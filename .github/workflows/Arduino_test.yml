@@ -34,9 +34,10 @@ jobs:
         pip install --upgrade platformio
         
     - name: Install library dependencies
-      run: platformio ci --project-conf=/ExoFlex-master/ExoFlex-Arduino/platformio.ini
-        
-#       run: pio pkg install -l "bblanchon/ArduinoJson@^6.19.2" -l "featherfly/SoftwareSerial @ ^1.0" -l "prampec/SoftTimer @ ^3.2.0" -l "arduino-libraries/Servo @ ^1.1.8"
+      env:
+        PLATFORMIO_CI_SRC: ${{ matrix.example }}
+    
+      run: pio pkg install -l "bblanchon/ArduinoJson@^6.19.2" -l "featherfly/SoftwareSerial @ ^1.0" -l "prampec/SoftTimer @ ^3.2.0" -l "arduino-libraries/Servo @ ^1.1.8"
       
     - name: Run PlatformIO
       env:
