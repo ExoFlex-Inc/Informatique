@@ -41,4 +41,4 @@ jobs:
       env:
         PLATFORMIO_CI_SRC: ${{ matrix.example }}
         
-      run: platformio run -d $PLATFORMIO_CI_SRC -c /ExoFlex-master/ExoFlex-Arduino/platformio.ini
+      run: platformio run -d $PLATFORMIO_CI_SRC -c $PLATFORMIO_CI_SRC
