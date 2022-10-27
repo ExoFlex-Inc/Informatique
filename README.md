@@ -1,6 +1,3 @@
-# ExoFlex
-5th Semester
-
 <div id="ExoFlex" align="center">
    <h1>ExoFlex</h1>
     
