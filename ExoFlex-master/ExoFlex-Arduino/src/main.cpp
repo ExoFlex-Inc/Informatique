@@ -1,7 +1,5 @@
 /*------------------------------ Librairies ---------------------------------*/
 #include <SoftwareSerial.h>
-#include <Wire.h>
-#include <SPI.h>
 #include <ArduinoJson.h>
 #include <SoftTimer.h>
 #include <Servo.h>
