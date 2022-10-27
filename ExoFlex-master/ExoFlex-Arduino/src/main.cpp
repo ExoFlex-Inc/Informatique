@@ -40,7 +40,7 @@ void setup()
 
     // Servo init
     dorsiflex_motor.attach(10); // dorsiflexion motor attached to PIN 10
-    eversion_motor.attach(11);  // dorsiflexion motor attached to PIN 10
+    eversion_motor.attach(11);  // eversion motor attached to PIN 10
 }
 
 /*------------------------------ Main loop ---------------------------------*/
