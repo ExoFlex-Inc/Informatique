@@ -6,4 +6,4 @@
 .vscode
 /build/
 /downloadedLibraries/
-**/.DS_Store
+.DS_Store
