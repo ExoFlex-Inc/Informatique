@@ -1,5 +1,8 @@
 .pio
-.vscode
+/.vscode/*
+!/.vscode/c_cpp_properties.json 
+!/.vscode/extensions.json 
+!/.vscode/launch.json 
 /build/
 /downloadedLibraries/
 .DS_Store
