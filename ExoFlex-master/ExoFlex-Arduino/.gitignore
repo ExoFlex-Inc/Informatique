@@ -1,5 +1,5 @@
 .pio
-/.vscode/
+.vscode
 /build/
 /downloadedLibraries/
 .DS_Store
