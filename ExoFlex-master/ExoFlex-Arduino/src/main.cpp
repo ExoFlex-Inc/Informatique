@@ -26,6 +26,7 @@ void sendMsg();
 void readMsg();
 void serialEvent();
 void digitalWrite(uint8_t pin, uint8_t val);
+/* this is a comment */
 
 /*---------------------------Setup------------------------*/
 
@@ -110,7 +111,7 @@ void readMsg()
     // Si erreur dans le message
     if (error)
     {
-       Serial.print("deserialize() failed:");
+        Serial.print("deserialize() failed:");
         Serial.println(error.c_str());
         return;
     }
