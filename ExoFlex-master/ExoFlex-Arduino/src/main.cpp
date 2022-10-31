@@ -110,7 +110,7 @@ void readMsg()
     // Si erreur dans le message
     if (error)
     {
-       Serial.print("deserialize() failed:");
+      Serial.print("deserialize() failed:");
         Serial.println(error.c_str());
         return;
     }
