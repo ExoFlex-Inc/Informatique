@@ -78,7 +78,6 @@ void loop()
 void serialEvent() { shouldRead_ = true; }
 
 void timerCallback() { shouldSend_ = true; }
-
 void sendMsg()
 {
 
@@ -95,6 +94,7 @@ void sendMsg()
     Serial.print("*");
     shouldSend_ = false;
 }
+
 void readMsg()
 {
 
