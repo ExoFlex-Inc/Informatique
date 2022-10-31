@@ -12,7 +12,6 @@ using namespace std;
 Servo dorsiflex_motor; // PIN 10
 Servo eversion_motor;  // PIN 11
 
-
 /*------------------------------ Global Variable ---------------------------------*/
 volatile bool shouldSend_ = false; // Ready to send message to serial flag
 volatile bool shouldRead_ = false; // Ready to read message to serial flag
@@ -116,7 +115,6 @@ void readMsg()
         return;
     }
 
-   
     // parse_msg = doc["MODE"];
 
     // if (!parse_msg.isNull())
@@ -125,4 +123,3 @@ void readMsg()
     // }
     // parse_msg = doc["CASE"];
 }
-
