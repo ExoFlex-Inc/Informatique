@@ -116,7 +116,7 @@ void readMsg()
         return;
     }
 
-    
+   
     // parse_msg = doc["MODE"];
 
     // if (!parse_msg.isNull())
