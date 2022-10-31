@@ -3,6 +3,8 @@ name: Prettier CI
 on:
   push:
     branches: [main]
+    paths:
+      - ExoFlex-master/**
 
 jobs:
   prettier:
