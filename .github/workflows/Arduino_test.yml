@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - ExoFlex-master/ExoFlex-Arduino/**
+      - ExoFlex-master/**
 
 jobs:
   build:
