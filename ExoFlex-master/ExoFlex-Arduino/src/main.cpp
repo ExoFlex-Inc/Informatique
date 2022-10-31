@@ -95,6 +95,7 @@ void sendMsg()
     Serial.print("*");
     shouldSend_ = false;
 }
+
 void readMsg()
 {
 
