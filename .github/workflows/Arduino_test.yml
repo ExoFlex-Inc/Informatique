@@ -1,7 +1,7 @@
 name: PlatformIO CI
 
 on:
-  push:
+  pull_request:
     branches:
       - main
     paths:
