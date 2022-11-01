@@ -1,6 +1,7 @@
 /*------------------------------ Librairies ---------------------------------*/
 #include <SoftwareSerial.h>
 #include <ArduinoJson.h>
+#include <AccelStepper.h>
 #include <SoftTimer.h>
 #include <Servo.h>
 /*------------------------------ Global Constantes ---------------------------------*/
@@ -110,7 +111,7 @@ void readMsg()
     // Si erreur dans le message
     if (error)
     {
-       Serial.print("deserialize() failed:");
+        Serial.print("deserialize() failed:");
         Serial.println(error.c_str());
         return;
     }
