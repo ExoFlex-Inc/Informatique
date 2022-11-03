@@ -10,8 +10,8 @@ using namespace std;
 #define BAUD 115200        // Frequence de transmission serielle
 #define UPDATE_PERIODE 100 // Periode (ms) d'envoie d'etat general
 
-Servo dorsiflex_motor;               // PIN 10
-Servo eversion_motor;                // PIN 11
+Servo dorsiflex_motor;               // PIN 22
+Servo eversion_motor;                // PIN 23
 AccelStepper stepper_tight(1, 2, 5); // STEP PIN 2, STEP DIR 5
 
 /*------------------------------ Global Variable ---------------------------------*/
@@ -42,8 +42,8 @@ void setup()
     timerSendMsg_.enable();
 
     // Servo init
-    dorsiflex_motor.attach(10); // dorsiflexion motor attached to PIN 10
-    eversion_motor.attach(11);  // eversion motor attached to PIN 11
+    dorsiflex_motor.attach(22); // dorsiflexion motor attached to PIN 22
+    eversion_motor.attach(23);  // eversion motor attached to PIN 23
 
     // Stepper init
     stepper_tight.setMaxSpeed(2000);     // À MODIFIER
