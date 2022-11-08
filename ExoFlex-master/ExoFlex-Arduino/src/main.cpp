@@ -23,7 +23,7 @@ int stepper_pos = 0; // Tightening stepper pos
 
 SoftTimer timerSendMsg_; // Send message timer
 
-/*------------------------- function prototypes -------------------------*/
+/*------------------------- Function Prototypes -------------------------*/
 void timerCallback();
 void sendMsg();
 void readMsg();
@@ -46,8 +46,9 @@ void setup()
     eversion_motor.attach(23);  // eversion motor attached to PIN 23
 
     // Stepper init
-    stepper_tight.setMaxSpeed(2000);     // À MODIFIER
-    stepper_tight.setAcceleration(1000); // À MODIFIER
+    stepper_tight.setMaxSpeed(1000);     // Set maximum speed value for the stepper
+    stepper_tight.setAcceleration(500);  // Set acceleration value for the stepper
+    stepper_tight.setCurrentPosition(0); // Set the current position to 0 steps
     stepper_tight.disableOutputs();
 }
 
@@ -82,15 +83,15 @@ void loop()
 
     // Stepper tests
 
-    for (stepper_pos = 0; stepper_pos <= 180; stepper_pos += 1)
+    stepper_tight.moveTo(800);     // Set desired move: 800 steps (in quater-step resolution that's one rotation)
+    stepper_tight.runToPosition(); // Moves the motor to target position w/ acceleration/ deceleration and it blocks until is in position
+
+    // Move back to position 0, using run() which is non-blocking - both motors will move at the same time
+    stepper_tight.moveTo(0);
+
+    while (stepper_tight.currentPosition() != 0)
     {
-        stepper_tight.move(stepper_pos); // tell servo to go to position in variable 'pos'
-        delay(20);                       // waits 15 ms for the servo to reach the position
-    }
-    if (stepper_pos == 180)
-    { // Stop stepper
-        stepper_tight.stop();
-        stepper_tight.disableOutputs();
+        stepper_tight.run(); // Move or step the motor implementing accelerations and decelerations to achieve the target position. Non-blocking function
     }
 
     timerSendMsg_.update();
