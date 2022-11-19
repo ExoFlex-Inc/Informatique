@@ -9,6 +9,14 @@ using namespace std;
 
 #define BAUD 115200        // Frequence de transmission serielle
 #define UPDATE_PERIODE 100 // Periode (ms) d'envoie d'etat general
+#define INITIALIZE 0
+#define WAIT 1
+#define DORSIFLEXION_UP 2
+#define DORSIFLEXION_DOWN 3
+#define EVERSION_UP 4
+#define EVERSION_DOWN 5
+#define TIGHTENING_ON 6
+#define TIGHTENING_OFF 7
 
 Servo dorsiflex_motor;               // PIN 22
 Servo eversion_motor;                // PIN 23
@@ -20,6 +28,7 @@ volatile bool shouldRead_ = false; // Ready to read message to serial flag
 
 int motor_pos = 0;   // Dorsiflexion/eversion motor position
 int stepper_pos = 0; // Tightening stepper pos
+int command = INITIALIZE;
 
 SoftTimer timerSendMsg_; // Send message timer
 
@@ -139,11 +148,10 @@ void readMsg()
         return;
     }
 
-    // parse_msg = doc["MODE"];
+    command = doc["Case"];
 
     // if (!parse_msg.isNull())
     // {
     //     operation_mode = doc["MODE"].as<int>();
     // }
-    // parse_msg = doc["CASE"];
 }

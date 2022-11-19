@@ -20,6 +20,12 @@
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/dashboard.css">
 
+  <!-- <script src="js/jquery-3.3.1.slim.min.js"></script>
+  <script src="js/popper.min.js"></script> -->
+  <!-- <script src="js/bootstrap.min.js"></script> -->
+  <script src='/socket.io/socket.io.js'></script>
+  <script src="js/functions.js"></script> 
+
     <title>ExoFlex</title>
 </head>
 
@@ -37,27 +43,13 @@
 
   <!-- Main layout BEGIN-->
   <div>
-    <select id="serial_port" name="serial_port">
-    </select>
+    <button id="serial_port" onclick="connectPort()" value="Not Connected" name="serial_port">
+    </button>
+    <div id="test"></div>
+    <button id="dorsiflexion_up" onclick="manualButton(this.value)" value="2"  name="dorsiflexion_up">
   </div>
-  <!-- Main layout END-->
-
-<!--
-.......####.##.....##.########...#######..########..########..######.
-........##..###...###.##.....##.##.....##.##.....##....##....##....##
-........##..####.####.##.....##.##.....##.##.....##....##....##......
-........##..##.###.##.########..##.....##.########.....##.....######.
-........##..##.....##.##........##.....##.##...##......##..........##
-........##..##.....##.##........##.....##.##....##.....##....##....##
-.......####.##.....##.##.........#######..##.....##....##.....######.
--->
   
-  <!-- JavaScript, import frameworks -->
-  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-  <script src="js/jquery-3.3.1.slim.min.js"></script>
-  <script src="js/popper.min.js"></script>
-  <script src="js/bootstrap.min.js"></script>
-  <script src="js/functions.js"></script>
+  <!-- Main layout END-->
 
 </body>
 </html>
