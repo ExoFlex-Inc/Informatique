@@ -1,7 +1,7 @@
 var socket = io();
 
 socket.on("data", function (data) {
-  document.getElementById("test").innerHTML = data;
+  document.getElementById("arduino_msg").innerHTML = data;
 });
 socket.on("portName", function (portName) {
   button = document.getElementById("serial_port");
