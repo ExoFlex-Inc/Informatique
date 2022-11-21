@@ -73,9 +73,9 @@ io.on("connection", function (socket) {
 
   socket.on("portConnect", function (data) {
     port = new SerialPort({
-      // path: "/dev/ttyACM0",
-      path: "/dev/cu.usbmodem11101",
-      baudRate: 115200,
+      path: "/dev/ttyACM0",
+      // path: "/dev/cu.usbmodem11101",
+      baudRate: 9600,
     });
 
     parser = port.pipe(new ReadlineParser({ delimiter: "*" }));

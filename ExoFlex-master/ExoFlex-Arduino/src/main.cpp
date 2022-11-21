@@ -1,3 +1,18 @@
+/*****************************************************
+ * DIP Switches as per the wized:
+ * - Battery Pack -> Pin 3 ON
+ * - Arduino Mega
+ * - Simplified Serial Mode -> Pin 6 ON, Pin
+ * - 9600 baudrate
+ *
+ * Pin 1 - ON
+ * Pin 2 - OFF
+ * Pin 3 - ON
+ * Pin 4 - ON
+ * Pin 5 - OFF
+ * Pin 6 - ON
+ ****************************************************/
+
 /*------------------------------ Librairies ---------------------------------*/
 #include <SoftwareSerial.h>
 #include <ArduinoJson.h>
@@ -8,7 +23,8 @@
 /*------------------------------ Global Constantes ---------------------------------*/
 using namespace std;
 
-#define BAUD 115200        // Frequence de transmission serielle
+#define BAUD 9600          // Frequence de transmission serielle
+#define SBT_BAUDRATE 9600  // Set to 9600 through Sabertooth dip switches
 #define UPDATE_PERIODE 100 // Periode (ms) d'envoie d'etat general
 #define INITIALIZE 0
 #define WAIT 1
@@ -20,13 +36,28 @@ using namespace std;
 #define TIGHTENING_OFF 7
 #define TEST 8
 
-#define dorsiflex_channel_A 26
-#define dorsiflex_channel_B 27
+#define eversion_enable 22
+#define dorsiflex_enable 7
+
 #define eversion_channel_A 24
 #define eversion_channel_B 25
+#define dorsiflex_channel_A 26
+#define dorsiflex_channel_B 27
 
-Servo dorsiflex_motor;               // PIN 22
-Servo eversion_motor;                // PIN 23
+// simplifierd serial limits for each motor
+#define SBT_EVERSION_FULL_FORWARD 127
+#define SBT_EVERSION_FULL_REVERSE 1
+#define SBT_EVERSION_STOP 64
+
+#define SBT_DORSIFLEX_FULL_FORWARD 255
+#define SBT_DORSIFLEX_FULL_REVERSE 128
+#define SBT_DORSIFLEX_STOP 192
+
+// shut down both motors
+#define SBT_ALL_STOP 0
+
+// Servo dorsiflex_motor;               // PIN 23
+// Servo eversion_motor;                // PIN 22
 AccelStepper stepper_tight(1, 2, 5); // STEP PIN 2, STEP DIR 5
 
 /*------------------------------ Global Variable ---------------------------------*/
@@ -48,87 +79,7 @@ int command = INITIALIZE;
 
 SoftTimer timerSendMsg_; // Send message timer
 
-/*------------------------- Function Prototypes -------------------------*/
-void timerCallback();
-void sendMsg();
-void readMsg();
-void serialEvent();
-void digitalWrite(uint8_t pin, uint8_t val);
-
-void motorMove(Servo motor, int channel_A, int channel_B, bool motorState, bool motorLastState, int motorCurrentPosition, int motorTargetPosition);
-
-/*---------------------------Setup------------------------*/
-
-void setup()
-{
-    Serial.begin(BAUD); // Initialisation of serial communication
-
-    // Send message timer
-    timerSendMsg_.setDelay(UPDATE_PERIODE);
-    timerSendMsg_.setCallback(timerCallback);
-    timerSendMsg_.enable();
-
-    // Servo init
-    dorsiflex_motor.attach(23); // dorsiflexion motor attached to PIN 22
-    eversion_motor.attach(22);  // eversion motor attached to PIN 23
-    pinMode(dorsiflex_channel_A, INPUT);
-    pinMode(dorsiflex_channel_B, INPUT);
-    pinMode(eversion_channel_A, INPUT);
-    pinMode(eversion_channel_B, INPUT);
-
-    dorsiflexLastState = digitalRead(dorsiflex_channel_A);
-    eversionLastState = digitalRead(eversion_channel_A);
-
-    // Stepper init
-    stepper_tight.setMaxSpeed(1000);     // Set maximum speed value for the stepper
-    stepper_tight.setAcceleration(500);  // Set acceleration value for the stepper
-    stepper_tight.setCurrentPosition(0); // Set the current position to 0 steps
-    stepper_tight.disableOutputs();
-}
-
-/*------------------------------ Main loop ---------------------------------*/
-void loop()
-{
-
-    if (shouldRead_)
-    {
-        readMsg();
-    }
-    if (shouldSend_)
-    {
-        sendMsg();
-    }
-
-    //---------------------- SWITCH CASE -------------------------------
-    switch (command)
-    {
-    case INITIALIZE: // Sets all servomotors to initial angles
-
-        // // Untight the strap
-        // stepper_tight.moveTo(0);
-
-        // while (stepper_tight.currentPosition() != 0)
-        // {
-        //     stepper_tight.run(); // Move or step the motor implementing accelerations and decelerations to achieve the target position. Non-blocking function
-        // }
-
-        // if( stepper_tight.currentPosition() == 0){
-        //     command = WAIT;
-        // }
-
-        delay(5000);
-
-        motorMove(dorsiflex_motor, dorsiflex_channel_A, dorsiflex_channel_B, dorsiflexState, dorsiflexLastState, dorsiflexMotorCurrentPos, 90);
-
-        break;
-
-    // case WAIT: // Wait for user to start the exercice
-    }
-
-    timerSendMsg_.update();
-}
-
-/*------------------------------ Function definitions ---------------------------------*/
+/*------------------------- Functions -------------------------*/
 
 void serialEvent() { shouldRead_ = true; }
 
@@ -179,28 +130,110 @@ void readMsg()
     // }
 }
 
-void motorMove(Servo motor, int channel_A, int channel_B, bool motorState, bool motorLastState, int motorCurrentPosition, int motorTargetPosition)
+void encoderUpdate(uint8_t channel_A, uint8_t channel_B, bool motorState, bool motorLastState, int motorCurrentPosition, int motorTargetPosition)
 {
 
-    motor.write(motorTargetPosition); // tell motors to go to position in variable 'motor_pos'
+    // // Encoder Update
+    // motorState = digitalRead(channel_A); // Reads the "current" state of the channel_A
+    // // If the previous and the current state of the channel_A are different, that means a Pulse has occured
+    // if (motorState != motorLastState)
+    // {
+    //     // If the outputB state is different to the outputA state, that means the encoder is rotating clockwise
+    //     if (digitalRead(channel_B) != motorState)
+    //     {
+    //         motorCurrentPosition++;
+    //     }
+    //     else
+    //     {
+    //         motorCurrentPosition--;
+    //     }
+    // }
+    // Serial.println(digitalRead(channel_A));
+    // Serial.println(digitalRead(channel_B));
+    // Serial.println("--------------");
+    // Serial.println(dorsiflexMotorCurrentPos);
+    // Serial.println("--------------");
+    // motorLastState = motorState; // Updates the previous state of the channel_A with the current state
+}
 
-    // Encoder Update
-    motorState = digitalRead(channel_A); // Reads the "current" state of the channel_A
-    // If the previous and the current state of the channel_A are different, that means a Pulse has occured
-    if (motorState != motorLastState)
+void dorsiflexFastForward()
+{
+    Serial1.write(SBT_DORSIFLEX_FULL_FORWARD);
+}
+void dorsiflexFastReverse()
+{
+    Serial1.write(SBT_DORSIFLEX_FULL_REVERSE);
+}
+void eversionFastForward()
+{
+    Serial1.write(SBT_EVERSION_FULL_FORWARD);
+}
+void eversionFastReverse()
+{
+    Serial1.write(SBT_EVERSION_FULL_REVERSE);
+}
+void stopMotors()
+{
+    Serial1.write(SBT_EVERSION_STOP);
+}
+
+/*****************************************************
+ * setEngineSpeed
+ *
+ * Inputs - cSpeed_Motor1 - Input a percentage of full
+ *                          speed, from -100 to +100
+ *
+ *****************************************************/
+void setEngineSpeed(signed char cNewMotorSpeed)
+{
+    unsigned char cSpeedVal_Motor1 = 0;
+
+    unsigned char cSpeedVal_Motor2 = 0;
+
+    // Check for full stop command
+    if (cNewMotorSpeed == 0)
     {
-        // If the outputB state is different to the outputA state, that means the encoder is rotating clockwise
-        if (digitalRead(channel_B) != motorState)
-        {
-            motorCurrentPosition++;
-        }
-        else
-        {
-            motorCurrentPosition--;
-        }
+        // Send full stop command for both motors
+        Serial1.write(byte(0));
+
+        return;
     }
-    Serial.println(motorCurrentPosition);
-    motorLastState = motorState; // Updates the previous state of the channel_A with the current state
+
+    // Calculate the speed value for motor 1
+    if (cNewMotorSpeed >= 100)
+    {
+
+        cSpeedVal_Motor1 = SBT_EVERSION_FULL_FORWARD;
+
+        cSpeedVal_Motor2 = SBT_DORSIFLEX_FULL_FORWARD;
+    }
+    else if (cNewMotorSpeed <= -100)
+    {
+        cSpeedVal_Motor1 = SBT_EVERSION_FULL_REVERSE;
+
+        cSpeedVal_Motor2 = SBT_DORSIFLEX_FULL_REVERSE;
+    }
+    else
+    {
+        // Calc motor 1 speed (Final value ranges from 1 to 127)
+        cSpeedVal_Motor1 = map(cNewMotorSpeed,
+                               -100,
+                               100,
+                               SBT_DORSIFLEX_FULL_REVERSE,
+                               SBT_DORSIFLEX_FULL_FORWARD);
+
+        // Calc motor 2 speed (Final value ranges from 128 to 255)
+        cSpeedVal_Motor2 = map(cNewMotorSpeed,
+                               -100,
+                               100,
+                               SBT_EVERSION_FULL_REVERSE,
+                               SBT_EVERSION_FULL_FORWARD);
+    }
+
+    // Fire the values off to the Sabertooth motor controller
+    Serial1.write(byte(cSpeedVal_Motor1));
+
+    Serial1.write(byte(cSpeedVal_Motor2));
 }
 
 void test()
@@ -208,39 +241,143 @@ void test()
 
     // Motor tests
 
-    for (dorsiflexMotorCurrentPos = 0; dorsiflexMotorCurrentPos <= 180; dorsiflexMotorCurrentPos += 1)
-    { // goes from 0 degrees to 180 degrees
-        // in steps of 1 degree
-        dorsiflex_motor.write(dorsiflexMotorCurrentPos); // tell motors to go to position in variable 'motor_pos'
-        delay(20);                                       // waits 15 ms for the servo to reach the position
-    }
-    for (dorsiflexMotorCurrentPos = 180; dorsiflexMotorCurrentPos >= 0; dorsiflexMotorCurrentPos -= 1)
-    {                                                    // goes from 180 degrees to 0 degrees
-        dorsiflex_motor.write(dorsiflexMotorCurrentPos); // tell motors to go to position in variable 'motor_pos'
-        delay(20);                                       // waits 15 ms for the servo to reach the position
-    }
-    for (eversionMotorCurrentPos = 0; eversionMotorCurrentPos <= 180; eversionMotorCurrentPos += 1)
-    { // goes from 0 degrees to 180 degrees
-        // in steps of 1 degree
-        eversion_motor.write(eversionMotorCurrentPos); // tell motors to go to position in variable 'motor_pos'
-        delay(20);                                     // waits 15 ms for the servo to reach the position
-    }
-    for (eversionMotorCurrentPos = 180; eversionMotorCurrentPos >= 0; eversionMotorCurrentPos -= 1)
-    {                                                  // goes from 180 degrees to 0 degrees
-        eversion_motor.write(eversionMotorCurrentPos); // tell motors to go to position in variable 'motor_pos'
-        delay(20);                                     // waits 15 ms for the servo to reach the position
-    }
+    // for (dorsiflexMotorCurrentPos = 0; dorsiflexMotorCurrentPos <= 180; dorsiflexMotorCurrentPos += 1)
+    // { // goes from 0 degrees to 180 degrees
+    //     // in steps of 1 degree
+    //     dorsiflex_motor.write(dorsiflexMotorCurrentPos); // tell motors to go to position in variable 'motor_pos'
+    //     delay(20);                                       // waits 15 ms for the servo to reach the position
+    // }
+    // for (dorsiflexMotorCurrentPos = 180; dorsiflexMotorCurrentPos >= 0; dorsiflexMotorCurrentPos -= 1)
+    // {                                                    // goes from 180 degrees to 0 degrees
+    //     dorsiflex_motor.write(dorsiflexMotorCurrentPos); // tell motors to go to position in variable 'motor_pos'
+    //     delay(20);                                       // waits 15 ms for the servo to reach the position
+    // }
+    // Serial.println(dorsiflexMotorCurrentPos);
+    // for (eversionMotorCurrentPos = 0; eversionMotorCurrentPos <= 180; eversionMotorCurrentPos += 1)
+    // { // goes from 0 degrees to 180 degrees
+    //     // in steps of 1 degree
+    //     eversion_motor.write(eversionMotorCurrentPos); // tell motors to go to position in variable 'motor_pos'
+    //     delay(20);                                     // waits 15 ms for the servo to reach the position
+    // }
+    // for (eversionMotorCurrentPos = 180; eversionMotorCurrentPos >= 0; eversionMotorCurrentPos -= 1)
+    // {                                                  // goes from 180 degrees to 0 degrees
+    //     eversion_motor.write(eversionMotorCurrentPos); // tell motors to go to position in variable 'motor_pos'
+    //     delay(20);                                     // waits 15 ms for the servo to reach the position
+    // }
 
-    // Stepper tests
+    // // Stepper tests
 
-    stepper_tight.moveTo(800);     // Set desired move: 800 steps (in quater-step resolution that's one rotation)
-    stepper_tight.runToPosition(); // Moves the motor to target position w/ acceleration/ deceleration and it blocks until is in position
+    // stepper_tight.moveTo(800);     // Set desired move: 800 steps (in quater-step resolution that's one rotation)
+    // stepper_tight.runToPosition(); // Moves the motor to target position w/ acceleration/ deceleration and it blocks until is in position
 
-    // Move back to position 0, using run() which is non-blocking - both motors will move at the same time
-    stepper_tight.moveTo(0);
+    // // Move back to position 0, using run() which is non-blocking - both motors will move at the same time
+    // stepper_tight.moveTo(0);
 
-    while (stepper_tight.currentPosition() != 0)
+    // while (stepper_tight.currentPosition() != 0)
+    // {
+    //     stepper_tight.run(); // Move or step the motor implementing accelerations and decelerations to achieve the target position. Non-blocking function
+    // }
+}
+
+/*---------------------------Setup------------------------*/
+
+void setup()
+{
+    Serial.begin(BAUD); // Initialisation of serial communication
+    Serial1.begin(SBT_BAUDRATE);
+
+    delay(2000);
+
+    // Send full stop command
+    setEngineSpeed(SBT_ALL_STOP);
+
+    // Send message timer
+    timerSendMsg_.setDelay(UPDATE_PERIODE);
+    timerSendMsg_.setCallback(timerCallback);
+    timerSendMsg_.enable();
+
+    // Servo init
+    // dorsiflex_motor.attach(dorsiflex_enable); // dorsiflexion motor attached to PIN 23
+    // eversion_motor.attach(eversion_enable); // eversion motor attached to PIN 22
+
+    // pinMode(dorsiflex_enable, OUTPUT);
+    pinMode(dorsiflex_channel_A, INPUT);
+    pinMode(dorsiflex_channel_B, INPUT);
+    pinMode(eversion_channel_A, INPUT);
+    pinMode(eversion_channel_B, INPUT);
+
+    dorsiflexLastState = digitalRead(dorsiflex_channel_A);
+    eversionLastState = digitalRead(eversion_channel_A);
+
+    // Stepper init
+    stepper_tight.setMaxSpeed(1000);     // Set maximum speed value for the stepper
+    stepper_tight.setAcceleration(500);  // Set acceleration value for the stepper
+    stepper_tight.setCurrentPosition(0); // Set the current position to 0 steps
+    stepper_tight.disableOutputs();
+}
+
+/*------------------------------ Main loop ---------------------------------*/
+void loop()
+{
+    if (shouldRead_)
     {
-        stepper_tight.run(); // Move or step the motor implementing accelerations and decelerations to achieve the target position. Non-blocking function
+        // readMsg();
     }
+    if (shouldSend_)
+    {
+        // sendMsg();
+    }
+
+    //---------------------- SWITCH CASE -------------------------------
+    switch (command)
+    {
+    case INITIALIZE: // Sets all servomotors to initial angles
+
+        // // Untight the strap
+        // stepper_tight.moveTo(0);
+
+        // while (stepper_tight.currentPosition() != 0)
+        // {
+        //     stepper_tight.run(); // Move or step the motor implementing accelerations and decelerations to achieve the target position. Non-blocking function
+        // }
+
+        // if( stepper_tight.currentPosition() == 0){
+        //     command = WAIT;
+        // }
+
+        break;
+
+        // case WAIT: // Wait for user to start the exercice
+    }
+    // Full stop
+    setEngineSpeed(0);
+    Serial.println("STOP");
+    delay(5000);
+
+    // // Half reverse
+    setEngineSpeed(-50);
+    Serial.println("HALF1");
+    delay(5000);
+
+    // // Full reverse
+    setEngineSpeed(-100);
+    Serial.println("FULL1");
+    delay(5000);
+
+    // Full stop
+    setEngineSpeed(0);
+    Serial.println("STOP");
+    delay(5000);
+
+    // // Half forward
+    setEngineSpeed(50);
+    Serial.println("HALF2");
+    delay(5000);
+
+    // // Full forward
+    setEngineSpeed(100);
+    Serial.println("FULL2");
+    delay(5000);
+
+    // timerSendMsg_.update();
 }
