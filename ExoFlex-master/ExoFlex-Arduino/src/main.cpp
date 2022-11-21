@@ -36,8 +36,8 @@ using namespace std;
 #define TIGHTENING_OFF 7
 #define TEST 8
 
-#define eversion_enable 22
-#define dorsiflex_enable 7
+#define eversion_enable 7
+#define dorsiflex_enable 8
 
 #define eversion_channel_A 24
 #define eversion_channel_B 25
@@ -56,8 +56,8 @@ using namespace std;
 // shut down both motors
 #define SBT_ALL_STOP 0
 
-// Servo dorsiflex_motor;               // PIN 23
-// Servo eversion_motor;                // PIN 22
+Servo dorsiflex_motor;               // PIN 8
+Servo eversion_motor;                // PIN 7
 AccelStepper stepper_tight(1, 2, 5); // STEP PIN 2, STEP DIR 5
 
 /*------------------------------ Global Variable ---------------------------------*/
@@ -289,7 +289,7 @@ void setup()
     delay(2000);
 
     // Send full stop command
-    setEngineSpeed(SBT_ALL_STOP);
+    // setEngineSpeed(SBT_ALL_STOP);
 
     // Send message timer
     timerSendMsg_.setDelay(UPDATE_PERIODE);
@@ -297,8 +297,8 @@ void setup()
     timerSendMsg_.enable();
 
     // Servo init
-    // dorsiflex_motor.attach(dorsiflex_enable); // dorsiflexion motor attached to PIN 23
-    // eversion_motor.attach(eversion_enable); // eversion motor attached to PIN 22
+    dorsiflex_motor.attach(dorsiflex_enable, 1000, 2000); // dorsiflexion motor attached to PIN 23
+    eversion_motor.attach(eversion_enable, 1000, 2000);   // eversion motor attached to PIN 22
 
     // pinMode(dorsiflex_enable, OUTPUT);
     pinMode(dorsiflex_channel_A, INPUT);
@@ -332,52 +332,58 @@ void loop()
     switch (command)
     {
     case INITIALIZE: // Sets all servomotors to initial angles
-
-        // // Untight the strap
-        // stepper_tight.moveTo(0);
-
-        // while (stepper_tight.currentPosition() != 0)
-        // {
-        //     stepper_tight.run(); // Move or step the motor implementing accelerations and decelerations to achieve the target position. Non-blocking function
-        // }
-
-        // if( stepper_tight.currentPosition() == 0){
-        //     command = WAIT;
-        // }
-
         break;
-
-        // case WAIT: // Wait for user to start the exercice
     }
+
+    //---------------------- TESTS -------------------------------
     // Full stop
-    setEngineSpeed(0);
-    Serial.println("STOP");
-    delay(5000);
+    // setEngineSpeed(0);
+    // Serial.println("STOP");
+    // delay(5000);
 
     // // Half reverse
-    setEngineSpeed(-50);
-    Serial.println("HALF1");
-    delay(5000);
+    // setEngineSpeed(-50);
+    // Serial.println("HALF1");
+    // delay(5000);
 
     // // Full reverse
-    setEngineSpeed(-100);
-    Serial.println("FULL1");
-    delay(5000);
+    // setEngineSpeed(-100);
+    // Serial.println("FULL1");
+    // delay(5000);
 
-    // Full stop
-    setEngineSpeed(0);
-    Serial.println("STOP");
-    delay(5000);
+    // // Full stop
+    // setEngineSpeed(0);
+    // Serial.println("STOP");
+    // delay(5000);
 
     // // Half forward
-    setEngineSpeed(50);
-    Serial.println("HALF2");
-    delay(5000);
+    // setEngineSpeed(50);
+    // Serial.println("HALF2");
+    // delay(5000);
 
     // // Full forward
-    setEngineSpeed(100);
-    Serial.println("FULL2");
-    delay(5000);
+    // setEngineSpeed(100);
+    // Serial.println("FULL2");
+    // delay(5000);
 
-    // timerSendMsg_.update();
+    int power;
+
+    // Ramp both servo channels from 0 to 180 (full reverse to full forward),
+    // waiting 20 ms (1/50th of a second) per value.
+    for (power = 0; power <= 180; power++)
+    {
+        dorsiflex_motor.write(power);
+        eversion_motor.write(power);
+        delay(20);
+    }
+
+    // Now go back the way we came.
+    for (power = 180; power >= 0; power--)
+    {
+        dorsiflex_motor.write(power);
+        eversion_motor.write(power);
+        delay(20);
+    }
+
+    timerSendMsg_.update();
 }
