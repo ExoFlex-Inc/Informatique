@@ -1,17 +1,5 @@
 /*****************************************************
- * DIP Switches as per the wized:
- * - R/C Mode -> Pin 1 OFF, Pin 2 ON
- * - Battery Pack -> Pin 3 ON
- * - Independant Mode( S1 controls Motor1, S2 controls Motor2) -> Pin 4 OFF
- * - Linear Response -> Pin 5 ON
- * - Microcontroller mode -> Pin 6 OFF
- *
- * Pin 1 - OFF
- * Pin 2 - ON
- * Pin 3 - ON
- * Pin 4 - OFF
- * Pin 5 - ON
- * Pin 6 - OFF
+ This code contains motor serial,R/C tests to keep if want to change motor config
  ****************************************************/
 
 /*------------------------------ Librairies ---------------------------------*/
@@ -46,6 +34,18 @@ using namespace std;
 #define dorsiflex_channel_A 26
 #define dorsiflex_channel_B 27
 
+// simplifierd serial limits for each motor
+#define SBT_EVERSION_FULL_FORWARD 127
+#define SBT_EVERSION_FULL_REVERSE 1
+#define SBT_EVERSION_STOP 64
+
+#define SBT_DORSIFLEX_FULL_FORWARD 255
+#define SBT_DORSIFLEX_FULL_REVERSE 128
+#define SBT_DORSIFLEX_STOP 192
+
+// shut down both motors
+#define SBT_ALL_STOP 0
+
 Servo dorsiflex_motor;               // PIN 8
 Servo eversion_motor;                // PIN 7
 AccelStepper stepper_tight(1, 2, 5); // STEP PIN 2, STEP DIR 5
@@ -54,11 +54,11 @@ AccelStepper stepper_tight(1, 2, 5); // STEP PIN 2, STEP DIR 5
 volatile bool shouldSend_ = false; // Ready to send message to serial flag
 volatile bool shouldRead_ = false; // Ready to read message to serial flag
 
-int dorsiflexMotorCurrentAngle = 0; // Dorsiflexion motor angle
+int dorsiflexMotorCurrentPos = 0; // Dorsiflexion/eversion motor position
 bool dorsiflexLastState;
 bool dorsiflexState;
 
-int eversionMotorCurrentAngle = 0; // Eversion motor angle
+int eversionMotorCurrentPos = 0; // Eversion motor position
 bool eversionLastState;
 bool eversionState;
 
@@ -120,95 +120,150 @@ void readMsg()
     // }
 }
 
-void motorMove(const char *motor, int power)
+void encoderUpdate(uint8_t channel_A, uint8_t channel_B, bool motorState, bool motorLastState, int motorCurrentPosition, int motorTargetPosition)
 {
 
-    // Remap power percent to motor speed values(0 = full reverse, 90 = stop, 180 = full forward)
-    if (power >= 100)
+    // // Encoder Update
+    // motorState = digitalRead(channel_A); // Reads the "current" state of the channel_A
+    // // If the previous and the current state of the channel_A are different, that means a Pulse has occured
+    // if (motorState != motorLastState)
+    // {
+    //     // If the outputB state is different to the outputA state, that means the encoder is rotating clockwise
+    //     if (digitalRead(channel_B) != motorState)
+    //     {
+    //         motorCurrentPosition++;
+    //     }
+    //     else
+    //     {
+    //         motorCurrentPosition--;
+    //     }
+    // }
+    // Serial.println(digitalRead(channel_A));
+    // Serial.println(digitalRead(channel_B));
+    // Serial.println("--------------");
+    // Serial.println(dorsiflexMotorCurrentPos);
+    // Serial.println("--------------");
+    // motorLastState = motorState; // Updates the previous state of the channel_A with the current state
+}
+
+void dorsiflexFastForward()
+{
+    Serial1.write(SBT_DORSIFLEX_FULL_FORWARD);
+}
+void dorsiflexFastReverse()
+{
+    Serial1.write(SBT_DORSIFLEX_FULL_REVERSE);
+}
+void eversionFastForward()
+{
+    Serial1.write(SBT_EVERSION_FULL_FORWARD);
+}
+void eversionFastReverse()
+{
+    Serial1.write(SBT_EVERSION_FULL_REVERSE);
+}
+void stopMotors()
+{
+    Serial1.write(SBT_EVERSION_STOP);
+}
+
+/*****************************************************
+ * setEngineSpeed
+ *
+ * Inputs - cSpeed_Motor1 - Input a percentage of full
+ *                          speed, from -100 to +100
+ *
+ *****************************************************/
+void setEngineSpeed(int cNewMotorSpeed)
+{
+    int cSpeedVal_Eversion = 0;
+
+    int cSpeedVal_Dorsiflex = 0;
+
+    // Check for full stop command
+    if (cNewMotorSpeed == 0)
     {
-        power = 180;
+        // Send full stop command for both motors
+        Serial.println(0);
+        Serial1.print(byte(0));
+
+        return;
     }
-    else if (power <= -100)
+
+    // Calculate the speed value for motor 1
+    if (cNewMotorSpeed >= 100)
     {
-        power = 0;
+
+        cSpeedVal_Eversion = SBT_EVERSION_FULL_FORWARD;
+
+        cSpeedVal_Dorsiflex = SBT_DORSIFLEX_FULL_FORWARD;
+    }
+    else if (cNewMotorSpeed <= -100)
+    {
+        cSpeedVal_Eversion = SBT_EVERSION_FULL_REVERSE;
+
+        cSpeedVal_Dorsiflex = SBT_DORSIFLEX_FULL_REVERSE;
     }
     else
     {
-        power = map(power, -100, 100, 0, 180);
+        // Calc motor 1 speed (Final value ranges from 1 to 127)
+        cSpeedVal_Eversion = map(cNewMotorSpeed,
+                                 -100,
+                                 100,
+                                 SBT_EVERSION_FULL_REVERSE,
+                                 SBT_EVERSION_FULL_FORWARD);
+
+        // Calc motor 2 speed (Final value ranges from 128 to 255)
+        cSpeedVal_Dorsiflex = map(cNewMotorSpeed,
+                                  -100,
+                                  100,
+                                  SBT_DORSIFLEX_FULL_REVERSE,
+                                  SBT_DORSIFLEX_FULL_FORWARD);
     }
+    Serial.println(cSpeedVal_Eversion);
+    // Fire the values off to the Sabertooth motor controller
+    Serial1.print(byte(cSpeedVal_Eversion));
 
-    if (motor == "dorsiflex")
-    {
-        if (power == 0)
-        {
-
-            dorsiflex_motor.write(power);
-            return;
-        }
-
-        // Move motor
-        dorsiflex_motor.write(power);
-
-        // Update Encoder
-        dorsiflexState = digitalRead(dorsiflex_channel_A); // Reads the "current" state of the channel_A
-
-        // If the previous and the current state of the channel_A are different, that means a Pulse has occured
-        if (dorsiflexState != dorsiflexLastState)
-        {
-            // If the outputB state is different to the outputA state, that means the encoder is rotating clockwise
-            if (digitalRead(dorsiflex_channel_B) != dorsiflexState)
-            {
-                dorsiflexMotorCurrentAngle++;
-            }
-            else
-            {
-                dorsiflexMotorCurrentAngle--;
-            }
-        }
-
-        dorsiflexLastState = dorsiflexState; // Updates the previous state of the channel_A with the current state
-    }
-    else
-    {
-        if (power == 0)
-        {
-            eversion_motor.write(power);
-            return;
-        }
-
-        // Move motor
-        eversion_motor.write(power);
-
-        // Update Encoder
-        eversionState = digitalRead(eversion_channel_A); // Reads the "current" state of the channel_A
-
-        // If the previous and the current state of the channel_A are different, that means a Pulse has occured
-        if (eversionState != eversionLastState)
-        {
-            // If the outputB state is different to the outputA state, that means the encoder is rotating clockwise
-            if (digitalRead(eversion_channel_B) != eversionState)
-            {
-                eversionMotorCurrentAngle++;
-            }
-            else
-            {
-                eversionMotorCurrentAngle--;
-            }
-        }
-
-        eversionLastState = eversionState; // Updates the previous state of the channel_A with the current state
-    }
-    Serial.println(power);
-    Serial.println("--------------");
-    Serial.println(digitalRead(dorsiflex_channel_A));
-    Serial.println(digitalRead(dorsiflex_channel_B));
-    Serial.println("--------------");
-    Serial.println(dorsiflexMotorCurrentAngle);
-    Serial.println("--------------");
+    Serial1.print(byte(cSpeedVal_Dorsiflex));
 }
 
 void test()
 {
+    // --------------------Motor Serial Test--------------------
+    // Full stop
+    // Serial.println("STOP");
+    // setEngineSpeed(0);
+    // delay(5000);
+
+    // Half reverse
+    // Serial.println("HALF1");
+    // setEngineSpeed(-50);
+    // delay(5000);
+
+    // // Full reverse
+    // Serial.println("FULL1");
+    // setEngineSpeed(-100);
+    // delay(5000);
+
+    // // Full stop
+    // Serial.println("STOP");
+    // setEngineSpeed(0);
+    // delay(5000);
+
+    // // Half forward
+    // Serial.println("HALF2");
+    // setEngineSpeed(50);
+    // delay(5000);
+
+    // // Full stop
+    // Serial.println("STOP");
+    // setEngineSpeed(0);
+    // delay(5000);
+
+    // // Full forward
+    // Serial.println("FULL2");
+    // setEngineSpeed(100);
+    // delay(5000);
 
     // -------------------------Motor R/C Test 1------------------------
 
@@ -271,8 +326,12 @@ void test()
 void setup()
 {
     Serial.begin(BAUD); // Initialisation of serial communication
+    Serial1.begin(SBT_BAUDRATE);
 
     delay(2000);
+
+    // Send full stop command
+    setEngineSpeed(SBT_ALL_STOP);
 
     // Send message timer
     timerSendMsg_.setDelay(UPDATE_PERIODE);
@@ -306,30 +365,6 @@ void setup()
 /*------------------------------ Main loop ---------------------------------*/
 void loop()
 {
-    if (shouldRead_)
-    {
-        // readMsg();
-    }
-    if (shouldSend_)
-    {
-        // sendMsg();
-    }
 
-    //---------------------- SWITCH CASE -------------------------------
-    switch (command)
-    {
-    case INITIALIZE: // Sets all servomotors to initial angles
-        break;
-    }
-
-    if (dorsiflexMotorCurrentAngle < 45)
-    {
-
-        motorMove("dorsiflex", -35);
-    }
-    else if (dorsiflexMotorCurrentAngle > 0)
-    {
-        motorMove("dorsiflex", 0);
-    }
-    timerSendMsg_.update();
+    test();
 }
