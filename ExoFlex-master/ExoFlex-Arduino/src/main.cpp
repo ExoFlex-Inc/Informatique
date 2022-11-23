@@ -32,8 +32,8 @@ using namespace std;
 #define WAIT 1
 #define DORSIFLEXION_UP 2
 #define DORSIFLEXION_DOWN 3
-#define EVERSION_UP 4
-#define EVERSION_DOWN 5
+#define EVERSION_RIGHT 4
+#define EVERSION_LEFT 5
 #define TIGHTENING_ON 6
 #define TIGHTENING_OFF 7
 #define TEST 8
@@ -139,7 +139,7 @@ void motorMove(const char *motor, int power)
 
     if (motor == "dorsiflex")
     {
-        if (power == 0)
+        if (power == 90)
         {
 
             dorsiflex_motor.write(power);
@@ -168,9 +168,9 @@ void motorMove(const char *motor, int power)
 
         dorsiflexLastState = dorsiflexState; // Updates the previous state of the channel_A with the current state
     }
-    else
+    else if (motor == "eversion")
     {
-        if (power == 0)
+        if (power == 90)
         {
             eversion_motor.write(power);
             return;
@@ -198,13 +198,13 @@ void motorMove(const char *motor, int power)
 
         eversionLastState = eversionState; // Updates the previous state of the channel_A with the current state
     }
-    Serial.println(power);
-    Serial.println("--------------");
-    Serial.println(digitalRead(dorsiflex_channel_A));
-    Serial.println(digitalRead(dorsiflex_channel_B));
-    Serial.println("--------------");
-    Serial.println(dorsiflexMotorCurrentAngle);
-    Serial.println("--------------");
+    // Serial.println(power);
+    // Serial.println("--------------");
+    // Serial.println(digitalRead(dorsiflex_channel_A));
+    // Serial.println(digitalRead(dorsiflex_channel_B));
+    // Serial.println("--------------");
+    // Serial.println(dorsiflexMotorCurrentAngle);
+    // Serial.println("--------------");
 }
 
 void test()
@@ -308,28 +308,46 @@ void loop()
 {
     if (shouldRead_)
     {
-        // readMsg();
+        readMsg();
     }
     if (shouldSend_)
     {
-        // sendMsg();
+        sendMsg();
     }
 
     //---------------------- SWITCH CASE -------------------------------
     switch (command)
     {
-    case INITIALIZE: // Sets all servomotors to initial angles
+    case WAIT:
+        motorMove("dorsiflex", 0);
+        motorMove("eversion", 0);
+        break;
+
+    case DORSIFLEXION_UP: // Sets all servomotors to initial angles
+        motorMove("dorsiflex", -100);
+        break;
+
+    case DORSIFLEXION_DOWN: // Sets all servomotors to initial angles
+        motorMove("dorsiflex", 100);
+        break;
+
+    case EVERSION_LEFT: // Sets all servomotors to initial angles
+        motorMove("eversion", -100);
+        break;
+
+    case EVERSION_RIGHT: // Sets all servomotors to initial angles
+        motorMove("eversion", 100);
         break;
     }
 
-    if (dorsiflexMotorCurrentAngle < 45)
-    {
+    // if (dorsiflexMotorCurrentAngle < 45)
+    // {
 
-        motorMove("dorsiflex", -35);
-    }
-    else if (dorsiflexMotorCurrentAngle > 0)
-    {
-        motorMove("dorsiflex", 0);
-    }
+    //     motorMove("dorsiflex", 35);
+    // }
+    // else if (dorsiflexMotorCurrentAngle > 0)
+    // {
+    //     motorMove("dorsiflex", 0);
+    // }
     timerSendMsg_.update();
 }

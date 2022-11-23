@@ -1,0 +1,95 @@
+<!doctype html>
+<html>
+
+<!--
+.##.....##.########....###....########.
+.##.....##.##.........##.##...##.....##
+.##.....##.##........##...##..##.....##
+.#########.######...##.....##.##.....##
+.##.....##.##.......#########.##.....##
+.##.....##.##.......##.....##.##.....##
+.##.....##.########.##.....##.########.
+-->
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+
+  <script type="text/javascript" src="js/jquery-3.3.1.slim.min.js"></script>
+  <!-- <script type="text/javascript" src="js/popper.min.js"></script> -->
+  <script type="text/javascript" src="js/bootstrap.min.js"></script>
+  <script type="text/javascript" src='js/socket.io.js'></script>
+
+  <title>ExoFlex Serrage</title>
+</head>
+
+<!--
+.########...#######..########..##....##
+.##.....##.##.....##.##.....##..##..##.
+.##.....##.##.....##.##.....##...####..
+.########..##.....##.##.....##....##...
+.##.....##.##.....##.##.....##....##...
+.##.....##.##.....##.##.....##....##...
+.########...#######..########.....##...
+-->
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">
+        <img src="img/ExoFlex.png" alt="..." height="54">
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="Serrage.html">Serrage</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="Controle.html" id="controllink">Contrôle</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="Debug.html">Debug</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main layout BEGIN-->
+  <div class="container mainpage">
+    <h1 class="mt-4">Serrage</h1><br>
+
+    <h2>Locked</h2>
+    <label class="switch">
+      <input type="checkbox" id="lock" value="on" checked>
+      <span class="slider"></span>
+    </label><br><br>
+
+    <button class="button-19" role="button">Serrer</button><br>
+
+    <button class="button-19" role="button">Desserrer</button>
+
+
+  </div>
+
+
+
+  <!-- Main layout END-->
+  <script src="js/serrage_functions.js"></script>
+
+
+</body>
+
+</html>

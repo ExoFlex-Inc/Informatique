@@ -4,6 +4,6 @@
     "description": "Sample connection for HTML",
     "dependencies": {
         "serialport": "^10.4.0",
-        "socket.io": "^2.5.0"
+        "socket.io": "^2.3.0"
     }
 }
