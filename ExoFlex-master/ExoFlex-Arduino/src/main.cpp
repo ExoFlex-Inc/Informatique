@@ -34,17 +34,20 @@ using namespace std;
 #define DORSIFLEXION_DOWN 3
 #define EVERSION_RIGHT 4
 #define EVERSION_LEFT 5
-#define TIGHTENING_ON 6
-#define TIGHTENING_OFF 7
-#define TEST 8
+#define TIGHTENING 6
 
-#define eversion_enable 7
-#define dorsiflex_enable 8
+#define eversion_enable 6
+#define dorsiflex_enable 7
 
 #define eversion_channel_A 24
 #define eversion_channel_B 25
 #define dorsiflex_channel_A 26
 #define dorsiflex_channel_B 27
+
+#define eversion_limit_switch 28
+#define dorsiflex_limit_switch 29
+
+#define tightenning_step_resolution 200 // Set desired move: 200 steps (in quater-step resolution that's one rotation)
 
 Servo dorsiflex_motor;               // PIN 8
 Servo eversion_motor;                // PIN 7
@@ -61,6 +64,8 @@ bool dorsiflexState;
 int eversionMotorCurrentAngle = 0; // Eversion motor angle
 bool eversionLastState;
 bool eversionState;
+
+int tightenningCurrentAngle = 0; // Tightenning motor angle
 
 int period = 2;             // Time to execute the movement
 unsigned long time_now = 0; // Time of code now
@@ -84,6 +89,9 @@ void sendMsg()
     // Elements du message
     doc["time"] = (millis() / 1000.0);
     doc["Case"] = command;
+    doc["DorsiflexAngle"] = dorsiflexMotorCurrentAngle;
+    doc["EversionAngle"] = eversionMotorCurrentAngle;
+    doc["TightAngle"] = map(stepper_tight.currentPosition(), 0, tightenning_step_resolution, 0, 180);
 
     // Serialisation
     serializeJson(doc, Serial);
@@ -113,11 +121,8 @@ void readMsg()
     }
 
     command = doc["Case"];
-
-    // if (!parse_msg.isNull())
-    // {
-    //     operation_mode = doc["MODE"].as<int>();
-    // }
+    tightenningCurrentAngle = doc["TightAngle"];
+    tightenningCurrentAngle = map(tightenningCurrentAngle, 0, 180, 0, tightenning_step_resolution);
 }
 
 void motorMove(const char *motor, int power)
@@ -287,11 +292,13 @@ void setup()
     dorsiflex_motor.write(90);
     eversion_motor.write(90);
 
-    // pinMode(dorsiflex_enable, OUTPUT);
     pinMode(dorsiflex_channel_A, INPUT);
     pinMode(dorsiflex_channel_B, INPUT);
     pinMode(eversion_channel_A, INPUT);
     pinMode(eversion_channel_B, INPUT);
+
+    pinMode(dorsiflex_limit_switch, INPUT);
+    pinMode(eversion_limit_switch, INPUT);
 
     dorsiflexLastState = digitalRead(dorsiflex_channel_A);
     eversionLastState = digitalRead(eversion_channel_A);
@@ -338,16 +345,11 @@ void loop()
     case EVERSION_RIGHT: // Sets all servomotors to initial angles
         motorMove("eversion", 100);
         break;
+    case TIGHTENING:
+        stepper_tight.moveTo(tightenningCurrentAngle);
+        stepper_tight.run();
+        break;
     }
 
-    // if (dorsiflexMotorCurrentAngle < 45)
-    // {
-
-    //     motorMove("dorsiflex", 35);
-    // }
-    // else if (dorsiflexMotorCurrentAngle > 0)
-    // {
-    //     motorMove("dorsiflex", 0);
-    // }
     timerSendMsg_.update();
 }

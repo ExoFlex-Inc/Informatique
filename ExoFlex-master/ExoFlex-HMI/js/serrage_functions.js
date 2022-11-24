@@ -1,3 +1,6 @@
+var socket = io();
+let TightAngle = 0;
+
 $(".mainpage button").attr("disabled", true);
 $("#controllink").attr("href","Controle.html?lock=on")
 $( "#lock" ).on( "change", function() {
@@ -14,3 +17,26 @@ $( "#lock" ).on( "change", function() {
         $("#controllink").attr("href","Controle.html?lock=on")
     }
 });
+
+function tighteningTight() {
+    tightenning_interval = setInterval(function () {
+      if( TightAngle < 180){
+        TightAngle += 5;
+        socket.emit("manualMovement", { TightAngle: TightAngle,
+        Case: 6 });
+      }
+    }, 100);
+  };
+  function tighteningUntight() {
+    tightenning_interval = setInterval(function () {
+      if( TightAngle > 0 ){
+        TightAngle -= 5;
+        socket.emit("manualMovement", { TightAngle: TightAngle,
+        Case: 6 });
+      }
+    }, 100);
+  };
+  
+  function tighteningStop() {
+      clearInterval( tightenning_interval );
+  };

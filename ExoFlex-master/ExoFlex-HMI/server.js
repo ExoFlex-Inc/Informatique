@@ -186,11 +186,12 @@ io.on("connection", function (socket) {
     });
   });
 
-  socket.on("manualMovement", function (Case) {
-    Case = JSON.stringify(Case);
+  socket.on("manualMovement", function (msg) {
+    msg = JSON.stringify(msg);
 
-    port.write(Case);
+    port.write(msg);
   });
+
 });
 
 function getPortsList() {

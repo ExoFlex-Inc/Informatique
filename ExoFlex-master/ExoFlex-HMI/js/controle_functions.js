@@ -10,7 +10,6 @@ let count = 00;
 var socket = io();
 
 function manualButton(button) {
-    console.log("allo");
     socket.emit("manualMovement", { Case: button });
 }
 

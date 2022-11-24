@@ -1,6 +1,7 @@
 
 var socket = io();
 var portNameGlobal;
+var TightAngle = 0;
 
 socket.on("data", function (data) {
   document.getElementById("arduino_msg").innerHTML = data;
@@ -36,3 +37,26 @@ function connectPort() {
 function manualButton(button) {
   socket.emit("manualMovement", { Case: button });
 }
+
+function tighteningTight() {
+  tightenning_interval = setInterval(function () {
+    if( TightAngle < 180){
+      TightAngle += 5;
+      socket.emit("manualMovement", { TightAngle: TightAngle,
+      Case: 6 });
+    }
+  }, 100);
+};
+function tighteningUntight() {
+  tightenning_interval = setInterval(function () {
+    if( TightAngle > 0 ){
+      TightAngle -= 5;
+      socket.emit("manualMovement", { TightAngle: TightAngle,
+      Case: 6 });
+    }
+  }, 100);
+};
+
+function tighteningStop() {
+    clearInterval( tightenning_interval );
+};
