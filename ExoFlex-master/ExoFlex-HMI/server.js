@@ -154,7 +154,7 @@ var server = http
       });
     }
   })
-  .listen(5500);
+  .listen(5500,'10.0.0.1');
 
 var io = require("socket.io")(server);
 
