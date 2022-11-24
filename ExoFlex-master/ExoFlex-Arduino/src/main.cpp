@@ -89,7 +89,7 @@ void sendMsg()
     // Elements du message
     doc["time"] = (millis() / 1000.0);
     doc["Case"] = command;
-    doc["DorsiflexAngle"] = dorsiflexMotorCurrentAngle;
+    doc["DorsiflexAngle"] = map(dorsiflexMotorCurrentAngle, 1000, 2000, 0, 180);
     doc["EversionAngle"] = eversionMotorCurrentAngle;
     doc["TightAngle"] = map(stepper_tight.currentPosition(), 0, tightenning_step_resolution, 0, 180);
 
@@ -350,6 +350,15 @@ void loop()
         stepper_tight.run();
         break;
     }
+
+    // if (dorsiflexMotorCurrentAngle < 180)
+    // {
+    //     motorMove("dorsiflex", -50);
+    // }
+    // else
+    // {
+    //     motorMove("dorsiflex", 0);
+    // }
 
     timerSendMsg_.update();
 }

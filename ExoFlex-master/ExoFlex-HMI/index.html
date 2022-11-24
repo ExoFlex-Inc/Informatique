@@ -45,7 +45,7 @@
       <a class="navbar-brand" href="index.html">
         <img src="img/ExoFlex.png" height="54">
       </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -69,6 +69,13 @@
   </nav>
 
   <!-- Main layout BEGIN-->
+  <div class="form-box">
+    <form action="Serrage.html" method="get" id="login">
+      <label>Username</label>
+      <input type="text" name="username_id" placeholder="Username" required><br>
+      <button type="button" onclick="connectPort()">Connecter</button>
+    </form>
+  </div>
 
   <!-- Main layout END-->
   <script src="js/home_functions.js"></script>
