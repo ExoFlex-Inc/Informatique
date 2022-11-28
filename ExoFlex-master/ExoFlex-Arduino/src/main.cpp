@@ -32,8 +32,8 @@ using namespace std;
 #define WAIT 1
 #define DORSIFLEXION_UP 2
 #define DORSIFLEXION_DOWN 3
-#define EVERSION_RIGHT 4
-#define EVERSION_LEFT 5
+#define EVERSION_RIGHT 5
+#define EVERSION_LEFT 4
 #define TIGHTENING 6
 
 #define eversion_enable 6
@@ -47,7 +47,7 @@ using namespace std;
 #define eversion_limit_switch 28
 #define dorsiflex_limit_switch 29
 
-#define tightenning_step_resolution 200 // Set desired move: 200 steps (in quater-step resolution that's one rotation)
+#define tightening_step_resolution 200 // Set desired move: 200 steps (in quater-step resolution that's one rotation)
 
 Servo dorsiflex_motor;               // PIN 8
 Servo eversion_motor;                // PIN 7
@@ -57,20 +57,20 @@ AccelStepper stepper_tight(1, 2, 5); // STEP PIN 2, STEP DIR 5
 volatile bool shouldSend_ = false; // Ready to send message to serial flag
 volatile bool shouldRead_ = false; // Ready to read message to serial flag
 
-int dorsiflexMotorCurrentAngle = 0; // Dorsiflexion motor angle
+int dorsiflexMotorCurrentAngle; // Dorsiflexion motor angle
 bool dorsiflexLastState;
 bool dorsiflexState;
 
-int eversionMotorCurrentAngle = 0; // Eversion motor angle
+int eversionMotorCurrentAngle; // Eversion motor angle
 bool eversionLastState;
 bool eversionState;
 
-int tightenningCurrentAngle = 0; // Tightenning motor angle
+int tighteningCurrentAngle; // Tightening motor angle
 
 int period = 2;             // Time to execute the movement
 unsigned long time_now = 0; // Time of code now
 
-int command = INITIALIZE;
+int command = WAIT;
 
 SoftTimer timerSendMsg_; // Send message timer
 
@@ -89,9 +89,10 @@ void sendMsg()
     // Elements du message
     doc["time"] = (millis() / 1000.0);
     doc["Case"] = command;
+    // doc["DorsiflexAngle"] = dorsiflexMotorCurrentAngle;
     doc["DorsiflexAngle"] = map(dorsiflexMotorCurrentAngle, 1000, 2000, 0, 180);
-    doc["EversionAngle"] = eversionMotorCurrentAngle;
-    doc["TightAngle"] = map(stepper_tight.currentPosition(), 0, tightenning_step_resolution, 0, 180);
+    doc["EversionAngle"] = map(eversionMotorCurrentAngle, 1000, 2000, 0, 180);
+    doc["TighteningAngle"] = map(tighteningCurrentAngle, 0, tightening_step_resolution, 0, 180);
 
     // Serialisation
     serializeJson(doc, Serial);
@@ -120,9 +121,31 @@ void readMsg()
         return;
     }
 
-    command = doc["Case"];
-    tightenningCurrentAngle = doc["TightAngle"];
-    tightenningCurrentAngle = map(tightenningCurrentAngle, 0, 180, 0, tightenning_step_resolution);
+    parse_msg = doc["Case"];
+
+    if (!parse_msg.isNull())
+    {
+        command = doc["Case"];
+    }
+    parse_msg = doc["TighteningAngle"];
+
+    if (!parse_msg.isNull())
+    {
+        tighteningCurrentAngle = doc["TighteningAngle"];
+        tighteningCurrentAngle = map(tighteningCurrentAngle, 0, 180, 0, tightening_step_resolution);
+    }
+    parse_msg = doc["DorsiflexAngle"];
+
+    if (!parse_msg.isNull())
+    {
+        dorsiflexMotorCurrentAngle = map(doc["DorsiflexAngle"], 0, 180, 1000, 2000);
+    }
+    parse_msg = doc["EversionAngle"];
+
+    if (!parse_msg.isNull())
+    {
+        eversionMotorCurrentAngle = map(doc["EversionAngle"], 0, 180, 1000, 2000);
+    }
 }
 
 void motorMove(const char *motor, int power)
@@ -212,72 +235,11 @@ void motorMove(const char *motor, int power)
     // Serial.println("--------------");
 }
 
-void test()
-{
-
-    // -------------------------Motor R/C Test 1------------------------
-
-    // Ramp both servo channels from 0 to 180 (full reverse to full forward),
-    // waiting 20 ms (1/50th of a second) per value.
-
-    // int power = 1;
-
-    // for (power = 0; power <= 180; power++)
-    // {
-    // dorsiflex_motor.write(power);
-    // eversion_motor.write(power);
-    // }
-
-    // Now go back the way we came.
-    // for (power = 180; power >= 0; power--)
-    // {
-    //     dorsiflex_motor.write(power);
-    //     eversion_motor.write(power);
-    //     delay(1);
-    //     dorsiflex_motor.write(90);
-    //     eversion_motor.write(90);
-    // }
-
-    // -------------------------Motor R/C Test 2------------------------
-
-    // int power = 1;
-
-    // if (millis() >= time_now + period)
-    // {
-    //     time_now += period;
-
-    //     Serial.print("Time: ");
-    //     Serial.print(time_now / 1000);
-    //     Serial.print("s - ");
-
-    //     dorsiflex_motor.write(power);
-    //     eversion_motor.write(power);
-    // delay(1);
-    // dorsiflex_motor.write(90);
-    // eversion_motor.write(90);
-    // }
-
-    // ------------------------- Stepper tests------------------------
-
-    // stepper_tight.moveTo(800);     // Set desired move: 800 steps (in quater-step resolution that's one rotation)
-    // stepper_tight.runToPosition(); // Moves the motor to target position w/ acceleration/ deceleration and it blocks until is in position
-
-    // // Move back to position 0, using run() which is non-blocking - both motors will move at the same time
-    // stepper_tight.moveTo(0);
-
-    // while (stepper_tight.currentPosition() != 0)
-    // {
-    //     stepper_tight.run(); // Move or step the motor implementing accelerations and decelerations to achieve the target position. Non-blocking function
-    // }
-}
-
 /*---------------------------Setup------------------------*/
 
 void setup()
 {
     Serial.begin(BAUD); // Initialisation of serial communication
-
-    delay(2000);
 
     // Send message timer
     timerSendMsg_.setDelay(UPDATE_PERIODE);
@@ -325,40 +287,34 @@ void loop()
     //---------------------- SWITCH CASE -------------------------------
     switch (command)
     {
+    case INITIALIZE:
+        break;
     case WAIT:
         motorMove("dorsiflex", 0);
         motorMove("eversion", 0);
         break;
 
     case DORSIFLEXION_UP: // Sets all servomotors to initial angles
-        motorMove("dorsiflex", -100);
-        break;
-
-    case DORSIFLEXION_DOWN: // Sets all servomotors to initial angles
         motorMove("dorsiflex", 100);
         break;
 
+    case DORSIFLEXION_DOWN: // Sets all servomotors to initial angles
+        motorMove("dorsiflex", -100);
+        break;
+
     case EVERSION_LEFT: // Sets all servomotors to initial angles
-        motorMove("eversion", -100);
+        motorMove("eversion", 100);
+        eversionMotorCurrentAngle += 1;
         break;
 
     case EVERSION_RIGHT: // Sets all servomotors to initial angles
-        motorMove("eversion", 100);
+        motorMove("eversion", -100);
         break;
     case TIGHTENING:
-        stepper_tight.moveTo(tightenningCurrentAngle);
+        stepper_tight.moveTo(tighteningCurrentAngle);
         stepper_tight.run();
         break;
     }
-
-    // if (dorsiflexMotorCurrentAngle < 180)
-    // {
-    //     motorMove("dorsiflex", -50);
-    // }
-    // else
-    // {
-    //     motorMove("dorsiflex", 0);
-    // }
 
     timerSendMsg_.update();
 }

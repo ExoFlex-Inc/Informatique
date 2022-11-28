@@ -1,4 +1,3 @@
-
 var socket = io();
 var portNameGlobal;
 var TightAngle = 0;
@@ -11,6 +10,12 @@ socket.on("data", function (data) {
     button.innerHTML = portNameGlobal;
     button.value = "Connected";
   }
+  $("#dorsiflex_up").disabled = false;
+  $("#dorsiflex_down").disabled = false;
+  $("#eversion_up").disabled = false;
+  $("#eversion_down").disabled = false;
+  $("#tightening_tight").disabled = false;
+  $("#tightening_untight").disabled = false;
 });
 socket.on("portName", function (portName) {
   button = document.getElementById("serial_port");
@@ -40,23 +45,21 @@ function manualButton(button) {
 
 function tighteningTight() {
   tightenning_interval = setInterval(function () {
-    if( TightAngle < 180){
+    if (TightAngle < 180) {
       TightAngle += 5;
-      socket.emit("manualMovement", { TightAngle: TightAngle,
-      Case: 6 });
+      socket.emit("manualMovement", { TightAngle: TightAngle, Case: 6 });
     }
   }, 100);
-};
+}
 function tighteningUntight() {
   tightenning_interval = setInterval(function () {
-    if( TightAngle > 0 ){
+    if (TightAngle > 0) {
       TightAngle -= 5;
-      socket.emit("manualMovement", { TightAngle: TightAngle,
-      Case: 6 });
+      socket.emit("manualMovement", { TightAngle: TightAngle, Case: 6 });
     }
   }, 100);
-};
+}
 
 function tighteningStop() {
-    clearInterval( tightenning_interval );
-};
+  clearInterval(tightenning_interval);
+}

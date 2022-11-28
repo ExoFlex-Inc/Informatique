@@ -70,22 +70,20 @@
 
     <!-- Main layout BEGIN-->
     <div>
-        <button id="serial_port" onclick="connectPort()" value="Not Connected" name="serial_port">
-        </button>
+        <button id="serial_port" onclick="connectPort()" value="Not Connected" name="serial_port" disabled></button>
         <div id="arduino_msg"></div>
         <button id="dorsiflexion_up" onmousedown="manualButton(this.value)" onmouseup="manualButton(1)" value="2"
-            name="dorsiflexion_up"> dorsiflexion_up</button>
+            name="dorsiflexion_up" disabled> dorsiflexion_up</button>
         <button id="dorsiflexion_down" onmousedown="manualButton(this.value)" onmouseup="manualButton(1)" value="3"
-            name="dorsiflexion_down">
-            dorsiflexion_down</button>
+            name="dorsiflexion_down" disabled>dorsiflexion_down</button>
         <button id="eversion_left" onmousedown="manualButton(this.value)" onmouseup="manualButton(1)" value="4"
-            name="eversion_left"> eversion_left</button>
+            name="eversion_left" disabled> eversion_left</button>
         <button id="eversion_right" onmousedown="manualButton(this.value)" onmouseup="manualButton(1)" value="5"
-            name="eversion_right"> eversion_right</button>
+            name="eversion_right" disabled> eversion_right</button>
         <button id="tigntening_tight" onmousedown="tighteningTight()"
-            onmouseup="tighteningStop()">tigntening_on</button>
+            onmouseup="tighteningStop()" disabled>tigntening_on</button>
         <button id="tigntening_untight" onmousedown="tighteningUntight()"
-            onmouseup="tighteningStop()">tigntening_off</button>
+            onmouseup="tighteningStop()" disabled>tigntening_off</button>
     </div>
 
     <!-- Main layout END-->

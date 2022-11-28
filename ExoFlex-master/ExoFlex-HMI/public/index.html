@@ -55,12 +55,6 @@
             <a class="nav-link active" aria-current="page" href="index.html">Home</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="Serrage.html">Serrage</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="Controle.html">Contrôle</a>
-          </li>
-          <li class="nav-item">
             <a class="nav-link" href="Debug.html">Debug</a>
           </li>
         </ul>
@@ -70,10 +64,8 @@
 
   <!-- Main layout BEGIN-->
   <div class="form-box">
-    <form action="Serrage.html" method="get" id="login">
-      <label>Username</label>
-      <input type="text" name="username_id" placeholder="Username" required><br>
-      <button type="button" onclick="connectPort()">Connecter</button>
+    <form action="/serialPort" method="POST">
+      <button type="submit">Start a session</button>
     </form>
   </div>
 
