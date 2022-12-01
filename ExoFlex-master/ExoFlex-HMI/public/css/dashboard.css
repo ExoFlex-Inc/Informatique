@@ -333,7 +333,7 @@ input:checked+.slider:before {
   align-items: center;
   justify-content: center;
   flex-direction:column;
-  height: 100vh;
+  height: 50vh;
   padding-bottom: 50px;
   padding-left: 25%;
   padding-right: 25%;
