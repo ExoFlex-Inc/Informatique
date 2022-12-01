@@ -1,8 +1,3 @@
-let startBtn = document.getElementById("start");
-let stopBtn = document.getElementById("stop");
-let resetBtn = document.getElementById("reset");
-
-
 let hour = 00;
 let minute = 00;
 let second = 00;
@@ -10,29 +5,29 @@ let count = 00;
 
 var socket = io();
 
-$('#dorsiflex_up').on('touchstart mousedown', function(){ 
+$("#dorsiflex_up").on("touchstart mousedown", function () {
   socket.emit("manualMovement", { Case: 2 });
 });
-$('#dorsiflex_up').on('touchend mouseup', function(){ 
+$("#dorsiflex_up").on("touchend mouseup", function () {
   socket.emit("manualMovement", { Case: 1 });
 });
-$('#dorsiflex_down').on('touchstart mousedown', function(){ 
+$("#dorsiflex_down").on("touchstart mousedown", function () {
   socket.emit("manualMovement", { Case: 3 });
 });
-$('#dorsiflex_down').on('touchend mouseup', function(){ 
+$("#dorsiflex_down").on("touchend mouseup", function () {
   socket.emit("manualMovement", { Case: 1 });
 });
 
-$('#eversion_left').on('touchstart mousedown', function(){ 
+$("#eversion_left").on("touchstart mousedown", function () {
   socket.emit("manualMovement", { Case: 4 });
 });
-$('#eversion_left').on('touchend mouseup', function(){ 
+$("#eversion_left").on("touchend mouseup", function () {
   socket.emit("manualMovement", { Case: 1 });
 });
-$('#eversion_right').on('touchstart mousedown', function(){ 
+$("#eversion_right").on("touchstart mousedown", function () {
   socket.emit("manualMovement", { Case: 5 });
 });
-$('#eversion_right').on('touchend mouseup', function(){ 
+$("#eversion_right").on("touchend mouseup", function () {
   socket.emit("manualMovement", { Case: 1 });
 });
 
@@ -40,25 +35,33 @@ function manualButton(button) {
   socket.emit("manualMovement", { Case: button });
 }
 
-startBtn.addEventListener("click", function () {
-  timer = true;
-  stopWatch();
+$("#start").on("click", function () {
+  if ($(this).hasClass("start")) {
+    $(this).text("Stop");
+    $(this).removeClass("start");
+    $(this).addClass("stop");
+    $("#reset").attr("disabled", "disabled");
+    timer = true;
+    stopWatch();
+  } else {
+    $(this).text("Start");
+    $(this).removeClass("stop");
+    $(this).addClass("start");
+    $("#reset").removeAttr("disabled");
+    timer = false;
+  }
 });
 
-stopBtn.addEventListener("click", function () {
-  timer = false;
-});
-
-resetBtn.addEventListener("click", function () {
+$("#reset").on("click", function () {
   timer = false;
   hour = 0;
   minute = 0;
   second = 0;
   count = 0;
-  document.getElementById("hr").innerHTML = "00";
-  document.getElementById("min").innerHTML = "00";
-  document.getElementById("sec").innerHTML = "00";
-  document.getElementById("count").innerHTML = "00";
+  $("#hr").text("00");
+  $("#min").text("00");
+  $("#sec").text("00");
+  $("#count").text("00");
 });
 
 function stopWatch() {

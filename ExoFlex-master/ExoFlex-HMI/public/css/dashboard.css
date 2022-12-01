@@ -157,6 +157,11 @@ input:checked+.slider:before {
 }
 
 /* CSS */
+.myCont{
+  text-align: center;
+
+}
+
 .button-19 {
   appearance: button;
   background-color: #1899D6;
@@ -218,15 +223,50 @@ input:checked+.slider:before {
   cursor: auto;
 }
 
+.button-20 {
+  background-color: #1CB0F6;
+  border: solid transparent;
+  border-radius: 16px;
+  border-width: 0 0 4px;
+  box-sizing: border-box;
+  color: #FFFFFF;
+  cursor: pointer;
+  font-family: din-round, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .8px;
+  line-height: 30px;
+  padding: 13px 16px;
+  text-align: center;
+  text-transform: uppercase;
+  vertical-align: middle;
+  width: 70%;
+  margin: 10px;
+  box-shadow: 1px 5px #1899D6;
+  height: 50px;
+}
 
+/*.button-20:hover {
+  background-color: #4dc6ff;
+}
+*/
+.button-20:hover:not(:disabled) {
+  filter: brightness(1.1);
+  -webkit-filter: brightness(1.1);
+}
+
+.button-20:disabled {
+  opacity: 50%;
+  cursor: auto;
+}
 
 
 .digit {
-  font-size: 150px;
+  font-size: 8.1vw;
 }
 
 .txt {
-  font-size: 30px;
+  font-size: 4.1vw;
 }
 
 #buttons {
@@ -248,14 +288,53 @@ input:checked+.slider:before {
   font-weight: 500;
 }
 
-#start {
+.start {
   background-color: #009779;
 }
 
-#stop {
+.stop {
   background-color: #0e85fc;
 }
 
 #reset {
   background-color: #c91400;
+}
+
+#time {
+  margin:auto;
+  text-align: center;
+
+}
+#buttons {
+  margin:auto;
+  text-align: center;
+
+}
+
+.dorValue, .everValue{
+  text-align: center;
+  font-size: 6.0vw;
+  width: 200px;
+  margin: auto;
+
+}
+
+.myRow{
+  background-color: #cdcdcd;
+}
+
+.col-sm{
+  text-align: center;
+  padding-bottom: 8px;
+}
+
+.form-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction:column;
+  height: 100vh;
+  padding-bottom: 50px;
+  padding-left: 25%;
+  padding-right: 25%;
 }
