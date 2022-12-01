@@ -45,7 +45,7 @@ router.post("/", (req, res) => {
         console.log("Socket is listening");
 
         parser.on("data", function (data) {
-          data = JSON.parse(data);
+          // data = JSON.parse(data);
 
           if (data.DorsiflexAngle === -180 && data.EversionAngle === -180) {
             // -180 = undefined with mapping

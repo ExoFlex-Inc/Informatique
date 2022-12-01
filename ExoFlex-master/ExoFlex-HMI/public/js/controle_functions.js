@@ -2,12 +2,39 @@ let startBtn = document.getElementById("start");
 let stopBtn = document.getElementById("stop");
 let resetBtn = document.getElementById("reset");
 
+
 let hour = 00;
 let minute = 00;
 let second = 00;
 let count = 00;
 
 var socket = io();
+
+$('#dorsiflex_up').on('touchstart mousedown', function(){ 
+  socket.emit("manualMovement", { Case: 2 });
+});
+$('#dorsiflex_up').on('touchend mouseup', function(){ 
+  socket.emit("manualMovement", { Case: 1 });
+});
+$('#dorsiflex_down').on('touchstart mousedown', function(){ 
+  socket.emit("manualMovement", { Case: 3 });
+});
+$('#dorsiflex_down').on('touchend mouseup', function(){ 
+  socket.emit("manualMovement", { Case: 1 });
+});
+
+$('#eversion_left').on('touchstart mousedown', function(){ 
+  socket.emit("manualMovement", { Case: 4 });
+});
+$('#eversion_left').on('touchend mouseup', function(){ 
+  socket.emit("manualMovement", { Case: 1 });
+});
+$('#eversion_right').on('touchstart mousedown', function(){ 
+  socket.emit("manualMovement", { Case: 5 });
+});
+$('#eversion_right').on('touchend mouseup', function(){ 
+  socket.emit("manualMovement", { Case: 1 });
+});
 
 function manualButton(button) {
   socket.emit("manualMovement", { Case: button });

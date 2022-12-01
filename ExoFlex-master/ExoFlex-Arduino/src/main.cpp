@@ -303,12 +303,12 @@ void loop()
         break;
 
     case EVERSION_LEFT: // Sets all servomotors to initial angles
-        motorMove("eversion", 100);
+        motorMove("eversion", 50);
         eversionMotorCurrentAngle += 1;
         break;
 
     case EVERSION_RIGHT: // Sets all servomotors to initial angles
-        motorMove("eversion", -100);
+        motorMove("eversion", -50);
         break;
     case TIGHTENING:
         stepper_tight.moveTo(tighteningCurrentAngle);
