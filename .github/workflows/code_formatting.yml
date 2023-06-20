@@ -1,23 +1,32 @@
-name: Super-Linter CI
+name: Code Formatting
 
 on:
-  pull_request:
+  push:
     branches:
       - main
-    paths:
-      - ExoFlex-master/**
+      - master
 
 jobs:
-  super-lint:
-    name: Lint code base
+  format-code:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Run Super-Linter
-        uses: github/super-linter@latest
-        env:
-          VALIDATE_ALL_CODEBASE: false
-          DEFAULT_BRANCH: main
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install Prettier
+        run: npm install --global prettier 
+
+      - name: Format code
+        run: prettier --write .
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -am "Auto-format code" --author="GitHub Action <action@github.com>"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
