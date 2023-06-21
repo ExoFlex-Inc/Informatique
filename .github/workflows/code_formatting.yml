@@ -17,8 +17,8 @@ jobs:
       - name: Install Prettier
         run: npm install --global prettier 
 
-      - name: Format code arduino
-        run: prettier --write "master/ExoFlex-Arduino/src" "master/ExoFlex-Arduino/test"
+#       - name: Format code arduino
+#         run: prettier --write "master/ExoFlex-Arduino/src" "master/ExoFlex-Arduino/test"
 
       - name: Format code hmi
         run: prettier --write "master/ExoFlex-HMI"
