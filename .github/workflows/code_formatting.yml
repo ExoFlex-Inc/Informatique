@@ -1,14 +1,10 @@
 name: Code Formatting
 
 on:
-#   pull_request:
-#     types:
-#       - opened
-#       - synchronize
-  push:
-    branches:
-      - main
-      - master
+  pull_request:
+    types:
+      - opened
+      - synchronize
 
 jobs:
   format-code:
