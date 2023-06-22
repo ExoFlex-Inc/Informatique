@@ -1,0 +1,33 @@
+name: Clang-Format Styling
+
+# Corrects C++, C
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  clang-format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Clang-Format
+        run: sudo apt-get install -y clang-format
+
+      - name: Run Clang-Format
+        run: |
+          git fetch origin ${{ github.event.pull_request.head.ref }}
+          git checkout FETCH_HEAD -- .
+          clang-format -i .
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Apply Clang-Format changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
