@@ -35,7 +35,7 @@
 // For SAMD:
 #define _useTimer1
 //#define _useTimer2   // <- TODO do not activate until the code in Servo.cpp
-//has been changed in order
+// has been changed in order
 //         to manage more than one channel per timer on the SAMD architecture
 
 #if defined(_useTimer1)
