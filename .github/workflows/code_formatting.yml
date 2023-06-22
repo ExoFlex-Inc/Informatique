@@ -35,7 +35,7 @@ jobs:
         run: black .
 
       - name: Run Clang-Fromat
-        run: clang-format -i .
+        run: find . \( -name '*.cpp' -o -name '*.h' \) -exec clang-format -i {} +
 
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
