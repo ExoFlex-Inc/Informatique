@@ -1,4 +1,39 @@
-name: Prettier Code Formatting
+# name: Prettier Code Formatting
+
+# # Corrects JavaScript, TypeScript, HTML, CSS, JSON, and YAML
+
+# on:
+#   pull_request_target:
+#     types:
+#       - opened
+#       - synchronize
+
+# jobs:
+#   prettier:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
+
+#       - name: Install Prettier
+#         run: npm install --global prettier
+
+#       - name: Run Prettier
+#         run: npm run prettier
+        
+#       - name: Commit changes
+#         uses: stefanzweifel/git-auto-commit-action@v4
+#         with:
+#           commit_message: Apply Prettier changes
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+
+
+
+# // .github/prettier.yml
+
+name: Fix Code Style
 
 # Corrects JavaScript, TypeScript, HTML, CSS, JSON, and YAML
 
@@ -9,26 +44,22 @@ on:
       - synchronize
 
 jobs:
-  format-code:
+  prettier:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Install Prettier
-        run: npm install --global prettier
+      - name: Install NPM dependencies
+        run: npm install
 
-      - name: Format code
-        run: prettier --write .
+      - name: Run Prettier
+        run: npm run prettier
 
       - name: Commit changes
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add .
-          git diff-index --quiet HEAD || git commit -am "Auto-format code" --author="GitHub Action <action@github.com>"
-          git pull origin ${{ github.head_ref }}
-          git push origin HEAD:${{ github.head_ref }}
-
-
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Apply Prettier changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
