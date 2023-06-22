@@ -21,6 +21,7 @@ jobs:
         run: |
           npm install --global prettier
           python -m pip install --upgrade black
+          sudo apt-get install -y clang-format
 
       - name: Checkout Branch
         run: |
@@ -33,9 +34,13 @@ jobs:
       - name: Run Black
         run: black .
 
+      - name: Run Clang-Fromat
+        run: clang-format -i .
+
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Apply Formatting changes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
