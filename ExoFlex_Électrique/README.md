@@ -41,4 +41,8 @@ Les potentiomètres rotatifs vont nous servir à déterminer l'angle des joints,
 
 ## Overview schéma électrique et conception PCB
 
-à remplir
+### Arduino et alimentation
+![Alt text](image.png)
+
+### Capteurs
+![Alt text](image-1.png)
