@@ -22,12 +22,16 @@ jobs:
           npm install --global prettier
           python -m pip install --upgrade black
 
-      - name: Run Formatters
+      - name: Checkout Branch
         run: |
           git fetch origin ${{ github.event.pull_request.head.ref }}
           git checkout FETCH_HEAD -- .
-          prettier --write .
-          black .
+
+      - name: Run Prettier
+        run: prettier --write .
+      
+      - name: Run Black
+        run: black .
 
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
@@ -35,4 +39,3 @@ jobs:
           commit_message: Apply Formatting changes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
