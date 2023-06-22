@@ -1,5 +1,5 @@
 body {
-  font-size: .875rem;
+  font-size: 0.875rem;
 }
 
 /*
@@ -15,14 +15,14 @@ body {
   /* Behind the navbar */
   padding: 48px 0 0;
   /* Height of navbar */
-  box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
 }
 
 .sidebar-sticky {
   position: relative;
   top: 0;
   height: calc(100vh - 48px);
-  padding-top: .5rem;
+  padding-top: 0.5rem;
   overflow-x: hidden;
   overflow-y: auto;
   /* Scrollable contents if viewport is shorter than content. */
@@ -45,7 +45,7 @@ body {
 }
 
 .sidebar-heading {
-  font-size: .75rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
 }
 
@@ -70,28 +70,28 @@ body {
  */
 
 .navbar-brand {
-  padding-top: .75rem;
-  padding-bottom: .75rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
   font-size: 1rem;
-  background-color: rgba(0, 0, 0, .25);
-  box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25);
+  background-color: rgba(0, 0, 0, 0.25);
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.25);
 }
 
 .navbar .form-control {
-  padding: .75rem 1rem;
+  padding: 0.75rem 1rem;
   border-width: 0;
   border-radius: 0;
 }
 
 .form-control-dark {
   color: #fff;
-  background-color: rgba(255, 255, 255, .1);
-  border-color: rgba(255, 255, 255, .1);
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .form-control-dark:focus {
   border-color: transparent;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
 }
 
 /* Custom CSS */
@@ -117,8 +117,8 @@ body {
   right: 0;
   bottom: 0;
   background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
 }
 
 .slider:before {
@@ -129,19 +129,19 @@ body {
   left: 4px;
   bottom: 4px;
   background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
 }
 
-input:checked+.slider {
-  background-color: #2196F3;
+input:checked + .slider {
+  background-color: #2196f3;
 }
 
-input:focus+.slider {
-  box-shadow: 0 0 1px #2196F3;
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196f3;
 }
 
-input:checked+.slider:before {
+input:checked + .slider:before {
   -webkit-transform: translateX(26px);
   -ms-transform: translateX(26px);
   transform: translateX(26px);
@@ -157,25 +157,24 @@ input:checked+.slider:before {
 }
 
 /* CSS */
-.myCont{
+.myCont {
   text-align: center;
-
 }
 
 .button-19 {
   appearance: button;
-  background-color: #1899D6;
+  background-color: #1899d6;
   border: solid transparent;
   border-radius: 16px;
   border-width: 0 0 4px;
   box-sizing: border-box;
-  color: #FFFFFF;
+  color: #ffffff;
   cursor: pointer;
   display: inline-block;
   font-family: din-round, sans-serif;
   font-size: 15px;
   font-weight: 700;
-  letter-spacing: .8px;
+  letter-spacing: 0.8px;
   line-height: 20px;
   margin: 0;
   outline: none;
@@ -185,7 +184,7 @@ input:checked+.slider:before {
   text-transform: uppercase;
   touch-action: manipulation;
   transform: translateZ(0);
-  transition: filter .2s;
+  transition: filter 0.2s;
   user-select: none;
   -webkit-user-select: none;
   vertical-align: middle;
@@ -196,7 +195,7 @@ input:checked+.slider:before {
 
 .button-19:after {
   background-clip: padding-box;
-  background-color: #1CB0F6;
+  background-color: #1cb0f6;
   border: solid transparent;
   border-radius: 16px;
   border-width: 0 0 4px;
@@ -224,17 +223,17 @@ input:checked+.slider:before {
 }
 
 .button-20 {
-  background-color: #1CB0F6;
+  background-color: #1cb0f6;
   border: solid transparent;
   border-radius: 16px;
   border-width: 0 0 4px;
   box-sizing: border-box;
-  color: #FFFFFF;
+  color: #ffffff;
   cursor: pointer;
   font-family: din-round, sans-serif;
   font-size: 15px;
   font-weight: 700;
-  letter-spacing: .8px;
+  letter-spacing: 0.8px;
   line-height: 30px;
   padding: 13px 16px;
   text-align: center;
@@ -242,7 +241,7 @@ input:checked+.slider:before {
   vertical-align: middle;
   width: 70%;
   margin: 10px;
-  box-shadow: 1px 5px #1899D6;
+  box-shadow: 1px 5px #1899d6;
   height: 50px;
 }
 
@@ -259,7 +258,6 @@ input:checked+.slider:before {
   opacity: 50%;
   cursor: auto;
 }
-
 
 .digit {
   font-size: 8.1vw;
@@ -301,29 +299,27 @@ input:checked+.slider:before {
 }
 
 #time {
-  margin:auto;
+  margin: auto;
   text-align: center;
-
 }
 #buttons {
-  margin:auto;
+  margin: auto;
   text-align: center;
-
 }
 
-.dorValue, .everValue{
+.dorValue,
+.everValue {
   text-align: center;
-  font-size: 6.0vw;
+  font-size: 6vw;
   width: 200px;
   margin: auto;
-
 }
 
-.myRow{
+.myRow {
   background-color: #cdcdcd;
 }
 
-.col-sm{
+.col-sm {
   text-align: center;
   padding-bottom: 8px;
 }
@@ -332,7 +328,7 @@ input:checked+.slider:before {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-direction:column;
+  flex-direction: column;
   height: 50vh;
   padding-bottom: 50px;
   padding-left: 25%;
