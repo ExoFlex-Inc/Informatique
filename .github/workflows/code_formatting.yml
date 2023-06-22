@@ -1,38 +1,3 @@
-# name: Prettier Code Formatting
-
-# # Corrects JavaScript, TypeScript, HTML, CSS, JSON, and YAML
-
-# on:
-#   pull_request_target:
-#     types:
-#       - opened
-#       - synchronize
-
-# jobs:
-#   prettier:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v3
-
-#       - name: Install Prettier
-#         run: npm install --global prettier
-
-#       - name: Run Prettier
-#         run: npm run prettier
-        
-#       - name: Commit changes
-#         uses: stefanzweifel/git-auto-commit-action@v4
-#         with:
-#           commit_message: Apply Prettier changes
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
-
-
-
-# // .github/prettier.yml
-
 name: Fix Code Style
 
 # Corrects JavaScript, TypeScript, HTML, CSS, JSON, and YAML
@@ -51,15 +16,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install NPM dependencies
-        run: npm install
+      - name: Install Prettier
+        run: npm install --global prettier
 
       - name: Run Prettier
-        run: npm run prettier
-
+        run: prettier --write .
+        
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Apply Prettier changes
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
