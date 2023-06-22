@@ -1,4 +1,4 @@
-name: Prettier Code Formatting 
+name: Prettier Code Formatting
 
 # Corrects JavaScript, TypeScript, HTML, CSS, JSON, and YAML
 
@@ -30,8 +30,8 @@ jobs:
           git diff-index --quiet HEAD || git commit -am "Auto-format code" --author="GitHub Action <action@github.com>"
 
       - name: Push changes
-        if: github.ref == 'refs/heads/master'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
 
