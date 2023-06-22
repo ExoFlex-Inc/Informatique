@@ -1,4 +1,6 @@
-name: Code Formatting
+name: Prettier Code Formatting 
+
+# Corrects JavaScript, TypeScript, HTML, CSS, JSON, and YAML
 
 on:
   pull_request:
