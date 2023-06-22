@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        example: [master/ExoFlex-Arduino]
+        example: [master/arduino]
 
     steps:
     - uses: actions/checkout@v2
