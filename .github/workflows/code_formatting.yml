@@ -28,5 +28,7 @@ jobs:
           git config --local user.name "GitHub Action"
           git add .
           git diff-index --quiet HEAD || git commit -am "Auto-format code" --author="GitHub Action <action@github.com>"
+          git pull origin ${{ github.head_ref }}
           git push origin HEAD:${{ github.head_ref }}
+
 
