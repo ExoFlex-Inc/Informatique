@@ -1,6 +1,6 @@
 /*
-  Servo.h - Interrupt driven Servo library for Arduino using 16 bit timers- Version 2
-  Copyright (c) 2009 Michael Margolis.  All right reserved.
+  Servo.h - Interrupt driven Servo library for Arduino using 16 bit timers-
+  Version 2 Copyright (c) 2009 Michael Margolis.  All right reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -21,8 +21,8 @@
  * Defines for 16 bit timers used with Servo library
  *
  * If _useTimerX is defined then TimerX is a 16 bit timer on the current board
- * timer16_Sequence_t enumerates the sequence that the timers should be allocated
- * _Nbr_16timers indicates how many 16 bit timers are available.
+ * timer16_Sequence_t enumerates the sequence that the timers should be
+ * allocated _Nbr_16timers indicates how many 16 bit timers are available.
  */
 
 /**
@@ -36,7 +36,13 @@
 #define _useTimer1
 #define _useTimer3
 #define _useTimer4
-typedef enum { _timer5, _timer1, _timer3, _timer4, _Nbr_16timers } timer16_Sequence_t;
+typedef enum {
+  _timer5,
+  _timer1,
+  _timer3,
+  _timer4,
+  _Nbr_16timers
+} timer16_Sequence_t;
 
 #elif defined(__AVR_ATmega32U4__)
 #define _useTimer1
@@ -47,12 +53,14 @@ typedef enum { _timer1, _Nbr_16timers } timer16_Sequence_t;
 #define _useTimer1
 typedef enum { _timer3, _timer1, _Nbr_16timers } timer16_Sequence_t;
 
-#elif defined(__AVR_ATmega128__) || defined(__AVR_ATmega1281__) || defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__) || defined(__AVR_ATmega2561__)
+#elif defined(__AVR_ATmega128__) || defined(__AVR_ATmega1281__) ||             \
+    defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__) ||             \
+    defined(__AVR_ATmega2561__)
 #define _useTimer3
 #define _useTimer1
 typedef enum { _timer3, _timer1, _Nbr_16timers } timer16_Sequence_t;
 
-#else  // everything else
+#else // everything else
 #define _useTimer1
 typedef enum { _timer1, _Nbr_16timers } timer16_Sequence_t;
 #endif

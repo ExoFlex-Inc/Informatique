@@ -7,7 +7,7 @@ Class to start a function after a certain delay or at certain frequency
 
 #include "SoftTimer.h"
 
-SoftTimer::SoftTimer(){
+SoftTimer::SoftTimer() {
   delay_ = 0;
   callTime_ = 0;
   nRep_ = -1;
@@ -16,12 +16,12 @@ SoftTimer::SoftTimer(){
   f_ = NULL;
 };
 
-void SoftTimer::update(){
-  if(millis()>callTime_ && enable_ && nRep_){
+void SoftTimer::update() {
+  if (millis() > callTime_ && enable_ && nRep_) {
     f_();
-    if(nRep_ > 0){
+    if (nRep_ > 0) {
       currRep_--;
-      if(currRep_ == 0){
+      if (currRep_ == 0) {
         disable();
       }
     }
@@ -29,14 +29,12 @@ void SoftTimer::update(){
   }
 };
 
-void SoftTimer::enable(){
-  if(f_ != NULL){
+void SoftTimer::enable() {
+  if (f_ != NULL) {
     enable_ = true;
     callTime_ = millis() + delay_;
     currRep_ = nRep_;
   }
 };
 
-void SoftTimer::disable(){
-  enable_ = false;
-};
+void SoftTimer::disable() { enable_ = false; };
