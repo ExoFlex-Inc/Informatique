@@ -16,6 +16,12 @@ jobs:
 
       - name: Install Prettier
         run: npm install --global prettier 
+        
+      - name: Test
+        run: |
+          ls
+          cd master
+          ls
 
       - name: Format code
         run: prettier --write .
