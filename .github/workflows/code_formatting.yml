@@ -20,11 +20,15 @@ jobs:
         run: npm install --global prettier
 
       - name: Run Prettier
-        run: prettier --write .
-        
+        run: |
+          git fetch origin ${{ github.event.pull_request.head.ref }}
+          git checkout FETCH_HEAD -- .
+          prettier --write .
+
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Apply Prettier changes
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+
