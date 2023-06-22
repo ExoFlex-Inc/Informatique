@@ -17,13 +17,8 @@ jobs:
       - name: Install Prettier
         run: npm install --global prettier 
 
-      - name: Format code arduino
-        run: |
-          cd master/arduino
-          prettier --write "src"
-
-      - name: Format code hmi
-        run: prettier --write "master/hmi"
+      - name: Format code
+        run: prettier --write .
 
       - name: Commit changes
         run: |
