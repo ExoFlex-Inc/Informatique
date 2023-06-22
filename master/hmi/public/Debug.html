@@ -1,7 +1,6 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-
-<!--
+  <!--
 .##.....##.########....###....########.
 .##.....##.##.........##.##...##.....##
 .##.....##.##........##...##..##.....##
@@ -11,24 +10,27 @@
 .##.....##.########.##.....##.########.
 -->
 
-<head>
+  <head>
     <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" type="text/css" href="css/dashboard.css">
-    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/dashboard.css" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
 
     <script type="text/javascript" src="js/jquery-3.3.1.slim.min.js"></script>
     <!-- <script type="text/javascript" src="js/popper.min.js"></script> -->
     <script type="text/javascript" src="js/bootstrap.min.js"></script>
-    <script type="text/javascript" src='js/socket.io.js'></script>
+    <script type="text/javascript" src="js/socket.io.js"></script>
 
     <title>ExoFlex Debug</title>
-</head>
+  </head>
 
-<!--
+  <!--
 .########...#######..########..##....##
 .##.....##.##.....##.##.....##..##..##.
 .##.....##.##.....##.##.....##...####..
@@ -38,58 +40,111 @@
 .########...#######..########.....##...
 -->
 
-<body>
-
+  <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
-        <div class="container">
-            <a class="navbar-brand" href="index.html">
-                <img src="img/ExoFlex.png" height="54">
-            </a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="Serrage.html">Serrage</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="Controle.html">Contrôle</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="Debug.html">Debug</a>
-                    </li>
-                </ul>
-            </div>
+      <div class="container">
+        <a class="navbar-brand" href="index.html">
+          <img src="img/ExoFlex.png" height="54" />
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="index.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="Serrage.html">Serrage</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="Controle.html">Contrôle</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="Debug.html">Debug</a>
+            </li>
+          </ul>
         </div>
+      </div>
     </nav>
 
     <!-- Main layout BEGIN-->
     <div>
-        <button id="serial_port" onclick="connectPort()" value="Not Connected" name="serial_port" disabled></button>
-        <div id="arduino_msg"></div>
-        <button id="dorsiflexion_up" onmousedown="manualButton(this.value)" onmouseup="manualButton(1)" value="2"
-            name="dorsiflexion_up" disabled> dorsiflexion_up</button>
-        <button id="dorsiflexion_down" onmousedown="manualButton(this.value)" onmouseup="manualButton(1)" value="3"
-            name="dorsiflexion_down" disabled>dorsiflexion_down</button>
-        <button id="eversion_left" onmousedown="manualButton(this.value)" onmouseup="manualButton(1)" value="4"
-            name="eversion_left" disabled> eversion_left</button>
-        <button id="eversion_right" onmousedown="manualButton(this.value)" onmouseup="manualButton(1)" value="5"
-            name="eversion_right" disabled> eversion_right</button>
-        <button id="tigntening_tight" onmousedown="tighteningTight()"
-            onmouseup="tighteningStop()" disabled>tigntening_on</button>
-        <button id="tigntening_untight" onmousedown="tighteningUntight()"
-            onmouseup="tighteningStop()" disabled>tigntening_off</button>
+      <button
+        id="serial_port"
+        onclick="connectPort()"
+        value="Not Connected"
+        name="serial_port"
+        disabled
+      ></button>
+      <div id="arduino_msg"></div>
+      <button
+        id="dorsiflexion_up"
+        onmousedown="manualButton(this.value)"
+        onmouseup="manualButton(1)"
+        value="2"
+        name="dorsiflexion_up"
+        disabled
+      >
+        dorsiflexion_up
+      </button>
+      <button
+        id="dorsiflexion_down"
+        onmousedown="manualButton(this.value)"
+        onmouseup="manualButton(1)"
+        value="3"
+        name="dorsiflexion_down"
+        disabled
+      >
+        dorsiflexion_down
+      </button>
+      <button
+        id="eversion_left"
+        onmousedown="manualButton(this.value)"
+        onmouseup="manualButton(1)"
+        value="4"
+        name="eversion_left"
+        disabled
+      >
+        eversion_left
+      </button>
+      <button
+        id="eversion_right"
+        onmousedown="manualButton(this.value)"
+        onmouseup="manualButton(1)"
+        value="5"
+        name="eversion_right"
+        disabled
+      >
+        eversion_right
+      </button>
+      <button
+        id="tigntening_tight"
+        onmousedown="tighteningTight()"
+        onmouseup="tighteningStop()"
+        disabled
+      >
+        tigntening_on
+      </button>
+      <button
+        id="tigntening_untight"
+        onmousedown="tighteningUntight()"
+        onmouseup="tighteningStop()"
+        disabled
+      >
+        tigntening_off
+      </button>
     </div>
 
     <!-- Main layout END-->
     <script src="js/debug_functions.js"></script>
-
-
-</body>
-
+  </body>
 </html>

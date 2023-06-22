@@ -1,7 +1,5 @@
 var socket = io();
 
 function connectPort() {
-
-      socket.emit("portConnect");
-
-  }
+  socket.emit("portConnect");
+}

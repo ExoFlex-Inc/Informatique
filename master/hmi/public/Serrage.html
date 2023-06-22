@@ -1,7 +1,6 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-
-<!--
+  <!--
 .##.....##.########....###....########.
 .##.....##.##.........##.##...##.....##
 .##.....##.##........##...##..##.....##
@@ -11,24 +10,27 @@
 .##.....##.########.##.....##.########.
 -->
 
-<head>
-  <!-- Required meta tags -->
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
 
-  <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="css/bootstrap.min.css">
-  <link rel="stylesheet" href="css/dashboard.css">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
 
-  <script type="text/javascript" src="js/jquery-3.3.1.slim.min.js"></script>
-  <!-- <script type="text/javascript" src="js/popper.min.js"></script> -->
-  <script type="text/javascript" src="js/bootstrap.min.js"></script>
-  <script type="text/javascript" src='js/socket.io.js'></script>
+    <script type="text/javascript" src="js/jquery-3.3.1.slim.min.js"></script>
+    <!-- <script type="text/javascript" src="js/popper.min.js"></script> -->
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/socket.io.js"></script>
 
-  <title>ExoFlex Tightenning</title>
-</head>
+    <title>ExoFlex Tightenning</title>
+  </head>
 
-<!--
+  <!--
 .########...#######..########..##....##
 .##.....##.##.....##.##.....##..##..##.
 .##.....##.##.....##.##.....##...####..
@@ -38,56 +40,70 @@
 .########...#######..########.....##...
 -->
 
-<body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
-    <div class="container">
-      <a class="navbar-brand" href="index.html">
-        <img src="img/ExoFlex.png" alt="..." height="54">
-      </a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="index.html">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" href="Serrage.html">Tightenning</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="Controle.html">Control</a>
-          </li>
-        </ul>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
+      <div class="container">
+        <a class="navbar-brand" href="index.html">
+          <img src="img/ExoFlex.png" alt="..." height="54" />
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="index.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="Serrage.html">Tightenning</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="Controle.html">Control</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main layout BEGIN-->
+    <div class="container mainpage">
+      <h1 class="mt-4">Tightenning</h1>
+      <br />
+
+      <h2>Locked</h2>
+      <label class="switch">
+        <input type="checkbox" id="lock" value="on" checked />
+        <span class="slider"></span> </label
+      ><br /><br />
+
+      <div class="myCont">
+        <button
+          class="button-20"
+          onmousedown="tighteningTight()"
+          onmouseup="tighteningStop()"
+        >
+          Tight</button
+        ><br />
+
+        <button
+          class="button-20"
+          onmousedown="tighteningUntight()"
+          onmouseup="tighteningStop()"
+        >
+          Untight
+        </button>
       </div>
     </div>
-  </nav>
 
-  <!-- Main layout BEGIN-->
-  <div class="container mainpage">
-    <h1 class="mt-4">Tightenning</h1><br>
-
-    <h2>Locked</h2>
-    <label class="switch">
-      <input type="checkbox" id="lock" value="on" checked>
-      <span class="slider"></span>
-    </label><br><br>
-
-    <div class="myCont">
-      <button class="button-20" onmousedown="tighteningTight()" onmouseup="tighteningStop()">Tight</button><br>
-
-      <button class="button-20" onmousedown="tighteningUntight()" onmouseup="tighteningStop()">Untight</button>
-    </div>
-
-  </div>
-
-
-
-  <!-- Main layout END-->
-  <script src="js/serrage_functions.js"></script>
-
-
-</body>
-
+    <!-- Main layout END-->
+    <script src="js/serrage_functions.js"></script>
+  </body>
 </html>
