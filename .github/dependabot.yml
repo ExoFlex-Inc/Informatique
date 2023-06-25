@@ -17,8 +17,15 @@ updates:
     schedule:
       interval: "weekly"
 
-  # Maintain dependencies for GitHub Actions
+  # Maintain dependencies for pip
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "weekly"
+
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "bundler"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
