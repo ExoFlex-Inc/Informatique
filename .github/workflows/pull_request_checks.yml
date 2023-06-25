@@ -1,0 +1,31 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npx eslint --ignore-path .gitignore .
+
+      - name: Update Pull Request Template
+        run: |
+          echo "### Points à valider avant de merge" >> $GITHUB_EVENT_PATH
+          echo "- [ ] Est-ce que le pull-request est dans une branche connecté sur Jira?" >> $GITHUB_EVENT_PATH
+          echo "- [ ] Est-ce qu'un test a été fait pour les fonctions ajoutées et ont été testés localement?" >> $GITHUB_EVENT_PATH
+          echo "- [ ] As-tu update le ReadMe avec les nouveau éléments ajoutées?" >> $GITHUB_EVENT_PATH
+          echo "- [ ] As-tu bien commenté ton code?" >> $GITHUB_EVENT_PATH
+          cat $GITHUB_EVENT_PATH
+          mv $GITHUB_EVENT_PATH $GITHUB_EVENT_PATH.json
