@@ -18,16 +18,22 @@ jobs:
         run: |
           PR_TEMPLATE_PATH=".github/pull_request_template.md"
           CHECKMARK="[x]"
+          UNCHECKED_CHECKBOX="[ ]"
+          WAIT_TIME=10 # Adjust as needed (in seconds)
+          MAX_ATTEMPTS=6 # Adjust as needed
 
           # Check if the PR template file exists
           if [ -f "$PR_TEMPLATE_PATH" ]; then
-            # Check if all checkboxes are checked
-            if grep -q "$CHECKMARK" "$PR_TEMPLATE_PATH"; then
-              echo "All checkboxes are checked. PR template validation successful!"
-            else
-              echo "ERROR: Some checkboxes are not checked in the PR template."
-              exit 1
-            fi
+            ATTEMPTS=0
+            while grep -q "$UNCHECKED_CHECKBOX" "$PR_TEMPLATE_PATH"; do
+              sleep $WAIT_TIME
+              ATTEMPTS=$((ATTEMPTS + 1))
+              if [ $ATTEMPTS -eq $MAX_ATTEMPTS ]; then
+                echo "ERROR: Some checkboxes are not checked in the PR template."
+                exit 1
+              fi
+            done
+            echo "All checkboxes are checked. PR template validation successful!"
           else
             echo "ERROR: PR template file not found."
             exit 1
