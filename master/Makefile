@@ -39,7 +39,8 @@ ifeq ($(OS),Windows_NT) # Only works on PowerShell
 	@call $(VENV)\$(PRODUCT)\Scripts\activate && g++ -std=c++14 -Iincludes arduino/test/*.cpp -o arduino/test/bin/tests
 	@arduino\test\bin\tests.exe
 else
-	@source $(VENV)/$(PRODUCT)/bin/activate && g++ -std=c++14 -Iincludes arduino/test/test.cpp -o arduino/test/bin/tests;
+	@source $(VENV)/$(PRODUCT)/bin/activate && g++ -std=c++14 -Iincludes arduino/test/*.cpp -o arduino/test/bin/tests.exe;
+	@arduino/test/bin/tests.exe
 endif
 
 test-py: venv ## Runs unit tests in python.
