@@ -11,6 +11,7 @@ arduino/downloadedLibraries/
 package-lock.json
 node_modules/
 
+#Unit Testing
 /venv/
 __pycache__/
 **/*.exe

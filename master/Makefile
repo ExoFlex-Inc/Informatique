@@ -6,7 +6,7 @@ VENV=venv
 PRODUCT=arduino
 TEST_DIR = $(PRODUCT)/test
 
-activate:
+activate:# activate venv, doesnt seem to work, but compiling
 	@echo 'Activating venv $(VENV)/$(PRODUCT)'
 
 ifeq ($(OS),Windows_NT)
@@ -15,7 +15,7 @@ else
 	@source $(VENV)/$(PRODUCT)/bin/activate;
 endif
 
-venv: ## create the virtualenv for python. FOR MAC, make sure you have bash terminal with brew
+venv: # create the virtualenv for python
 ifeq ($(OS),Windows_NT)
 	@if not exist $(VENV)/$(PRODUCT) ( \
 		echo Creating venv $(VENV)/$(PRODUCT) & \
@@ -31,7 +31,7 @@ else
 	fi
 endif
 
-install:  ## install product dependencies
+install:  # install packages
 	@echo 'Installing dev pip packages'
 ifeq ($(OS),Windows_NT)
 	@pip3 install -r requirements-pip-dev.txt >NUL 2>&1
@@ -39,7 +39,7 @@ else
 	@pip3 install -r requirements-pip-dev.txt 2>&1 > /dev/null
 endif
 
-test-cpp: venv ## Runs unit tests in cpp.
+test-cpp: venv # Runs unit tests in cpp.
 ifeq ($(OS),Windows_NT) # Only works on PowerShell
 	@call $(VENV)/$(PRODUCT)/Scripts/activate && g++ -std=c++14 -Iincludes arduino/test/*.cpp -o arduino/test/bin/tests
 	@arduino\test\bin\tests.exe
@@ -48,14 +48,14 @@ else
 	@arduino/test/bin/tests.exe
 endif
 
-test-py: venv ## Runs unit tests in python.
-ifeq ($(OS),Windows_NT)
+test-py: venv # Runs unit tests in python.
+ifeq ($(OS),Windows_NT) # Not working on */test/*.py for windows
 	@call $(VENV)/$(PRODUCT)/Scripts/activate && py -m pytest -vv arduino/test/test.py
 else
 	@source $(VENV)/$(PRODUCT)/bin/activate && python3 -m pytest -vv */test/*.py;
 endif
 
-clean:
+clean: # Remove every environement in venv
 
 ifeq ($(OS),Windows_NT)
 	@rmdir /s /q $(VENV)\$(PRODUCT)
@@ -63,7 +63,7 @@ else
 	@rm -rf $(VENV)/$(PRODUCT)
 endif
 
-clean-all:
+clean-all: # Remove venv folder
 
 ifeq ($(OS),Windows_NT)
 	@rmdir /s /q $(VENV)
