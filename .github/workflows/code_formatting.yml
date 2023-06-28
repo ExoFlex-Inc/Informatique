@@ -13,7 +13,7 @@ jobs:
   formatting:
     runs-on: ubuntu-latest
     permissions:
-      packages: write
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
