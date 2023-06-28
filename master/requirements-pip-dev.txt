@@ -4,7 +4,6 @@ pytest==7.0.0
 pytest-mock==3.10.0
 python-dotenv==0.19.2
 python-dotenv[cli]
-time_machine==2.5.0
 requests==2.26.0
 google-api-python-client
 google-cloud-storage
@@ -15,12 +14,9 @@ google-auth
 gspread
 click>=7.1.2
 typing==3.6.4
-psycopg2-binary==2.8.6
 pydantic==1.8.1
 brotli==1.0.9
 boto3>=1.16.47
 PyYAML==5.4
-pandas==1.3.5
-sqlalchemy==1.3.22
-numpy==1.21.5
-dataclasses
+pandas
+numpy
