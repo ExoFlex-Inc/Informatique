@@ -37,7 +37,7 @@ install:  ## install product dependencies
 test-cpp: venv ## Runs unit tests in cpp.
 ifeq ($(OS),Windows_NT)
 	@source $(VENV)/$(PRODUCT)/Scripts/activate; \
-		g++ -std=c++14 -Iincludes arduino/test/test.cpp -o arduino/bin/tests;
+		g++ -std=c++14 -Iincludes arduino/test/test.cpp -o arduino/test/bin/tests;
 else
 	@source $(VENV)/$(PRODUCT)/bin/activate; \
 		g++ -std=c++14 -Iincludes arduino/test/test.cpp -o arduino/bin/tests;
