@@ -17,11 +17,11 @@ endif
 
 venv: ## create the virtualenv for python. FOR MAC, make sure you have bash terminal with brew
 ifeq ($(OS),Windows_NT)
-	@if [ ! -d "$(VENV)/$(PRODUCT)" ]; then \
+	@if not exist "$(VENV)/$(PRODUCT)" ( \
 		echo Creating venv $(VENV)/$(PRODUCT) ; \
 		py -m venv $(VENV)/$(PRODUCT) ; \
 		source $(VENV)/$(PRODUCT)/Scripts/activate && make install; \
-	fi
+	)
 else
 	@if [ ! -d "$(VENV)/$(PRODUCT)" ]; then \
 		echo 'Creating venv $(VENV)/$(PRODUCT)'; \
@@ -35,21 +35,18 @@ install:  ## install product dependencies
 	@pip3 install -r requirements-pip-dev.txt 2>&1 > /dev/null
 
 test-cpp: venv ## Runs unit tests in cpp.
-ifeq ($(OS),Windows_NT)
-	@source $(VENV)/$(PRODUCT)/Scripts/activate; \
-		g++ -std=c++14 -Iincludes arduino/test/test.cpp -o arduino/test/bin/tests;
+ifeq ($(OS),Windows_NT) # Only works on PowerShell
+	@call $(VENV)\$(PRODUCT)\Scripts\activate && g++ -std=c++14 -Iincludes arduino/test/*.cpp -o arduino/test/bin/tests
+	@arduino\test\bin\tests.exe
 else
-	@source $(VENV)/$(PRODUCT)/bin/activate; \
-		g++ -std=c++14 -Iincludes arduino/test/test.cpp -o arduino/bin/tests;
+	@source $(VENV)/$(PRODUCT)/bin/activate && g++ -std=c++14 -Iincludes arduino/test/test.cpp -o arduino/test/bin/tests;
 endif
 
 test-py: venv ## Runs unit tests in python.
 ifeq ($(OS),Windows_NT)
-	@source $(VENV)/$(PRODUCT)/Scripts/activate; \
-		py -m pytest -vv */test/*.py;
+	@source $(VENV)/$(PRODUCT)/Scripts/activate && py -m pytest -vv */test/*.py;
 else
-	@source $(VENV)/$(PRODUCT)/bin/activate; \
-		python3 -m pytest -vv */test/*.py;
+	@source $(VENV)/$(PRODUCT)/bin/activate && python3 -m pytest -vv */test/*.py;
 endif
 
 clean:
