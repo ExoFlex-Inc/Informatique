@@ -37,17 +37,17 @@ install:  ## install product dependencies
 test-cpp: venv ## Runs unit tests in cpp.
 ifeq ($(OS),Windows_NT)
 	@source $(VENV)/$(PRODUCT)/Scripts/activate; \
-		g++ -std=c++20 -Iincludes arduino/test/test.cpp -o arduino/test;
-else ifeq ($(OS),Darwin)
+		g++ -std=c++14 -Iincludes arduino/test/test.cpp -o arduino/bin/tests;
+else
 	@source $(VENV)/$(PRODUCT)/bin/activate; \
-		g++ -std=c++14 -I $(TEST_DIR) -o test  $(TEST_DIR)/*.cpp;
+		g++ -std=c++14 -Iincludes arduino/test/test.cpp -o arduino/bin/tests;
 endif
 
 test-py: venv ## Runs unit tests in python.
 ifeq ($(OS),Windows_NT)
 	@source $(VENV)/$(PRODUCT)/Scripts/activate; \
 		py -m pytest -vv */test/*.py;
-else ifeq ($(OS),Darwin)
+else
 	@source $(VENV)/$(PRODUCT)/bin/activate; \
 		python3 -m pytest -vv */test/*.py;
 endif
