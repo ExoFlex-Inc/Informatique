@@ -1,8 +1,5 @@
 name: Release
 
-# Corrects with Prettier: JavaScript, TypeScript, HTML, CSS, JSON, and YAML
-#                         Black: Python
-
 on:
   workflow_dispatch:
 

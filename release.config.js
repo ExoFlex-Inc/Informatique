@@ -1,5 +1,5 @@
 const config = {
-    branches: ['main'],
+    branches: ['EF-556-tester-les-release-automatique'],
     plugins: [
         '@semantic-release/commit-analyzer',
         '@semantic-release/release-notes-generator',
