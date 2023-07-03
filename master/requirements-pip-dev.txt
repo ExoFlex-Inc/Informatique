@@ -14,7 +14,7 @@ google-auth
 gspread
 click>=7.1.2
 typing==3.6.4
-pydantic==1.8.2
+pydantic==2.0
 brotli==1.0.9
 boto3>=1.16.47
 PyYAML==5.4
