@@ -1,0 +1,15 @@
+
+#Arduino
+**/.pio
+**/.vscode
+master/arduino/build/
+master/arduino/downloadedLibraries/
+
+#HMI
+package-lock.json
+node_modules/
+
+#Unit Testing
+master/venv/
+__pycache__/
+**/*.exe
