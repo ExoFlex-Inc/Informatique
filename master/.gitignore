@@ -1,1 +1,18 @@
+
+#Arduino
+.pio
+.vscode
+!.vscode/c_cpp_properties.json 
+!.vscode/extensions.json 
+!.vscode/launch.json 
+arduino/build/
+arduino/downloadedLibraries/
+
+#HMI
+package-lock.json
+node_modules/
+
+#Unit Testing
 /venv/
+__pycache__/
+**/*.exe
