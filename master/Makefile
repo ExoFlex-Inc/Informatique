@@ -55,6 +55,10 @@ else
 	@source $(VENV)/$(PRODUCT)/bin/activate && python3 -m pytest -vv */test/*.py;
 endif
 
+test-js: venv # Runs unit tests in python.
+	@cd hmi; \
+		npm run test
+
 clean: # Remove every environement in venv
 
 ifeq ($(OS),Windows_NT)
