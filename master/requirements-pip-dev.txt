@@ -4,7 +4,7 @@ pytest==7.0.0
 pytest-mock==3.10.0
 python-dotenv==0.19.2
 python-dotenv[cli]
-requests==2.26.0
+requests==2.31.0
 google-api-python-client
 google-cloud-storage
 google-cloud-bigquery
