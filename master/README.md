@@ -44,7 +44,7 @@ Cette section résume les recherches effectuées au sujet du choix de microcontr
 
 **Conclusion: Nous choisissons le STM32..... . Ceci implique donc que le langage utilisé pour l'architecture robotique sera du C**
 
-_Note: Les spécifications électriques du STM32..... se retrouve dans le [README.md](https://github.com/ExoFlex-Inc/ExoFlex/blob/main/ExoFlex_%C3%89lectrique/README.md)_
+_Note: Les spécifications électriques du STM32..... se retrouve dans le [README.md](https://github.com/ExoFlex-Inc/ExoFlex/blob/main/ExoFlex_%C3%89lectrique/README.md) électrique_
 
 
 ## Interface utilisateur
