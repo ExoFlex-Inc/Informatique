@@ -8,16 +8,16 @@ Cette section résume les recherches effectuées au sujet du choix de microcontr
 
 ### ROS sur un raspberry Pi
 
-![image alt text](https://www.zdnet.com/a/img/resize/2f3709d5d1474a5d20d535a9cf6174198a2368d1/2021/06/11/a419ab3e-428b-40fa-b554-02a18831fce3/raspberry-pi-4-model-b-header.jpg?auto=webp&fit=crop&height=675&width=1200)
+<img src="https://www.zdnet.com/a/img/resize/2f3709d5d1474a5d20d535a9cf6174198a2368d1/2021/06/11/a419ab3e-428b-40fa-b554-02a18831fce3/raspberry-pi-4-model-b-header.jpg?auto=webp&fit=crop&height=675&width=1200" alt="image alt text" width="500" height="500"/>
 
 - ROS est une librairie de contrôle robotique qui offre une variété de type de contrôle ansi qu'une grande modularité
-- ROS est éaglement très utile pour la visualisation d'environnement avec capteurs et caméras (Pas très utile dans notre cas)
+- ROS est également très utile pour la visualisation d'environnement avec capteurs et caméras (Pas très utile dans notre cas)
 - L'utilisation de cette librairie serait sur un raspberry pi connecté à un microcontroller
 - **Overkill pour notre utilisation**
 
 ### ESP-32
 
-![image alt text](https://www.az-delivery.de/cdn/shop/products/esp32-nodemcu-module-wlan-wifi-development-board-mit-cp2102-nachfolgermodell-zum-esp8266-kompatibel-mit-arduino-872375_1024x.jpg?v=1679400491)
+![image](https://www.az-delivery.de/cdn/shop/products/esp32-nodemcu-module-wlan-wifi-development-board-mit-cp2102-nachfolgermodell-zum-esp8266-kompatibel-mit-arduino-872375_1024x.jpg?v=1679400491)
 
 ### STM32
 
