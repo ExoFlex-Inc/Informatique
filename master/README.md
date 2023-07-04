@@ -16,19 +16,36 @@ Cette section résume les recherches effectuées au sujet du choix de microcontr
 
 - L'utilisation de cette librairie serait sur un raspberry pi connecté à un microcontroller
 
-- **Overkill pour notre utilisation**
+**Conclusion: On ne choisi pas ROS puisque c'est overkill pour notre utilisation**
 
-### ESP-32
+### ESP32
 
 <img src="https://www.az-delivery.de/cdn/shop/products/esp32-nodemcu-module-wlan-wifi-development-board-mit-cp2102-nachfolgermodell-zum-esp8266-kompatibel-mit-arduino-872375_1024x.jpg?v=1679400491" alt="image" width="533" height="300"/>
+
+- Microcontrolleur très versatile avec sa connection wifi et bluetooth 
+
+- Il peut créer des firmware custom (Ex MicroRos) et aussi être programmer avec Arduino IDE ou platformeIO
+
+- Il est performant, mais on aimerait chercher plus de performance, de fiabilité et de versatilité pour une machine médicale
+
+**Conclusion: Le manque de performance et de fiabilité nous font rejeter l'ESP32.  **
 
 ### STM32
 
 <img src="https://botland.store/img/art/inne/19373_4.jpg" alt="image" width="533" height="300"/>
 
-### Conclusion
+- Très utilisé dans les systemes médicaux
 
-à remplir, mettre le stm32 final 
+- Il existe beaucoup de kits différents que l'on peut adapter selon nos besoins (Plus de performance et fiabilité)
+
+- Possible dans le futur de s'en fair un encore plus custom pour notre utilisation
+
+- Utilise un IDE plus robuste et ayant plus de fonctionnalité que Arduino IDE (Stm32CubeIde)
+
+**Conclusion: Nous choisissons le STM32..... . Ceci implique donc que le langage utilisé pour l'architecture robotique sera du C**
+
+__Note: Les spécifications électriques du STM32..... se retrouve dans le README.md électrique: [a link](https://github.com/ExoFlex-Inc/ExoFlex/blob/main/ExoFlex_%C3%89lectrique/README.md)__
+
 
 ## Interface utilisateur
 
