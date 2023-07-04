@@ -53,11 +53,11 @@ Cette section résume les recherches effectuées au sujet de l'interface utilisa
 
 ### Type d'écran
 
-## LCD
+#### LCD
 
 à remplir
 
-## Page HTML
+#### Page HTML
 
 à remplir
 
