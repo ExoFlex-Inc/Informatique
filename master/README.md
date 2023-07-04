@@ -28,7 +28,7 @@ Cette section résume les recherches effectuées au sujet du choix de microcontr
 
 - Il est performant, mais on aimerait chercher plus de performance, de fiabilité et de versatilité pour une machine médicale
 
-**Conclusion: Le manque de performance et de fiabilité nous font rejeter l'ESP32.  **
+**Conclusion: Le manque de performance et de fiabilité nous font rejeter l'ESP32**
 
 ### STM32
 
@@ -44,7 +44,7 @@ Cette section résume les recherches effectuées au sujet du choix de microcontr
 
 **Conclusion: Nous choisissons le STM32..... . Ceci implique donc que le langage utilisé pour l'architecture robotique sera du C**
 
-__Note: Les spécifications électriques du STM32..... se retrouve dans le README.md électrique: [a link](https://github.com/ExoFlex-Inc/ExoFlex/blob/main/ExoFlex_%C3%89lectrique/README.md)__
+_Note: Les spécifications électriques du STM32..... se retrouve dans le [README.md](https://github.com/ExoFlex-Inc/ExoFlex/blob/main/ExoFlex_%C3%89lectrique/README.md)_
 
 
 ## Interface utilisateur
