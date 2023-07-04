@@ -61,7 +61,7 @@ Cette section résume les recherches effectuées au sujet de l'interface utilisa
 
 à remplir
 
-## Application mobile
+#### Application mobile
 
 à remplir
 
