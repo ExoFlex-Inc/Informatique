@@ -8,12 +8,13 @@ Cette section résume les recherches effectuées au sujet du choix de microcontr
 
 ### ROS sur un raspberry Pi
 
-<p align="center">
-	<img src="https://www.zdnet.com/a/img/resize/2f3709d5d1474a5d20d535a9cf6174198a2368d1/2021/06/11/a419ab3e-428b-40fa-b554-02a18831fce3/raspberry-pi-4-model-b-header.jpg?auto=webp&fit=crop&height=675&width=1200" alt="image" width="533" height="300"/>
-</p>
+<img align="center" src="https://www.zdnet.com/a/img/resize/2f3709d5d1474a5d20d535a9cf6174198a2368d1/2021/06/11/a419ab3e-428b-40fa-b554-02a18831fce3/raspberry-pi-4-model-b-header.jpg?auto=webp&fit=crop&height=675&width=1200" alt="image" width="533" height="300"/>
 - ROS est une librairie de contrôle robotique qui offre une variété de type de contrôle ansi qu'une grande modularité
+
 - ROS est également très utile pour la visualisation d'environnement avec capteurs et caméras (Pas très utile dans notre cas)
+
 - L'utilisation de cette librairie serait sur un raspberry pi connecté à un microcontroller
+
 - **Overkill pour notre utilisation**
 
 ### ESP-32
