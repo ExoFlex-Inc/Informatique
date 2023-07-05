@@ -28,7 +28,7 @@ Cette section résume les recherches effectuées au sujet du choix de microcontr
 
 **Conclusion: Le manque de performance et de fiabilité nous font rejeter l'ESP32**
 
-<img src="https://www.az-delivery.de/cdn/shop/products/esp32-nodemcu-module-wlan-wifi-development-board-mit-cp2102-nachfolgermodell-zum-esp8266-kompatibel-mit-arduino-872375_1024x.jpg?v=1679400491" alt="image" width="400" height="300"/>
+<img src="https://www.az-delivery.de/cdn/shop/products/esp32-nodemcu-module-wlan-wifi-development-board-mit-cp2102-nachfolgermodell-zum-esp8266-kompatibel-mit-arduino-872375_1024x.jpg?v=1679400491" alt="image" width="300" height="300"/>
 
 ### STM32
 
