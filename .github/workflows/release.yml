@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: 16
       - run: npm install
-      - run: npm run build
+      - run: npm install --save-dev semantic-release
       - run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
