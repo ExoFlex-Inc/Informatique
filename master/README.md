@@ -51,6 +51,7 @@ Cette section présente comment bien setup son ordinateur
 ### Stm32CubeIde
 
 (Procédure installation du logiciel et setup du pour le code)
+
 à remplir
 
 ## Code release
@@ -59,5 +60,6 @@ Cette section explique les étapes à suivre pour faire un release
 
 ### Procédure
 
-Mettre les étapes/commandes à faire pour effectuer un release 
+Mettre les étapes/commandes à faire pour effectuer un release
+ 
 à remplir 
