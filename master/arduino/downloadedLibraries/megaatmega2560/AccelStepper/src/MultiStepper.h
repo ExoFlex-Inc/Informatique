@@ -31,47 +31,48 @@ class AccelStepper;
 /// deceleration is not supported All the steppers managed by MultiStepper will
 /// step at a constant speed to their target (albeit perhaps different speeds
 /// for each stepper).
-class MultiStepper {
-public:
-  /// Constructor
-  MultiStepper();
+class MultiStepper
+{
+   public:
+    /// Constructor
+    MultiStepper();
 
-  /// Add a stepper to the set of managed steppers
-  /// There is an upper limit of MULTISTEPPER_MAX_STEPPERS = 10 to the number of
-  /// steppers that can be managed \param[in] stepper Reference to a stepper to
-  /// add to the managed list \return true if successful. false if the number of
-  /// managed steppers would exceed MULTISTEPPER_MAX_STEPPERS
-  boolean addStepper(AccelStepper &stepper);
+    /// Add a stepper to the set of managed steppers
+    /// There is an upper limit of MULTISTEPPER_MAX_STEPPERS = 10 to the number
+    /// of steppers that can be managed \param[in] stepper Reference to a
+    /// stepper to add to the managed list \return true if successful. false if
+    /// the number of managed steppers would exceed MULTISTEPPER_MAX_STEPPERS
+    boolean addStepper(AccelStepper& stepper);
 
-  /// Set the target positions of all managed steppers
-  /// according to a coordinate array.
-  /// New speeds will be computed for each stepper so they will all arrive at
-  /// their respective targets at very close to the same time. \param[in]
-  /// absolute An array of desired absolute stepper positions. absolute[0] will
-  /// be used to set the absolute position of the first stepper added by
-  /// addStepper() etc. The array must be at least as long as the number of
-  /// steppers that have been added by addStepper, else results are undefined.
-  void moveTo(long absolute[]);
+    /// Set the target positions of all managed steppers
+    /// according to a coordinate array.
+    /// New speeds will be computed for each stepper so they will all arrive at
+    /// their respective targets at very close to the same time. \param[in]
+    /// absolute An array of desired absolute stepper positions. absolute[0]
+    /// will be used to set the absolute position of the first stepper added by
+    /// addStepper() etc. The array must be at least as long as the number of
+    /// steppers that have been added by addStepper, else results are undefined.
+    void moveTo(long absolute[]);
 
-  /// Calls runSpeed() on all the managed steppers
-  /// that have not acheived their target position.
-  /// \return true if any stepper is still in the process of running to its
-  /// target position.
-  boolean run();
+    /// Calls runSpeed() on all the managed steppers
+    /// that have not acheived their target position.
+    /// \return true if any stepper is still in the process of running to its
+    /// target position.
+    boolean run();
 
-  /// Runs all managed steppers until they acheived their target position.
-  /// Blocks until all that position is acheived. If you dont
-  /// want blocking consider using run() instead.
-  void runSpeedToPosition();
+    /// Runs all managed steppers until they acheived their target position.
+    /// Blocks until all that position is acheived. If you dont
+    /// want blocking consider using run() instead.
+    void runSpeedToPosition();
 
-private:
-  /// Array of pointers to the steppers we are controlling.
-  /// Fills from 0 onwards
-  AccelStepper *_steppers[MULTISTEPPER_MAX_STEPPERS];
+   private:
+    /// Array of pointers to the steppers we are controlling.
+    /// Fills from 0 onwards
+    AccelStepper* _steppers[MULTISTEPPER_MAX_STEPPERS];
 
-  /// Number of steppers we are controlling and the number
-  /// of steppers in _steppers[]
-  uint8_t _num_steppers;
+    /// Number of steppers we are controlling and the number
+    /// of steppers in _steppers[]
+    uint8_t _num_steppers;
 };
 
 /// @example MultiStepper.pde
