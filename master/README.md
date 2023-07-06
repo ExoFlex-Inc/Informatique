@@ -50,10 +50,7 @@ Cette section présente comment bien setup son ordinateur
 
 ### Stm32CubeIde
 
-à remplir
-
-### Ouverture du projet
-
+(Procédure installation du logiciel et setup du pour le code)
 à remplir
 
 ## Code release
