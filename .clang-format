@@ -1,51 +1,51 @@
 ---
-Language:        Cpp
-BasedOnStyle:    Google
+Language: Cpp
+BasedOnStyle: Google
 
 # Indentation options
-IndentWidth:             4
-TabWidth:                4
-UseTab:                  Never
-IndentCaseLabels:        false
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+IndentCaseLabels: false
 IndentFunctionDeclarationAfterType: false
 IndentWrappedFunctionNames: false
 
 # Wrapping options
-ColumnLimit:             80
-MaxEmptyLinesToKeep:     1
+ColumnLimit: 80
+MaxEmptyLinesToKeep: 1
 BreakBeforeBinaryOperators: None
 AllowShortIfStatementsOnASingleLine: false
-AllowShortLoopsOnASingleLine:        false
-AllowShortFunctionsOnASingleLine:    None
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
 
 # Spacing options
-SpaceBeforeAssignmentOperators:   true
-SpaceAfterCStyleCast:             true
-SpacesInParentheses:              false
-SpacesInSquareBrackets:           false
-SpacesInAngles:                   false
-SpaceBeforeCpp11BracedList:       false
+SpaceBeforeAssignmentOperators: true
+SpaceAfterCStyleCast: true
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpacesInAngles: false
+SpaceBeforeCpp11BracedList: false
 SpaceAfterControlStatementKeyword: true
-SpaceBeforeParens:                ControlStatements
+SpaceBeforeParens: ControlStatements
 SpaceBeforeRangeBasedForLoopColon: false
 
 # Pointer and reference alignment options
-PointerAlignment:            Left
-DerivePointerAlignment:      false
+PointerAlignment: Left
+DerivePointerAlignment: false
 
 # Empty line options
 EmptyLineBeforeAccessModifier: Always
 
 # Alignment options
-AlignConsecutiveMacros:         true
-AlignConsecutiveDeclarations:    true
-AlignConsecutiveAssignments:     true
-AlignEscapedNewlinesLeft:        false
-AlignTrailingComments:           false
+AlignConsecutiveMacros: true
+AlignConsecutiveDeclarations: true
+AlignConsecutiveAssignments: true
+AlignEscapedNewlinesLeft: false
+AlignTrailingComments: false
 
 # Brace options
-BreakBeforeBraces:              Allman
-AllowShortBlocksOnASingleLine:  false
+BreakBeforeBraces: Allman
+AllowShortBlocksOnASingleLine: false
 
 # Comment options
-CommentPragmas:                '^ IWYU pragma:'
+CommentPragmas: "^ IWYU pragma:"
