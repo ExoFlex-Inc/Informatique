@@ -356,7 +356,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "Arduino_Mega.kicad_pro",
+    "filename": "ExoFlex_Kicad.kicad_pro",
     "version": 1
   },
   "net_settings": {
@@ -440,6 +440,14 @@
     [
       "e63e39d7-6ac0-4ffd-8aa3-1841a4541b55",
       ""
+    ],
+    [
+      "0f39fbe7-4373-48dc-9f63-14fa36e46946",
+      "Stepper"
+    ],
+    [
+      "acaf37ba-b1f6-483f-9a15-dc7d7c6730ea",
+      "Sensors"
     ]
   ],
   "text_variables": {}
