@@ -531,8 +531,8 @@
               r(
                 o.skips.map(p).map(function (t) {
                   return "-" + t;
-                })
-              )
+                }),
+              ),
             )
             .join(",");
           return o.enable(""), t;
@@ -583,7 +583,7 @@
         if (((t = String(t)), !(t.length > 100))) {
           var e =
             /^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
-              t
+              t,
             );
           if (e) {
             var n = parseFloat(e[1]),
@@ -674,7 +674,7 @@
         if ("number" === i && isFinite(t)) return e["long"] ? o(t) : r(t);
         throw new Error(
           "val is not a non-empty string or a valid number. val=" +
-            JSON.stringify(t)
+            JSON.stringify(t),
         );
       };
     },
@@ -818,7 +818,7 @@
             if (!m(t) && !t.base64) throw new Error("Unknown type: " + t);
             if (!this.reconstructor)
               throw new Error(
-                "got binary data when not reconstructing a packet"
+                "got binary data when not reconstructing a packet",
               );
             (n = this.reconstructor.takeBinaryData(t)),
               n && ((this.reconstructor = null), this.emit("decoded", n));
@@ -1133,7 +1133,7 @@
         if (((t = String(t)), !(t.length > 100))) {
           var e =
             /^((?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|years?|yrs?|y)?$/i.exec(
-              t
+              t,
             );
           if (e) {
             var n = parseFloat(e[1]),
@@ -1217,7 +1217,7 @@
         if ("number" === i && isNaN(t) === !1) return e["long"] ? o(t) : r(t);
         throw new Error(
           "val is not a non-empty string or a valid number. val=" +
-            JSON.stringify(t)
+            JSON.stringify(t),
         );
       };
     },
@@ -1235,7 +1235,7 @@
             return (
               (this._callbacks = this._callbacks || {}),
               (this._callbacks["$" + t] = this._callbacks["$" + t] || []).push(
-                e
+                e,
               ),
               this
             );
@@ -1991,9 +1991,12 @@
         (r.prototype.onHeartbeat = function (t) {
           clearTimeout(this.pingTimeoutTimer);
           var e = this;
-          e.pingTimeoutTimer = setTimeout(function () {
-            "closed" !== e.readyState && e.onClose("ping timeout");
-          }, t || e.pingInterval + e.pingTimeout);
+          e.pingTimeoutTimer = setTimeout(
+            function () {
+              "closed" !== e.readyState && e.onClose("ping timeout");
+            },
+            t || e.pingInterval + e.pingTimeout,
+          );
         }),
         (r.prototype.setPing = function () {
           var t = this;
@@ -2001,7 +2004,7 @@
             (t.pingIntervalTimer = setTimeout(function () {
               a(
                 "writing ping packet - expecting pong within %sms",
-                t.pingTimeout
+                t.pingTimeout,
               ),
                 t.ping(),
                 t.onHeartbeat(t.pingTimeout);
@@ -2151,7 +2154,7 @@
         if (!e)
           try {
             return new self[["Active"].concat("Object").join("X")](
-              "Microsoft.XMLHTTP"
+              "Microsoft.XMLHTTP",
             );
           } catch (i) {}
       };
@@ -2298,11 +2301,11 @@
                 this.isBinary
                   ? e.setRequestHeader(
                       "Content-type",
-                      "application/octet-stream"
+                      "application/octet-stream",
                     )
                   : e.setRequestHeader(
                       "Content-type",
-                      "text/plain;charset=UTF-8"
+                      "text/plain;charset=UTF-8",
                     );
               } catch (o) {}
             try {
@@ -2332,7 +2335,7 @@
                         ? n.onLoad()
                         : setTimeout(function () {
                             n.onError(
-                              "number" == typeof e.status ? e.status : 0
+                              "number" == typeof e.status ? e.status : 0,
                             );
                           }, 0));
                   }),
@@ -2984,7 +2987,7 @@
             throw Error(
               "Lone surrogate U+" +
                 t.toString(16).toUpperCase() +
-                " is not a scalar value"
+                " is not a scalar value",
             );
           return !1;
         }
@@ -3227,7 +3230,7 @@
         var i,
           s =
             "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_".split(
-              ""
+              "",
             ),
           a = 64,
           c = {},
@@ -3268,7 +3271,7 @@
                 function () {
                   n.script && (n.script.onerror = r);
                 },
-                !1
+                !1,
               );
         }
         var s = n(22),
@@ -3371,7 +3374,7 @@
         e,
         (function () {
           return this;
-        })()
+        })(),
       );
     },
     function (t, e, n) {
