@@ -1,4 +1,6 @@
 master/arduino/downloadedLibraries/**
+master/hmi/public/css/**
+master/hmi/public/js/**
 .github/**
 **/*.txt
 **/*.py
