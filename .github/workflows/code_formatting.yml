@@ -39,7 +39,7 @@ jobs:
         run: |
           find . \( -name '*.cpp' -o -name '*.h' \) \
           -type f \
-          -not -path "./.clang-format-ignore" \
+          -not -path "./main/.clang-format-ignore" \
           -exec clang-format -i {} +
 
       - name: Commit changes
