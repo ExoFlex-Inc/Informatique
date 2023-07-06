@@ -59,4 +59,5 @@ Cette section explique les étapes à suivre pour faire un release
 
 ### Procédure
 
-à remplir
+Mettre les étapes/commandes à faire pour effectuer un release 
+à remplir 
