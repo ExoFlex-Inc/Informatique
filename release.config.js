@@ -1,11 +1,5 @@
 module.exports = {
-  branches: [
-    'main',
-    {
-      name: 'release',
-      prerelease: true
-    }
-  ],
+  branches: ['main'],
   repositoryUrl: 'https://github.com/ExoFlex-Inc/ExoFlex',
   plugins: [
     '@semantic-release/commit-analyzer',
