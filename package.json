@@ -8,6 +8,8 @@
     "semantic-release": "^21.0.6"
   },
   "release": {
-    "branches": ["main"]
+    "branches": [
+      "main"
+    ]
   }
 }

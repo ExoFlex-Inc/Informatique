@@ -23,7 +23,7 @@ describe("App", function () {
         req.server = server;
         next();
       },
-      portRouter
+      portRouter,
     );
 
     server = app.listen(PORT, IP, function () {

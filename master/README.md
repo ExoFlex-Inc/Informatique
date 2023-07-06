@@ -1,6 +1,6 @@
 # ExoFlex Architecture Informatique
 
-ExoFlex Architecture Informatique présente tous les informations en lien avec l'architecture informatique 
+ExoFlex Architecture Informatique présente tous les informations en lien avec l'architecture informatique
 
 ## Choix microcontroller
 
@@ -20,7 +20,7 @@ Cette section résume les recherches effectuées au sujet du choix de microcontr
 
 ### ESP32
 
-- Microcontrolleur très versatile avec sa connection wifi et bluetooth 
+- Microcontrolleur très versatile avec sa connection wifi et bluetooth
 
 - Il peut créer des firmware custom (Ex MicroRos) et aussi être programmer avec Arduino IDE ou platformeIO
 
@@ -42,7 +42,7 @@ Cette section résume les recherches effectuées au sujet du choix de microcontr
 
 **Conclusion: Nous choisissons le STM32..... . Ceci implique donc que le langage utilisé pour l'architecture robotique sera du C**
 
-_Note: Les spécifications électriques du STM32..... se retrouvent dans le [README.md](https://github.com/ExoFlex-Inc/ExoFlex/blob/main/ExoFlex_%C3%89lectrique/README.md) électrique_
+_Note: Les spécifications électriques du STM32..... se retrouvent dans le [README.md](https://github.com/ExoFlex-Inc/ExoFlex/blob/main/ExoFlex_%C3%89lectrique/README.md) électrique\_
 
 <img src="https://botland.store/img/art/inne/19373_4.jpg" alt="image" width="533" height="300"/>
 
@@ -66,7 +66,7 @@ Cette section résume les recherches effectuées au sujet de l'interface utilisa
 
 ## Procédure de tests
 
-Cette section explique les différentes procédure de tests 
+Cette section explique les différentes procédure de tests
 
 ### Github actions
 
@@ -95,8 +95,3 @@ Cette section explique les étapes à suivre pour faire un release
 ### Procédure
 
 à remplir
-
-
-
-
-
