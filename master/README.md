@@ -12,13 +12,13 @@ Cette section résume les recherches effectuées au sujet du choix de microcontr
 
 - Il existe beaucoup de kits différents que l'on peut adapter selon nos besoins (Plus de performance et fiabilité)
 
-- Possible dans le futur de s'en fair un encore plus custom pour notre utilisation
+- Possible dans le futur de s'en faire un encore plus custom pour notre utilisation
 
 - Utilise un IDE plus robuste et ayant plus de fonctionnalité que Arduino IDE (Stm32CubeIde)
 
 **Conclusion: Nous choisissons le STM32..... . Ceci implique donc que le langage utilisé pour l'architecture robotique sera du C**
 
-_Note: Les spécifications électriques du STM32..... se retrouvent dans le [README.md](https://github.com/ExoFlex-Inc/ExoFlex/blob/main/ExoFlex_%C3%89lectrique/README.md) électrique\_
+_Note: Les spécifications électriques du STM32..... se retrouvent dans le [README.md](https://github.com/ExoFlex-Inc/ExoFlex/blob/main/ExoFlex_%C3%89lectrique/README.md) électrique_
 
 <img src="https://botland.store/img/art/inne/19373_4.jpg" alt="image" width="533" height="300"/>
 
@@ -40,7 +40,7 @@ Cette section résume les recherches effectuées au sujet de l'interface utilisa
 
 à remplir
 
-## Procédure de tests locals
+## Procédure de tests locale
 
 Cette section explique les différentes procédure de tests
 
@@ -60,5 +60,5 @@ Cette section explique les étapes à suivre pour faire un release
 
 ### Procédure
 
-Mettre les étapes/commandes à faire pour effectuer un release
+(Mettre les étapes/commandes à faire pour effectuer un release)
 à remplir
