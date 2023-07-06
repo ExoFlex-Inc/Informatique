@@ -8,10 +8,6 @@ ExoFlex Électrique est la référence à toutes les questions en lien avec les 
 
 Les capteurs de pression seront essentiellement utilisé avec les sangles qui seront conçues par l'équipe mécanique. Ce capteur va permettre de vérifier la pression entre la sangle et la jambe du patient afin de procurer un confort à l'utilisateur.
 
-```
-
-```
-
 ### IMU
 
 L'IMU utilisé aura un accéléromètre et un gyroscope d'intégré à celui-ci. Ce capteur va nous permettre de spécifier des repères pour déterminer les positions cibles à atteindre lors des étirements. Le capteur qui sera utilisé pour le banc de test sera le MPU6050 fabriqué par DFROBOT.

@@ -1,0 +1,8 @@
+{
+  "name": "releases",
+  "version": "1.0.0",
+  "description": "All JS packages for releases",
+  "devDependencies": {
+    "semantic-release": "^21.0.6"
+  }
+}

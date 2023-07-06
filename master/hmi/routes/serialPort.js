@@ -15,7 +15,7 @@ router.post("/", (req, res) => {
 
   SerialPort.list().then(function (ports) {
     const scannerPort = ports.filter(
-      (port) => port.manufacturer === "Arduino (www.arduino.cc)"
+      (port) => port.manufacturer === "Arduino (www.arduino.cc)",
       // (port) => port.productId === "7523" //CHANGE
     );
     if (scannerPort.length !== 0) {

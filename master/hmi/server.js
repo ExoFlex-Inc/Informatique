@@ -30,5 +30,5 @@ app.use(
     req.server = server;
     next();
   },
-  portRouter
+  portRouter,
 );
