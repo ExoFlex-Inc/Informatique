@@ -19,7 +19,7 @@ void setupImu();
 void readAcc();
 void readGyro();
 void readBoth();
-int rawValueToDegree();
+int  rawValueToDegree();
 
 void setup()
 {
@@ -87,7 +87,7 @@ void loop()
     Serial.print(pitch);
     Serial.print("/");
     Serial.println(yaw);
-  
+
     Serial.println(rawValueToDegree());
 
     delay(100);
