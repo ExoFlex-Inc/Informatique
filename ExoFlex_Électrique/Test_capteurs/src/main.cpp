@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include <Wire.h>
 
+#define PIN_POTENTIO A0
+
 // Constants and variables
 const int MPU = 0x68;  // MPU6050 I2C address
 float     AccX, AccY, AccZ;
@@ -17,11 +19,13 @@ void setupImu();
 void readAcc();
 void readGyro();
 void readBoth();
+int rawValueToDegree();
 
 void setup()
 {
     Serial.begin(9600);
     // Setup for IMU
+    pinMode(PIN_POTENTIO, INPUT);
     setupImu();
 }
 
@@ -83,6 +87,8 @@ void loop()
     Serial.print(pitch);
     Serial.print("/");
     Serial.println(yaw);
+  
+    Serial.println(rawValueToDegree());
 
     delay(100);
 }
@@ -161,4 +167,11 @@ void setupImu()
 
     calculateImuError();
     delay(20);
+}
+
+int rawValueToDegree()
+{
+    int rawValue = analogRead(PIN_POTENTIO);
+    int degree   = map(rawValue, 0, 1023, 0, 255);
+    return degree;
 }

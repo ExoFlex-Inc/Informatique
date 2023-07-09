@@ -1,2 +1,2 @@
 # Ignore directories
-master/arduino/downloadedLibraries/
+master/arduino/downloadedLibraries/*
