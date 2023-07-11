@@ -69,6 +69,7 @@ Cette section explique les étapes à suivre pour faire un release
 | perf(pencil): message <br> <br> BREAKING CHANGE: (message) | Breaking/Major release |
 
 Comme on peut le constater dans le tableau ci-haut, on doit se rappeler de plusieurs mots clés lorsqu'un nouveau feature ou un fix est fait dans le code.
+
 - Le mot clé fix est utilisé pour dire que la modification qui à été fait est la correction d'un bug dans le code.
 - Le mot clé feat est utilisé pour dire qu'une nouvelle fonctionnalité a été ajouté dans une application quelconque. On pourrait associer un feat à une story jira par example, car ce n'est pas une grosse modification.
 - Le mot clé perf est utilisé pour dire qu'une nouvelle fonctionnalité majeure a été ajouté dans une application quelconque. On pourrait associer un perf à un epic jira par example, car c'est une grosse modification.
@@ -79,7 +80,8 @@ Comme on peut le constater dans le tableau ci-haut, on doit se rappeler de plusi
 ### Example de message commit
 
 Le format de message qu'on utilise pour les releases est seulement applicable lorsqu'un ticket est terminé et qu'il est prêt d'être en pull request. Pour tout autre commit vous pouvez seulement écrire le message que vous avez l'habitude de faire.
-- Dans cet example, disons que le code du IMU est finalisé pour le mouvement de la dorsiflexion et éversion. Alors le message du commit ressemblerait à ceci: 
+
+- Dans cet example, disons que le code du IMU est finalisé pour le mouvement de la dorsiflexion et éversion. Alors le message du commit ressemblerait à ceci:
 - feat: Intégration d'un capteur IMU pour connaitre la position du pied dans l'espace.
 - Dans cette situation il s'agit d'un feat, car on parle seulement d'un capteur qui est relié au mouvement d'éversion et de dorsiflexion.
 - Si on parle de l'intégralité de tous les capteurs et code associé à ces deux mouvements, alors on aurait utilisé le mot-clé perf.
