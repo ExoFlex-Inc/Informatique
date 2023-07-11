@@ -1,0 +1,10 @@
+---
+"../Src/action.c":
+- - USE_HAL_DRIVER
+  - STM32L4xx
+  - STM32L476xx
+- TEST
+"../Core/Src/action.c":
+- - USE_HAL_DRIVER
+  - STM32L4xx
+  - STM32L432xx
