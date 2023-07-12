@@ -1,5 +1,4 @@
 ---
-
 :bullseye:
   :auto_license: TRUE
 :plugins:
@@ -11,7 +10,7 @@
   :bullseye_instrumentation:
     :executable: covc
     :arguments:
-      - '--file $': ENVIRONMENT_COVFILE
+      - "--file $": ENVIRONMENT_COVFILE
       - -q
       - ${1}
   :bullseye_compiler:
@@ -36,14 +35,14 @@
   :bullseye_report_covsrc:
     :executable: covsrc
     :arguments:
-      - '--file $': ENVIRONMENT_COVFILE
+      - "--file $": ENVIRONMENT_COVFILE
       - -q
       - -w140
   :bullseye_report_covfn:
     :executable: covfn
     :stderr_redirect: :auto
     :arguments:
-      - '--file $': ENVIRONMENT_COVFILE
+      - "--file $": ENVIRONMENT_COVFILE
       - --width 120
       - --no-source
       - '"${1}"'
@@ -53,5 +52,3 @@
     :optional: TRUE
     :arguments:
       - '"$"': ENVIRONMENT_COVFILE
-
-...
