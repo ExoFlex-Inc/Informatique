@@ -17,7 +17,6 @@ jobs:
       matrix:
         path:
           - 'master/arduino/src'
-          - 'master/arduino/test'
           - 'stm32/Src'
           - 'stm32/Inc'
           - 'stm32/UnitTests/test'
