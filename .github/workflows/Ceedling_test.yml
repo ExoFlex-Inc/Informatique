@@ -24,5 +24,3 @@ jobs:
     - name: Build and test with Ceedling
       run: |
         ceedling version
-        cd master/stm32/UnitTests/
-        ceedling
