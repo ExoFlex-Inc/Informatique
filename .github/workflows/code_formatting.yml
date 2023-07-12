@@ -12,8 +12,19 @@ on:
 jobs:
   formatting:
     runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        path:
+          - 'master/arduino/src'
+          - 'master/arduino/test'
+          - 'stm32/Src'
+          - 'stm32/Inc'
+          - 'stm32/UnitTests/test'
+    
     permissions:
       contents: write
+      
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -39,6 +50,7 @@ jobs:
         uses: jidicula/clang-format-action@v4.6.2
         with:
           clang-format-version: '13'
+          check-path: ${{ matrix.path }}
 
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
