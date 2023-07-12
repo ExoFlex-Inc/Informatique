@@ -19,7 +19,7 @@ jobs:
         ruby-version: 3.2.2
 
     - name: Install Ceedling
-      run: gem install ceedling
+      run: gem install ceedling --version 0.29.1
 
     - name: Build and test with Ceedling
       run: |
