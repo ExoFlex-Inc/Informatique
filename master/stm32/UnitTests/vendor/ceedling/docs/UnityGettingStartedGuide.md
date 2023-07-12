@@ -87,7 +87,7 @@ Give it a try.
 If your compiler complains that it can't find setUp or tearDown when it links, you'll know you need to at least include an empty function for these.
 
 The majority of the file will be a series of test functions.
-Test functions follow the convention of starting with the word "test_" or "spec_".
+Test functions follow the convention of starting with the word "test*" or "spec*".
 You don't HAVE to name them this way, but it makes it clear what functions are tests for other developers.
 Also, the automated scripts that come with Unity or Ceedling will default to looking for test functions to be prefixed this way.
 Test functions take no arguments and return nothing. All test accounting is handled internally in Unity.
@@ -143,13 +143,13 @@ There are two ways to execute the test.
 
 The classic variant
 
-``` c
+```c
 RUN_TEST(func, linenum)
 ```
 
 Or its simpler replacement that starts at the beginning of the function.
 
-``` c
+```c
 RUN_TEST(func)
 ```
 
@@ -162,7 +162,7 @@ At these times, TEST_IGNORE can be called.
 Control will immediately be returned to the caller of the test, and no failures will be returned.
 This is useful when your test runners are automatically generated.
 
-``` c
+```c
 TEST_IGNORE()
 ```
 
@@ -236,7 +236,7 @@ These files create an executable which can be run as the test set for that modul
 Then, this process is repeated for the next test file.
 This flexibility of separating tests into individual executables allows us to much more thoroughly unit test our system and it keeps all the test code out of our final release!
 
-*Find The Latest of This And More at [ThrowTheSwitch.org][]*
+_Find The Latest of This And More at [ThrowTheSwitch.org][]_
 
 [generate_test_runner.rb]: ../auto/generate_test_runner.rb
 [ThrowTheSwitch.org]: https://throwtheswitch.org

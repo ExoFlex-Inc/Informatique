@@ -1,5 +1,4 @@
-xml_tests_report
-================
+# xml_tests_report
 
 ## Overview
 
@@ -14,7 +13,7 @@ into other reporting tools. The XML file is output to the appropriate
 Enable the plugin in your project.yml by adding `xml_tests_report` to the list
 of enabled plugins.
 
-``` YAML
+```YAML
 :plugins:
   :enabled:
     - xml_tests_report
@@ -30,7 +29,7 @@ You can also configure the path that this artifact is stored. This can be done
 by setting `path`. The default is that it will be placed in a subfolder under
 the `build` directory.
 
-``` YAML
+```YAML
 :xml_tests_report:
   :artifact_filename: report_xunit.xml
 ```

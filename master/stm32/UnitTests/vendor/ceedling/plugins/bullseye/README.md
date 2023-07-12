@@ -1,11 +1,10 @@
-ceedling-bullseye
-=================
+# ceedling-bullseye
 
 # Plugin Overview
 
 Plugin for integrating Bullseye code coverage tool into Ceedling projects.
 This plugin requires a working license to Bullseye code coverage tools. The tools
-must be within the path or the path should be added to the environment in the 
+must be within the path or the path should be added to the environment in the
 `project.yml file`.
 
 ## Configuration
