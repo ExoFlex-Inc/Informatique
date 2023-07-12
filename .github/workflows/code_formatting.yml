@@ -37,9 +37,9 @@ jobs:
 
       - name: Run Clang-Fromat
         run: |
-          find . \( -name '*.cpp' -o -name '*.h' \) \
+          find . \( -name '*.cpp' -o -name '*.h' -o -name '*.c' \) \
+          -not \( -name '*.m' -o -name '*.mm' \) \
           -type f \
-          -not -path "./main/.clang-format-ignore" \
           -exec clang-format -i {} +
 
       - name: Commit changes
