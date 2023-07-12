@@ -1,6 +1,0 @@
----
-- "/Library/Ruby/Gems/2.6.0/gems/ceedling-0.31.1/vendor/unity/src/unity.h"
-- src/Types.h
-- src/Model.h
-- build/test/mocks/MockTaskScheduler.h
-- build/test/mocks/MockTemperatureFilter.h

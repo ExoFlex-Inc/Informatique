@@ -1,7 +1,0 @@
----
-- "/Library/Ruby/Gems/2.6.0/gems/ceedling-0.31.1/vendor/unity/src/unity.h"
-- src/Types.h
-- src/UsartModel.h
-- src/ModelConfig.h
-- build/test/mocks/MockTemperatureFilter.h
-- MockUsartBaudRateRegisterCalculator.h
