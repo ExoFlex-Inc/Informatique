@@ -1,8 +1,5 @@
 name: Code Formatting
 
-# Corrects with Prettier: JavaScript, TypeScript, HTML, CSS, JSON, and YAML
-#                         Black: Python
-
 on:
   pull_request_target:
     types:
@@ -45,16 +42,15 @@ jobs:
       - name: Run Black
         run: black .
 
-      - name: Run Clang-Fromat
+      - name: Run Clang-Format
         uses: jidicula/clang-format-action@v4.6.2
         with:
           clang-format-version: '13'
-          check-path: ${{ matrix.path.join(' ') }}
-
+          check-path: ${{ join(matrix.path, ' ') }} 
+          
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Apply Formatting changes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
