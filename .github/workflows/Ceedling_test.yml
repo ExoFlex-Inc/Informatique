@@ -16,4 +16,4 @@ jobs:
     - name: Install Ceedling
       uses: batov/ceedling_action@master
       with:
-        working-directory: master/stm32/UnitTests
+        test_directory: master/stm32/UnitTests
