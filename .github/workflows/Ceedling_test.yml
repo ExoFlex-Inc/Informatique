@@ -13,8 +13,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
       
-    - name: Change to desired directory
-      run: cd master/stm32/UnitTests
-
-    - name: Build and test with Ceedling
+    - name: Install Ceedling
       uses: batov/ceedling_action@master
+      
+    - name: Change to desired directory and test
+      run: |
+        cd master/stm32/UnitTests
+        ceedling
+
