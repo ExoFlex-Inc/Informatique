@@ -36,11 +36,9 @@ jobs:
         run: black .
 
       - name: Run Clang-Fromat
-        run: |
-          find . \( -name '*.cpp' -o -name '*.h' -o -name '*.c' \) \
-          -not \( -name '*.m' -o -name '*.mm' \) \
-          -type f \
-          -exec clang-format -i {} +
+        uses: jidicula/clang-format-action@master
+        with:
+          clang-format-version: '13'
 
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
