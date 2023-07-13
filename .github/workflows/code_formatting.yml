@@ -14,9 +14,9 @@ jobs:
       matrix:
         path:
           - 'master/arduino/src'
-          - 'stm32/Src'
-          - 'stm32/Inc'
-          - 'stm32/UnitTests/test'
+          - 'master/stm32/Src'
+          - 'master/stm32/Inc'
+          - 'master/stm32/UnitTests/test'
     
     permissions:
       contents: write
@@ -46,7 +46,7 @@ jobs:
         uses: jidicula/clang-format-action@v4.6.2
         with:
           clang-format-version: '13'
-          check-path: ${{ join(matrix.path, ' ') }} 
+          check-path: ${{ matrix.path }}
           
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
