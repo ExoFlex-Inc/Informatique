@@ -12,8 +12,21 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-      
-    - name: Install Ceedling
-      uses: batov/ceedling_action@master
+
+    - name: Set up Ruby
+      uses: actions/setup-ruby@v1
       with:
-        test_directory: master/stm32/UnitTests
+        ruby-version: 2.7
+
+    - name: Install Ceedling
+      run: gem install ceedling
+
+    - name: Run Ceedling
+      run: ceedling test:all FILE=master/stm32/UnitTests
+
+
+      
+#     - name: Install Ceedling
+#       uses: batov/ceedling_action@master
+#       with:
+#         test_directory: master/stm32/UnitTests
