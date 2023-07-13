@@ -21,8 +21,10 @@ jobs:
     - name: Install Ceedling
       run: gem install ceedling
 
-    - name: Run Ceedling
-      run: ceedling test:all FILE=master/stm32/UnitTests
+    - name: Run Unit Tests
+      run: |
+        cd master/stm32/UnitTests
+        ceedling test:all
 
 
       
