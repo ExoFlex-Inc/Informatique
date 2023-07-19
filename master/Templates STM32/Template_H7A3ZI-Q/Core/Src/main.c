@@ -17,7 +17,7 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
+#include "CalcManager.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -99,6 +99,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
   uint32_t u32Timer = HAL_GetTick();
+
+  uint8_t result = add(2,3);
 
   while (1)
   {

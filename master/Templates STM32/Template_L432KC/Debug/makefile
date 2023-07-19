@@ -9,6 +9,7 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include Manager/Src/subdir.mk
 -include Drivers/STM32L4xx_HAL_Driver/Src/subdir.mk
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk
@@ -60,8 +61,8 @@ all: main-build
 main-build: Template_L432KC.elf secondary-outputs
 
 # Tool invocations
-Template_L432KC.elf Template_L432KC.map: $(OBJS) $(USER_OBJS) C:\Users\Charles\ Henri\Desktop\ExoFlex\Templates\ STM32\Template_L432KC\STM32L432KCUX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Template_L432KC.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Charles Henri\Desktop\ExoFlex\Templates STM32\Template_L432KC\STM32L432KCUX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Template_L432KC.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Template_L432KC.elf Template_L432KC.map: $(OBJS) $(USER_OBJS) C:\Users\Charles\ Henri\Desktop\ExoFlex\master\Templates\ STM32\Template_L432KC\STM32L432KCUX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "Template_L432KC.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Charles Henri\Desktop\ExoFlex\master\Templates STM32\Template_L432KC\STM32L432KCUX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Template_L432KC.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

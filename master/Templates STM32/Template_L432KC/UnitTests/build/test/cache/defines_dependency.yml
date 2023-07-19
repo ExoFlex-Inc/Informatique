@@ -6,5 +6,9 @@
 - TEST
 "../Core/Src/action.c":
 - - USE_HAL_DRIVER
+  - STM32H7xx
+  - STM32H7A3xxQ
+"../Manager/Src/CalcManager.c":
+- - USE_HAL_DRIVER
   - STM32L4xx
   - STM32L432xx

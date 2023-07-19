@@ -27,6 +27,7 @@
   - "-:test/support"
   :source:
   - "../Core/Src/**"
+  - "../Manager/Src/**"
   :support:
   - test/support
   :include:
@@ -35,6 +36,7 @@
   - "../Drivers/CMSIS/Include/**"
   - "../Drivers/STM32L4xx_HAL_Driver/Inc/**"
   - "../Drivers/STM32L4xx_HAL_Driver/Inc/Legacy/**"
+  - "../Manager/Inc/**"
   :libraries: []
   :test_toolchain_include: []
   :release_toolchain_include: []

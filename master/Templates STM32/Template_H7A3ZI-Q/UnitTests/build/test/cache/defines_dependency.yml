@@ -8,3 +8,7 @@
 - - USE_HAL_DRIVER
   - STM32H7xx
   - STM32H7A3xxQ
+"../Manager/Src/CalcManager.c":
+- - USE_HAL_DRIVER
+  - STM32H7xx
+  - STM32H7A3xxQ
