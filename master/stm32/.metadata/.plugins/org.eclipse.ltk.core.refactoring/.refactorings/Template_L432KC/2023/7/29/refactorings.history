@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">&#x0A;<refactoring comment="Rename resource &apos;Template_L432KC/Manager/Src/action.c&apos; to &apos;CalcManager.c&apos;" description="Rename resource &apos;action.c&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="Manager/Src/action.c" name="CalcManager.c" stamp="1689799998480" updateReferences="true"/>&#x0A;<refactoring comment="Rename resource &apos;Template_L432KC/Manager/Inc/action.h&apos; to &apos;CalcManager.h&apos;" description="Rename resource &apos;action.h&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="Manager/Inc/action.h" name="CalcManager.h" stamp="1689800005340" updateReferences="true"/>
+</session>
