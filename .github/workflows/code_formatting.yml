@@ -45,11 +45,8 @@ jobs:
       - name: Run Black
         run: black .
         
-#       - name: Format code with Clang-Format
-#         run: clang-format -i master/stm32/h7a3zi-q/Manager/Src/*.c master/stm32/h7a3zi-q/UnitTests/test/*.c master/stm32/h7a3zi-q/Manager/Inc/*.h master/stm32/l432kc/Manager/Src/*.c master/stm32/l432kc/UnitTests/test/*.c master/stm32/l432kc/Manager/Inc/*.h
-      
       - name: Format code with Clang-Format
-        run: clang-format -i ${{ matrix.path }}/*.c ${{ matrix.path }}/*.h
+        run: clang-format -i master/arduino/src/*.cpp master/stm32/h7a3zi-q/Manager/Src/*.c master/stm32/h7a3zi-q/UnitTests/test/*.c master/stm32/h7a3zi-q/Manager/Inc/*.h master/stm32/l432kc/Manager/Src/*.c master/stm32/l432kc/UnitTests/test/*.c master/stm32/l432kc/Manager/Inc/*.h
           
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
