@@ -44,7 +44,7 @@
     - ../Drivers/STM32L4xx_HAL_Driver/Inc/**
     - ../Drivers/STM32L4xx_HAL_Driver/Inc/Legacy/**
     - ../Manager/Inc/**
- 
+
   :release_toolchain_include:
 
   :support:

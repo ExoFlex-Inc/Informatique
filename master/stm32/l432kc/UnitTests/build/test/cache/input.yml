@@ -26,17 +26,17 @@
     - "+:test/**"
     - "-:test/support"
   :source:
-  - "../Core/Src/**"
-  - "../Manager/Src/**"
+    - "../Core/Src/**"
+    - "../Manager/Src/**"
   :support:
     - test/support
   :include:
-  - "../Core/Inc/**"
-  - "../Drivers/CMSIS/Device/ST/STM32L4xx/Include/**"
-  - "../Drivers/CMSIS/Include/**"
-  - "../Drivers/STM32L4xx_HAL_Driver/Inc/**"
-  - "../Drivers/STM32L4xx_HAL_Driver/Inc/Legacy/**"
-  - "../Manager/Inc/**"
+    - "../Core/Inc/**"
+    - "../Drivers/CMSIS/Device/ST/STM32L4xx/Include/**"
+    - "../Drivers/CMSIS/Include/**"
+    - "../Drivers/STM32L4xx_HAL_Driver/Inc/**"
+    - "../Drivers/STM32L4xx_HAL_Driver/Inc/Legacy/**"
+    - "../Manager/Inc/**"
   :libraries: []
   :test_toolchain_include: []
   :release_toolchain_include: []
@@ -50,19 +50,19 @@
   - :rake_columns: "120"
 :defines:
   :test:
-  - &1
-    - USE_HAL_DRIVER
-    - STM32L4xx
-    - STM32L432xx
+    - &1
+      - USE_HAL_DRIVER
+      - STM32L4xx
+      - STM32L432xx
   :test_preprocess:
-  - *1
+    - *1
   :release: []
   :release_preprocess: []
   :use_test_definition: false
   :common:
-  - USE_HAL_DRIVER
-  - STM32L4xx
-  - STM32L432xx
+    - USE_HAL_DRIVER
+    - STM32L4xx
+    - STM32L432xx
 :libraries:
   :flag: "-l${1}"
   :path_flag: "-L ${1}"

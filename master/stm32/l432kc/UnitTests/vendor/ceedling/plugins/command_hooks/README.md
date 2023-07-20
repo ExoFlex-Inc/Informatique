@@ -1,5 +1,4 @@
-ceedling-command-hooks
-======================
+# ceedling-command-hooks
 
 Plugin for easily calling command line tools at various points in the build process
 

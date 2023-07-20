@@ -5,16 +5,16 @@
 ### Super Condensed Version
 
 - An assertion establishes truth (i.e. boolean True) for a single condition.
-Upon boolean False, an assertion stops execution and reports the failure.
+  Upon boolean False, an assertion stops execution and reports the failure.
 - Unity is mainly a rich collection of assertions and the support to gather up
-and easily execute those assertions.
+  and easily execute those assertions.
 - The structure of Unity allows you to easily separate test assertions from
-source code in, well, test code.
+  source code in, well, test code.
 - Unity's assertions:
 - Come in many, many flavors to handle different C types and assertion cases.
 - Use context to provide detailed and helpful failure messages.
 - Document types, expected values, and basic behavior in your source code for
-free.
+  free.
 
 ### Unity Is Several Things But Mainly It's Assertions
 
@@ -194,9 +194,9 @@ will always be found inside a conditional code block.
 _Examples:_
 
 - Executing a state machine multiple times that increments a counter your test
-code then verifies as a final step.
+  code then verifies as a final step.
 - Triggering an exception and verifying it (as in Try / Catch / Throw - see the
-[CException](https://github.com/ThrowTheSwitch/CException) project).
+  [CException](https://github.com/ThrowTheSwitch/CException) project).
 
 #### `TEST_PASS()`
 
@@ -775,13 +775,13 @@ What about the times where you suddenly need to deal with something odd, like a
 affect you:
 
 1. When Unity displays errors for you, it's going to pad the upper unused bits
-with zeros.
+   with zeros.
 2. You're going to have to be careful of assertions that perform signed
-operations, particularly `TEST_ASSERT_INT_WITHIN`.Such assertions might wrap
-your `int` in the wrong place, and you could experience false failures. You can
-always back down to a simple `TEST_ASSERT` and do the operations yourself.
+   operations, particularly `TEST_ASSERT_INT_WITHIN`.Such assertions might wrap
+   your `int` in the wrong place, and you could experience false failures. You can
+   always back down to a simple `TEST_ASSERT` and do the operations yourself.
 
-*Find The Latest of This And More at [ThrowTheSwitch.org][]*
+_Find The Latest of This And More at [ThrowTheSwitch.org][]_
 
 [assert() macro]: http://en.wikipedia.org/en/wiki/Assert.h
 [ThrowTheSwitch.org]: https://throwtheswitch.org
