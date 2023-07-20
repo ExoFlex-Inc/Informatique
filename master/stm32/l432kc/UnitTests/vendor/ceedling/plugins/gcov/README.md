@@ -1,5 +1,4 @@
-ceedling-gcov
-=============
+# ceedling-gcov
 
 # Plugin Overview
 
@@ -41,7 +40,7 @@ Gcovr and / or ReportGenerator may be enabled to create coverage reports.
 ```yaml
 :gcov:
   :utilities:
-    - gcovr           # Use gcovr to create the specified reports (default).
+    - gcovr # Use gcovr to create the specified reports (default).
     - ReportGenerator # Use ReportGenerator to create the specified reports.
 ```
 
@@ -155,7 +154,6 @@ Generation of Gcovr HTML reports may be modified with the following configuratio
   # Deprecated - See the :reports: configuration option.
   :html_report_type: [basic|detailed]
 
-
   :gcovr:
     # HTML report filename.
     :html_artifact_filename: <output>
@@ -194,7 +192,6 @@ Generation of Cobertura XML reports may be modified with the following configura
   # Defaults to disabled. (gcovr --xml)
   # Deprecated - See the :reports: configuration option.
   :xml_report: [true|false]
-
 
   :gcovr:
     # Set to 'true' to pretty-print the Cobertura XML report, otherwise set to 'false'.

@@ -35,34 +35,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := Template_H7A3ZI-Q
+BUILD_ARTIFACT_NAME := h7a3zi-q
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-Template_H7A3ZI-Q.elf \
+h7a3zi-q.elf \
 
 MAP_FILES += \
-Template_H7A3ZI-Q.map \
+h7a3zi-q.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-Template_H7A3ZI-Q.list \
+h7a3zi-q.list \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: Template_H7A3ZI-Q.elf secondary-outputs
+main-build: h7a3zi-q.elf secondary-outputs
 
 # Tool invocations
-Template_H7A3ZI-Q.elf Template_H7A3ZI-Q.map: $(OBJS) $(USER_OBJS) C:\Users\Charles\ Henri\Desktop\ExoFlex\master\Templates\ STM32\Template_H7A3ZI-Q\STM32H7A3ZITXQ_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Template_H7A3ZI-Q.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\Charles Henri\Desktop\ExoFlex\master\Templates STM32\Template_H7A3ZI-Q\STM32H7A3ZITXQ_FLASH.ld" --specs=nosys.specs -Wl,-Map="Template_H7A3ZI-Q.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+h7a3zi-q.elf h7a3zi-q.map: $(OBJS) $(USER_OBJS) C:\Users\Charles\ Henri\Desktop\ExoFlex\master\stm32\h7a3zi-q\STM32H7A3ZITXQ_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "h7a3zi-q.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\Charles Henri\Desktop\ExoFlex\master\stm32\h7a3zi-q\STM32H7A3ZITXQ_FLASH.ld" --specs=nosys.specs -Wl,-Map="h7a3zi-q.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -71,14 +71,14 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-Template_H7A3ZI-Q.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "Template_H7A3ZI-Q.list"
+h7a3zi-q.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "h7a3zi-q.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) Template_H7A3ZI-Q.elf Template_H7A3ZI-Q.list Template_H7A3ZI-Q.map default.size.stdout
+	-$(RM) default.size.stdout h7a3zi-q.elf h7a3zi-q.list h7a3zi-q.map
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)

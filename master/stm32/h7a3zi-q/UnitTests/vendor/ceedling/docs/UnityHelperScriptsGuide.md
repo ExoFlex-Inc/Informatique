@@ -237,7 +237,7 @@ OVERALL UNITY TEST SUMMARY
 
 How convenient is that?
 
-*Find The Latest of This And More at [ThrowTheSwitch.org][]*
+_Find The Latest of This And More at [ThrowTheSwitch.org][]_
 
 [ruby-lang.org]: https://ruby-labg.org/
 [YAML]: http://www.yaml.org/

@@ -1,9 +1,8 @@
-ceedling-stdout-ide-tests-report
-================================
+# ceedling-stdout-ide-tests-report
 
 ## Overview
 
-The stdout_ide_tests_report replaces the normal ceedling "pretty" output with 
+The stdout_ide_tests_report replaces the normal ceedling "pretty" output with
 a simplified variant intended to be easily parseable.
 
 ## Setup
@@ -11,7 +10,7 @@ a simplified variant intended to be easily parseable.
 Enable the plugin in your project.yml by adding `stdout_ide_tests_report`
 to the list of enabled plugins.
 
-``` YAML
+```YAML
 :plugins:
   :enabled:
     - stdout_ide_tests_report

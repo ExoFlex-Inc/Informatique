@@ -1,9 +1,8 @@
-ceedling-subprojects
-====================
+# ceedling-subprojects
 
 Plugin for supporting subprojects that are built as static libraries. It continues to support  
-dependency tracking, without getting confused between your main project files and your   
-subproject files. It accepts different compiler flags and linker flags, allowing you to   
+dependency tracking, without getting confused between your main project files and your  
+subproject files. It accepts different compiler flags and linker flags, allowing you to  
 optimize for your situation.
 
 First, you're going to want to add the extension to your list of known extensions:
@@ -18,7 +17,7 @@ as you may need under the :paths key. For each, you specify a unique place to bu
 and a unique name.
 
 ```
-:subprojects:  
+:subprojects:
   :paths:
    - :name: libprojectA
      :source:
@@ -27,7 +26,7 @@ and a unique name.
      :include:
        - ./subprojectA/include/dir
      :build_root: ./subprojectA/build/dir
-     :defines: 
+     :defines:
        - DEFINE_JUST_FOR_THIS_FILE
        - AND_ANOTHER
    - :name: libprojectB
