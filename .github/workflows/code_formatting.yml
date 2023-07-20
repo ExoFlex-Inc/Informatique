@@ -33,9 +33,6 @@ jobs:
           npm install --global prettier
           python -m pip install --upgrade black
           sudo apt-get install -y clang-format
-          
-      - name: Clean up the working directory
-        run: git reset --hard HEAD
 
       - name: Checkout Branch
         run: |
@@ -48,14 +45,11 @@ jobs:
       - name: Run Black
         run: black .
         
+#       - name: Format code with Clang-Format
+#         run: clang-format -i master/stm32/h7a3zi-q/Manager/Src/*.c master/stm32/h7a3zi-q/UnitTests/test/*.c master/stm32/h7a3zi-q/Manager/Inc/*.h master/stm32/l432kc/Manager/Src/*.c master/stm32/l432kc/UnitTests/test/*.c master/stm32/l432kc/Manager/Inc/*.h
+      
       - name: Format code with Clang-Format
-        run: clang-format -i master/stm32/h7a3zi-q/Manager/Src/*.c master/stm32/h7a3zi-q/UnitTests/test/*.c master/stm32/h7a3zi-q/Manager/Inc/*.h master/stm32/l432kc/Manager/Src/*.c master/stm32/l432kc/UnitTests/test/*.c master/stm32/l432kc/Manager/Inc/*.h
-
-#       - name: Run Clang-Format Verifier
-#         uses: jidicula/clang-format-action@v4.11.0
-#         with:
-#           clang-format-version: '13'
-#           check-path: ${{ matrix.path }}
+        run: clang-format -i ${{ matrix.path }}/*.c ${{ matrix.path }}/*.h
           
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
