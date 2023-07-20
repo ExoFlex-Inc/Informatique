@@ -17,26 +17,26 @@
   :which_ceedling: gem
   :ceedling_version: 0.31.1
   :default_tasks:
-  - test:all
+    - test:all
 :release_build:
   :use_assembly: false
   :artifacts: []
 :paths:
   :test:
-  - "+:test/**"
-  - "-:test/support"
+    - "+:test/**"
+    - "-:test/support"
   :source:
-  - "../Core/Src/**"
-  - "../Manager/Src/**"
+    - "../Core/Src/**"
+    - "../Manager/Src/**"
   :support:
-  - test/support
+    - test/support
   :include:
-  - "../Core/Inc/**"
-  - "../Drivers/CMSIS/Device/ST/STM32H7xx/Include/**"
-  - "../Drivers/CMSIS/Include/**"
-  - "../Drivers/STM32H7xx_HAL_Driver/Inc/**"
-  - "../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy/**"
-  - "../Manager/Inc/**"
+    - "../Core/Inc/**"
+    - "../Drivers/CMSIS/Device/ST/STM32H7xx/Include/**"
+    - "../Drivers/CMSIS/Include/**"
+    - "../Drivers/STM32H7xx_HAL_Driver/Inc/**"
+    - "../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy/**"
+    - "../Manager/Inc/**"
   :libraries: []
   :test_toolchain_include: []
   :release_toolchain_include: []
@@ -47,22 +47,22 @@
   :support: []
   :include: []
 :environment:
-- :rake_columns: '120'
+  - :rake_columns: "120"
 :defines:
   :test:
-  - &1
-    - USE_HAL_DRIVER
-    - STM32H7xx
-    - STM32H7A3xxQ
+    - &1
+      - USE_HAL_DRIVER
+      - STM32H7xx
+      - STM32H7A3xxQ
   :test_preprocess:
-  - *1
+    - *1
   :release: []
   :release_preprocess: []
   :use_test_definition: false
   :common:
-  - USE_HAL_DRIVER
-  - STM32H7xx
-  - STM32H7A3xxQ
+    - USE_HAL_DRIVER
+    - STM32H7xx
+    - STM32H7A3xxQ
 :libraries:
   :flag: "-l${1}"
   :path_flag: "-L ${1}"
@@ -79,8 +79,8 @@
   :assembly: ".s"
   :object: ".o"
   :libraries:
-  - ".a"
-  - ".so"
+    - ".a"
+    - ".so"
   :executable: ".out"
   :map: ".map"
   :list: ".lst"
@@ -100,12 +100,12 @@
   :when_ptr: :smart
   :callback_include_count: true
   :plugins:
-  - :callback
-  - :expect
-  - :array
-  - :ignore
-  - :ignore_arg
-  - :return_thru_ptr
+    - :callback
+    - :expect
+    - :array
+    - :ignore
+    - :ignore_arg
+    - :return_thru_ptr
   :treat_as:
     uint8_t: UINT8
     uint16_t: UINT16
@@ -133,18 +133,18 @@
     :background_exec: :none
     :optional: false
     :arguments:
-    - ''
-    - ''
-    - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
-    - -I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE
-    - "-D$": COLLECTION_DEFINES_TEST_AND_VENDOR
-    - "-DGNU_COMPILER"
-    - "-g"
-    - ''
-    - -c "${1}"
-    - -o "${2}"
-    - "-MMD"
-    - -MF "${4}"
+      - ""
+      - ""
+      - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
+      - -I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE
+      - "-D$": COLLECTION_DEFINES_TEST_AND_VENDOR
+      - "-DGNU_COMPILER"
+      - "-g"
+      - ""
+      - -c "${1}"
+      - -o "${2}"
+      - "-MMD"
+      - -MF "${4}"
   :test_fixture:
     :executable: "${1}"
     :name: default_test_fixture
@@ -159,15 +159,15 @@
     :background_exec: :none
     :optional: false
     :arguments:
-    - ''
-    - ''
-    - ''
-    - '"${1}"'
-    - "${5}"
-    - -o "${2}"
-    - ''
-    - "${4}"
-    - ''
+      - ""
+      - ""
+      - ""
+      - '"${1}"'
+      - "${5}"
+      - -o "${2}"
+      - ""
+      - "${4}"
+      - ""
   :test_file_preprocessor:
     :executable: gcc.exe
     :name: default_test_file_preprocessor
@@ -175,16 +175,16 @@
     :background_exec: :none
     :optional: false
     :arguments:
-    - ''
-    - ''
-    - "-E"
-    - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
-    - -I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE
-    - "-D$": COLLECTION_DEFINES_TEST_AND_VENDOR
-    - "-D$": DEFINES_TEST_PREPROCESS
-    - "-DGNU_COMPILER"
-    - '"${1}"'
-    - -o "${2}"
+      - ""
+      - ""
+      - "-E"
+      - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
+      - -I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE
+      - "-D$": COLLECTION_DEFINES_TEST_AND_VENDOR
+      - "-D$": DEFINES_TEST_PREPROCESS
+      - "-DGNU_COMPILER"
+      - '"${1}"'
+      - -o "${2}"
   :test_file_preprocessor_directives:
     :executable: gcc.exe
     :name: default_test_file_preprocessor_directives
@@ -192,15 +192,15 @@
     :background_exec: :none
     :optional: false
     :arguments:
-    - "-E"
-    - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
-    - -I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE
-    - "-D$": COLLECTION_DEFINES_TEST_AND_VENDOR
-    - "-D$": DEFINES_TEST_PREPROCESS
-    - "-DGNU_COMPILER"
-    - "-fdirectives-only"
-    - '"${1}"'
-    - -o "${2}"
+      - "-E"
+      - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
+      - -I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE
+      - "-D$": COLLECTION_DEFINES_TEST_AND_VENDOR
+      - "-D$": DEFINES_TEST_PREPROCESS
+      - "-DGNU_COMPILER"
+      - "-fdirectives-only"
+      - '"${1}"'
+      - -o "${2}"
   :test_includes_preprocessor:
     :executable: gcc.exe
     :name: default_test_includes_preprocessor
@@ -208,17 +208,17 @@
     :background_exec: :none
     :optional: false
     :arguments:
-    - ''
-    - ''
-    - "-E"
-    - "-MM"
-    - "-MG"
-    - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
-    - -I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE
-    - "-D$": COLLECTION_DEFINES_TEST_AND_VENDOR
-    - "-D$": DEFINES_TEST_PREPROCESS
-    - "-DGNU_COMPILER"
-    - '"${1}"'
+      - ""
+      - ""
+      - "-E"
+      - "-MM"
+      - "-MG"
+      - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
+      - -I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE
+      - "-D$": COLLECTION_DEFINES_TEST_AND_VENDOR
+      - "-D$": DEFINES_TEST_PREPROCESS
+      - "-DGNU_COMPILER"
+      - '"${1}"'
 :test_compiler:
   :arguments: []
 :test_linker:
@@ -244,12 +244,12 @@
   :arguments: []
 :plugins:
   :load_paths:
-  - C:/Ruby30-x64/lib/ruby/gems/3.0.0/gems/ceedling-0.31.1/lib/../plugins
+    - C:/Ruby30-x64/lib/ruby/gems/3.0.0/gems/ceedling-0.31.1/lib/../plugins
   :enabled:
-  - stdout_pretty_tests_report
-  - module_generator
-  - xml_tests_report
-  - junit_tests_report
+    - stdout_pretty_tests_report
+    - module_generator
+    - xml_tests_report
+    - junit_tests_report
   :display_raw_test_results: false
   :stdout_pretty_tests_report_path: C:/Ruby30-x64/lib/ruby/gems/3.0.0/gems/ceedling-0.31.1/lib/../plugins/stdout_pretty_tests_report
   :module_generator_path: C:/Ruby30-x64/lib/ruby/gems/3.0.0/gems/ceedling-0.31.1/lib/../plugins/module_generator
@@ -257,7 +257,7 @@
   :junit_tests_report_path: C:/Ruby30-x64/lib/ruby/gems/3.0.0/gems/ceedling-0.31.1/lib/../plugins/junit_tests_report
 :gcov:
   :reports:
-  - HtmlDetailed
+    - HtmlDetailed
   :gcovr:
     :html_medium_threshold: 75
     :html_high_threshold: 90

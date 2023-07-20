@@ -29,7 +29,7 @@ In either case, you've got a couple choices for configuring these options:
 
 1. Because these options are specified via C defines, you can pass most of these options to your compiler through command line compiler flags. Even if you're using an embedded target that forces you to use their overbearing IDE for all configuration, there will be a place somewhere in your project to configure defines for your compiler.
 2. You can create a custom `unity_config.h` configuration file (present in your toolchain's search paths).
-  In this file, you will list definitions and macros specific to your target. All you must do is define `UNITY_INCLUDE_CONFIG_H` and Unity will rely on `unity_config.h` for any further definitions it may need.
+   In this file, you will list definitions and macros specific to your target. All you must do is define `UNITY_INCLUDE_CONFIG_H` and Unity will rely on `unity_config.h` for any further definitions it may need.
 
 Unfortunately, it doesn't usually work well to just #define these things in the test itself.
 These defines need to take effect where ever unity.h is included.
@@ -233,18 +233,18 @@ _Example:_
 
 Unity provides a simple (and very basic) printf-like string output implementation, which is able to print a string modified by the following format string modifiers:
 
-- __%d__ - signed value (decimal)
-- __%i__ - same as __%i__
-- __%u__ - unsigned value (decimal)
-- __%f__ - float/Double (if float support is activated)
-- __%g__ - same as __%f__
-- __%b__ - binary prefixed with "0b"
-- __%x__ - hexadecimal (upper case) prefixed with "0x"
-- __%X__ - same as __%x__
-- __%p__ - pointer (same as __%x__ or __%X__)
-- __%c__ - a single character
-- __%s__ - a string (e.g. "string")
-- __%%__ - The "%" symbol (escaped)
+- **%d** - signed value (decimal)
+- **%i** - same as **%i**
+- **%u** - unsigned value (decimal)
+- **%f** - float/Double (if float support is activated)
+- **%g** - same as **%f**
+- **%b** - binary prefixed with "0b"
+- **%x** - hexadecimal (upper case) prefixed with "0x"
+- **%X** - same as **%x**
+- **%p** - pointer (same as **%x** or **%X**)
+- **%c** - a single character
+- **%s** - a string (e.g. "string")
+- **%%** - The "%" symbol (escaped)
 
 _Example:_
 
@@ -500,6 +500,6 @@ The defines and macros in this guide should help you port Unity to just about an
 If you run into a snag or two, don't be afraid of asking for help on the forums.
 We love a good challenge!
 
-*Find The Latest of This And More at [ThrowTheSwitch.org][]*
+_Find The Latest of This And More at [ThrowTheSwitch.org][]_
 
 [ThrowTheSwitch.org]: https://throwtheswitch.org

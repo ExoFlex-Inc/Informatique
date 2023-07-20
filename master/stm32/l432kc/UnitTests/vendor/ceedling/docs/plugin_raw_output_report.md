@@ -1,5 +1,4 @@
-ceedling-raw-output-report
-==========================
+# ceedling-raw-output-report
 
 ## Overview
 
@@ -12,7 +11,7 @@ useful for debugging... but can eat through memory quickly if left running.
 Enable the plugin in your project.yml by adding `raw_output_report`
 to the list of enabled plugins.
 
-``` YAML
+```YAML
 :plugins:
   :enabled:
     - raw_output_report

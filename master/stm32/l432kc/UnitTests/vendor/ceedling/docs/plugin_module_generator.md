@@ -1,5 +1,4 @@
-ceedling-module-generator
-=========================
+# ceedling-module-generator
 
 ## Overview
 
@@ -19,7 +18,7 @@ ceedling module:create[MadScience]
 It says we're speaking to the module plugin, and we want to create a new module. The
 name of that module is between the brackets. It will keep this case, unless you have
 specified a different default (see configuration). It will create three files:
-`MadScience.c`, `MadScience.h`, and `TestMadScience.c`. *NOTE* that it is important that
+`MadScience.c`, `MadScience.h`, and `TestMadScience.c`. _NOTE_ that it is important that
 there are no spaces between the brackets. We know, it's annoying... but it's the rules.
 
 You can also create an entire pattern of files. To do that, just add a second argument
@@ -96,7 +95,7 @@ put that corporate copyright notice (or maybe a copyleft notice, if that's your 
 ### Test Defines
 
 You can specify the "#ifdef TEST" at the top of the test files with a custom define.
-This example will put a "#ifdef CEEDLING_TEST" at the top of the test files.  
+This example will put a "#ifdef CEEDLING_TEST" at the top of the test files.
 
 ```
 :module_generator:
@@ -111,9 +110,7 @@ generate files like `MY_NEW_MODULE.c`. This keeps everyone on your team behaving
 
 Your options are as follows:
 
-  - `:bumpy` - BumpyFilesLooksLikeSo
-  - `:camel` - camelFilesAreSimilarButStartLow
-  - `:snake` - snake_case_is_all_lower_and_uses_underscores
-  - `:caps`  - CAPS_FEELS_LIKE_YOU_ARE_SCREAMING
-
-
+- `:bumpy` - BumpyFilesLooksLikeSo
+- `:camel` - camelFilesAreSimilarButStartLow
+- `:snake` - snake_case_is_all_lower_and_uses_underscores
+- `:caps` - CAPS_FEELS_LIKE_YOU_ARE_SCREAMING

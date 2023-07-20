@@ -8,13 +8,11 @@ and we'll try to be polite when we notice yours.
 
 ;)
 
-
 ## Why Have A Coding Standard?
 
 Being consistent makes code easier to understand. We've made an attempt to keep
 our standard simple because we also believe that we can only expect someone to
 follow something that is understandable. Please do your best.
-
 
 ## Our Philosophy
 
@@ -46,7 +44,6 @@ default. We believe that if you're working with a simple compiler and target,
 you shouldn't need to configure very much... we try to make the tools guess as
 much as they can, but give the user the power to override it when it's wrong.
 
-
 ## Naming Things
 
 Let's talk about naming things. Programming is all about naming things. We name
@@ -56,18 +53,17 @@ finding *What Something WANTS to be Called*™.
 
 When naming things, we more or less follow this hierarchy, the first being the
 most important to us (but we do all four whenever possible):
+
 1. Readable
 2. Descriptive
 3. Consistent
 4. Memorable
-
 
 #### Readable
 
 We want to read our code. This means we like names and flow that are more
 naturally read. We try to avoid double negatives. We try to avoid cryptic
 abbreviations (sticking to ones we feel are common).
-
 
 #### Descriptive
 
@@ -91,14 +87,12 @@ naming. We find i, j, and k are better loop counters than loopCounterVar or
 whatnot. We only break this rule when we see that more description could improve
 understanding of an algorithm.
 
-
 #### Consistent
 
 We like consistency, but we're not really obsessed with it. We try to name our
 configuration macros in a consistent fashion... you'll notice a repeated use of
 UNITY_EXCLUDE_BLAH or UNITY_USES_BLAH macros. This helps users avoid having to
 remember each macro's details.
-
 
 #### Memorable
 
@@ -112,7 +106,6 @@ module in charge of invoking tasks during releases than release_invoker? Don't
 get carried away. The names are still descriptive and fulfill the above
 requirements, but they don't feel stale.
 
-
 ## C and C++ Details
 
 We don't really want to add to the style battles out there. Tabs or spaces?
@@ -123,7 +116,6 @@ happy.
 We've decided on our own style preferences. If you'd like to contribute to these
 projects (and we hope that you do), then we ask if you do your best to follow
 the same. It will only hurt a little. We promise.
-
 
 #### Whitespace
 
@@ -140,16 +132,14 @@ things up in nice tidy columns.
     }
 ```
 
-
 #### Case
 
 - Files - all lower case with underscores.
 - Variables - all lower case with underscores
 - Macros - all caps with underscores.
-- Typedefs - all caps with underscores. (also ends with _T).
+- Typedefs - all caps with underscores. (also ends with \_T).
 - Functions - camel cased. Usually named ModuleName_FuncName
 - Constants and Globals - camel cased.
-
 
 #### Braces
 
@@ -164,7 +154,6 @@ catching an error and you have a one-line, go ahead and to it on the same line.
     }
 ```
 
-
 #### Comments
 
 Do you know what we hate? Old-school C block comments. BUT, we're using them
@@ -173,13 +162,11 @@ especially embedded compilers. There are STILL C compilers out there that only
 support old-school block comments. So that is what we're using. We apologize. We
 think they are ugly too.
 
-
 ## Ruby Details
 
 Is there really such thing as a Ruby coding standard? Ruby is such a free form
 language, it seems almost sacrilegious to suggest that people should comply to
 one method! We'll keep it really brief!
-
 
 #### Whitespace
 
@@ -187,7 +174,6 @@ Our Ruby style is to use spaces and to use 2 of them per indent level. It's a
 nice power-of-2 number that really grooves with Ruby's compact style. We have no
 more reason than that. We break that rule when we have lines that wrap. When
 that happens, we like to indent further to line things up in nice tidy columns.
-
 
 #### Case
 
@@ -197,11 +183,9 @@ that happens, we like to indent further to line things up in nice tidy columns.
 - Functions - all lower case with underscores
 - Constants - all upper case with underscores
 
-
 ## Documentation
 
 Egad. Really? We use markdown and we like pdf files because they can be made to
 look nice while still being portable. Good enough?
 
-
-*Find The Latest of This And More at [ThrowTheSwitch.org](https://throwtheswitch.org)*
+_Find The Latest of This And More at [ThrowTheSwitch.org](https://throwtheswitch.org)_

@@ -1,5 +1,4 @@
-warnings-report
-===============
+# warnings-report
 
 ## Overview
 
@@ -12,7 +11,7 @@ of this into a warnings file in the output artifact directory.
 Enable the plugin in your project.yml by adding `warnings_report`
 to the list of enabled plugins.
 
-``` YAML
+```YAML
 :plugins:
   :enabled:
     - warnings_report
