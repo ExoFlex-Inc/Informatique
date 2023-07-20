@@ -9,8 +9,8 @@
 		<item key="SmartImportRootWizardPage.STORE_NESTED_PROJECTS" value="true"/>
 		<item key="SmartImportRootWizardPage.STORE_CONFIGURE_NATURES" value="true"/>
 		<list key="org.eclipse.ui.internal.wizards.datatransfer.SmartImportRootWizardPage.knownSources">
-			<item value="C:\Users\Charles Henri\Desktop\ExoFlex\master\Templates STM32\Template_H7A3ZI-Q"/>
-			<item value="C:\Users\Charles Henri\Desktop\ExoFlex\master\Templates STM32\Template_L432KC"/>
+			<item value="C:\Users\Charles Henri\Desktop\ExoFlex\master\stm32\l432kc"/>
+			<item value="C:\Users\Charles Henri\Desktop\ExoFlex\master\stm32\h7a3zi-q"/>
 		</list>
 	</section>
 </section>
