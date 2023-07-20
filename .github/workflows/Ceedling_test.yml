@@ -21,14 +21,12 @@ jobs:
     - name: Install Ceedling
       run: gem install ceedling
 
-    - name: Run Unit Tests
+    - name: Run Unit Tests H7A3ZI-Q
       run: |
-        cd master/stm32/UnitTests
+        cd master/stm32//h7a3zi-q/UnitTests
         ceedling test:all
-
-
-      
-#     - name: Install Ceedling
-#       uses: batov/ceedling_action@master
-#       with:
-#         test_directory: master/stm32/UnitTests
+        
+    - name: Run Unit Tests L432KC
+      run: |
+        cd master/stm32//l432kc/UnitTests
+        ceedling test:all
