@@ -44,8 +44,11 @@ jobs:
       
       - name: Run Black
         run: black .
+        
+      - name: Format code with Clang-Format
+        run: clang-format -i master/stm32/h7a3zi-q/Manager/Src/*.c master/stm32/h7a3zi-q/UnitTests/test/*.c master/stm32/h7a3zi-q/Manager/Inc/*.h master/stm32/l432kc/Manager/Src/*.c master/stm32/l432kc/UnitTests/test/*.c master/stm32/l432kc/Manager/Inc/*.h
 
-      - name: Run Clang-Format
+      - name: Run Clang-Format Verifier
         uses: jidicula/clang-format-action@v4.11.0
         with:
           clang-format-version: '13'
