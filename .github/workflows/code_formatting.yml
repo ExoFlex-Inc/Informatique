@@ -14,9 +14,12 @@ jobs:
       matrix:
         path:
           - 'master/arduino/src'
-          - 'master/stm32/Src'
-          - 'master/stm32/Inc'
-          - 'master/stm32/UnitTests/test'
+          - 'master/stm32/h7a3zi-q/Manager/Src'
+          - 'master/stm32/h7a3zi-q/Manager/Inc'
+          - 'master/stm32/h7a3zi-q/UnitTests/test'
+          - 'master/stm32/l432kc/Manager/Src'
+          - 'master/stm32/l432kc/Manager/Inc'
+          - 'master/stm32/l432kc/UnitTests/test'
     
     permissions:
       contents: write
