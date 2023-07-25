@@ -6,8 +6,10 @@ master/arduino/build/
 master/arduino/downloadedLibraries/
 
 #STM32
-master/stm32/**/.settings
-master/stm32/**/Debug
+master/stm32/l432kc/.settings
+master/stm32/l432kc/Debug
+master/stm32/h7a3zi-q/.settings
+master/stm32/h7a3zi-q/Debug
 
 #HMI
 package-lock.json
