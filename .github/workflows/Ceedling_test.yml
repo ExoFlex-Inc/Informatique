@@ -1,0 +1,32 @@
+name: Ceedling CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.7
+
+    - name: Install Ceedling
+      run: gem install ceedling
+
+    - name: Run Unit Tests H7A3ZI-Q
+      run: |
+        cd master/stm32//h7a3zi-q/UnitTests
+        ceedling test:all
+        
+    - name: Run Unit Tests L432KC
+      run: |
+        cd master/stm32//l432kc/UnitTests
+        ceedling test:all

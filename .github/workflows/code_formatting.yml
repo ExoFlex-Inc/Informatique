@@ -1,8 +1,5 @@
 name: Code Formatting
 
-# Corrects with Prettier: JavaScript, TypeScript, HTML, CSS, JSON, and YAML
-#                         Black: Python
-
 on:
   pull_request_target:
     types:
@@ -12,8 +9,10 @@ on:
 jobs:
   formatting:
     runs-on: ubuntu-latest
+    
     permissions:
       contents: write
+      
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -34,18 +33,13 @@ jobs:
       
       - name: Run Black
         run: black .
-
-      - name: Run Clang-Fromat
-        run: |
-          find . \( -name '*.cpp' -o -name '*.h' \) \
-          -type f \
-          -not -path "./main/.clang-format-ignore" \
-          -exec clang-format -i {} +
-
+        
+      - name: Format code with Clang-Format
+        run: clang-format -i master/arduino/src/*.cpp master/stm32/h7a3zi-q/Manager/Src/*.c master/stm32/h7a3zi-q/UnitTests/test/*.c master/stm32/h7a3zi-q/Manager/Inc/*.h master/stm32/l432kc/Manager/Src/*.c master/stm32/l432kc/UnitTests/test/*.c master/stm32/l432kc/Manager/Inc/*.h
+          
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Apply Formatting changes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
