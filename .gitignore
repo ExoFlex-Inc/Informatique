@@ -5,6 +5,10 @@
 master/arduino/build/
 master/arduino/downloadedLibraries/
 
+#STM32
+master/stm32/**/.settings
+master/stm32/**/Debug
+
 #HMI
 package-lock.json
 node_modules/
@@ -13,4 +17,3 @@ node_modules/
 master/venv/
 __pycache__/
 **/*.exe
-master/stm32/.metadata
