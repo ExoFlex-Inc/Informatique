@@ -1,0 +1,19 @@
+///
+/// \file 		fwf_cli.h
+/// \brief 		command-line communications handler header
+///				
+/// \author 	Charles Henri Hébert-Michaud
+///
+/// \ingroup    Ethernet
+#ifndef __FWF_CLI_H__
+#define __FWF_CLI_H__
+
+#include "fwf_native.h"
+
+bool Cli_Init(void);
+void Cli_Process(void);
+void Cli_Log(const char* szLogLine, int len);
+
+#endif // __FWF_CLI_H__
+
+

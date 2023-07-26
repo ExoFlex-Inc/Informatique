@@ -1,0 +1,27 @@
+14:28:50 **** Incremental Build of configuration Debug for project l432kc ****
+make -j12 all 
+arm-none-eabi-gcc "../Manager/Src/fwf_cli.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32L432xx -c -I../Core/Inc -I../Drivers/STM32L4xx_HAL_Driver/Inc -I../Drivers/STM32L4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I../Drivers/CMSIS/Include -I../Manager/Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Manager/Src/fwf_cli.d" -MT"Manager/Src/fwf_cli.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Manager/Src/fwf_cli.o"
+In file included from ../Manager/Inc/fwf_cli.h:11,
+                 from ../Manager/Src/fwf_cli.c:8:
+../Manager/Inc/fwf_native.h: In function 'FWF_Native_ComputeFreeHeapAndHalt':
+../Manager/Inc/fwf_native.h:281:5: warning: implicit declaration of function 'FWF_BREAKPOINT' [-Wimplicit-function-declaration]
+  281 |     FWF_BREAKPOINT();
+      |     ^~~~~~~~~~~~~~
+At top level:
+../Manager/Inc/fwf_native.h:271:13: warning: 'FWF_Native_ComputeFreeHeapAndHalt' defined but not used [-Wunused-function]
+  271 | static void FWF_Native_ComputeFreeHeapAndHalt(void)
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+arm-none-eabi-gcc -o "l432kc.elf" @"objects.list"   -mcpu=cortex-m4 -T"C:\Users\Charles Henri\Desktop\ExoFlex\master\stm32\l432kc\STM32L432KCUX_FLASH.ld" --specs=nosys.specs -Wl,-Map="l432kc.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: l432kc.elf
+ 
+arm-none-eabi-size   l432kc.elf 
+arm-none-eabi-objdump -h -S  l432kc.elf  > "l432kc.list"
+   text	   data	    bss	    dec	    hex	filename
+  25936	    120	  16264	  42320	   a550	l432kc.elf
+Finished building: default.size.stdout
+ 
+Finished building: l432kc.list
+ 
+
+14:28:51 Build Finished. 0 errors, 2 warnings. (took 951ms)
+

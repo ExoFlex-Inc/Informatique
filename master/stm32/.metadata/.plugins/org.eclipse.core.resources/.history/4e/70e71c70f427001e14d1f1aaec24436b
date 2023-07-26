@@ -1,0 +1,1019 @@
+///
+/// \file 		fwf_cli.c
+/// \brief 		command-line communications handler
+///				
+/// \author 	Charles Henri Hébert-Michaud
+///
+
+#include <fwf_cli.h>
+#include "main.h"
+#include <math.h>
+#include <fwf_circularBuffer.h>
+#include <fwf_string.h>
+#include <ctype.h>
+
+extern UART_HandleTypeDef huart2;
+extern DMA_HandleTypeDef hdma_usart2_rx;
+
+/*******************************************************************************
+*                               Enumerations
+*******************************************************************************/
+/// \enum	eCliConsts_t
+/// \brief	Constants that define the default values of cli manager
+typedef enum
+{    
+	kCliBufferSize 		    = 768,  ///< cli buffer size for transmission
+	kDmaBufferSize          = 256,
+	kHistoryCmdCount 		= 16,   ///< Number of commands to keep in backlog history
+	kCliMaxUserData			= 64,   ///< Maximum number of items in userdata for asynchronous commands
+} eCliConsts_t;
+
+/// \enum	eLoginState_t
+/// \brief	Login State to validate progression of login stages
+typedef enum
+{
+	kLoginStage_NotLogged = 0,      ///< User is not logged in
+	kLoginStage_UserPrompt,         ///< User prompt is shown
+	kLoginStage_PasswordPrompt,     ///< Password prompt is shown
+	kLoginStage_LoggedIn,           ///< User is logged in (provided a correct user and password combination)
+} eLoginState_t;
+
+/// \enum	eLoginAccess_t
+/// \brief	Type of user access
+typedef enum
+{
+	kLoginAccess_User = 0,          ///< Normal user access rights
+	kLoginAccess_Factory,           ///< Factory privileged user access rights
+} eLoginAccess_t;
+
+/*******************************************************************************
+*                               Structs
+*******************************************************************************/
+/// \struct	oCliFnc_t
+/// \brief	Command-Line Function Descriptor
+typedef struct 
+{
+	const char* szCmd;      ///< Zero-Terminated string command
+	const char* szDesc;     ///< Zero-Terminated string command description
+	int 		nCmdLen;    ///< Length of szCmd
+	bool(*Exec)(int cmdId, const char* szCmdLine, int cmdLen, int len, int tokenCount); ///< Callback function that executes the command
+} oCliFnc_t;
+
+/// \struct	oCmdAsync_t
+/// \brief	Asynchronous Command Descriptor
+typedef struct
+{
+	int32_t		nFncId;		                    ///< Function ID of the asynchronous command; -1 when not executing async command.
+	int32_t		nUserData[kCliMaxUserData];     ///< UserData of the asynchronous descriptor
+    char        szUserData[kCliMaxUserData];    ///< String-type user data
+} oCmdAsync_t;
+
+/// \struct	oCliVar_t
+/// \brief	System variable descriptor
+typedef struct
+{
+	const char* szName;                         ///< Name of this command-line system variable
+    const char* szDesc;                         ///< Description of this variable
+	bool(*Get)(char* szArgument, char* szValue, int bufLen);      ///< Get callback of this command-line system variable
+	bool(*Set)(char* szValue);                  ///< Set callback of this command-line system variable
+} oCliVar_t;
+
+/// \struct	oCmdLine_t
+/// \brief	String representation of the command line
+typedef struct
+{
+	char sz[kCliBufferSize];
+} oCmdLine_t;
+
+extern struct mallinfo __iar_dlmallinfo();      ///< Memory information function
+
+#define MALLINFO_FIELD_TYPE size_t
+/// \struct	mallinfo
+/// \brief	Internal IAR Allocator information descriptor
+struct mallinfo 
+{
+    MALLINFO_FIELD_TYPE arena;    ///< non-mmapped space allocated from system
+    MALLINFO_FIELD_TYPE ordblks;  ///< number of free chunks
+    MALLINFO_FIELD_TYPE smblks;   ///< always 0
+    MALLINFO_FIELD_TYPE hblks;    ///< always 0
+    MALLINFO_FIELD_TYPE hblkhd;   ///< space in mmapped regions
+    MALLINFO_FIELD_TYPE usmblks;  ///< maximum total allocated space
+    MALLINFO_FIELD_TYPE fsmblks;  ///< always 0
+    MALLINFO_FIELD_TYPE uordblks; ///< total allocated space
+    MALLINFO_FIELD_TYPE fordblks; ///< total free space
+    MALLINFO_FIELD_TYPE keepcost; ///< releasable (via malloc_trim) space
+};
+
+/*******************************************************************************
+*                               Prototypes
+*******************************************************************************/
+/// \Default functions
+void Cli_ProcessPacket(int newDmaLen);
+void Cli_RxProcessCmd();
+void Cli_RxProcessBackspace();
+void Cli_ProcessArrowUp();
+void Cli_ProcessArrowDown();
+void Cli_RxAddChar(char c);
+void Cli_ShowCmdPrompt(void);
+void Cli_ShowLoginPrompt(void);
+void Cli_Exec(char* szCmdLine, int len);
+void Cli_Reset_Dma();
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size);
+
+/// \Default commands
+bool Cli_ExecHelp(int cmdId, const char* szCmdLine, int cmdLen, int len, int tokenCount);
+bool Cli_ExecVarList(int cmdId, const char* szCmdLine, int cmdLen, int len, int tokenCount);
+bool Cli_ExecExit(int cmdId, const char* szCmdLine, int cmdLen, int len, int tokenCount);
+bool Cli_ExecLiveLog(int cmdId, const char* szCmdLine, int cmdLen, int len, int tokenCount);
+bool Cli_ExecGet(int cmdId, const char* szCmdLine, int cmdLen, int len, int tokenCount);
+bool Cli_ExecSet(int cmdId, const char* szCmdLine, int cmdLen, int len, int tokenCount);
+
+/// \Variable commands
+bool Cli_SetDate(char* szValue);
+bool Cli_GetDate(char* szArgument, char* szValue, int bufLen);
+bool Cli_SetTime(char* szValue);
+bool Cli_GetTime(char* szArgument, char* szValue, int bufLen);
+
+/*******************************************************************************
+*                               Command descriptors
+*******************************************************************************/
+
+///< Default command descriptors
+const oCliFnc_t kCliFunctions[] = 	{
+	{ .szCmd = "help",			.nCmdLen = 4, 	.Exec = Cli_ExecHelp,				.szDesc="" },
+    { .szCmd = "varlist",   	.nCmdLen = 7, 	.Exec = Cli_ExecVarList,			.szDesc="List system variables (used with set and get)" },
+    { .szCmd = "exit",			.nCmdLen = 4, 	.Exec = Cli_ExecExit,				.szDesc="Close this session" },
+	{ .szCmd = "livelog", 		.nCmdLen = 7,	.Exec = Cli_ExecLiveLog, 			.szDesc="Enable/Disable LiveLog param: [1 or 0]" },
+	{ .szCmd = "get", 			.nCmdLen = 3,	.Exec = Cli_ExecGet,				.szDesc="Get a variable value.  param: <varname>" },
+	{ .szCmd = "set", 			.nCmdLen = 3,	.Exec = Cli_ExecSet,				.szDesc="Set a variable value.  param: <varname> <value>" },
+									};
+///< Variable command descriptors
+const oCliVar_t kCliVariables[] = 	{
+	{ .szName = "date",     .Set = Cli_SetDate,     .Get = Cli_GetDate,           .szDesc="[Set/Get] System date YYYY/MM/DD"                      },
+	{ .szName = "time",     .Set = Cli_SetTime,     .Get = Cli_GetTime,           .szDesc="[Set/Get] System time HH:MM:SS"                        },
+   							};
+
+/*******************************************************************************
+*                               Private variables
+*******************************************************************************/
+static bool 				gInitialized                    = false;
+static bool					bClientConnected                = false;
+static int					gRxOffset                       = 0;
+static int					gDmaOffset                       = 0;
+static oCmdAsync_t			gAsyncCmd;
+static uint8_t				gRxBuffer[kCliBufferSize];
+static char					gScratch[kCliBufferSize];
+static uint8_t              gDmaBuffer[kDmaBufferSize];
+
+static eLoginState_t		gLoginStage 	                = kLoginStage_NotLogged;
+static bool					gLogSubscribed 	                = false;
+static oCmdLine_t			gHistoryCmd[kHistoryCmdCount]   = { 0 };
+static uint32_t				gHistoryCount                   = 0;
+static int32_t				gHistoryIndex                   = 0;
+
+static bool bDmaIdleLine = false;
+static bool bArrowUp = false;
+static bool bArrowDown = false;
+
+/*******************************************************************************
+*                               Public default functions
+*******************************************************************************/
+/// \brief		Cli_Init()
+/// \details	Initialize the cli console
+///
+/// \public
+/// \return	    bool        Success
+bool Cli_Init(void)
+{
+	HAL_UARTEx_ReceiveToIdle_DMA(&huart2, gDmaBuffer, kDmaBufferSize);
+	__HAL_DMA_DISABLE_IT(&hdma_usart2_rx, DMA_IT_HT);
+	bDmaIdleLine = false;
+
+	gAsyncCmd.nFncId 	    = -1;
+    gAsyncCmd.szUserData[0] = '\0';
+	for (int a = 0; a < kCliMaxUserData; ++a)
+	{
+		gAsyncCmd.nUserData[a] = -1;
+	}
+
+	Cli_Reset_Dma();
+
+	gInitialized = true;
+	return gInitialized;
+}
+
+/// \brief		Cli_Process()
+/// \details	Process the cli communications
+///
+/// \public
+/// \return	    void
+void Cli_Process(void)
+{
+	if (!gInitialized)
+	{
+		return;
+	}
+
+	if (!bClientConnected)
+	{
+		bClientConnected 	= true;
+		gLoginStage			= kLoginStage_NotLogged;
+		gLogSubscribed		= false;
+
+		Cli_ShowLoginPrompt();
+
+		gRxOffset = 0;
+		gDmaOffset = 0;
+	}
+
+	if (bClientConnected)
+	{
+		bool bBusy = false;
+		if (gLoginStage == kLoginStage_LoggedIn)
+		{
+			// Are we running an asynchronous command?
+			if (gAsyncCmd.nFncId != -1)
+			{
+				if (gAsyncCmd.nFncId > sizeof(kCliFunctions)/sizeof(*kCliFunctions)-1)
+				{
+					gAsyncCmd.nFncId        = -1;
+					gAsyncCmd.szUserData[0] = '\0';
+				}
+				else
+				{
+					// Warning, async functions are not able to pass cmdline and tokens to exec functors!
+					kCliFunctions[gAsyncCmd.nFncId].Exec(gAsyncCmd.nFncId, NULL, 0, 0, 0);
+					bBusy = (gAsyncCmd.nFncId != -1); // Still running?
+					if (!bBusy)
+					{
+						Cli_ShowCmdPrompt();
+					}
+				}
+			}
+		}
+
+		if (gDmaOffset >= kDmaBufferSize-1)
+		{
+			Cli_Reset_Dma();
+		}
+
+		if (bDmaIdleLine)
+		{
+			uint16_t u16DmaLen = kDmaBufferSize - huart2.hdmarx->Instance->CNDTR;
+			uint16_t u16NewDmaLen = 0;
+
+			//Restart dma after saving offset
+			HAL_UARTEx_ReceiveToIdle_DMA(&huart2, gDmaBuffer, kDmaBufferSize);
+			__HAL_DMA_DISABLE_IT(&hdma_usart2_rx, DMA_IT_HT);
+			bDmaIdleLine = false;
+
+			if (u16DmaLen > gDmaOffset)
+			{
+				u16NewDmaLen = u16DmaLen - gDmaOffset;
+				gDmaOffset = u16DmaLen;
+			}
+
+			if (u16NewDmaLen > 0)
+			{
+				if (bBusy)
+				{
+					// Cancel async operation on key press
+					gAsyncCmd.nFncId = -1;
+					Cli_ShowCmdPrompt();
+				}
+				else
+				{
+					if (gDmaOffset < kDmaBufferSize)
+					{
+						Cli_ProcessPacket(u16NewDmaLen);
+					}
+
+				}
+			}
+		}
+	}
+}
+
+/*******************************************************************************
+*                               Private default functions
+*******************************************************************************/
+/// \brief		Cli_ProcessPacket()
+/// \details	Process the dma buffer
+///
+/// \public
+/// \param[in]  newDmaLen      Current parsing offset in the received buffer
+/// \return	    void
+void Cli_ProcessPacket(int newDmaLen)
+{
+    if (gDmaBuffer == NULL || gRxBuffer == NULL)
+    {
+        return;
+    }
+
+    if (gDmaOffset >= kDmaBufferSize-1)
+    {
+    	Cli_Reset_Dma();
+    	return;
+    }
+
+	// Scan dma
+	for (int i = gDmaOffset-newDmaLen; i < gDmaOffset; ++i)
+	{
+		//Enter \r\n
+		if(i+1 < gDmaOffset && gDmaBuffer[i] == '\r' && gDmaBuffer[i+1] == '\n')
+		{
+			Cli_RxProcessCmd();
+			Cli_Reset_Dma();
+			break;
+		}
+
+		// Backspace
+		if (i > 0 && (gDmaBuffer[i] == 0x08 || gDmaBuffer[i] == 0x7F))
+		{
+			Cli_RxProcessBackspace();
+		}
+
+		// Arrows
+		if (i+2 < gDmaOffset && gDmaBuffer[i] == '\e' && gDmaBuffer[i+1] == '[')
+		{
+			//Arrow up
+			if (gLoginStage == kLoginStage_LoggedIn && gDmaBuffer[i+2] == 'A')
+			{
+				Cli_ProcessArrowUp();
+				break;
+			}
+			//Arrow down
+			else if (gLoginStage == kLoginStage_LoggedIn &&  gDmaBuffer[i+2] == 'B')
+			{
+				Cli_ProcessArrowDown();
+				break;
+			}
+			//Arrow right
+			else if (gDmaBuffer[i+2] == 'C')
+			{
+				break;
+			}
+			//Arrow left
+			else if (gDmaBuffer[i+2] == 'D')
+			{
+				break;
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		//Default character
+		else if (gLoginStage != kLoginStage_NotLogged && (isalnum(gDmaBuffer[i]) || gDmaBuffer[i] == '.' || gDmaBuffer[i] == ' ' || gDmaBuffer[i] == '/'))
+		{
+			Cli_RxAddChar(gDmaBuffer[i]);
+		}
+	}
+}
+
+/// \brief		Cli_RxProcessCmd()
+/// \details	Ready cmd to be executed
+///
+/// \public
+/// \return	    void
+void Cli_RxProcessCmd()
+{
+	if (gRxOffset-3 < kCliBufferSize)
+	{
+		char* c = "\r\n";
+		HAL_UART_Transmit(&huart2, (uint8_t*)c, 2, 1000);
+
+		gRxBuffer[gRxOffset++] = '\r';
+		gRxBuffer[gRxOffset++] = '\n';
+		gRxBuffer[gRxOffset++] = '\0';
+
+		if (gLoginStage == kLoginStage_LoggedIn && gRxOffset > 3)
+		{
+			bool bCpyToHistory = false;
+
+			if (gHistoryCount == 0)
+			{
+				if (memcmp(gHistoryCmd[kHistoryCmdCount].sz, gRxBuffer, gRxOffset-3) != 0)
+				{
+					bCpyToHistory = true;
+				}
+			}
+			else
+			{
+				if (memcmp(gHistoryCmd[gHistoryCount-1].sz, gRxBuffer, gRxOffset-3) != 0)
+				{
+					bCpyToHistory = true;
+				}
+			}
+
+			if (bCpyToHistory)
+			{
+				memcpy(gHistoryCmd[gHistoryCount].sz, gRxBuffer, gRxOffset-3);
+				gHistoryCmd[gHistoryCount].sz[gRxOffset-3] = '\0';
+
+				gHistoryIndex = gHistoryCount;
+				gHistoryCount = (gHistoryCount + 1) % kHistoryCmdCount;
+			}
+		}
+
+		Cli_Exec((char*)&gRxBuffer, gRxOffset);
+
+		gRxOffset = 0;
+		Cli_Reset_Dma();
+	}
+}
+
+/// \brief		Cli_RxProcessBackspace()
+/// \details	Process backspace
+///
+/// \public
+/// \return	    void
+void Cli_RxProcessBackspace()
+{
+	if (gRxOffset > 0)
+	{
+		gRxBuffer[gRxOffset--] = '\0';
+		char* c = "\b \b";
+		HAL_UART_Transmit(&huart2, (uint8_t*)c, 3, 1000);
+	}
+}
+
+/// \brief		Cli_ProcessArrowUp()
+/// \details	Process key up (Command history)
+///
+/// \public
+/// \return	    void
+void Cli_ProcessArrowUp()
+{
+	if (gHistoryCount > 0)
+	{
+		// Rewind and clear line ESC[2K + ShowPrompt + Show Last command history
+		HAL_UART_Transmit(&huart2, (uint8_t*)"\x1b[2K\r> ", 7, 1000);
+
+		if (bArrowDown)
+		{
+			gHistoryIndex--;
+			if (gHistoryIndex < 0)
+			{
+				gHistoryIndex = gHistoryCount-1;
+			}
+			bArrowDown = false;
+		}
+
+		int len = strlen(gHistoryCmd[gHistoryIndex].sz);
+		HAL_UART_Transmit(&huart2, (uint8_t*)gHistoryCmd[gHistoryIndex].sz, len, 1000);
+
+		memcpy(&gRxBuffer[0], gHistoryCmd[gHistoryIndex].sz, len);
+		gRxOffset = len;
+
+		gHistoryIndex--;
+		if (gHistoryIndex < 0)
+		{
+			gHistoryIndex = gHistoryCount-1;
+		}
+		bArrowUp = true;
+	}
+}
+
+/// \brief		Cli_ProcessArrowUp()
+/// \details	Process key up (Command history)
+///
+/// \public
+/// \return	    void
+void Cli_ProcessArrowDown()
+{
+	if (gHistoryCount > 0)
+	{
+		// Rewind and clear line ESC[2K + ShowPrompt + Show Last command history
+		HAL_UART_Transmit(&huart2, (uint8_t*)"\x1b[2K\r> ", 7, 1000);
+
+		if (bArrowUp)
+		{
+			gHistoryIndex++;
+			if (gHistoryIndex > gHistoryCount-1)
+			{
+				gHistoryIndex = 0;
+			}
+			bArrowUp = false;
+		}
+
+		gHistoryIndex++;
+		if (gHistoryIndex > gHistoryCount-1)
+		{
+			gHistoryIndex = 0;
+		}
+
+		int len = strlen(gHistoryCmd[gHistoryIndex].sz);
+		HAL_UART_Transmit(&huart2, (uint8_t*)gHistoryCmd[gHistoryIndex].sz, len, 1000);
+
+		memcpy(&gRxBuffer[0], gHistoryCmd[gHistoryIndex].sz, len);
+		gRxOffset = len;
+
+		bArrowDown = true;
+	}
+}
+
+/// \brief		Cli_RxAddChar()
+/// \details	Add char to rx cmd buffer
+///
+/// \public
+/// \param[in]  c      char to add to gRxBuffer
+/// \return	    void
+void Cli_RxAddChar(char c)
+{
+	if (gRxOffset-1 < kCliBufferSize)
+	{
+		gRxBuffer[gRxOffset++] = c;
+
+		if (gLoginStage == kLoginStage_PasswordPrompt)
+		{
+			c = '*';
+		}
+		HAL_UART_Transmit(&huart2, (uint8_t*)&c, 1, 1000);
+	}
+}
+
+/// \brief	Cli_ShowCmdPrompt()
+/// \details	Output the command prompt to the client
+///
+/// \public
+/// \return	    void
+void Cli_ShowCmdPrompt(void)
+{
+	if (bClientConnected)
+	{
+		const char* szPrompt = "\x1b[0m> ";
+		HAL_UART_Transmit(&huart2, (uint8_t*)szPrompt, 6, 1000);
+	}
+}
+
+/// \brief		Cli_ShowLoginPrompt()
+/// \details	Output the login prompt to the client
+///
+/// \public
+/// \return	    void
+void Cli_ShowLoginPrompt(void)
+{
+	if (bClientConnected)
+	{
+		if (gLoginStage == kLoginStage_NotLogged)
+		{
+			HAL_UART_Transmit(&huart2, (uint8_t*)"\r\nNot logged\r\n", 12, 1000);
+		}
+		else if (gLoginStage == kLoginStage_UserPrompt)
+		{
+			HAL_UART_Transmit(&huart2, (uint8_t*)"Login : ", 8, 1000);
+		}
+		else if (gLoginStage == kLoginStage_PasswordPrompt)
+		{
+			HAL_UART_Transmit(&huart2, (uint8_t*)"Password: ", 10, 1000);
+		}
+	}
+}
+
+/// \brief	Cli_Exec()
+/// \details	Execute the parsed commandline
+///
+/// \public
+/// \param[in]  szCmdLine   The received client command line
+/// \param[in]  len         Length of the command line
+/// \return	    void
+void Cli_Exec(char* szCmdLine, int len)
+{
+    if (szCmdLine == NULL)
+    {
+        return;
+    }
+
+	int   cmdLen   = 0;
+	szCmdLine[len] = '\0'; // Guarantee zero-terminated
+	szCmdLine = FWF_Str_TrimWhiteSpace(szCmdLine);
+	int tokenCount = FWF_Str_Tokenize(szCmdLine, strlen(szCmdLine));
+
+	bool bExecuted 		= (szCmdLine[0] == '\0')?true:false;
+	bool bSuccessExec 	= true;
+	// First token is command.
+	char* szCmd = szCmdLine;
+	cmdLen = strlen(szCmd);
+
+	if (gLoginStage != kLoginStage_LoggedIn)
+	{
+		switch(gLoginStage)
+		{
+		case kLoginStage_NotLogged:
+			gLoginStage  = kLoginStage_UserPrompt;
+			break;
+
+		case kLoginStage_UserPrompt:
+			if (strncmp(szCmdLine, "user", 4) == 0 && strlen(szCmdLine) == 4)
+			{
+				gLoginStage  = kLoginStage_PasswordPrompt;
+			}
+			break;
+
+		case kLoginStage_PasswordPrompt:
+			if  (strncmp(szCmdLine, "password", 8) == 0 && strlen(szCmdLine) == 8)
+			{
+				gLoginStage  = kLoginStage_LoggedIn;
+			}
+			break;
+
+		default:
+			break;
+		};
+	}
+	else
+	{
+		for (int a = 0; a < sizeof(kCliFunctions)/sizeof(*kCliFunctions); ++a)
+		{
+			if ((cmdLen == kCliFunctions[a].nCmdLen) && (strncmp(kCliFunctions[a].szCmd, szCmd, cmdLen) == 0))
+			{
+				bSuccessExec = kCliFunctions[a].Exec(a, szCmdLine, cmdLen, len, tokenCount);
+				bExecuted = true;
+				break;
+			}
+		}
+
+		if (!bExecuted)
+		{
+			const char* szInvalidCmd = "Unknown Command.\r\n";
+			HAL_UART_Transmit(&huart2,(uint8_t*)szInvalidCmd, strlen(szInvalidCmd), 1000);
+		}
+		else
+		{
+			if (gAsyncCmd.nFncId == -1)
+			{
+				const char* szInvalidCmd = (bSuccessExec)?"OK\r\n":"ERROR\r\n";
+				HAL_UART_Transmit(&huart2, (uint8_t*)szInvalidCmd,  strlen(szInvalidCmd), 1000);
+			}
+		}
+	}
+
+	if (gLoginStage == kLoginStage_LoggedIn)
+	{
+		if (gAsyncCmd.nFncId == -1)
+		{
+			Cli_ShowCmdPrompt();
+		}
+	}
+	else
+	{
+		Cli_ShowLoginPrompt();
+	}
+}
+
+/// \brief		Cli_Reset_Dma()
+/// \details	Reset dma pointer to start of rx buffer
+///
+/// \private
+/// \return	    void
+void Cli_Reset_Dma()
+{
+	huart2.hdmarx->Instance->CCR &= ~DMA_CCR_EN;
+	huart2.hdmarx->Instance->CNDTR = kDmaBufferSize;
+	huart2.hdmarx->Instance->CCR |= DMA_CCR_EN;
+	gDmaOffset = 0;
+}
+
+/// \brief	HAL_UARTEx_RxEventCallback
+/// \details	Callback of the uart indiacting idle line
+///
+/// \private
+/// \return	    bool        Success
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
+{
+	bDmaIdleLine = true;
+}
+
+/*******************************************************************************
+*                               Private default commands
+*******************************************************************************/
+/// \brief		Cli_ExecHelp()
+/// \details	Show the Help menu on the CLI
+///
+/// \private
+/// \param[in]  cmdId       Command Index from kCliFunctions
+/// \param[in]  szCmdLine   Command line sent to this command
+/// \param[in]  cmdLen      The length of the Command name in szCmdLine
+/// \param[in]  len         Command line length
+/// \param[in]  tokenCount  Number of arguments to this command
+/// \return	    bool        Success
+bool Cli_ExecHelp(int cmdId, const char* szCmdLine, int cmdLen, int len, int tokenCount)
+{
+	for (int a = 0; a < sizeof(kCliFunctions)/sizeof(*kCliFunctions); ++a)
+	{
+		int sendLen = snprintf(gScratch, sizeof(gScratch)/sizeof(*gScratch), "%-12s %s\r\n",
+			 			kCliFunctions[a].szCmd, kCliFunctions[a].szDesc);
+
+		if (sendLen > 0)
+		{
+			HAL_UART_Transmit(&huart2, (uint8_t*)gScratch, sendLen, 1000);
+		}
+	}
+
+	return true;
+}
+
+/// \brief		Cli_ExecVarList()
+/// \details	Show the internal variables on the CLI
+///
+/// \private
+/// \param[in]  cmdId       Command Index from kCliFunctions
+/// \param[in]  szCmdLine   Command line sent to this command
+/// \param[in]  cmdLen      The length of the Command name in szCmdLine
+/// \param[in]  len         Command line length
+/// \param[in]  tokenCount  Number of arguments to this command
+/// \return	    bool        Success
+bool Cli_ExecVarList(int cmdId, const char* szCmdLine, int cmdLen, int len, int tokenCount)
+{
+    for (int a = 0; a < sizeof(kCliVariables)/sizeof(*kCliVariables); ++a)
+	{
+		int sendLen = snprintf(gScratch, sizeof(gScratch)/sizeof(*gScratch), "%-12s %s\r\n",
+			 			kCliVariables[a].szName, kCliVariables[a].szDesc);
+
+		if (sendLen > 0)
+		{
+			HAL_UART_Transmit(&huart2, (uint8_t*)gScratch, sendLen, 1000);
+		}
+	}
+
+	return true;
+}
+
+/// \brief		Cli_ExecExit()
+/// \details	Disconnect the client
+///
+/// \private
+/// \param[in]  cmdId       Command Index from kCliFunctions
+/// \param[in]  szCmdLine   Command line sent to this command
+/// \param[in]  cmdLen      The length of the Command name in szCmdLine
+/// \param[in]  len         Command line length
+/// \param[in]  tokenCount  Number of arguments to this command
+/// \return	    bool        Success
+bool Cli_ExecExit(int cmdId, const char* szCmdLine, int cmdLen, int len, int tokenCount)
+{
+    bClientConnected = false;
+    return true;
+}
+
+/// \brief		Cli_ExecLiveLog()
+/// \details	Enable showing the log entries in realtime in the console
+///
+/// \private
+/// \param[in]  cmdId       Command Index from kCliFunctions
+/// \param[in]  szCmdLine   Command line sent to this command
+/// \param[in]  cmdLen      The length of the Command name in szCmdLine
+/// \param[in]  len         Command line length
+/// \param[in]  tokenCount  Number of arguments to this command
+/// \return	    bool        Success
+bool Cli_ExecLiveLog(int cmdId, const char* szCmdLine, int cmdLen, int len, int tokenCount)
+{
+	if (tokenCount < 1 || szCmdLine == NULL)
+	{
+		return false;
+	}
+
+	char* szToken = (char*)&szCmdLine[cmdLen+1];
+	gLogSubscribed = false;
+	if (strncmp(szToken, "1", 1) == 0)
+	{
+		gLogSubscribed = true;
+	}
+
+	return true;
+}
+
+/// \brief		Cli_ExecGet()
+/// \details	Get variable value
+///
+/// \private
+/// \param[in]  cmdId       Command Index from kCliFunctions
+/// \param[in]  szCmdLine   Command line sent to this command
+/// \param[in]  cmdLen      The length of the Command name in szCmdLine
+/// \param[in]  len         Command line length
+/// \param[in]  tokenCount  Number of arguments to this command
+/// \return	    bool        Success
+bool Cli_ExecGet(int cmdId, const char* szCmdLine, int cmdLen, int len, int tokenCount)
+{
+	if (tokenCount < 1 || szCmdLine == NULL)
+	{
+		return false;
+	}
+
+	bool  success = false;
+	char* szToken = (char*)&szCmdLine[cmdLen+1];
+    char* szArgument = NULL;
+    if (tokenCount > 1)
+    {
+        szArgument = (char*)&szCmdLine[cmdLen+1+strlen(szToken)+1];
+    }
+	for (int a = 0; a < sizeof(kCliVariables)/sizeof(*kCliVariables); ++a)
+	{
+		if (strncmp(szToken, kCliVariables[a].szName, strlen(szToken)) == 0)
+		{
+			gScratch[0] = 0;
+			success = kCliVariables[a].Get(szArgument, gScratch, kCliBufferSize);
+			break;
+		}
+	}
+
+	if (success)
+	{
+		int sendLen = strlen(gScratch);
+		if (sendLen > 0)
+		{
+			HAL_UART_Transmit(&huart2, (uint8_t*)gScratch, sendLen, 1000);
+		}
+	}
+
+	return success;
+}
+
+/// \brief		Cli_ExecSet()
+/// \details	Set variable value
+///
+/// \private
+/// \param[in]  cmdId       Command Index from kCliFunctions
+/// \param[in]  szCmdLine   Command line sent to this command
+/// \param[in]  cmdLen      The length of the Command name in szCmdLine
+/// \param[in]  len         Command line length
+/// \param[in]  tokenCount  Number of arguments to this command
+/// \return	    bool        Success
+bool Cli_ExecSet(int cmdId, const char* szCmdLine, int cmdLen, int len, int tokenCount)
+{
+	if (tokenCount < 2 || szCmdLine == NULL)
+	{
+		return false;
+	}
+
+	bool  success = false;
+	char* szToken = (char*)&szCmdLine[cmdLen+1];
+	char* szValue = (char*)&szCmdLine[cmdLen+1+strlen(szToken)+1];
+	for (int a = 0; a < sizeof(kCliVariables)/sizeof(*kCliVariables); ++a)
+	{
+		if (strncmp(szToken, kCliVariables[a].szName, strlen(szToken)) == 0)
+		{
+			success = kCliVariables[a].Set(szValue);
+			break;
+		}
+	}
+
+	Cli_ExecGet(cmdId, szCmdLine, cmdLen, len, tokenCount);
+
+	return success;
+}
+
+/*******************************************************************************
+*                               Private variable commands
+*******************************************************************************/
+extern RTC_HandleTypeDef hrtc;
+/// \brief		Cli_SetDate()
+/// \details	Set the realtime clock date
+///
+/// \private
+/// \param[in]  szValue     Date string YYYY/MM/DD
+/// \return	    bool        Success
+bool Cli_SetDate(char* szValue)
+{
+    if (szValue == NULL)
+    {
+        return false;
+    }
+
+	RTC_DateTypeDef oDate;
+	memset(&oDate, 0, sizeof(RTC_TimeTypeDef));
+
+	int len     = strlen(szValue);
+	int idxSep  = 0;
+	int lastIdx = 0;
+	for (int a = 0; a < len; ++a)
+	{
+		if (szValue[a] == '-' || szValue[a] == '/' || (a == len-1))
+		{
+			if (a != len-1)
+			{
+				szValue[a] = '\0';
+			}
+
+			switch (idxSep)
+			{
+			case 0:
+				oDate.Year = strtol(&szValue[lastIdx], NULL, 10) + 2000;
+				break;
+			case 1:
+				oDate.Month = strtol(&szValue[lastIdx], NULL, 10);
+				break;
+			case 2:
+				oDate.Date = strtol(&szValue[lastIdx], NULL, 10);
+				break;
+			default:
+				break;
+			};
+			++idxSep;
+			lastIdx = a+1;
+		}
+	}
+
+	return (HAL_RTC_SetDate(&hrtc, &oDate, FORMAT_BIN) == HAL_OK);
+}
+
+/// \brief		Cli_GetDate()
+/// \details	Get the realtime clock date
+///
+/// \private
+/// \param[in]  szArgument  Optional parameters
+/// \param[in]  szValue     Date string YYYY/MM/DD
+/// \param[in]  bufLen      Maximum size of szValue
+/// \return	    bool        Success
+bool Cli_GetDate(char* szArgument, char* szValue, int bufLen)
+{
+    if (szValue == NULL)
+    {
+        return false;
+    }
+
+	RTC_DateTypeDef oDate;
+
+	// Get the RTC current Date
+	if (HAL_RTC_GetDate(&hrtc, &oDate, FORMAT_BIN) == HAL_OK)
+    {
+        return (snprintf(szValue, bufLen, "%04d/%02d/%02d\r\n", oDate.Year+2000, oDate.Month, oDate.Date) > 0);
+    }
+    return false;
+}
+
+/// \brief		Cli_SetTime()
+/// \details	Set the realtime clock time
+///
+/// \private
+/// \param[in]  szValue     Date string HH:MM:SS
+/// \return	    bool        Success
+bool Cli_SetTime(char* szValue)
+{
+    if (szValue == NULL)
+    {
+        return false;
+    }
+
+	RTC_TimeTypeDef oTime;
+	memset(&oTime, 0, sizeof(RTC_TimeTypeDef));
+
+	int len     = strlen(szValue);
+	int idxSep  = 0;
+	int lastIdx = 0;
+	for (int a = 0; a < len; ++a)
+	{
+		if (szValue[a] == ':' || (a == len-1))
+		{
+			szValue[a] = '\0';
+			switch (idxSep)
+			{
+			case 0:
+				oTime.Hours = strtol(&szValue[lastIdx], NULL, 0);
+				break;
+			case 1:
+				oTime.Minutes = strtol(&szValue[lastIdx], NULL, 0);
+				break;
+			case 2:
+				oTime.Seconds = strtol(&szValue[lastIdx], NULL, 0);
+				break;
+			default:
+				break;
+			};
+			++idxSep;
+			lastIdx = a+1;
+		}
+	}
+
+	return (HAL_RTC_SetTime(&hrtc, &oTime, FORMAT_BIN) == HAL_OK);
+}
+
+/// \brief		Cli_GetTime()
+/// \details	Get the realtime clock time
+///
+/// \private
+/// \param[in]  szArgument  Optional parameters
+/// \param[in]  szValue     Time string HH:MM:SS
+/// \param[in]  bufLen      Maximum size of szValue
+/// \return	    bool        Success
+bool Cli_GetTime(char* szArgument, char* szValue, int bufLen)
+{
+    if (szValue == NULL)
+    {
+        return false;
+    }
+
+	RTC_DateTypeDef oDate;
+	RTC_TimeTypeDef oTime;
+
+	// Get the RTC current Time
+	// You MUST call GetDate AFTER GetTime to unlock variables of time descriptor
+    if (HAL_RTC_GetTime(&hrtc, &oTime, FORMAT_BIN) == HAL_OK &&
+        HAL_RTC_GetDate(&hrtc, &oDate, FORMAT_BIN) == HAL_OK)
+    {
+        // Display time Format : hh:mm:ss
+        return snprintf(szValue, bufLen, "%02d:%02d:%02d\r\n", oTime.Hours, oTime.Minutes, oTime.Seconds) > 0;
+    }
+    return false;
+}

@@ -1,0 +1,13 @@
+0000000000000000000000000000000000000000 35661b6f94b067300ccc7998d38dd2dd4223e96f Charles Henri Hébert-Michaud <ch.hebert@novoelectronique.com> 1659706240 -0400	clone: from bitbucket.org:novo-sw-team/fwf_cli.git
+35661b6f94b067300ccc7998d38dd2dd4223e96f f2da351c70f155bd75604b452adbdb051fe68b9c Charles Henri Hébert-Michaud <ch.hebert@novoelectronique.com> 1659709729 -0400	commit: update dependencies
+f2da351c70f155bd75604b452adbdb051fe68b9c 71e32be6a5862a3c05a7883b41de23cbb8da6da5 Charles Henri Hébert-Michaud <ch.hebert@novoelectronique.com> 1659709755 -0400	commit: fix uart transmission of pointer
+71e32be6a5862a3c05a7883b41de23cbb8da6da5 db2a978bca14bbc1c6b8ceb53447de206b9ef4c2 Charles Henri Hébert-Michaud <ch.hebert@novoelectronique.com> 1659712800 -0400	commit: writing, enter, backspace are fluid; backspace does not erase
+db2a978bca14bbc1c6b8ceb53447de206b9ef4c2 6ff606ea6ca1b8792700034483818f47c6a1c9e0 Charles Henri Hébert-Michaud <ch.hebert@novoelectronique.com> 1659714320 -0400	commit: Backsapce functionnal
+6ff606ea6ca1b8792700034483818f47c6a1c9e0 f11b11716a56c6c088b5bd66c7f02c4a212cd235 Charles Henri Hébert-Michaud <ch.hebert@novoelectronique.com> 1659714753 -0400	commit: backspace first char, code clean up
+f11b11716a56c6c088b5bd66c7f02c4a212cd235 ff3d6f68baf371f86220bf80b25ce62576c156a6 Charles Henri Hébert-Michaud <ch.hebert@novoelectronique.com> 1659720481 -0400	commit: Change dma mode to idle line to capture more than one char at a time
+ff3d6f68baf371f86220bf80b25ce62576c156a6 654480e796db1140a1914cd8150d9fc4645fd6a2 Charles Henri Hébert-Michaud <ch.hebert@novoelectronique.com> 1659722319 -0400	commit: process packet with arrows
+654480e796db1140a1914cd8150d9fc4645fd6a2 3f5f8ce5b41dbb1b36fe7268cafc55a1862626e7 Charles Henri Hébert-Michaud <ch.hebert@novoelectronique.com> 1659723249 -0400	commit: Code clean up, activate cmd output
+3f5f8ce5b41dbb1b36fe7268cafc55a1862626e7 3fc2092ee7e2059d0126fcdc42696bb7579137a3 Charles Henri Hébert-Michaud <ch.hebert@novoelectronique.com> 1659735743 -0400	commit: enable up arrow and history, upgrade history to not contain dupplicates one after the other
+3fc2092ee7e2059d0126fcdc42696bb7579137a3 427f15af595eb47fdfe094bfafb6cee11f77ad86 Charles Henri Hébert-Michaud <ch.hebert@novoelectronique.com> 1659736349 -0400	commit: code clean up, secure connexion
+427f15af595eb47fdfe094bfafb6cee11f77ad86 cafee7ac06eb20c4e0ae365b11984e257c8a00b3 Charles Henri Hébert-Michaud <ch.hebert@novoelectronique.com> 1659737822 -0400	commit: Enable arrow down
+cafee7ac06eb20c4e0ae365b11984e257c8a00b3 f0aaa3bbfff98e0cb3ed8e1b0d6ca0f64cf6c8ed Charles Henri Hébert-Michaud <ch.hebert@novoelectronique.com> 1659739828 -0400	commit: Massive code clean up and reorganisation

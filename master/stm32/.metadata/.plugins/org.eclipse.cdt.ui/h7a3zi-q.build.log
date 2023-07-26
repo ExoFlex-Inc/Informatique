@@ -1,0 +1,10 @@
+17:27:31 **** Incremental Build of configuration Debug for project h7a3zi-q ****
+make -j12 all 
+arm-none-eabi-size   h7a3zi-q.elf 
+   text	   data	    bss	    dec	    hex	filename
+  21480	     24	   1720	  23224	   5ab8	h7a3zi-q.elf
+Finished building: default.size.stdout
+ 
+
+17:27:31 Build Finished. 0 errors, 0 warnings. (took 382ms)
+

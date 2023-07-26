@@ -1,0 +1,7 @@
+[dependencies]
+fwf_progutils 1.0.0
+fwf_maths 1.0.0
+
+[remotes]
+fwf_progutils git@bitbucket.org:novo-sw-team/fwf_progutils.git fa8191e1ef9394b783f695ec4572932c117d5895
+fwf_maths git@bitbucket.org:novo-sw-team/fwf_maths.git 93b5084818c132326e3a075fa85172765bb05773

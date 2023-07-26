@@ -1,0 +1,307 @@
+/**
+ * @file        circularBuffer.c
+ * @brief       Circular buffer optimized for speed. To allow speed optimization it supports only power of 2 buffer
+ *              length.
+ * @date		2022-06-01 (creation)
+
+ */
+
+/** @addtogroup CircularBuffer
+ * @{
+ */
+
+/* Includes ------------------------------------------------------------------*/
+/** @addtogroup CircularBuffer_Private_Includes
+ * @{
+ */
+#include "fwf_circularBuffer.h"
+#include "fwf_utilMacro.h"
+/**
+ * @}
+ */
+
+/* Private Defines -----------------------------------------------------------*/
+/** @addtogroup CircularBuffer_Private_Defines
+ * @{
+ */
+#define CIR_BUF_INDEX_INCREMENT(x) ((x + 1) & (psDesc->DataCount - 1)) /*!< Index increment with wrap around */
+/**
+ * @}
+ */
+
+/* Private macros ------------------------------------------------------------*/
+/** @addtogroup CircularBuffer_Private_Macros
+ * @{
+ */
+
+/**
+ * @}
+ */
+
+/* Private Enumerations ------------------------------------------------------*/
+/** @addtogroup CircularBuffer_Private_Enumerations
+ * @{
+ */
+
+/**
+ * @}
+ */
+
+/* Private Structs -----------------------------------------------------------*/
+/** @addtogroup CircularBuffer_Private_Struct
+ * @{
+ */
+
+/**
+ * @}
+ */
+
+/* Private Function Prototypes -----------------------------------------------*/
+/** @addtogroup CircularBuffer_Private_Function_Prototype
+ * @{
+ */
+
+/**
+ * @}
+ */
+
+/* Private Variables ---------------------------------------------------------*/
+/** @addtogroup CircularBuffer_Private_Variables
+ * @{
+ */
+
+/**
+ * @}
+ */
+
+/* Functions definition ------------------------------------------------------*/
+/**
+ * @brief		Buffer descriptor initialization.
+ * @param[out]  psDesc:       Circular buffer descriptor handle
+ * @param[in]   pBuffer:     Data buffer handle
+ * @param[in]   DataSize:    Size of data item in byte. It must be greater than 0.
+ * @param[in]   DataCount:   Number of data item in circular buffer. It must be a power of 2 value and greater than 0.
+ * @return		eStatus_t: STATUS_SUCCESS if succeeded. Otherwise, STATUS_ERROR.
+ */
+eStatus_t CircularBuffer_Init(sCircularBufferDesc_t *const psDesc, uint8_t const *const pBuffer, uint32_t DataSize,
+                               uint32_t DataCount)
+{
+    /* Safe programming function parameters check */
+    RETURN_IF_NULL(psDesc);
+    RETURN_IF_NULL(pBuffer);
+
+    /* Check data size is at leat one byte */
+    if (0 == DataSize)
+    {
+        return STATUS_ERROR;
+    }
+
+    /* Check buffer contains at least one item and length is power of 2 */
+    if ((0 == DataCount) || (!IS_POWER_OF_2(DataCount)))
+    {
+        return STATUS_ERROR;
+    }
+
+    psDesc->pBuffer        = (uint8_t *)pBuffer;
+    psDesc->WriteIndex     = 0;
+    psDesc->ReadIndex      = 0;
+    psDesc->DataCount      = DataCount;
+    psDesc->DataSize       = DataSize;
+    psDesc->BufferShift    = 0;
+    psDesc->BufferOverflow = 0;
+    psDesc->bIsFull        = false;
+
+    /* Find bit shift value */
+    while ((DataCount & 1) != 1)
+    {
+        DataCount >>= 1;
+        ++(psDesc->BufferShift);
+    }
+
+    return STATUS_SUCCESS;
+}
+
+/**
+ * @brief		Clear circular buffer descriptor
+ * @param[in]   psDesc:    Circular buffer descriptor handle   
+ * @return		eStatus_t: STATUS_SUCCESS if succeeded. Otherwise, STATUS_ERROR.
+ */
+eStatus_t CircularBuffer_Clear(sCircularBufferDesc_t *const psDesc)
+{
+    /* Safe programming function parameters check */
+    RETURN_IF_NULL(psDesc);
+
+    psDesc->WriteIndex     = 0;
+    psDesc->ReadIndex      = 0;
+    psDesc->BufferOverflow = 0;
+
+    return STATUS_SUCCESS;
+}
+
+/**
+ * @brief		Get next item to be read in circular buffer
+ * @param[in]   psDesc:     Circular buffer descriptor handle  
+ * @param[out]  ppItem:    Item handle. NULL if no item to get.
+ * @return		eStatus_t: STATUS_SUCCESS if succeeded. Otherwise, STATUS_ERROR.
+ */
+eStatus_t CircularBuffer_GetItem(sCircularBufferDesc_t *const psDesc, uint8_t **ppItem)
+{
+    /* Safe programming function parameters check */
+    RETURN_IF_NULL(psDesc);
+    RETURN_IF_NULL(ppItem);
+
+    *ppItem = NULL;
+
+    /* Check if buffer is not empty */
+    if ((psDesc->ReadIndex != psDesc->WriteIndex) || psDesc->bIsFull)
+    {
+        *ppItem          = &psDesc->pBuffer[psDesc->ReadIndex * psDesc->DataSize];
+        psDesc->ReadIndex = CIR_BUF_INDEX_INCREMENT(psDesc->ReadIndex);
+        psDesc->bIsFull   = false;
+    }
+
+    return STATUS_SUCCESS;
+}
+
+/**
+ * @brief		Add item to the cicular buffer. If the buffer is full the item is overwritten
+ * @param[in]   psDesc:    Circular buffer descriptor handle    
+ * @param[in]   pItem:    Item to add   
+ * @return		eStatus_t: STATUS_SUCCESS if succeeded. Otherwise, STATUS_ERROR.
+ */
+eStatus_t CircularBuffer_AddItem(sCircularBufferDesc_t *const psDesc, uint8_t const *const pItem)
+{    
+    /* Safe programming function parameters check */
+    RETURN_IF_NULL(psDesc);
+    RETURN_IF_NULL(pItem);
+
+    memcpy(&psDesc->pBuffer[psDesc->WriteIndex * psDesc->DataSize], pItem, psDesc->DataSize);
+
+    
+    psDesc->WriteIndex = CIR_BUF_INDEX_INCREMENT(psDesc->WriteIndex);
+
+    /* If the buffer is full */
+    if ((psDesc->WriteIndex == psDesc->ReadIndex) || psDesc->bIsFull)
+    {
+        /* Increment read index only if the buffer was already full */
+        if (psDesc->bIsFull)
+        {
+            psDesc->ReadIndex = CIR_BUF_INDEX_INCREMENT(psDesc->ReadIndex);
+            ++(psDesc->BufferOverflow); /* Flag to indicate the buffer overflown */
+        }
+        psDesc->bIsFull = true;
+    }
+
+    return STATUS_SUCCESS;
+}
+
+/**
+ * @brief		Get the item count in buffer
+ * @param[in]   psDesc:    Circular buffer descriptor handle   
+ * @param[out]  pSize:    Item count  
+ * @return		eStatus_t: STATUS_SUCCESS if succeeded. Otherwise, STATUS_ERROR.
+ */
+eStatus_t CircularBuffer_GetSize(sCircularBufferDesc_t const *const psDesc, uint32_t *const pSize)
+{
+    /* Safe programming function parameters check */
+    RETURN_IF_NULL(psDesc);
+    RETURN_IF_NULL(pSize);
+
+    *pSize = psDesc->DataCount;
+
+    if (!psDesc->bIsFull)
+    {
+        int32_t DecadeSize = psDesc->WriteIndex - psDesc->ReadIndex;
+        *pSize             = (1 - ((DecadeSize >> 31) << psDesc->BufferShift)) + DecadeSize - 1;
+    }
+
+    return STATUS_SUCCESS;
+}
+
+/**
+ * @brief		Get the maximum data item count supported by the circular buffer
+ * @param[in]   psDesc:       Circular buffer descriptor handle
+ * @param[out]  pDataCount:  The data item count
+ * @return		eStatus_t: STATUS_SUCCESS if succeeded. Otherwise, STATUS_ERROR.
+ */
+eStatus_t CircularBuffer_GetDataCount(sCircularBufferDesc_t const *const psDesc, uint32_t *const pDataCount)
+{
+    /* Safe programming function parameters check */
+    RETURN_IF_NULL(psDesc);
+    RETURN_IF_NULL(pDataCount);
+
+    *pDataCount = psDesc->DataCount;
+
+    return STATUS_SUCCESS;
+}
+
+/**
+ * @brief		Get the size in bytes of data item
+ * @param[in]   psDesc:       Circular buffer descriptor handle
+ * @param[out]  pDataSize:   Size in bytes of data item
+ * @return		eStatus_t: STATUS_SUCCESS if succeeded. Otherwise, STATUS_ERROR.
+ */
+eStatus_t CircularBuffer_GetDataSize(sCircularBufferDesc_t const *const psDesc, uint32_t *const pDataSize)
+{
+    /* Safe programming function parameters check */
+    RETURN_IF_NULL(psDesc);
+    RETURN_IF_NULL(pDataSize);
+
+    *pDataSize = psDesc->DataSize;
+
+    return STATUS_SUCCESS;
+}
+
+/**
+ * @brief		Get the buffer overflow count
+ * @param[in]   psDesc:       Circular buffer descriptor handle
+ * @param[out]  pOverflow:   Overflow counter handle
+ * @return		eStatus_t: STATUS_SUCCESS if succeeded. Otherwise, STATUS_ERROR.
+ */
+eStatus_t CircularBuffer_GetBufOverflow(sCircularBufferDesc_t const *const psDesc, uint32_t *const pOverflow)
+{
+    /* Safe programming function parameters check */
+    RETURN_IF_NULL(psDesc);
+    RETURN_IF_NULL(pOverflow);
+
+    *pOverflow = psDesc->BufferOverflow;
+
+    return STATUS_SUCCESS;
+}
+
+/**
+ * @brief       Reset the buffer overflow counter 
+ * @param[in]   psDesc:  Circular buffer descriptor handle
+ * @return		eStatus_t: STATUS_SUCCESS if succeeded. Otherwise, STATUS_ERROR.
+ */
+eStatus_t CircularBuffer_ResetOverflow(sCircularBufferDesc_t *const psDesc)
+{
+    /* Safe programming function parameters check */
+    RETURN_IF_NULL(psDesc);
+
+    psDesc->BufferOverflow = 0;
+
+    return STATUS_SUCCESS;
+}
+
+/**
+ * @brief		Get the buffer full state
+ * @param[in]   psDesc:       Circular buffer descriptor handle
+ * @param[out]  pbIsFull:    Full state handle. True, if full. Otherwise, false.
+ * @return		eStatus_t: STATUS_SUCCESS if succeeded. Otherwise, STATUS_ERROR.
+ */
+eStatus_t CircularBuffer_IsBufferFull(sCircularBufferDesc_t const *const psDesc, bool *const pbIsFull)
+{
+    /* Safe programming function parameters check */
+    RETURN_IF_NULL(psDesc);
+    RETURN_IF_NULL(pbIsFull);
+
+    *pbIsFull = psDesc->bIsFull;
+
+    return STATUS_SUCCESS;
+}
+
+/**
+ * @}
+ */
+/*****END OF FILE****/
