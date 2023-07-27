@@ -23,10 +23,10 @@ jobs:
 
     - name: Run Unit Tests H7A3ZI-Q
       run: |
-        cd master/stm32//h7a3zi-q/UnitTests
+        cd stm32/h7a3zi-q/UnitTests
         ceedling test:all
         
     - name: Run Unit Tests L432KC
       run: |
-        cd master/stm32//l432kc/UnitTests
+        cd stm32/l432kc/UnitTests
         ceedling test:all

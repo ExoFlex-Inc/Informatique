@@ -1,0 +1,124 @@
+<!doctype html>
+<html>
+  <!--
+.##.....##.########....###....########.
+.##.....##.##.........##.##...##.....##
+.##.....##.##........##...##..##.....##
+.#########.######...##.....##.##.....##
+.##.....##.##.......#########.##.....##
+.##.....##.##.......##.....##.##.....##
+.##.....##.########.##.....##.########.
+-->
+
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+
+    <script type="text/javascript" src="js/jquery-3.3.1.slim.min.js"></script>
+    <!-- <script type="text/javascript" src="js/popper.min.js"></script> -->
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/socket.io.js"></script>
+
+    <title>ExoFlex Control</title>
+  </head>
+
+  <!--
+.########...#######..########..##....##
+.##.....##.##.....##.##.....##..##..##.
+.##.....##.##.....##.##.....##...####..
+.########..##.....##.##.....##....##...
+.##.....##.##.....##.##.....##....##...
+.##.....##.##.....##.##.....##....##...
+.########...#######..########.....##...
+-->
+
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
+      <div class="container">
+        <a class="navbar-brand" href="index.html">
+          <img src="img/ExoFlex.png" alt="..." height="54" />
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="index.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="Serrage.html">Tightenning</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="Controle.html">Control</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main layout BEGIN-->
+    <div class="container">
+      <h1 class="mt-4">Control</h1>
+    </div>
+
+    <div class="container">
+      <div id="time">
+        <span class="digit" id="hr"> 00</span>
+        <span class="txt">Hr</span>
+        <span class="digit" id="min"> 00</span>
+        <span class="txt">Min</span>
+        <span class="digit" id="sec"> 00</span>
+        <span class="txt">Sec</span>
+        <span class="digit" id="count"> 00</span>
+      </div>
+      <div id="buttons">
+        <button class="btn start" id="start">Start</button>
+        <button class="btn" id="reset">Reset</button>
+      </div>
+    </div>
+    <div class="container">
+      <div id="dorsiflexion">
+        <h2>Dorsiflexion</h2>
+        <div class="row myRow">
+          <div class="col-sm"></div>
+          <div class="col-sm">
+            <button class="button-19" id="dorsiflex_up">UP</button><br />
+            <button class="button-19" id="dorsiflex_down">DOWN</button><br />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div id="eversion">
+        <h2>Eversion</h2>
+        <div class="row myRow">
+          <div class="col-sm"></div>
+          <div class="col-sm">
+            <button class="button-19" id="eversion_left">LEFT</button><br />
+            <button class="button-19" id="eversion_right">RIGHT</button><br />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main layout END-->
+    <script src="js/controle_functions.js"></script>
+  </body>
+</html>

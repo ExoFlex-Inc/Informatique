@@ -2,20 +2,22 @@
 #Arduino
 **/.pio
 **/.vscode
-master/arduino/build/
-master/arduino/downloadedLibraries/
+arduino/build/
+arduino/downloadedLibraries/
 
 #STM32
-master/stm32/l432kc/.settings/
-master/stm32/l432kc/Debug/
-master/stm32/h7a3zi-q/.settings/
-master/stm32/h7a3zi-q/Debug/
+stm32/l432kc/.settings/
+stm32/l432kc/Debug/
+stm32/l432kc/UnitTests/build/
+stm32/h7a3zi-q/.settings/
+stm32/h7a3zi-q/Debug/
+stm32/h7a3zi-q/UnitTests/build/
 
 #HMI
 package-lock.json
 node_modules/
 
 #Unit Testing
-master/venv/
+venv/
 __pycache__/
 **/*.exe
