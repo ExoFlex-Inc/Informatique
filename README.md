@@ -7,8 +7,6 @@
 
 </div>
 
-ExoFlex Architecture Informatique présente tous les informations en lien avec l'architecture informatique
-
 ## Choix microcontrôler
 
 Cette section résume les recherches effectuées au sujet du choix de microcontrôler
