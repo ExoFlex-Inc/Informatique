@@ -2,8 +2,8 @@
 #Arduino
 **/.pio
 **/.vscode
-arduino/build/
-arduino/downloadedLibraries/
+IMC/arduino/build/
+IMC/arduino/downloadedLibraries/
 
 #STM32
 stm32/l432kc/.settings/
