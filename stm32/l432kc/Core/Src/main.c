@@ -18,10 +18,11 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
+#include "cJSON.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "CalcManager.h"
+#include "json_utils.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -97,18 +98,26 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  uint8_t result = add(2,3);
+//  uint8_t result = add(2,3);
 
   uint32_t u32Timer = HAL_GetTick();
 
   while (1)
   {
+	cJSON *root = cJSON_CreateObject();
 
 	 if (HAL_GetTick() - u32Timer >= 500)
 	 {
 		 HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
 		 u32Timer = HAL_GetTick();
 	 }
+
+	cJSON_AddNumberToObject(root, "key1", 123);
+	cJSON_AddStringToObject(root, "key2", "Hello");
+
+
+	char *jsonMessage = cJSON_PrintUnformatted(root);
+	send_json_msg(&huart2, jsonMessage);
 
     /* USER CODE END WHILE */
 
