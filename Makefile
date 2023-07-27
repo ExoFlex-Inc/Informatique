@@ -3,7 +3,7 @@
 SHELL := /bin/bash
 
 VENV=venv
-PRODUCT=arduino
+PRODUCT=stm32
 TEST_DIR = $(PRODUCT)/test
 OS = $(shell uname -s)
 
@@ -60,27 +60,33 @@ else ifeq ($(OS),Linux)
 	fi
 endif
 
-test-cpp: venv # Runs unit tests in cpp.
-ifeq ($(OS),Windows_NT) # Only works on PowerShell
-	@call $(VENV)/$(PRODUCT)/Scripts/activate && g++ -std=c++14 -Iincludes arduino/test/*.cpp -o arduino/test/bin/tests
-	@arduino\test\bin\tests.exe
-else
-	@source $(VENV)/$(PRODUCT)/bin/activate && g++ -std=c++14 -Iincludes arduino/test/*.cpp -o arduino/test/bin/tests.exe;
-	@arduino/test/bin/tests.exe
-endif
+# test-cpp: venv # Runs unit tests in cpp.
+# ifeq ($(OS),Windows_NT) # Only works on PowerShell
+# 	@call $(VENV)/$(PRODUCT)/Scripts/activate && g++ -std=c++14 -Iincludes arduino/test/*.cpp -o arduino/test/bin/tests
+# 	@arduino\test\bin\tests.exe
+# else
+# 	@source $(VENV)/$(PRODUCT)/bin/activate && g++ -std=c++14 -Iincludes arduino/test/*.cpp -o arduino/test/bin/tests.exe;
+# 	@arduino/test/bin/tests.exe
+# endif
 
-test-py: venv # Runs unit tests in python.
-ifeq ($(OS),Windows_NT) # Not working on */test/*.py for windows
-	@call $(VENV)/$(PRODUCT)/Scripts/activate && py -m pytest -vv arduino/test/test.py
-else
-	@source $(VENV)/$(PRODUCT)/bin/activate && python3 -m pytest -vv */test/*.py;
-endif
+# test-py: venv # Runs unit tests in python.
+# ifeq ($(OS),Windows_NT) # Not working on */test/*.py for windows
+# 	@call $(VENV)/$(PRODUCT)/Scripts/activate && py -m pytest -vv arduino/test/test.py
+# else
+# 	@source $(VENV)/$(PRODUCT)/bin/activate && python3 -m pytest -vv */test/*.py;
+# endif
 
-test-js: venv # Runs unit tests in python.
-	@cd hmi; \
-		npm run test
+# test-js: venv # Runs unit tests in python.
+# 	@cd hmi; \
+# 		npm run test
 
-test-ceedling: venv # Run ceedling tests
+ceedling-h7a3zi-q: venv # Run ceedling tests/ Only works on windows
+	@cd stm32/h7a3zi-q/UnitTests; \
+		ceedling test:all
+
+ceedling-l432kc: venv # Run ceedling tests/ Only works on windows
+	@cd stm32/l432kc/UnitTests; \
+		ceedling test:all
 
 clean: # Remove every environement in venv
 
