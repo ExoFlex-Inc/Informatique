@@ -2,16 +2,16 @@
 #Arduino
 **/.pio
 **/.vscode
-arduino/build/
-arduino/downloadedLibraries/
+IMC/arduino/build/
+IMC/arduino/downloadedLibraries/
 
 #STM32
 stm32/l432kc/.settings/
 stm32/l432kc/Debug/
-stm32/l432kc/UnitTests/build/
+stm32/l432kc/UnitTests/build/*
 stm32/h7a3zi-q/.settings/
 stm32/h7a3zi-q/Debug/
-stm32/h7a3zi-q/UnitTests/build/
+stm32/h7a3zi-q/UnitTests/build/*
 
 #HMI
 package-lock.json
