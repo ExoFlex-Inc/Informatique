@@ -18,7 +18,7 @@ extern DMA_HandleTypeDef hdma_usart2_rx;
 #define MainBuf_SIZE 1024
 
 uint8_t RxBuf[RxBuf_SIZE];
-uint8_t MainBuf[MainBuf_SIZE];
+extern uint8_t MainBuf[MainBuf_SIZE];
 
 uint16_t oldPos = 0;
 uint16_t newPos = 0;
@@ -327,15 +327,15 @@ repeat2:
 }
 
 
-char* searchWord() {
+char* searchWord(char *buffertocopyfrom) {
     char* wordToFind[] = {"right", "left"};
     char* closestWord = NULL;
     size_t closestPosition = SIZE_MAX;
 
     for (int i = 0; i < 2; i++) {
-        char* pos = strstr((char*)MainBuf, wordToFind[i]);
+        char* pos = strstr(buffertocopyfrom, wordToFind[i]);
         if (pos != NULL) {
-            size_t position = pos - (char*)MainBuf;
+            size_t position = pos - buffertocopyfrom;
 
             if (position < closestPosition) {
                 closestPosition = position;
@@ -352,16 +352,16 @@ char* searchWord() {
         size_t afterPosition = closestPosition + wordLength;
 
         // Calculate the length of the text after the found word
-        size_t afterLength = strlen((char*)MainBuf + afterPosition);
+        size_t afterLength = strlen(buffertocopyfrom + afterPosition);
 
         // Copy the text after the found word and any unfinished word
-        memmove((char*)MainBuf, (char*)MainBuf + afterPosition, afterLength);
+        memmove(buffertocopyfrom, (char*)MainBuf + afterPosition, afterLength);
 
         // Update newPos accordingly (assuming it's a global variable)
         newPos = afterLength;
 
         // Zero out the rest of the buffer
-        memset((char*)MainBuf + afterLength, 0, afterPosition);
+        memset(buffertocopyfrom + afterLength, 0, afterPosition);
 
         return closestWord; // Return the closest found word
     }

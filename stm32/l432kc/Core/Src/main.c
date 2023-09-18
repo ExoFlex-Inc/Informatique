@@ -84,6 +84,10 @@ void ReceiveHMITask(void *argument);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+#define MainBuf_SIZE 1024
+
+uint8_t MainBuf[MainBuf_SIZE];
+
 /* USER CODE END 0 */
 
 /**
@@ -354,7 +358,7 @@ void ReceiveHMITask(void *argument)
   for(;;)
   {
 
-	  char* foundWord = searchWord();
+	  char* foundWord = searchWord((char*) MainBuf);
 
 	  vTaskDelay(1000 / portTICK_PERIOD_MS);
 

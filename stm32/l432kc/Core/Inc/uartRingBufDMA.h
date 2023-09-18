@@ -55,6 +55,6 @@ int getAfter (char *string, uint8_t numberofchars, char *buffertocopyinto, uint3
 
 void getDataFromBuffer (char *startString, char *endString, char *buffertocopyfrom, char *buffertocopyinto);
 
-char* searchWord();
+char* searchWord(char *buffertocopyfrom);
 
 #endif /* INC_UARTRINGBUFDMA_H_ */
