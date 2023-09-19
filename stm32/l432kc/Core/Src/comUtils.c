@@ -135,7 +135,7 @@ again:
 //		goto again;
 //	}
 
-	HAL_Delay (100);
+	// HAL_Delay (100);
 
 	if ((so_far!=len)&&isDataAvailable)
 	{
@@ -195,7 +195,7 @@ again:
 		if (so_far == len) return 1;
 	}
 
-	HAL_Delay (100);
+	// HAL_Delay (100);
 
 	if ((so_far!=len)&&isDataAvailable)
 	{
@@ -222,7 +222,7 @@ int getAfter (char *string, uint8_t numberofchars, char *buffertocopyinto, uint3
 	if ((waitFor(string, Timeout)) != 1) return 0;
 //	TIMEOUT = Timeout/3;
 //	while (TIMEOUT > 0);
-	HAL_Delay (100);
+	// HAL_Delay (100);
 	for (int indx=0; indx<numberofchars; indx++)
 	{
 		if (Tail==MainBuf_SIZE) Tail = 0;
@@ -326,14 +326,19 @@ char* searchWord(char *buffertocopyfrom) {
         // Copy the text after the found word and any unfinished word
         memmove(buffertocopyfrom, (char*)MainBuf + afterPosition, afterLength);
 
-        // Update newPos accordingly (assuming it's a global variable)
+        // Update newPos accordingly
         newPos = afterLength;
 
         // Zero out the rest of the buffer
         memset(buffertocopyfrom + afterLength, 0, afterPosition);
 
         return closestWord; // Return the closest found word
+    } else {
+        // If no closest word found, clear MainBuf
+        memset(buffertocopyfrom, '\0', strlen(buffertocopyfrom));
+        
+        // Update newPos accordingly
+        newPos = 0;
     }
-
     return NULL; // Return NULL if no word was found
 }

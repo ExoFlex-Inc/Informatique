@@ -8,6 +8,7 @@
 #ifndef INC_UARTRINGBUFDMA_H_
 #define INC_UARTRINGBUFDMA_H_
 
+#include <stdint.h>
 
 /* Initialize the Ring buffer
  * It will also initialize the UART RECEIVE DMA
