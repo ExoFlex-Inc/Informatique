@@ -25,27 +25,27 @@ int waitFor(char* string, uint32_t Timeout);
  * if the end string gets copied, it returns 1 or else 0
  *
  */
-int copyUpto (char *string, char *buffertocopyinto, uint32_t Timeout);
+int copyUpto(char* string, char* buffertocopyinto, uint32_t Timeout);
 
-
-/* Copies the entered number of characters, after the entered string (from the incoming buffer), into the buffer
- * returns 1 on success
- * returns 0 on failure
+/* Copies the entered number of characters, after the entered string (from the
+ * incoming buffer), into the buffer returns 1 on success returns 0 on failure
  */
-int getAfter (char *string, uint8_t numberofchars, char *buffertocopyinto, uint32_t Timeout);
+int getAfter(char* string, uint8_t numberofchars, char* buffertocopyinto,
+             uint32_t Timeout);
 
 void getDataFromBuffer(char* startString, char* endString,
                        char* buffertocopyfrom, char* buffertocopyinto);
-                       
+
 /* Copies the data from a buffer to another buffer
  */
-void getDataFromBuffer (char *startString, char *endString, char *buffertocopyfrom, char *buffertocopyinto);
+void getDataFromBuffer(char* startString, char* endString,
+                       char* buffertocopyfrom, char* buffertocopyinto);
 
 /* Search for a word in a wordlist inside the buffer and deletes unfound words
  * returns the closest word found on success
  * returns NULL if no word found
  */
 
-char* searchWord(char *buffertocopyfrom);
+char* searchWord(char* buffertocopyfrom);
 
 #endif /* CONMUTILS_H */
