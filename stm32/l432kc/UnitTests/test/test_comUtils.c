@@ -29,6 +29,7 @@ void test_searchWord_unfinishedWord(void)
 
     // Check if the closest word is "left"
     TEST_ASSERT_EQUAL_STRING("right", result);
+    // Check if the buffer has "left"
     TEST_ASSERT_EQUAL_STRING("left", MainBuf);
 }
 
@@ -40,8 +41,9 @@ void test_searchWord_emptyBuffer(void)
     // Call the searchWord function
     char* result = searchWord(MainBuf);
 
-    // Check if the closest word is an empty string
+    // Check if the closest word is an NULL pointer
     TEST_ASSERT_EQUAL_STRING(NULL, result);
+    // Check if the buffer has empty string
     TEST_ASSERT_EQUAL_STRING("", MainBuf);
 }
 
@@ -53,8 +55,9 @@ void test_searchWord_noMatch(void)
     // Call the searchWord function
     char* result = searchWord(MainBuf);
 
-    // Check if the closest word is an empty string
+    // Check if the closest word has NULL pointer
     TEST_ASSERT_EQUAL_STRING(NULL, result);
+    // Check if the buffer has empty string
     TEST_ASSERT_EQUAL_STRING("", MainBuf);
 }
 
@@ -68,5 +71,6 @@ void test_searchWord_multipleOccurrences(void)
 
     // Check if the closest word is "left"
     TEST_ASSERT_EQUAL_STRING("left", result);
+    // Check if the buffer has "leftright"
     TEST_ASSERT_EQUAL_STRING("leftright", MainBuf);
 }

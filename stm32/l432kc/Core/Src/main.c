@@ -360,6 +360,10 @@ void ReceiveHMITask(void *argument)
 
 	  char* foundWord = searchWord((char*) MainBuf);
 
+    /*
+    Switch case here when a word is found in MainBuf
+    */
+
 	  vTaskDelay(1000 / portTICK_PERIOD_MS);
 
   }
