@@ -29,7 +29,7 @@
 #include "cJSON.h"
 #include "uartRingBufDMA.h"
 
-#include "CalcManager.h"
+#include "comUtils.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
