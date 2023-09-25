@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "description": "All JS packages for releases",
   "devDependencies": {
-    "semantic-release": "^22.0.0"
+    "semantic-release": "^22.0.5"
   }
 }
