@@ -1,6 +1,6 @@
 setuptools
 coverage==7.3.2
-pytest==7.4.2
+pytest==7.4.3
 pytest-mock==3.12.0
 python-dotenv==1.0.0
 python-dotenv[cli]
