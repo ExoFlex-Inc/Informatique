@@ -16,7 +16,7 @@ export default function NavBar() {
           className="nav-logo"
           src={logo}
           alt="logo"
-          style={{ width: '30%', height: 'auto' }}
+          style={{ width: "30%", height: "auto" }}
         />
       </Link>
       <ul className="nav-right-list">

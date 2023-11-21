@@ -19,7 +19,7 @@ export async function welcomeLoader() {
   if (data?.username && data) {
     return redirect("/");
   }
-  return { loaded: true }; 
+  return { loaded: true };
 }
 
 export function Welcome() {
@@ -59,7 +59,7 @@ export function Welcome() {
                     const target = localStorage.getItem("returnPath") || "/";
                     localStorage.removeItem("returnPath");
                     navigate(target);
-                    window.location.reload(); 
+                    window.location.reload();
                   }
                 });
             }}

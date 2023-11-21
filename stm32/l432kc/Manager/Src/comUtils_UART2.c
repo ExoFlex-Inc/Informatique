@@ -20,10 +20,10 @@ extern uint16_t newPos_UART2;
 /* Timeout is in milliseconds */
 extern int32_t TIMEOUT;
 
-
 char* searchWord(char* buffertocopyfrom)
 {
-    char*  wordToFind[]    = {"eversionR", "eversionL", "dorsiflexionU", "dorsiflexionD", "extensionU", "extensionD"};
+    char*  wordToFind[]    = {"eversionR",     "eversionL",  "dorsiflexionU",
+                              "dorsiflexionD", "extensionU", "extensionD"};
     char*  closestWord     = NULL;
     size_t closestPosition = SIZE_MAX;
 
@@ -54,7 +54,8 @@ char* searchWord(char* buffertocopyfrom)
         size_t afterLength = strlen(buffertocopyfrom + afterPosition);
 
         // Copy the text after the found word and any unfinished word
-        memmove(buffertocopyfrom, (char*) MainBuf_UART2 + afterPosition, afterLength);
+        memmove(buffertocopyfrom, (char*) MainBuf_UART2 + afterPosition,
+                afterLength);
 
         // Update newPos accordingly
         newPos_UART2 = afterLength;
@@ -70,7 +71,7 @@ char* searchWord(char* buffertocopyfrom)
         memset(buffertocopyfrom, '\0', strlen(buffertocopyfrom));
 
         // Update newPos accordingly
-       newPos_UART2 = 0;
+        newPos_UART2 = 0;
     }
     return NULL;  // Return NULL if no word was found
 }

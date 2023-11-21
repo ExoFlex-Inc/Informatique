@@ -1,14 +1,18 @@
 import { createContext } from "react";
-import { createBrowserRouter, Outlet, RouterProvider, useNavigate } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Outlet,
+  RouterProvider,
+  useNavigate,
+} from "react-router-dom";
 import { Welcome, welcomeLoader } from "./pages/Welcome.tsx";
 import NavBar from "./components/NavBar.tsx";
 import { SupashipUserInfo, useSession } from "./hooks/use-session.ts";
 import "./App.css";
 import HMI, { serialConnect } from "./pages/Hmi.tsx";
 import Stretch from "./pages/Stretch.tsx";
-import Activity from"./pages/Activity.tsx";
-import { useEffect } from 'react';
- 
+import Activity from "./pages/Activity.tsx";
+import { useEffect } from "react";
 
 const router = createBrowserRouter([
   {
@@ -34,9 +38,8 @@ const router = createBrowserRouter([
     path: "hmi",
     element: <HMI />,
     loader: serialConnect,
-  }
+  },
 ]);
-
 
 function App() {
   return <RouterProvider router={router} />;
@@ -55,7 +58,7 @@ function Layout() {
 
   useEffect(() => {
     if (supashipUserInfo.session) {
-      navigate('/stretch');
+      navigate("/stretch");
     }
   }, [supashipUserInfo.session, navigate]);
 

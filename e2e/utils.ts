@@ -21,7 +21,7 @@ function reseedDb() {
     "PGPASSWORD=postgres psql -U postgres -h 127.0.0.1 -p 54322 -f supabase/clear-db-data.sql",
     // for Windows:
     // "SET PGPASSWORD=postgres&&psql -U postgres -h 127.0.0.1 -p 54322 -f supabase/clear-db-data.sql"
-    { stdio: "ignore" }
+    { stdio: "ignore" },
   );
 }
 
@@ -30,7 +30,7 @@ export async function signUp(
   email: string,
   password: string,
   userName: string,
-  skipUserName = false
+  skipUserName = false,
 ) {
   const signUpButton = page.locator("button", { hasText: "Sign Up" }).first();
   await signUpButton.click();
@@ -58,7 +58,7 @@ export async function login(
   email: string,
   password: string,
   username: string,
-  loginButtonSelector = "button"
+  loginButtonSelector = "button",
 ) {
   const signUpButton = page
     .locator(loginButtonSelector, { hasText: "Login" })

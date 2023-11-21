@@ -40,7 +40,7 @@ export function useSession(): SupashipUserInfo {
             }
             setChannel(newChannel);
           }
-        }
+        },
       );
     } else if (!userInfo.session?.user) {
       channel?.unsubscribe();
@@ -69,7 +69,7 @@ export function useSession(): SupashipUserInfo {
         },
         (payload) => {
           setUserInfo({ ...userInfo, profile: payload.new as UserProfile });
-        }
+        },
       )
       .subscribe();
   }

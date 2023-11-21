@@ -1,4 +1,4 @@
-import { Auth } from '@supabase/auth-ui-react';
+import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { useContext, useEffect, useState } from "react";
 import { UserContext } from "../App.tsx";
@@ -19,7 +19,6 @@ export default function Login() {
   const setReturnPath = () => {
     localStorage.setItem("returnPath", window.location.pathname);
   };
-
 
   return (
     <>
@@ -63,7 +62,7 @@ export default function Login() {
                 },
               }}
               view={authMode}
-              providers={['google']}
+              providers={["google"]}
             />
             <button onClick={() => setShowModal(false)}>Close</button>
           </>

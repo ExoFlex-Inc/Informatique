@@ -242,8 +242,8 @@ int getAfter(char* string, uint8_t numberofchars, char* buffertocopyinto,
         if (Tail_UART1 == MAINBUF_UART1_SIZE)
             Tail_UART1 = 0;
         buffertocopyinto[indx] =
-			MainBuf_UART1[Tail_UART1++];  // save the data into the buffer... increments the
-                              // tail
+            MainBuf_UART1[Tail_UART1++];  // save the data into the buffer...
+                                          // increments the tail
     }
     return 1;
 }

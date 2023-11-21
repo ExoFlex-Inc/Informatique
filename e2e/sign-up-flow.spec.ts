@@ -102,7 +102,7 @@ test.describe("User auth", () => {
       });
       await expect(welcomeHeader).toHaveCount(1);
       await expect(validation).toHaveText(
-        "Username can only contain letters, numbers, and underscores"
+        "Username can only contain letters, numbers, and underscores",
       );
     });
     test("it should not allow usernames longer than 15 characters", async ({
@@ -119,7 +119,7 @@ test.describe("User auth", () => {
       });
       await expect(welcomeHeader).toHaveCount(1);
       await expect(validation).toHaveText(
-        "Username must be less than 15 characters long"
+        "Username must be less than 15 characters long",
       );
     });
 
@@ -137,7 +137,7 @@ test.describe("User auth", () => {
       });
       await expect(welcomeHeader).toHaveCount(1);
       await expect(validation).toHaveText(
-        "Username must be at least 4 characters long"
+        "Username must be at least 4 characters long",
       );
     });
   });

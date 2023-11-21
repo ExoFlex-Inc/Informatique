@@ -1,8 +1,8 @@
-import { useContext } from 'react';
-import { Link } from 'react-router-dom';
-import { UserContext } from '../App.tsx';
+import { useContext } from "react";
+import { Link } from "react-router-dom";
+import { UserContext } from "../App.tsx";
 import { supaClient } from "../hooks/supa-client.ts";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 export default function UserMenu() {
   const { profile } = useContext(UserContext);
@@ -10,7 +10,7 @@ export default function UserMenu() {
 
   const handleLogout = () => {
     supaClient.auth.signOut();
-    navigate('/');
+    navigate("/");
   };
 
   return (
@@ -23,11 +23,8 @@ export default function UserMenu() {
         </li>
         <li className="nav-message-board-list-item">
           <div className="flex flex-col">
-            <h2>Welcome {profile?.username || 'dawg'}.</h2>
-            <button
-              onClick={handleLogout}
-              className="user-menu-logout-button"
-            >
+            <h2>Welcome {profile?.username || "dawg"}.</h2>
+            <button onClick={handleLogout} className="user-menu-logout-button">
               Logout
             </button>
           </div>
