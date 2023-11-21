@@ -25,11 +25,13 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "cJSON.h"
 #include "uartRingBufDMA.h"
+#include "comUtils_UART2.h"
+#include "CAN_Motor_Servo.h"
 
-#include "comUtils.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -40,6 +42,8 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
+#define MAX_JSON_LENGTH 20
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -48,6 +52,8 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+CAN_HandleTypeDef hcan1;
+
 UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_usart2_rx;
 
@@ -55,7 +61,7 @@ DMA_HandleTypeDef hdma_usart2_rx;
 osThreadId_t SendJSONHandle;
 const osThreadAttr_t SendJSON_attributes = {
   .name = "SendJSON",
-  .stack_size = 128 * 8,
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityLow1,
 };
 /* Definitions for ReceiveHMI */
@@ -64,6 +70,20 @@ const osThreadAttr_t ReceiveHMI_attributes = {
   .name = "ReceiveHMI",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityHigh,
+};
+/* Definitions for CanCom */
+osThreadId_t CanComHandle;
+const osThreadAttr_t CanCom_attributes = {
+  .name = "CanCom",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityHigh,
+};
+/* Definitions for SerialDetect */
+osThreadId_t SerialDetectHandle;
+const osThreadAttr_t SerialDetect_attributes = {
+  .name = "SerialDetect",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityRealtime,
 };
 /* USER CODE BEGIN PV */
 
@@ -74,8 +94,11 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_CAN1_Init(void);
 void SendJSONTask(void *argument);
 void ReceiveHMITask(void *argument);
+void CanComTask(void *argument);
+void SerialDetectTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -84,9 +107,27 @@ void ReceiveHMITask(void *argument);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-#define MainBuf_SIZE 1024
+// COM Variables
+#define MainBuf_UART2_SIZE 1024
 
-uint8_t MainBuf[MainBuf_SIZE];
+extern uint8_t MainBuf_UART2[MainBuf_UART2_SIZE];
+
+extern char id[20];
+
+CAN_TxHeaderTypeDef TxHeader;
+CAN_RxHeaderTypeDef RxHeader;
+CAN_FilterTypeDef canfilterconfig;
+
+
+uint8_t TxData[8];
+uint8_t RxData[8];
+
+uint32_t TxMailbox;
+
+// Motor values
+float p_in_1;
+float p_in_2;
+float p_in_3;
 
 /* USER CODE END 0 */
 
@@ -121,8 +162,22 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_USART2_UART_Init();
+  MX_CAN1_Init();
   /* USER CODE BEGIN 2 */
+
   Ringbuf_Init();
+
+  HAL_CAN_Start(&hcan1);
+
+  // Activate the notification
+  HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
+
+
+//  HAL_UART_Transmit(&huart1, (uint8_t *)"AT+RST\r\n", 8, 1000);
+//  while (ESP_Init("dlink08", "78542e0651a0") != 1)
+//  {
+//
+//  }
 
   /* USER CODE END 2 */
 
@@ -152,6 +207,12 @@ int main(void)
   /* creation of ReceiveHMI */
   ReceiveHMIHandle = osThreadNew(ReceiveHMITask, NULL, &ReceiveHMI_attributes);
 
+  /* creation of CanCom */
+  CanComHandle = osThreadNew(CanComTask, NULL, &CanCom_attributes);
+
+  /* creation of SerialDetect */
+  SerialDetectHandle = osThreadNew(SerialDetectTask, NULL, &SerialDetect_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -162,6 +223,7 @@ int main(void)
 
   /* Start scheduler */
   osKernelStart();
+
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -225,6 +287,56 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief CAN1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_CAN1_Init(void)
+{
+
+  /* USER CODE BEGIN CAN1_Init 0 */
+
+  /* USER CODE END CAN1_Init 0 */
+
+  /* USER CODE BEGIN CAN1_Init 1 */
+
+  /* USER CODE END CAN1_Init 1 */
+  hcan1.Instance = CAN1;
+  hcan1.Init.Prescaler = 40;
+  hcan1.Init.Mode = CAN_MODE_NORMAL;
+  hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
+  hcan1.Init.TimeSeg1 = CAN_BS1_2TQ;
+  hcan1.Init.TimeSeg2 = CAN_BS2_1TQ;
+  hcan1.Init.TimeTriggeredMode = DISABLE;
+  hcan1.Init.AutoBusOff = DISABLE;
+  hcan1.Init.AutoWakeUp = DISABLE;
+  hcan1.Init.AutoRetransmission = DISABLE;
+  hcan1.Init.ReceiveFifoLocked = DISABLE;
+  hcan1.Init.TransmitFifoPriority = DISABLE;
+  if (HAL_CAN_Init(&hcan1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN CAN1_Init 2 */
+
+  canfilterconfig.FilterActivation = CAN_FILTER_ENABLE;
+  canfilterconfig.FilterBank = 10;  // which filter bank to use from the assigned ones
+  canfilterconfig.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+  canfilterconfig.FilterIdHigh = 0;
+  canfilterconfig.FilterIdLow = 0;
+  canfilterconfig.FilterMaskIdHigh = 0;
+  canfilterconfig.FilterMaskIdLow = 0;
+  canfilterconfig.FilterMode = CAN_FILTERMODE_IDMASK;
+  canfilterconfig.FilterScale = CAN_FILTERSCALE_32BIT;
+  canfilterconfig.SlaveStartFilterBank = 20;  // how many filters to assign to the CAN1 (master can)
+
+  HAL_CAN_ConfigFilter(&hcan1, &canfilterconfig);
+
+  /* USER CODE END CAN1_Init 2 */
+
 }
 
 /**
@@ -295,7 +407,17 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : PA5 */
+  GPIO_InitStruct.Pin = GPIO_PIN_5;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LD3_Pin */
   GPIO_InitStruct.Pin = LD3_Pin;
@@ -325,20 +447,75 @@ void SendJSONTask(void *argument)
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
 
+  // Initialize motor variables
+  float motor1_pos = 0.0f;
+  float motor1_spd = 0.0f;
+  float motor1_cur = 0.0f;
+  uint8_t motor1_temp = 0;
+  uint8_t motor1_error = 0;
+
+  float motor2_pos = 0.0f;
+  float motor2_spd = 0.0f;
+  float motor2_cur = 0.0f;
+  uint8_t motor2_temp = 0;
+  uint8_t motor2_error = 0;
+
+  float motor3_pos = 0.0f;
+  float motor3_spd = 0.0f;
+  float motor3_cur = 0.0f;
+  uint8_t motor3_temp = 0;
+  uint8_t motor3_error = 0;
+
   for (;;)
   {
+	  uint8_t comm_can_extract_controller_id(uint32_t ext_id) {
+	      return (uint8_t)(ext_id & 0xFF);
+	  }
+	  uint8_t received_controller_id = comm_can_extract_controller_id(RxHeader.ExtId);
 
-    // Format the JSON message with variable values
-	  cJSON *root = cJSON_CreateObject();
-	  cJSON_AddStringToObject(root, "key1", "value1");
-	  cJSON_AddNumberToObject(root, "key2", 42);
-	  char *jsonMessage = cJSON_PrintUnformatted(root);
-	  cJSON_Delete(root);
+	if (received_controller_id == 1) {
 
-    // Send JSON string over UART
-	  HAL_UART_Transmit(&huart2, (uint8_t *)jsonMessage, strlen(jsonMessage), HAL_MAX_DELAY);
+		motor_receive(&motor1_pos, &motor1_spd, &motor1_cur, &motor1_temp, &motor1_error);
 
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+	} else if (received_controller_id == 2) {
+
+		motor_receive(&motor2_pos, &motor2_spd, &motor2_cur, &motor2_temp, &motor2_error);
+
+	} else if (received_controller_id == 3) {
+
+		motor_receive(&motor3_pos, &motor3_spd, &motor3_cur, &motor3_temp, &motor3_error);
+
+	}
+
+	cJSON *root = cJSON_CreateObject();
+
+	// Convert numbers to strings using sprintf
+	char dorsiflexionStr[20];
+	char eversionStr[20];
+	char extensionStr[20];
+
+
+	sprintf(eversionStr, "%.2f", motor1_pos);
+	sprintf(dorsiflexionStr, "%.2f", motor2_pos);
+	sprintf(extensionStr, "%.2f", motor3_pos);
+
+	// Add strings to the JSON object
+	cJSON_AddStringToObject(root, "dorsiflexion", dorsiflexionStr);
+	cJSON_AddStringToObject(root, "eversion", eversionStr);
+	cJSON_AddStringToObject(root, "extension", extensionStr);
+
+	// Print the JSON object
+	char *jsonMessage = cJSON_PrintUnformatted(root);
+	printf("%s\n", jsonMessage);
+
+
+	// Send JSON string over UART
+	HAL_UART_Transmit(&huart2, (uint8_t *)jsonMessage, strlen(jsonMessage), HAL_MAX_DELAY);
+
+	cJSON_Delete(root);
+	free(jsonMessage);
+
+    vTaskDelay(100 / portTICK_PERIOD_MS);
   }
   vTaskDelete(NULL);
   /* USER CODE END 5 */
@@ -357,18 +534,116 @@ void ReceiveHMITask(void *argument)
   /* Infinite loop */
   for(;;)
   {
+	  float p_step = 0.1;
 
-	  char* foundWord = searchWord((char*) MainBuf);
+	  char* foundWord = searchWord((char*) MainBuf_UART2);
 
-    /*
-    Switch case here when a word is found in MainBuf
-    */
 
-	  vTaskDelay(1000 / portTICK_PERIOD_MS);
+	  if (strcmp(foundWord, "eversionR") == 0) {
+	      p_in_1 -= p_step;
+	      comm_can_set_pos(1, p_in_1);
+
+	      p_in_2 += p_step;
+//	      comm_can_set_pos(2, p_in_1);
+
+	  }
+	  else if (strcmp(foundWord, "eversionL") == 0) {
+	      p_in_1 += p_step;
+	      comm_can_set_pos(1, p_in_1);
+
+	      p_in_2 -= p_step;
+	      comm_can_set_pos(2, p_in_1);
+
+	  }
+	  else if (strcmp(foundWord, "dorsiflexionU") == 0) {
+	      p_in_1 += p_step;
+	      comm_can_set_pos(1, p_in_1);
+
+	      p_in_2 += p_step;
+	      comm_can_set_pos(2, p_in_1);
+
+	  }
+	  else if (strcmp(foundWord, "dorsiflexionD") == 0) {
+	      p_in_1 -= p_step;
+	      comm_can_set_pos(1, p_in_1);
+
+	      p_in_2 -= p_step;
+	      comm_can_set_pos(2, p_in_1);
+
+	  }
+	  else if (strcmp(foundWord, "extensionU") == 0) {
+	      p_in_3 += p_step;
+	      comm_can_set_pos(3, p_in_3);
+
+	  }
+	  else if (strcmp(foundWord, "extensionD") == 0) {
+	      p_in_3 -= p_step;
+	      comm_can_set_pos(3, p_in_3);
+
+	  }
+
+
+
+	  vTaskDelay(100 / portTICK_PERIOD_MS);
 
   }
   vTaskDelete(NULL);
   /* USER CODE END ReceiveHMITask */
+}
+
+/* USER CODE BEGIN Header_CanComTask */
+/**
+* @brief Function implementing the CanCom thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_CanComTask */
+void CanComTask(void *argument)
+{
+  /* USER CODE BEGIN CanComTask */
+  /* Infinite loop */
+  for(;;)
+  {
+	  //Servo Mode
+//	  comm_can_set_pos_spd(1, 360, 5000, 30000);
+
+	  vTaskDelay(1000 / portTICK_PERIOD_MS);
+  }
+  vTaskDelete(NULL);
+  /* USER CODE END CanComTask */
+}
+
+/* USER CODE BEGIN Header_SerialDetectTask */
+/**
+* @brief Function implementing the SerialDetect thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_SerialDetectTask */
+void SerialDetectTask(void *argument)
+{
+  /* USER CODE BEGIN SerialDetectTask */
+  uint8_t uart2_detected = 0;
+
+  for(;;)
+  {
+    // Check UART2 connection status
+    if (HAL_UART_GetState(&huart2) == HAL_UART_STATE_READY) {
+      uart2_detected = 1; // UART2 is detected
+    } else {
+      uart2_detected = 0; // UART2 is not detected
+    }
+
+    // Do something based on the UART2 detection status
+    if (uart2_detected) {
+      // Delay before checking again
+      osDelay(pdMS_TO_TICKS(1000)); // Adjust the delay period as needed
+    } else {
+      // UART2 not detected, stay in this task
+      osDelay(portMAX_DELAY); // Block the task indefinitely
+    }
+  }
+  /* USER CODE END SerialDetectTask */
 }
 
 /**

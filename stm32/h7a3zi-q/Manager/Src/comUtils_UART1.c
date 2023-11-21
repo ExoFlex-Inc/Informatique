@@ -1,24 +1,21 @@
 #include <stdlib.h>
 
-#include "stm32l4xx_hal.h"
+#include "stm32h7xx_hal.h"
 #include "string.h"
 #include "uartRingBufDMA.h"
 
-extern UART_HandleTypeDef huart2;
-extern DMA_HandleTypeDef  hdma_usart2_rx;
+extern UART_HandleTypeDef huart1;
+extern DMA_HandleTypeDef  hdma_usart1_rx;
 
 #define UART huart2
 #define DMA  hdma_usart2_rx
 
 /* Define the Size Here */
-#define RxBuf_SIZE   512
-#define MainBuf_SIZE 1024
+#define MAINBUF_UART1_SIZE 1024
 
-extern uint16_t Head, Tail;
+extern uint16_t Head_UART1, Tail_UART1;
 
-extern uint8_t MainBuf[MainBuf_SIZE];
-
-extern uint16_t newPos;
+extern uint8_t MainBuf_UART1[MAINBUF_UART1_SIZE];
 
 extern int isDataAvailable;
 
@@ -96,7 +93,7 @@ int waitFor(char* string, uint32_t Timeout)
 
     TIMEOUT = Timeout;
 
-    while ((Tail == Head) && TIMEOUT)
+    while ((Tail_UART1 == Head_UART1) && TIMEOUT)
         ;  // let's wait for the data to show up
     isDataAvailable = 0;
 
@@ -110,34 +107,34 @@ again:
      * increment the index And wait for the string to arrive in the incoming
      * data
      * */
-    while (MainBuf[Tail] !=
+    while (MainBuf_UART1[Tail_UART1] !=
            string[so_far])  // peek in the rx_buffer to see if we get the string
     {
         if (TIMEOUT <= 0)
             return 0;
 
-        if (Tail == Head)
+        if (Tail_UART1 == Head_UART1)
             goto again;
-        Tail++;
+        Tail_UART1++;
 
-        if (Tail == MainBuf_SIZE)
-            Tail = 0;
+        if (Tail_UART1 == MAINBUF_UART1_SIZE)
+            Tail_UART1 = 0;
     }
 
     /* If the incoming data does match with the string, we will return 1 to
      * indicate this */
-    while (MainBuf[Tail] ==
+    while (MainBuf_UART1[Tail_UART1] ==
            string[so_far])  // if we got the first letter of the string
     {
         if (TIMEOUT <= 0)
             return 0;
         so_far++;
 
-        if (Tail == Head)
+        if (Tail_UART1 == Head_UART1)
             goto again;
-        Tail++;
-        if (Tail == MainBuf_SIZE)
-            Tail = 0;
+        Tail_UART1++;
+        if (Tail_UART1 == MAINBUF_UART1_SIZE)
+            Tail_UART1 = 0;
         if (so_far == len)
             return 1;
     }
@@ -178,7 +175,7 @@ int copyUpto(char* string, char* buffertocopyinto, uint32_t Timeout)
     int indx   = 0;
 
     TIMEOUT = Timeout;
-    while ((Tail == Head) && TIMEOUT)
+    while ((Tail_UART1 == Head_UART1) && TIMEOUT)
         ;
     isDataAvailable = 0;
 again:
@@ -187,27 +184,27 @@ again:
         return 0;
 
     /* Keep copying data until the string is found in the incoming data */
-    while (MainBuf[Tail] != string[so_far])
+    while (MainBuf_UART1[Tail_UART1] != string[so_far])
     {
-        buffertocopyinto[indx] = MainBuf[Tail];
+        buffertocopyinto[indx] = MainBuf_UART1[Tail_UART1];
 
-        if (Tail == Head)
+        if (Tail_UART1 == Head_UART1)
             goto again;
-        Tail++;
+        Tail_UART1++;
         indx++;
-        if (Tail == MainBuf_SIZE)
-            Tail = 0;
+        if (Tail_UART1 == MAINBUF_UART1_SIZE)
+            Tail_UART1 = 0;
     }
 
     /* If the string is found, copy it and return 1
      * or else goto again: and keep copying
      */
-    while (MainBuf[Tail] == string[so_far])
+    while (MainBuf_UART1[Tail_UART1] == string[so_far])
     {
         so_far++;
-        buffertocopyinto[indx++] = MainBuf[Tail++];
-        if (Tail == MainBuf_SIZE)
-            Tail = 0;
+        buffertocopyinto[indx++] = MainBuf_UART1[Tail_UART1++];
+        if (Tail_UART1 == MAINBUF_UART1_SIZE)
+            Tail_UART1 = 0;
         if (so_far == len)
             return 1;
     }
@@ -242,10 +239,10 @@ int getAfter(char* string, uint8_t numberofchars, char* buffertocopyinto,
     // HAL_Delay (100);
     for (int indx = 0; indx < numberofchars; indx++)
     {
-        if (Tail == MainBuf_SIZE)
-            Tail = 0;
+        if (Tail_UART1 == MAINBUF_UART1_SIZE)
+            Tail_UART1 = 0;
         buffertocopyinto[indx] =
-            MainBuf[Tail++];  // save the data into the buffer... increments the
+			MainBuf_UART1[Tail_UART1++];  // save the data into the buffer... increments the
                               // tail
     }
     return 1;
@@ -317,58 +314,4 @@ repeat2:
         buffertocopyinto[indx] = buffertocopyfrom[i];
         indx++;
     }
-}
-
-char* searchWord(char* buffertocopyfrom)
-{
-    char*  wordToFind[]    = {"right", "left"};
-    char*  closestWord     = NULL;
-    size_t closestPosition = SIZE_MAX;
-
-    for (int i = 0; i < 2; i++)
-    {
-        char* pos = strstr(buffertocopyfrom, wordToFind[i]);
-        if (pos != NULL)
-        {
-            size_t position = pos - buffertocopyfrom;
-
-            if (position < closestPosition)
-            {
-                closestPosition = position;
-                closestWord     = wordToFind[i];
-            }
-        }
-    }
-
-    if (closestWord != NULL)
-    {
-        // Calculate the length of the found word
-        size_t wordLength = strlen(closestWord);
-
-        // Calculate the position after the found word
-        size_t afterPosition = closestPosition + wordLength;
-
-        // Calculate the length of the text after the found word
-        size_t afterLength = strlen(buffertocopyfrom + afterPosition);
-
-        // Copy the text after the found word and any unfinished word
-        memmove(buffertocopyfrom, (char*) MainBuf + afterPosition, afterLength);
-
-        // Update newPos accordingly
-        newPos = afterLength;
-
-        // Zero out the rest of the buffer
-        memset(buffertocopyfrom + afterLength, 0, afterPosition);
-
-        return closestWord;  // Return the closest found word
-    }
-    else
-    {
-        // If no closest word found, clear MainBuf
-        memset(buffertocopyfrom, '\0', strlen(buffertocopyfrom));
-
-        // Update newPos accordingly
-        newPos = 0;
-    }
-    return NULL;  // Return NULL if no word was found
 }

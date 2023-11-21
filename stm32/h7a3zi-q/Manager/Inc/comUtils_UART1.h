@@ -1,6 +1,6 @@
 
-#ifndef COMUTILS_H
-#define COMUTILS_H
+#ifndef COMUTILS_UART1_H
+#define COMUTILS_UART1_H
 
 #include <stdint.h>
 
@@ -48,4 +48,4 @@ void getDataFromBuffer(char* startString, char* endString,
 
 char* searchWord(char* buffertocopyfrom);
 
-#endif /* CONMUTILS_H */
+#endif /* CONMUTILS_UART1_H */
