@@ -38,7 +38,7 @@ jobs:
         run: clang-format -i  stm32/h7a3zi-q/Manager/Src/*.c stm32/h7a3zi-q/UnitTests/test/*.c stm32/h7a3zi-q/Manager/Inc/*.h stm32/l432kc/Manager/Src/*.c stm32/l432kc/UnitTests/test/*.c stm32/l432kc/Manager/Inc/*.h
           
       - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Apply Formatting changes
         env:
