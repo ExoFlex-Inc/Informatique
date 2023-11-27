@@ -61,7 +61,7 @@ void comm_can_set_origin(uint8_t controller_id)
     //	uint8_t buffer[4];
     //	comm_can_transmit_eid(controller_id |
     //			((uint32_t)CAN_PACKET_SET_ORIGIN_HERE << 8), buffer,
-    //send_index);
+    // send_index);
 }
 
 void comm_can_set_pos(uint8_t controller_id, float pos)
