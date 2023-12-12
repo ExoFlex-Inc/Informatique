@@ -95,7 +95,10 @@
 // void pack_MIT_cmd(uint8_t controller_id, float p_des, float v_des, float kp,
 // float kd, float t_ff){ /// limit data to be within bounds /// 	float P_MIN
 //=-12.5f; 	float P_MAX =12.5f; 	float V_MIN =-50.0f; 	float V_MAX =50.0f;
-//float T_MIN =-65.0f; 	float T_MAX =65.0f; 	float Kp_MIN =0; 	float Kp_MAX
+
+// float T_MIN =-65.0f; 	float T_MAX =65.0f; 	float Kp_MIN =0; 	float
+// Kp_MAX
+
 // =500; 	float Kd_MIN =0; 	float Kd_MAX =5;
 //     uint8_t data[8];
 //
@@ -117,9 +120,12 @@
 //	data[1] = p_int & 0xFF;// post 8 bit low
 //	data[2] = v_int >> 4;
 //	data[3] = ((v_int & 0xF) << 4) | (kp_int >> 8); // Speed 4 bit lower KP 4bit
-// higher 	data[4] = kp_int & 0xFF; // KP 8 bit lower 	data[5] = kd_int >> 4; //
-// Kd 8 bit higher 	data[6] = ((kd_int & 0xF) << 4) | (kp_int >> 8); // KP 4 bit
-// lower torque 4 bit higher 	data[7] = t_int & 0xFF; // torque 4 bit lower
+
+// higher 	data[4] = kp_int & 0xFF; // KP 8 bit lower 	data[5] = kd_int >> 4;
+// // Kd 8 bit higher 	data[6] = ((kd_int & 0xF) << 4) | (kp_int >> 8); // KP 4
+// bit lower torque 4 bit higher 	data[7] = t_int & 0xFF; // torque 4 bit
+// lower
+
 //
 //	comm_can_transmit_eid(controller_id, data, 8);
 //
