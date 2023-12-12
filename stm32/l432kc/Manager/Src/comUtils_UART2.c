@@ -22,12 +22,16 @@ extern int32_t TIMEOUT;
 
 char* searchWord(char* buffertocopyfrom)
 {
-    char*  wordToFind[]    = {"eversionR",     "eversionL",  "dorsiflexionU",
-                              "dorsiflexionD", "extensionU", "extensionD"};
+    char*  wordToFind[]    = {"eversionR",     "eversionL",  "dorsiflexionU","dorsiflexionD", "extensionU", "extensionD",
+    						  "motor1H", "motor1AH", "motor2H", "motor2AH", "motor3H", "motor3AH",
+							  "goHome1", "goHome2", "goHome3", "goHome", "setHome"};
+
+    size_t numWords = sizeof(wordToFind) / sizeof(wordToFind[0]);
+
     char*  closestWord     = NULL;
     size_t closestPosition = SIZE_MAX;
 
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < numWords; i++)
     {
         char* pos = strstr(buffertocopyfrom, wordToFind[i]);
         if (pos != NULL)

@@ -1,18 +1,22 @@
-import { createContext } from "react";
+import { createContext, useEffect } from "react";
 import {
   createBrowserRouter,
   Outlet,
   RouterProvider,
   useNavigate,
 } from "react-router-dom";
-import { Welcome, welcomeLoader } from "./pages/Welcome.tsx";
-import NavBar from "./components/NavBar.tsx";
-import { SupashipUserInfo, useSession } from "./hooks/use-session.ts";
+
 import "./App.css";
-import HMI, { serialConnect } from "./pages/Hmi.tsx";
-import Stretch from "./pages/Stretch.tsx";
+
+import { Welcome, welcomeLoader } from "./pages/Welcome.tsx";
+import HMI, { hmiInit } from "./pages/Hmi.tsx";
+import Home from "./pages/Home.tsx";
 import Activity from "./pages/Activity.tsx";
-import { useEffect } from "react";
+import Manual, { manualInit } from "./pages/Manual.tsx";
+
+import NavBar from "./components/NavBar.tsx";
+
+import { SupashipUserInfo, useSession } from "./hooks/use-session.ts";
 
 const router = createBrowserRouter([
   {
@@ -20,8 +24,8 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       {
-        path: "stretch",
-        element: <Stretch />,
+        path: "home",
+        element: <Home />,
       },
       {
         path: "activity",
@@ -35,9 +39,14 @@ const router = createBrowserRouter([
     ],
   },
   {
+    path: "manual",
+    element: <Manual />,
+    loader: manualInit,
+  },
+  {
     path: "hmi",
     element: <HMI />,
-    loader: serialConnect,
+    loader: hmiInit,
   },
 ]);
 
@@ -58,7 +67,7 @@ function Layout() {
 
   useEffect(() => {
     if (supashipUserInfo.session) {
-      navigate("/stretch");
+      navigate("/home");
     }
   }, [supashipUserInfo.session, navigate]);
 

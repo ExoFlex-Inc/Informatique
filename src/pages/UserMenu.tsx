@@ -17,13 +17,18 @@ export default function UserMenu() {
     <div>
       <ul className="nav-right-list">
         <li className="nav-message-board-list-item">
-          <Link to="/activity" className="nav-message-board-link">
-            Activity
+          <Link to="/manual" className="nav-message-board-link">
+            Manual
           </Link>
         </li>
         <li className="nav-message-board-list-item">
+        <Link to="/activity" className="nav-message-board-link">
+            Activity
+          </Link>
+          </li>
+        <li className="nav-message-board-list-item">
           <div className="flex flex-col">
-            <h2>Welcome {profile?.username || "dawg"}.</h2>
+            <h2>Welcome {profile?.username || "client"}.</h2>
             <button onClick={handleLogout} className="user-menu-logout-button">
               Logout
             </button>

@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "fatfs.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -31,6 +32,7 @@
 #include "uartRingBufDMA.h"
 #include "comUtils_UART2.h"
 #include "CAN_Motor_Servo.h"
+#include "File_Handling_RTOS.h"
 
 /* USER CODE END Includes */
 
@@ -54,6 +56,8 @@
 /* Private variables ---------------------------------------------------------*/
 CAN_HandleTypeDef hcan1;
 
+SPI_HandleTypeDef hspi1;
+
 UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_usart2_rx;
 
@@ -61,29 +65,22 @@ DMA_HandleTypeDef hdma_usart2_rx;
 osThreadId_t SendJSONHandle;
 const osThreadAttr_t SendJSON_attributes = {
   .name = "SendJSON",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityLow1,
+  .stack_size = 220 * 4,
+  .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for ReceiveHMI */
 osThreadId_t ReceiveHMIHandle;
 const osThreadAttr_t ReceiveHMI_attributes = {
   .name = "ReceiveHMI",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityHigh,
-};
-/* Definitions for CanCom */
-osThreadId_t CanComHandle;
-const osThreadAttr_t CanCom_attributes = {
-  .name = "CanCom",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityHigh,
-};
-/* Definitions for SerialDetect */
-osThreadId_t SerialDetectHandle;
-const osThreadAttr_t SerialDetect_attributes = {
-  .name = "SerialDetect",
-  .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityRealtime,
+};
+/* Definitions for SDCard */
+osThreadId_t SDCardHandle;
+const osThreadAttr_t SDCard_attributes = {
+  .name = "SDCard",
+  .stack_size = 220 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
 
@@ -95,10 +92,10 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_CAN1_Init(void);
+static void MX_SPI1_Init(void);
 void SendJSONTask(void *argument);
 void ReceiveHMITask(void *argument);
-void CanComTask(void *argument);
-void SerialDetectTask(void *argument);
+void SDCard_Task(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -125,9 +122,15 @@ uint8_t RxData[8];
 uint32_t TxMailbox;
 
 // Motor values
-float p_in_1;
-float p_in_2;
-float p_in_3;
+float p_in_1 = 0.0f;
+float p_in_2 = 0.0f;
+float p_in_3 = 0.0f;
+
+void parseFileContent(char *fileContent, float *p_in_1, float *p_in_2, float *p_in_3) {
+    // Assuming the content format is "1. %f 2. %f 3. %f"
+    sscanf(fileContent, "1. %f 2. %f 3. %f", p_in_1, p_in_2, p_in_3);
+    vPortFree(fileContent);
+}
 
 /* USER CODE END 0 */
 
@@ -163,6 +166,8 @@ int main(void)
   MX_DMA_Init();
   MX_USART2_UART_Init();
   MX_CAN1_Init();
+  MX_SPI1_Init();
+  MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
 
   Ringbuf_Init();
@@ -172,12 +177,12 @@ int main(void)
   // Activate the notification
   HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
 
-
-//  HAL_UART_Transmit(&huart1, (uint8_t *)"AT+RST\r\n", 8, 1000);
-//  while (ESP_Init("dlink08", "78542e0651a0") != 1)
-//  {
-//
-//  }
+  Mount_SD("/");
+  char* homeBuff = Read_File("home.txt");
+  parseFileContent(homeBuff, &p_in_1, &p_in_2, &p_in_3);
+  Format_SD();
+  Create_File("home.txt");
+  Unmount_SD("/");
 
   /* USER CODE END 2 */
 
@@ -207,11 +212,8 @@ int main(void)
   /* creation of ReceiveHMI */
   ReceiveHMIHandle = osThreadNew(ReceiveHMITask, NULL, &ReceiveHMI_attributes);
 
-  /* creation of CanCom */
-  CanComHandle = osThreadNew(CanComTask, NULL, &CanCom_attributes);
-
-  /* creation of SerialDetect */
-  SerialDetectHandle = osThreadNew(SerialDetectTask, NULL, &SerialDetect_attributes);
+  /* creation of SDCard */
+  SDCardHandle = osThreadNew(SDCard_Task, NULL, &SDCard_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -265,10 +267,10 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = 1;
-  RCC_OscInitStruct.PLL.PLLN = 10;
+  RCC_OscInitStruct.PLL.PLLN = 15;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV7;
   RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
-  RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
+  RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV4;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -283,7 +285,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3) != HAL_OK)
   {
     Error_Handler();
   }
@@ -305,11 +307,11 @@ static void MX_CAN1_Init(void)
 
   /* USER CODE END CAN1_Init 1 */
   hcan1.Instance = CAN1;
-  hcan1.Init.Prescaler = 40;
+  hcan1.Init.Prescaler = 24;
   hcan1.Init.Mode = CAN_MODE_NORMAL;
   hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan1.Init.TimeSeg1 = CAN_BS1_2TQ;
-  hcan1.Init.TimeSeg2 = CAN_BS2_1TQ;
+  hcan1.Init.TimeSeg2 = CAN_BS2_2TQ;
   hcan1.Init.TimeTriggeredMode = DISABLE;
   hcan1.Init.AutoBusOff = DISABLE;
   hcan1.Init.AutoWakeUp = DISABLE;
@@ -336,6 +338,46 @@ static void MX_CAN1_Init(void)
   HAL_CAN_ConfigFilter(&hcan1, &canfilterconfig);
 
   /* USER CODE END CAN1_Init 2 */
+
+}
+
+/**
+  * @brief SPI1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SPI1_Init(void)
+{
+
+  /* USER CODE BEGIN SPI1_Init 0 */
+
+  /* USER CODE END SPI1_Init 0 */
+
+  /* USER CODE BEGIN SPI1_Init 1 */
+
+  /* USER CODE END SPI1_Init 1 */
+  /* SPI1 parameter configuration*/
+  hspi1.Instance = SPI1;
+  hspi1.Init.Mode = SPI_MODE_MASTER;
+  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi1.Init.NSS = SPI_NSS_SOFT;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
+  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi1.Init.CRCPolynomial = 7;
+  hspi1.Init.CRCLength = SPI_CRC_LENGTH_DATASIZE;
+  hspi1.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
+  if (HAL_SPI_Init(&hspi1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SPI1_Init 2 */
+
+  /* USER CODE END SPI1_Init 2 */
 
 }
 
@@ -410,7 +452,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|LD3_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : PA5 */
   GPIO_InitStruct.Pin = GPIO_PIN_5;
@@ -419,12 +461,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : LD3_Pin */
-  GPIO_InitStruct.Pin = LD3_Pin;
+  /*Configure GPIO pins : PB0 LD3_Pin */
+  GPIO_InitStruct.Pin = GPIO_PIN_0|LD3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LD3_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
@@ -445,79 +487,82 @@ static void MX_GPIO_Init(void)
 void SendJSONTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
-  /* Infinite loop */
+    /* Infinite loop */
 
-  // Initialize motor variables
-  float motor1_pos = 0.0f;
-  float motor1_spd = 0.0f;
-  float motor1_cur = 0.0f;
-  uint8_t motor1_temp = 0;
-  uint8_t motor1_error = 0;
+    // Initialize motor variables
+    float motor1_pos = 0.0f;
+    float motor1_spd = 0.0f;
+    float motor1_cur = 0.0f;
+    uint8_t motor1_temp = 0;
+    uint8_t motor1_error = 0;
 
-  float motor2_pos = 0.0f;
-  float motor2_spd = 0.0f;
-  float motor2_cur = 0.0f;
-  uint8_t motor2_temp = 0;
-  uint8_t motor2_error = 0;
+    float motor2_pos = 0.0f;
+    float motor2_spd = 0.0f;
+    float motor2_cur = 0.0f;
+    uint8_t motor2_temp = 0;
+    uint8_t motor2_error = 0;
 
-  float motor3_pos = 0.0f;
-  float motor3_spd = 0.0f;
-  float motor3_cur = 0.0f;
-  uint8_t motor3_temp = 0;
-  uint8_t motor3_error = 0;
+    float motor3_pos = 0.0f;
+    float motor3_spd = 0.0f;
+    float motor3_cur = 0.0f;
+    uint8_t motor3_temp = 0;
+    uint8_t motor3_error = 0;
 
-  for (;;)
-  {
-	  uint8_t comm_can_extract_controller_id(uint32_t ext_id) {
-	      return (uint8_t)(ext_id & 0xFF);
-	  }
-	  uint8_t received_controller_id = comm_can_extract_controller_id(RxHeader.ExtId);
+    for (;;)
+    {
+        uint8_t comm_can_extract_controller_id(uint32_t ext_id)
+        {
+            return (uint8_t)(ext_id & 0xFF);
+        }
+        uint8_t received_controller_id = comm_can_extract_controller_id(RxHeader.ExtId);
 
-	if (received_controller_id == 1) {
+        if (received_controller_id == 1)
+        {
+            motor_receive(&motor1_pos, &motor1_spd, &motor1_cur, &motor1_temp, &motor1_error);
+        }
+        else if (received_controller_id == 2)
+        {
+            motor_receive(&motor2_pos, &motor2_spd, &motor2_cur, &motor2_temp, &motor2_error);
+        }
+        else if (received_controller_id == 3)
+        {
+            motor_receive(&motor3_pos, &motor3_spd, &motor3_cur, &motor3_temp, &motor3_error);
+        }
 
-		motor_receive(&motor1_pos, &motor1_spd, &motor1_cur, &motor1_temp, &motor1_error);
+        cJSON *root = cJSON_CreateObject();
 
-	} else if (received_controller_id == 2) {
+        // Convert numbers to strings using sprintf
+        char *eversionStr = pvPortMalloc(15 * sizeof(char));
+        char *dorsiflexionStr = pvPortMalloc(15 * sizeof(char));
+        char *extensionStr = pvPortMalloc(15 * sizeof(char));
 
-		motor_receive(&motor2_pos, &motor2_spd, &motor2_cur, &motor2_temp, &motor2_error);
+        sprintf(eversionStr, "%.2f", motor1_pos);
+        sprintf(dorsiflexionStr, "%.2f", motor2_pos);
+        sprintf(extensionStr, "%.2f", motor3_pos);
 
-	} else if (received_controller_id == 3) {
+        // Add strings to the JSON object
+        cJSON_AddStringToObject(root, "dorsiflexion", dorsiflexionStr);
+        cJSON_AddStringToObject(root, "eversion", eversionStr);
+        cJSON_AddStringToObject(root, "extension", extensionStr);
 
-		motor_receive(&motor3_pos, &motor3_spd, &motor3_cur, &motor3_temp, &motor3_error);
+        // Print the JSON object
+        char *jsonMessage = cJSON_PrintUnformatted(root);
 
-	}
+        // Send JSON string over UART
+        HAL_UART_Transmit(&huart2, (uint8_t *)jsonMessage, strlen(jsonMessage), HAL_MAX_DELAY);
 
-	cJSON *root = cJSON_CreateObject();
+        free(jsonMessage);
+        cJSON_Delete(root);  // Correct way to free cJSON memory
 
-	// Convert numbers to strings using sprintf
-	char dorsiflexionStr[20];
-	char eversionStr[20];
-	char extensionStr[20];
+        // Free dynamically allocated cJSON strings
+        vPortFree(eversionStr);
+        vPortFree(dorsiflexionStr);
+        vPortFree(extensionStr);
 
+        // Free the JSON string
 
-	sprintf(eversionStr, "%.2f", motor1_pos);
-	sprintf(dorsiflexionStr, "%.2f", motor2_pos);
-	sprintf(extensionStr, "%.2f", motor3_pos);
-
-	// Add strings to the JSON object
-	cJSON_AddStringToObject(root, "dorsiflexion", dorsiflexionStr);
-	cJSON_AddStringToObject(root, "eversion", eversionStr);
-	cJSON_AddStringToObject(root, "extension", extensionStr);
-
-	// Print the JSON object
-	char *jsonMessage = cJSON_PrintUnformatted(root);
-	printf("%s\n", jsonMessage);
-
-
-	// Send JSON string over UART
-	HAL_UART_Transmit(&huart2, (uint8_t *)jsonMessage, strlen(jsonMessage), HAL_MAX_DELAY);
-
-	cJSON_Delete(root);
-	free(jsonMessage);
-
-    vTaskDelay(100 / portTICK_PERIOD_MS);
-  }
-  vTaskDelete(NULL);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+    }
   /* USER CODE END 5 */
 }
 
@@ -544,7 +589,8 @@ void ReceiveHMITask(void *argument)
 	      comm_can_set_pos(1, p_in_1);
 
 	      p_in_2 += p_step;
-//	      comm_can_set_pos(2, p_in_1);
+	      comm_can_set_pos(2, p_in_2);
+
 
 	  }
 	  else if (strcmp(foundWord, "eversionL") == 0) {
@@ -552,7 +598,7 @@ void ReceiveHMITask(void *argument)
 	      comm_can_set_pos(1, p_in_1);
 
 	      p_in_2 -= p_step;
-	      comm_can_set_pos(2, p_in_1);
+	      comm_can_set_pos(2, p_in_2);
 
 	  }
 	  else if (strcmp(foundWord, "dorsiflexionU") == 0) {
@@ -560,7 +606,7 @@ void ReceiveHMITask(void *argument)
 	      comm_can_set_pos(1, p_in_1);
 
 	      p_in_2 += p_step;
-	      comm_can_set_pos(2, p_in_1);
+	      comm_can_set_pos(2, p_in_2);
 
 	  }
 	  else if (strcmp(foundWord, "dorsiflexionD") == 0) {
@@ -568,7 +614,7 @@ void ReceiveHMITask(void *argument)
 	      comm_can_set_pos(1, p_in_1);
 
 	      p_in_2 -= p_step;
-	      comm_can_set_pos(2, p_in_1);
+	      comm_can_set_pos(2, p_in_2);
 
 	  }
 	  else if (strcmp(foundWord, "extensionU") == 0) {
@@ -581,69 +627,106 @@ void ReceiveHMITask(void *argument)
 	      comm_can_set_pos(3, p_in_3);
 
 	  }
+	  else if (strcmp(foundWord, "motor1H") == 0) {
 
+	      p_in_1 -= p_step;
+	      comm_can_set_pos(1, p_in_1);
+
+	  }
+	  else if (strcmp(foundWord, "motor1AH") == 0) {
+
+	      p_in_1 += p_step;
+	      comm_can_set_pos(1, p_in_1);
+
+	  }
+	  else if (strcmp(foundWord, "motor2H") == 0) {
+
+	      p_in_2 -= p_step;
+	      comm_can_set_pos(2, p_in_2);
+
+	  }
+	  else if (strcmp(foundWord, "motor2AH") == 0) {
+
+	      p_in_2 += p_step;
+	      comm_can_set_pos(2, p_in_2);
+
+	  }
+	  else if (strcmp(foundWord, "motor3H") == 0) {
+
+	      p_in_3 -= p_step;
+	      comm_can_set_pos(3, p_in_3);
+
+	  }
+	  else if (strcmp(foundWord, "motor3AH") == 0) {
+
+	      p_in_3 += p_step;
+	      comm_can_set_pos(3, p_in_3);
+
+	  }
+	  else if (strcmp(foundWord, "goHome1") == 0) {
+
+		  comm_can_set_pos_spd(1, 0.0, 500, 1000);
+	      p_in_1 = 0.0;
+
+	  }
+	  else if (strcmp(foundWord, "goHome2") == 0) {
+
+		  comm_can_set_pos_spd(2, 0.0, 1000, 1000);
+	      p_in_2 = 0.0;
+
+	  }
+	  else if (strcmp(foundWord, "goHome3") == 0) {
+
+		  comm_can_set_pos_spd(3, 0.0, 1000, 1000);
+	       p_in_3 = 0.0;
+
+	  }
+	  else if (strcmp(foundWord, "setHome") == 0) {
+
+			comm_can_set_origin(1);
+			comm_can_set_origin(2);
+			comm_can_set_origin(3);
+
+
+	  }
+	  else if (strcmp(foundWord, "goHome") == 0) {
+
+		  comm_can_set_pos_spd(1, 0.0, 1000, 1000);
+		  comm_can_set_pos_spd(2, 0.0, 1000, 1000);
+		  comm_can_set_pos_spd(3, 0.0, 1000, 1000);
+
+	  }
 
 
 	  vTaskDelay(100 / portTICK_PERIOD_MS);
 
   }
-  vTaskDelete(NULL);
   /* USER CODE END ReceiveHMITask */
 }
 
-/* USER CODE BEGIN Header_CanComTask */
+/* USER CODE BEGIN Header_SDCard_Task */
 /**
-* @brief Function implementing the CanCom thread.
+* @brief Function implementing the SDCard thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_CanComTask */
-void CanComTask(void *argument)
+/* USER CODE END Header_SDCard_Task */
+void SDCard_Task(void *argument)
 {
-  /* USER CODE BEGIN CanComTask */
-  /* Infinite loop */
-  for(;;)
-  {
-	  //Servo Mode
-//	  comm_can_set_pos_spd(1, 360, 5000, 30000);
+  /* USER CODE BEGIN SDCard_Task */
+    /* Infinite loop */
+    for (;;)
+    {
+        char buffer[50];
+        snprintf(buffer, sizeof(buffer), "1. %.2f 2. %.2f 3. %.2f", (double)p_in_1, (double)p_in_2, (double)p_in_3);
 
-	  vTaskDelay(1000 / portTICK_PERIOD_MS);
-  }
-  vTaskDelete(NULL);
-  /* USER CODE END CanComTask */
-}
+        Mount_SD("/");
+        Update_File("home.txt", buffer);
+        Unmount_SD("/");
 
-/* USER CODE BEGIN Header_SerialDetectTask */
-/**
-* @brief Function implementing the SerialDetect thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_SerialDetectTask */
-void SerialDetectTask(void *argument)
-{
-  /* USER CODE BEGIN SerialDetectTask */
-  uint8_t uart2_detected = 0;
-
-  for(;;)
-  {
-    // Check UART2 connection status
-    if (HAL_UART_GetState(&huart2) == HAL_UART_STATE_READY) {
-      uart2_detected = 1; // UART2 is detected
-    } else {
-      uart2_detected = 0; // UART2 is not detected
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
-
-    // Do something based on the UART2 detection status
-    if (uart2_detected) {
-      // Delay before checking again
-      osDelay(pdMS_TO_TICKS(1000)); // Adjust the delay period as needed
-    } else {
-      // UART2 not detected, stay in this task
-      osDelay(portMAX_DELAY); // Block the task indefinitely
-    }
-  }
-  /* USER CODE END SerialDetectTask */
+  /* USER CODE END SDCard_Task */
 }
 
 /**
