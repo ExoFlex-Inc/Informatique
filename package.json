@@ -16,7 +16,7 @@
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/supabase-js": "^2.38.0",
     "@syncfusion/ej2-react-charts": "^23.1.42",
-    "core-js": "^3.33.0",
+    "core-js": "^3.33.3",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "fs": "^0.0.1-security",
