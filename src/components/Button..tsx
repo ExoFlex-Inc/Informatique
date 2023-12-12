@@ -1,0 +1,92 @@
+import React, { useRef } from "react";
+
+interface ButtonProps {
+  label: string;
+  toSend?: string;
+  onMouseDown?: () => void;
+  onClick?: () => void;
+  className?: string;
+}
+
+
+const Button: React.FC<ButtonProps> = ({ label, toSend, onMouseDown, onClick, className }) => {
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isMouseDown = useRef(false);
+
+  const handleMouseUp = () => {
+    clearIntervalRef();
+    window.removeEventListener("mouseup", handleMouseUp);
+  };
+
+  const startSendingRequests = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/hmi-button-click", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ buttonClicked: toSend }),
+      });
+
+      if (response.ok) {
+        console.log("Button click sent successfully.");
+      } else {
+        console.error("Failed to send button click.");
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
+    }
+  };
+
+  const clearIntervalRef = () => {
+    if (intervalRef.current !== null) {
+      clearInterval(intervalRef.current!);
+      intervalRef.current = null;
+    }
+  };
+
+  const handleMouseDown = () => {
+    if (onMouseDown) {
+      onMouseDown();
+    }
+
+    // Set the flag to indicate mouse down
+    isMouseDown.current = true;
+
+    // Start sending requests with interval for mouse down event
+    intervalRef.current = setInterval(startSendingRequests, 100);
+
+    // Add event listener for mouseup
+    window.addEventListener("mouseup", () => {
+      isMouseDown.current = false;
+      clearIntervalRef();
+      window.removeEventListener("mouseup", handleMouseUp);
+    });
+  };
+
+  const handleClick = () => {
+    clearIntervalRef();
+
+    if (onClick) {
+      onClick();
+    }
+
+    // Start sending requests once for click event only if there was no mouse down event
+    if (!isMouseDown.current && toSend) {
+      startSendingRequests();
+    }
+  };
+
+  return (
+    <button
+      className={`bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ${className}`}
+      onMouseDown={handleMouseDown}
+      onClick={handleClick}
+    >
+      {label}
+    </button>
+  );
+};
+
+export default Button;
+
