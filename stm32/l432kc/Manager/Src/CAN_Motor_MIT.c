@@ -120,12 +120,10 @@
 //	data[1] = p_int & 0xFF;// post 8 bit low
 //	data[2] = v_int >> 4;
 //	data[3] = ((v_int & 0xF) << 4) | (kp_int >> 8); // Speed 4 bit lower KP 4bit
-
 // higher 	data[4] = kp_int & 0xFF; // KP 8 bit lower 	data[5] = kd_int >> 4;
 // // Kd 8 bit higher 	data[6] = ((kd_int & 0xF) << 4) | (kp_int >> 8); // KP 4
 // bit lower torque 4 bit higher 	data[7] = t_int & 0xFF; // torque 4 bit
 // lower
-
 //
 //	comm_can_transmit_eid(controller_id, data, 8);
 //
