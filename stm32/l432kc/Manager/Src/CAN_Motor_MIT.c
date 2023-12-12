@@ -95,10 +95,8 @@
 // void pack_MIT_cmd(uint8_t controller_id, float p_des, float v_des, float kp,
 // float kd, float t_ff){ /// limit data to be within bounds /// 	float P_MIN
 //=-12.5f; 	float P_MAX =12.5f; 	float V_MIN =-50.0f; 	float V_MAX =50.0f;
-
 // float T_MIN =-65.0f; 	float T_MAX =65.0f; 	float Kp_MIN =0; 	float
 // Kp_MAX
-
 // =500; 	float Kd_MIN =0; 	float Kd_MAX =5;
 //     uint8_t data[8];
 //
