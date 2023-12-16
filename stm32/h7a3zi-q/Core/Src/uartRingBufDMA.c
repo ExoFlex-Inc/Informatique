@@ -4,19 +4,19 @@
 #include <stdlib.h>
 
 // Define the UART1 and UART2 handles and DMA handles
-extern UART_HandleTypeDef huart2;
-extern DMA_HandleTypeDef hdma_usart2_rx;
+extern UART_HandleTypeDef huart3;
+extern DMA_HandleTypeDef hdma_usart3_rx;
 
-#define MAIN_BUF_SIZE_UART2 1024
-#define RX_BUF_SIZE_UART2 512
+#define MAIN_BUF_SIZE_UART 1024
+#define RX_BUF_SIZE_UART 512
 
 // Variables for UART2
-uint8_t MainBuf_UART2[MAIN_BUF_SIZE_UART2];
-uint8_t RxBuf_UART2[RX_BUF_SIZE_UART2];
-uint16_t oldPos_UART2 = 0;
-uint16_t newPos_UART2 = 0;
+uint8_t MainBuf_UART[MAIN_BUF_SIZE_UART];
+uint8_t RxBuf_UART[RX_BUF_SIZE_UART];
+uint16_t oldPos_UART = 0;
+uint16_t newPos_UART = 0;
 
-uint16_t Head_UART2, Tail_UART2;
+uint16_t Head_UART, Tail_UART;
 
 /* Define the Size Here */
 #define RxBuf_SIZE 512
@@ -29,21 +29,21 @@ int isDataAvailable = 0;
 /* Initialize the Ring Buffer */
 void Ringbuf_Init(void) {
 
-    memset(RxBuf_UART2, '\0', RX_BUF_SIZE_UART2);
-    memset(MainBuf_UART2, '\0', MAIN_BUF_SIZE_UART2);
-    oldPos_UART2 = 0;
-    newPos_UART2 = 0;
-    HAL_UARTEx_ReceiveToIdle_DMA(&huart2, RxBuf_UART2, RX_BUF_SIZE_UART2);
-    __HAL_DMA_DISABLE_IT(&hdma_usart2_rx, DMA_IT_HT);
+    memset(RxBuf_UART, '\0', RX_BUF_SIZE_UART);
+    memset(MainBuf_UART, '\0', MAIN_BUF_SIZE_UART);
+    oldPos_UART = 0;
+    newPos_UART = 0;
+    HAL_UARTEx_ReceiveToIdle_DMA(&huart3, RxBuf_UART, RX_BUF_SIZE_UART);
+    __HAL_DMA_DISABLE_IT(&hdma_usart3_rx, DMA_IT_HT);
 }
 
 /* Resets the Ring buffer */
 void Ringbuf_Reset(UART_HandleTypeDef *huart) {
-	memset(MainBuf_UART2, '\0', MAIN_BUF_SIZE_UART2);
-	memset(RxBuf_UART2, '\0', RX_BUF_SIZE_UART2);
-	Tail_UART2 = 0;
-	Head_UART2 = 0;
-	newPos_UART2 = 0;
+	memset(MainBuf_UART, '\0', MAIN_BUF_SIZE_UART);
+	memset(RxBuf_UART, '\0', RX_BUF_SIZE_UART);
+	Tail_UART = 0;
+	Head_UART = 0;
+	newPos_UART = 0;
 
 }
 
@@ -52,16 +52,16 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
 
     // Update oldPos and newPos based on the UART
 
-	oldPos_UART2 = newPos_UART2;
-	memcpy((uint8_t *)MainBuf_UART2 + oldPos_UART2, (uint8_t *)RxBuf_UART2, Size);
-	newPos_UART2 = (oldPos_UART2 + Size) % MAIN_BUF_SIZE_UART2;
+	oldPos_UART = newPos_UART;
+	memcpy((uint8_t *)MainBuf_UART + oldPos_UART, (uint8_t *)RxBuf_UART, Size);
+	newPos_UART = (oldPos_UART + Size) % MAIN_BUF_SIZE_UART;
 
 	// Update Head based on the UART
-	if (Head_UART2 + Size < MAIN_BUF_SIZE_UART2)
-		Head_UART2 = Head_UART2 + Size;
+	if (Head_UART + Size < MAIN_BUF_SIZE_UART)
+		Head_UART = Head_UART + Size;
 	else
-		Head_UART2 = Head_UART2 + Size - MAIN_BUF_SIZE_UART2;
+		Head_UART = Head_UART + Size - MAIN_BUF_SIZE_UART;
 
-	HAL_UARTEx_ReceiveToIdle_DMA(&huart2, (uint8_t *)RxBuf_UART2, RX_BUF_SIZE_UART2);
-	__HAL_DMA_DISABLE_IT(&hdma_usart2_rx, DMA_IT_HT);
+	HAL_UARTEx_ReceiveToIdle_DMA(&huart3, (uint8_t *)RxBuf_UART, RX_BUF_SIZE_UART);
+	__HAL_DMA_DISABLE_IT(&hdma_usart3_rx, DMA_IT_HT);
 }

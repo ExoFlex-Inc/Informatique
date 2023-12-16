@@ -177,12 +177,12 @@ int main(void)
   // Activate the notification
   HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
 
-  Mount_SD("/");
-  char* homeBuff = Read_File("home.txt");
-  parseFileContent(homeBuff, &p_in_1, &p_in_2, &p_in_3);
-  Format_SD();
-  Create_File("home.txt");
-  Unmount_SD("/");
+//  Mount_SD("/");
+//  char* homeBuff = Read_File("home.txt");
+//  parseFileContent(homeBuff, &p_in_1, &p_in_2, &p_in_3);
+//  Format_SD();
+//  Create_File("home.txt");
+//  Unmount_SD("/");
 
   /* USER CODE END 2 */
 
@@ -236,6 +236,7 @@ int main(void)
   {
 
     /* USER CODE END WHILE */
+
 
     /* USER CODE BEGIN 3 */
   }
@@ -583,7 +584,6 @@ void ReceiveHMITask(void *argument)
 
 	  char* foundWord = searchWord((char*) MainBuf_UART2);
 
-
 	  if (strcmp(foundWord, "eversionR") == 0) {
 	      p_in_1 -= p_step;
 	      comm_can_set_pos(1, p_in_1);
@@ -717,14 +717,14 @@ void SDCard_Task(void *argument)
     /* Infinite loop */
     for (;;)
     {
-        char buffer[50];
-        snprintf(buffer, sizeof(buffer), "1. %.2f 2. %.2f 3. %.2f", (double)p_in_1, (double)p_in_2, (double)p_in_3);
+//        char buffer[50];
+//        snprintf(buffer, sizeof(buffer), "1. %.2f 2. %.2f 3. %.2f", (double)p_in_1, (double)p_in_2, (double)p_in_3);
+//
+//        Mount_SD("/");
+//        Update_File("home.txt", buffer);
+//        Unmount_SD("/");
 
-        Mount_SD("/");
-        Update_File("home.txt", buffer);
-        Unmount_SD("/");
-
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(1 / portTICK_PERIOD_MS);
     }
   /* USER CODE END SDCard_Task */
 }
