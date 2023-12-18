@@ -8,8 +8,13 @@ interface ButtonProps {
   className?: string;
 }
 
-
-const Button: React.FC<ButtonProps> = ({ label, toSend, onMouseDown, onClick, className }) => {
+const Button: React.FC<ButtonProps> = ({
+  label,
+  toSend,
+  onMouseDown,
+  onClick,
+  className,
+}) => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const isMouseDown = useRef(false);
 
@@ -89,4 +94,3 @@ const Button: React.FC<ButtonProps> = ({ label, toSend, onMouseDown, onClick, cl
 };
 
 export default Button;
-
