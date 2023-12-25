@@ -53,7 +53,6 @@ let machine_id = "";
 */
 
 app.post("/initialize-serial-port", (_, res) => {
-
   const closeSerialPort = () => {
     if (port && port.isOpen) {
       port.close((err) => {
@@ -70,40 +69,35 @@ app.post("/initialize-serial-port", (_, res) => {
 
   if (port && port.isOpen) {
     res.status(200).send("Serial port already initialized.");
-  }
-  else{
+  } else {
     SerialPort.list().then((ports) => {
       const scannerPort = ports.find(
         (port) => port.manufacturer === "STMicroelectronics",
       );
-  
+
       if (scannerPort) {
         console.log("Scanner port:", scannerPort.path);
         port = new SerialPort({
           path: scannerPort.path,
           baudRate: 115200,
         });
-  
+
         port.on("error", (error) => {
           console.error("Error opening the port:", error.message);
           machineData = resetMachineData();
           closeSerialPort();
         });
-  
+
         port.on("open", () => {
           console.log("Serial port opened.");
           res.status(200).send("Serial port initialized and ready.");
-  
         });
-  
       } else {
         console.error("No scanner port found.");
         res.status(500).send("No scanner port found.");
       }
     });
   }
-  
-
 });
 
 app.post("/reset-serial-port", (_, res) => {
@@ -134,12 +128,11 @@ app.post("/reset-serial-port", (_, res) => {
 });
 
 app.post("/fetch-patient-data", (_, res) => {
-
   const createJSON = () => {
     const now = new Date();
 
     // Extracting only the date part from the current timestamp
-    const datePart = now.toISOString().split("T")[0]; 
+    const datePart = now.toISOString().split("T")[0];
 
     jsonFilename = `./machineAngles/${datePart}.json`;
 
@@ -150,7 +143,6 @@ app.post("/fetch-patient-data", (_, res) => {
         console.log(`Data has been written to ${jsonFilename}`);
       }
     });
-
   };
 
   const formatTime = (date: Date) => {
@@ -172,70 +164,69 @@ app.post("/fetch-patient-data", (_, res) => {
       console.log("Received data:", data.toString());
       receivedDataBuffer += data.toString();
 
-    // Check if the received data starts with '{'
-    if (!receivedDataBuffer.startsWith("{")) {
-      // If it doesn't start with '{', clear the buffer and continue buffering
-      resetDataBuffer();
-    }
+      // Check if the received data starts with '{'
+      if (!receivedDataBuffer.startsWith("{")) {
+        // If it doesn't start with '{', clear the buffer and continue buffering
+        resetDataBuffer();
+      }
 
-    // Check if the receivedDataBuffer is more than 100 characters
-    if (receivedDataBuffer.length > 100) {
-      // If it is, clear the buffer
-      resetDataBuffer();
-    }
+      // Check if the receivedDataBuffer is more than 100 characters
+      if (receivedDataBuffer.length > 100) {
+        // If it is, clear the buffer
+        resetDataBuffer();
+      }
 
-    // Check if the received data forms a valid JSON
-    try {
-      const jsonData = JSON.parse(receivedDataBuffer);
+      // Check if the received data forms a valid JSON
+      try {
+        const jsonData = JSON.parse(receivedDataBuffer);
 
-      if (jsonData) {
-        console.log("Received JSON:", jsonData);
+        if (jsonData) {
+          console.log("Received JSON:", jsonData);
 
-        const currentTime = new Date(); // Get the current timestamp
+          const currentTime = new Date(); // Get the current timestamp
 
-        // Loop through the keys in jsonData
-        for (const key in jsonData) {
-          if (key in machineData) {
-            const formattedTime = formatTime(currentTime);
-            if (Array.isArray(machineData[key])) {
-              // Check if it's an array, then push the value along with the timestamp to the array
-              machineData[key].push({
-                data: jsonData[key],
-                time: formattedTime,
-              });
-            } else {
-              // If it's not an array, update the value with an object containing the data and timestamp
-              machineData[key] = {
-                data: jsonData[key],
-                time: formattedTime,
-              };
+          // Loop through the keys in jsonData
+          for (const key in jsonData) {
+            if (key in machineData) {
+              const formattedTime = formatTime(currentTime);
+              if (Array.isArray(machineData[key])) {
+                // Check if it's an array, then push the value along with the timestamp to the array
+                machineData[key].push({
+                  data: jsonData[key],
+                  time: formattedTime,
+                });
+              } else {
+                // If it's not an array, update the value with an object containing the data and timestamp
+                machineData[key] = {
+                  data: jsonData[key],
+                  time: formattedTime,
+                };
+              }
             }
           }
+          // Optionally, save the updated machineData to the JSON file
+          const machineDataString = JSON.stringify(machineData);
+          fs.writeFile(jsonFilename, machineDataString, (err) => {
+            if (err) {
+              console.error("Error writing to file:", err);
+            } else {
+              console.log(`Data has been written to ${jsonFilename}`);
+            }
+          });
+          // Reset the buffer for new data
+          resetDataBuffer();
+          res.status(200).send("Data received and processed successfully.");
+        } else {
+          res
+            .status(400)
+            .json({ message: "Invalid JSON data in the request." });
         }
-        // Optionally, save the updated machineData to the JSON file
-        const machineDataString = JSON.stringify(machineData);
-        fs.writeFile(jsonFilename, machineDataString, (err) => {
-          if (err) {
-            console.error("Error writing to file:", err);
-          } else {
-            console.log(`Data has been written to ${jsonFilename}`);
-          }
-        });
-        // Reset the buffer for new data
-        resetDataBuffer();
-        res.status(200).send("Data received and processed successfully.");
-      } else {
-        res
-          .status(400)
-          .json({ message: "Invalid JSON data in the request." });
+      } catch (error) {
+        // If the data does not form a complete JSON, keep buffering
       }
-    } catch (error) {
-      // If the data does not form a complete JSON, keep buffering
-    }
-  });
+    });
   }
 });
-
 
 /*
 .##.....##.##.....##.####
@@ -271,9 +262,7 @@ app.post("/hmi-button-click", (req, res) => {
 });
 
 app.post("/home-machine", (_, res) => {
-
-  if(port && port.isOpen){
-    
+  if (port && port.isOpen) {
     port.write("home", (err) => {
       if (err) {
         console.error("Error while homing the machine:", err);
@@ -283,9 +272,7 @@ app.post("/home-machine", (_, res) => {
         res.status(500).send("Homing was successfully sent");
       }
     });
-
   }
-
 });
 
 /*
