@@ -117,27 +117,20 @@ export default function HMI() {
           className="mr-2"
         />
         <button
-        onClick={() => sendDataToSupabase()} 
-        className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2" 
+          onClick={() => sendDataToSupabase()}
+          className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2"
         >
-        Send data
+          Send data
         </button>
         <Button
           label={rightButton === "eversionR" ? "EversionR" : "DorsiflexionU"}
           toSend={rightButton}
         />
         {leftButton === "dorsiflexionD" && (
-          <Button
-            label="ExtensionD"
-            toSend="extensionD"
-            className="mr-2"
-          />
+          <Button label="ExtensionD" toSend="extensionD" className="mr-2" />
         )}
         {rightButton === "dorsiflexionU" && (
-          <Button
-            label="ExtensionU"
-            toSend="extensionU"
-          />
+          <Button label="ExtensionU" toSend="extensionU" />
         )}
       </div>
       <div className="flex justify-between p-5">
@@ -146,5 +139,4 @@ export default function HMI() {
       </div>
     </div>
   );
-  
 }
