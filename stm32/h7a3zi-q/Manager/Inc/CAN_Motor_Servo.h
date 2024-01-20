@@ -30,7 +30,8 @@ extern uint32_t TxMailbox;
 
 extern float p_in;
 
-void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef* hfdcan, uint32_t RxFifo0ITs);
+void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef* hfdcan,
+                               uint32_t             RxFifo0ITs);
 void buffer_append_int16(uint8_t* buffer, int16_t number, int16_t* index);
 void buffer_append_int32(uint8_t* buffer, int32_t number, int32_t* index);
 void comm_can_transmit_eid(uint32_t id, const uint8_t* data, uint32_t bytes);

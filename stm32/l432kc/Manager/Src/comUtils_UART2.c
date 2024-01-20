@@ -22,9 +22,12 @@ extern int32_t TIMEOUT;
 
 char* searchWord(char* buffertocopyfrom)
 {
-    char*  wordToFind[]    = {"eversionR",     "eversionL",  "dorsiflexionU","dorsiflexionD", "extensionU", "extensionD",
-    						  "motor1H", "motor1AH", "motor2H", "motor2AH", "motor3H", "motor3AH",
-							  "goHome1", "goHome2", "goHome3", "goHome", "setHome"};
+    char* wordToFind[] = {"eversionR",     "eversionL",  "dorsiflexionU",
+                          "dorsiflexionD", "extensionU", "extensionD",
+                          "motor1H",       "motor1AH",   "motor2H",
+                          "motor2AH",      "motor3H",    "motor3AH",
+                          "goHome1",       "goHome2",    "goHome3",
+                          "goHome",        "setHome"};
 
     size_t numWords = sizeof(wordToFind) / sizeof(wordToFind[0]);
 

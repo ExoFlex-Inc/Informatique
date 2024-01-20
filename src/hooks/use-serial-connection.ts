@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 const useSerialConnection = () => {
   const [error, setError] = useState(null);
@@ -7,21 +7,23 @@ const useSerialConnection = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-
-        const responseSerialPort = await fetch('http://localhost:3001/initialize-serial-port', {
-          method: 'POST',
-        });
+        const responseSerialPort = await fetch(
+          "http://localhost:3001/initialize-serial-port",
+          {
+            method: "POST",
+          },
+        );
 
         if (responseSerialPort.ok) {
-          console.log('Serial port initialized successfully.');
+          console.log("Serial port initialized successfully.");
           setIsConnected(true);
         } else {
-          console.error('Failed to initialize the serial port.');
-          setError('Failed to initialize the serial port.');
+          console.error("Failed to initialize the serial port.");
+          setError("Failed to initialize the serial port.");
         }
       } catch (error) {
-        console.error('An error occurred:', error);
-        setError('An error occurred.');
+        console.error("An error occurred:", error);
+        setError("An error occurred.");
       }
     };
 
