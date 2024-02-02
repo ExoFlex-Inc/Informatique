@@ -3,6 +3,7 @@
 #ifndef CAN_MOTOR_SERVO_H
 #define CAN_MOTOR_SERVO_H
 
+#include "main.h"
 #include <stdint.h>
 
 #include "stm32h7xx_hal.h"
@@ -19,16 +20,8 @@ typedef enum
     CAN_PACKET_POS_SPD  // Position velocity loop mode
 } CAN_PACKET_ID;
 
-extern FDCAN_HandleTypeDef   hfdcan1;
-extern FDCAN_TxHeaderTypeDef TxHeader;
-extern FDCAN_RxHeaderTypeDef RxHeader;
 
-extern uint8_t TxData[8];
-extern uint8_t RxData[8];
 
-extern uint32_t TxMailbox;
-
-extern float p_in;
 
 void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef* hfdcan, uint32_t RxFifo0ITs);
 void buffer_append_int16(uint8_t* buffer, int16_t number, int16_t* index);
