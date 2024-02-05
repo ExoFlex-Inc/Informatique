@@ -2,6 +2,13 @@
 #include "CAN_Motor_Servo.h"
 #include "cJSON.h"
 
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include "comUtils_UART2.h"
+#include "uartRingBufDMA.h"
+
 #define MOTOR_NBR 3
 #define MOTOR_1 0
 #define MOTOR_2 1
@@ -30,6 +37,7 @@ void ManagerMotorHMI_Init()
 		motors[i].current = 0;
 		motors[i].temp = 0;
 		motors[i].error = 0;
+		motors[i].update = false;
 	}
 }
 
@@ -140,7 +148,7 @@ void ManagerMotorHMI_SendToMotors()
 {
 	for(uint8_t i = 0; i<MOTOR_NBR; i++)
 	{
-		if (motors[i].update = true)
+		if (motors[i].update)
 		{
 			comm_can_set_pos(motors[i].index, motors[i].nextPosition);
 			motors[i].update = false;

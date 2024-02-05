@@ -21,14 +21,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+
 
 #include "cJSON.h"
 #include "uartRingBufDMA.h"
-#include "comUtils_UART2.h"
+
 #include <Manager_Motor_HMI.h>
 
 
