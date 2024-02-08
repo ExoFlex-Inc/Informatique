@@ -16,8 +16,11 @@
 
 #define MOTOR_STEP 0.1
 
+#define TIMER 100
+
 motorInfo_t motors[MOTOR_NBR];
 uint8_t motorIndexes[MOTOR_NBR];
+uint32_t timerMs = 0;
 
 //Prototypes
 void ManagerMotorHMI_ReceiveFromMotors();
@@ -45,14 +48,18 @@ void ManagerMotorHMI_Task()
 {
 
 	//Machine à état qui prend en compte l'initialisation des moteurs, première lecture et home
+	if (HAL_GetTick() - timerMs >= TIMER)
+	{
+		ManagerMotorHMI_ReceiveFromMotors();
 
-	ManagerMotorHMI_ReceiveFromMotors();
+		ManagerMotorHMI_CalculateNextPositions();
 
-	ManagerMotorHMI_CalculateNextPositions();
+		ManagerMotorHMI_SendToMotors();
 
-	ManagerMotorHMI_SendToMotors();
+		ManagerMotorHMI_SendToHMI();
 
-	ManagerMotorHMI_SendToHMI();
+		timerMs = HAL_GetTick();
+	}
 }
 
 
