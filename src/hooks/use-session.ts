@@ -1,6 +1,6 @@
 import { RealtimeChannel, Session } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
-import { redirect, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supaClient } from "./supa-client.ts";
 
 export interface UserProfile {
@@ -9,13 +9,13 @@ export interface UserProfile {
   avatarUrl?: string;
 }
 
-export interface SupashipUserInfo {
+export interface SupabaseUserInfo {
   session: Session | null;
   profile: UserProfile | null;
 }
 
-export function useSession(): SupashipUserInfo {
-  const [userInfo, setUserInfo] = useState<SupashipUserInfo>({
+export function useSession(): SupabaseUserInfo {
+  const [userInfo, setUserInfo] = useState<SupabaseUserInfo>({
     profile: null,
     session: null,
   });
@@ -27,7 +27,7 @@ export function useSession(): SupashipUserInfo {
       access_token,
       refresh_token,
     };
-  
+
     try {
       const responseServer = await fetch('http://localhost:3001/setup-local-server', {
         method: 'POST',
@@ -42,12 +42,12 @@ export function useSession(): SupashipUserInfo {
       } else {
         console.error('Local server setup failed');
         setChannel(null);
-        redirect("/");
+        navigate("/");
       }
     } catch (error) {
       console.error('Error during local server setup:', error);
       setChannel(null); //TODO: When server local is not connected, it still signs in the user
-      redirect("/");
+      navigate("/");
     }
   };  
 
@@ -71,9 +71,8 @@ export function useSession(): SupashipUserInfo {
             setChannel(newChannel);
           }
         },
-        );
-        
-        
+      );
+
       const access_token = userInfo.session?.access_token;
       const refresh_token = userInfo.session?.refresh_token;
 
@@ -82,7 +81,7 @@ export function useSession(): SupashipUserInfo {
     } else if (!userInfo.session?.user) {
       channel?.unsubscribe();
       setChannel(null);
-      redirect("/");
+      navigate("/");
     }
   }, [userInfo.session]);
 

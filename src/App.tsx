@@ -1,82 +1,74 @@
 import { createContext, useEffect } from "react";
-import {
-  createBrowserRouter,
-  Outlet,
-  RouterProvider,
-  useNavigate,
-} from "react-router-dom";
-
+import { Routes, Route, BrowserRouter, useNavigate } from "react-router-dom";
+import { ColorModeContext, useMode } from "./hooks/theme.ts";
+import { CssBaseline, ThemeProvider } from "@mui/material";
 import "./App.css";
 
+import Dashboard from "./pages/Dashboard.tsx";
 import { Welcome, welcomeLoader } from "./pages/Welcome.tsx";
 import HMI, { hmiInit } from "./pages/Hmi.tsx";
 import Home from "./pages/Home.tsx";
 import Activity from "./pages/Activity.tsx";
 import Manual, { manualInit } from "./pages/Manual.tsx";
 
-import NavBar from "./components/NavBar.tsx";
+import TopBar from "./pages/global/TopBar.tsx";
+import ProSideBar from "./pages/global/Sidebar.tsx";
 
-import { SupashipUserInfo, useSession } from "./hooks/use-session.ts";
+import { SupabaseUserInfo, useSession } from "./hooks/use-session.ts";
+import Settings from "./pages/Settings.tsx";
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Layout />,
-    children: [
-      {
-        path: "home",
-        element: <Home />,
-      },
-      {
-        path: "activity",
-        element: <Activity />,
-      },
-      {
-        path: "welcome",
-        element: <Welcome />,
-        loader: welcomeLoader,
-      },
-    ],
-  },
-  {
-    path: "manual",
-    element: <Manual />,
-    loader: manualInit,
-  },
-  {
-    path: "hmi",
-    element: <HMI />,
-    loader: hmiInit,
-  },
-]);
-
-function App() {
-  return <RouterProvider router={router} />;
-}
-
-export default App;
-
-export const UserContext = createContext<SupashipUserInfo>({
+export const UserContext = createContext<SupabaseUserInfo>({
   session: null,
   profile: null,
 });
 
 function Layout() {
-  const supashipUserInfo = useSession();
+  const supabaseUserInfo = useSession();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (supashipUserInfo.session) {
-      navigate("/home");
+    if (supabaseUserInfo.session) {
+      // navigate("/home");
     }
-  }, [supashipUserInfo.session, navigate]);
+  }, [supabaseUserInfo.session, navigate]);
 
   return (
-    <>
-      <UserContext.Provider value={supashipUserInfo}>
-        <NavBar />
-        <Outlet />
-      </UserContext.Provider>
-    </>
+    <UserContext.Provider value={supabaseUserInfo}>
+      <>
+      {supabaseUserInfo.session && (
+        <ProSideBar/>
+      )}
+        <main className="content">
+          <TopBar />
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/activity" element={<Activity />} />
+            <Route path="/welcome" element={<Welcome />} loader={welcomeLoader} />
+            <Route path="/manual" element={<Manual />} loader={manualInit} />
+            <Route path="/hmi" element={<HMI />} loader={hmiInit} />
+            <Route path="/settings" element={<Settings />} />
+          </Routes>
+        </main>
+      </>
+    </UserContext.Provider>
   );
 }
+
+function App() {
+  const [theme, colorMode] = useMode();
+
+  return (
+    <ColorModeContext.Provider value={colorMode}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <BrowserRouter>
+          <div className="app">
+            <Layout />
+          </div>
+        </BrowserRouter>
+      </ThemeProvider>
+    </ColorModeContext.Provider>
+  );
+}
+
+export default App;
