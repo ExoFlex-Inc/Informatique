@@ -14,7 +14,6 @@ import TvIcon from '@mui/icons-material/Tv';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import { stringify } from "querystring";
 
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
@@ -135,7 +134,7 @@ const ProSidebar = () => {
                   {profile?.username || "Client"}
                 </Typography>
                 <Typography variant={isTablet ? "h6" : "h5"} color={colors.greenAccent[500]}>
-                  Physiothérapeute
+                {profile?.speciality || "Speciality"}
                 </Typography>
               </Box>
             </Box>

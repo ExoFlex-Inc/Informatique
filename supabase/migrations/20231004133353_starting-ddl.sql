@@ -12,10 +12,10 @@ CREATE EXTENSION IF NOT EXISTS ltree;
 */
 
 CREATE TABLE  user_profiles (
-  user_id uuid primary key references auth.users (id) not null,
-  username text unique not null
-  CONSTRAINT proper_username CHECK (username ~* '^[a-zA-Z0-9_]+$')
-  CONSTRAINT username_length CHECK (char_length(username) > 3 and char_length(username) < 15)
+  user_id UUID PRIMARY KEY REFERENCES auth.users (id) NOT NULL,
+  username TEXT CHECK (char_length(username) > 0 AND char_length(username) <= 50 AND username !~ '\d'), 
+  lastname TEXT CHECK (char_length(lastname) > 0 AND char_length(lastname) <= 50 AND lastname !~ '\d'),
+  speciality TEXT CHECK (char_length(speciality) > 0 AND char_length(speciality) <= 50 AND speciality !~ '\d')
 );
 
 CREATE TABLE machine (

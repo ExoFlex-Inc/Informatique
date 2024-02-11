@@ -5,6 +5,8 @@ import { supaClient } from "./supa-client.ts";
 
 export interface UserProfile {
   username: string;
+  lastname: string;
+  speciality: string;
   user_id: string;
   avatarUrl?: string;
 }
