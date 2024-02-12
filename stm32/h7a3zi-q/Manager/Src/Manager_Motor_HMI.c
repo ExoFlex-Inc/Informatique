@@ -1,7 +1,7 @@
 #include <Manager_Motor_HMI.h>
-#include "CAN_Motor_Servo.h"
-#include "cJSON.h"
+#include "CanMotorServo.h"
 
+#include "cJSON.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,6 +31,8 @@ uint8_t ManagerMotorHMI_CANExtractControllerID(uint32_t ext_id);
 
 void ManagerMotorHMI_Init()
 {
+	CanMotorServo_Init();
+
 	for (uint8_t i = 0; i < MOTOR_NBR; i++)
 	{
 		motors[i].index = i + 1;
@@ -71,7 +73,7 @@ void ManagerMotorHMI_ReceiveFromMotors()
 	if (received_controller_id >= 1 && received_controller_id <= 3  )
 	{
 		uint8_t motorIndex = received_controller_id - 1 ;
-		motor_receive(&motors[motorIndex].position, &motors[motorIndex].speed, &motors[motorIndex].current, &motors[motorIndex].temp, &motors[motorIndex].error);
+		CanMotorServo_Receive(&motors[motorIndex].position, &motors[motorIndex].speed, &motors[motorIndex].current, &motors[motorIndex].temp, &motors[motorIndex].error);
 	}
 }
 
@@ -137,9 +139,12 @@ void ManagerMotorHMI_CalculateNextPositions()
   }
   else if (strcmp(foundWord, "setHome") == 0) {
 
-	comm_can_set_origin(1);
-	comm_can_set_origin(2);
-	comm_can_set_origin(3);
+	CanMotorServo_SetOrigin(1);
+	CanMotorServo_SetOrigin(2);
+	CanMotorServo_SetOrigin(3);
+	motors[MOTOR_1].nextPosition = 0;
+	motors[MOTOR_2].nextPosition = 0;
+	motors[MOTOR_3].nextPosition = 0;
   }
   else if (strcmp(foundWord, "goHome") == 0) {
 	  motors[MOTOR_1].nextPosition = 0;
@@ -157,7 +162,7 @@ void ManagerMotorHMI_SendToMotors()
 	{
 		if (motors[i].update)
 		{
-			comm_can_set_pos(motors[i].index, motors[i].nextPosition);
+			CanMotorServo_SetPos(motors[i].index, motors[i].nextPosition);
 			motors[i].update = false;
 		}
 	}
