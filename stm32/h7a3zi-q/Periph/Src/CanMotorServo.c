@@ -107,15 +107,9 @@ void CanMotorServo_Receive(float* motor_pos, float* motor_spd, float* motor_cur,
 
 void CanMotorServo_SetOrigin(uint8_t controller_id) {
     // 0: Temporary origin (power failure elimination),
-    // 1: Permanent zero point (automatic parameter saving),
-    // 2: Restoring the default zero point (automatic parameter saving)
     // For now, only mode 0 works and position can't be saved in drive for power off
-
-    // For now, enforce set_origin_mode to be 0
     uint8_t set_origin_mode = 0;
-
-    CanMotorServo_Transmit(controller_id |
-            ((uint32_t)CAN_PACKET_SET_ORIGIN_HERE << 8), &set_origin_mode, FDCAN_DLC_BYTES_1);
+    CanMotorServo_Transmit(controller_id | ((uint32_t)CAN_PACKET_SET_ORIGIN_HERE << 8), &set_origin_mode, FDCAN_DLC_BYTES_1);
 }
 
 
@@ -123,17 +117,73 @@ void CanMotorServo_SetPos(uint8_t controller_id, float pos)
 {
     int32_t send_index = 0;
     uint8_t buffer[4];
-    CanMotorServo_BufferAppendInt32(buffer, (int32_t) (pos * 1000000.0), &send_index);
-    CanMotorServo_Transmit(controller_id | ((uint32_t) CAN_PACKET_SET_POS << 8),
-                          buffer, FDCAN_DLC_BYTES_4);
+    CanMotorServo_BufferAppendInt32(buffer, (int32_t) (pos * 10000.0), &send_index);
+    CanMotorServo_Transmit(controller_id | ((uint32_t) CAN_PACKET_SET_POS << 8), buffer, FDCAN_DLC_BYTES_4);
 }
 
-void CanMotorServo_SetPosSpeed(uint8_t controller_id, float pos, int16_t spd,
-                          int16_t RPA)
-{
-	// pos: -3600-3600,
-	// spd:
+void CanMotorServo_SetSpeed(uint8_t controller_id, float rpm) {
+  int32_t send_index = 0;
+  uint8_t buffer[4];
+  CanMotorServo_BufferAppendInt32(buffer, (int32_t)rpm, &send_index);
+  CanMotorServo_Transmit(controller_id | ((uint32_t)CAN_PACKET_SET_RPM << 8), buffer, FDCAN_DLC_BYTES_4);
 }
+
+void CanMotorServo_SetPosSpeed(uint8_t controller_id, float pos, int16_t spd, int16_t RPA)
+{
+	int32_t send_index = 0;
+	int16_t send_index1 = 4;
+
+	uint8_t cnt = 0;
+
+	uint8_t buffer[8] = {0};
+
+	CanMotorServo_BufferAppendInt32(buffer, (int32_t)(pos * 10000.0), &send_index);
+	CanMotorServo_BufferAppendInt16(buffer,(int16_t)spd, &send_index1);
+	CanMotorServo_BufferAppendInt16(buffer,(int16_t) RPA, &send_index1);
+
+	for(int i = 0, j = 7; i < 8/2; i++, j--)
+	    {
+	        cnt = buffer[i];
+	        buffer[i] = buffer[j];
+	        buffer[j] = cnt;
+	    }
+
+	CanMotorServo_Transmit(controller_id |((uint32_t)CAN_PACKET_SET_POS_SPD << 8), buffer, FDCAN_DLC_BYTES_8);
+}
+
+void CanMotorServo_SetRPM(uint8_t controller_id, float rpm) 
+{
+  int32_t send_index = 0;
+  uint8_t buffer[4];
+  CanMotorServo_BufferAppendInt32(buffer, (int32_t)rpm, &send_index);
+  CanMotorServo_Transmit(controller_id |
+  ((uint32_t)CAN_PACKET_SET_RPM << 8), buffer, send_index);
+}
+
+void CanMotorServo_SetCurrentBreak(uint8_t controller_id, float current) 
+{
+  int32_t send_index = 0;
+  uint8_t buffer[4];
+  CanMotorServo_BufferAppendInt32(buffer, (int32_t)(current * 1000.0), &send_index);
+  CanMotorServo_Transmit(controller_id |((uint32_t)CAN_PACKET_SET_CURRENT_BRAKE << 8), buffer, FDCAN_DLC_BYTES_4);
+}
+
+void CanMotorServo_SetCurrent(uint8_t controller_id, float current) 
+{
+  int32_t send_index = 0;
+  uint8_t buffer[4];
+  CanMotorServo_BufferAppendInt32(buffer, (int32_t)(current * 1000.0), &send_index);
+  CanMotorServo_Transmit(controller_id | ((uint32_t)CAN_PACKET_SET_CURRENT << 8), buffer, FDCAN_DLC_BYTES_4);
+}
+
+void CanMotorServo_SetDuty(uint8_t controller_id, float duty) 
+{
+  int32_t send_index = 0;
+  uint8_t buffer[4];
+  CanMotorServo_BufferAppendInt32(buffer, (int32_t)(duty * 100000.0), &send_index);
+  CanMotorServo_Transmit(controller_id |((uint32_t)CAN_PACKET_SET_DUTY << 8), buffer, FDCAN_DLC_BYTES_4);
+}
+
 
 void CanMotorServo_BufferAppendInt16(uint8_t* buffer, int16_t number, int16_t* index)
 {
@@ -147,7 +197,6 @@ void CanMotorServo_BufferAppendInt32(uint8_t* buffer, int32_t number, int32_t* i
     buffer[(*index)++] = number >> 16;
     buffer[(*index)++] = number >> 8;
     buffer[(*index)++] = number;
-
 }
 
 
