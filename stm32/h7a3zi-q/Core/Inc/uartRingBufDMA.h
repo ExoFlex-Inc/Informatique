@@ -8,6 +8,8 @@
 #ifndef INC_UARTRINGBUFDMA_H_
 #define INC_UARTRINGBUFDMA_H_
 
+#include "main.h"
+
 #include <stdint.h>
 
 /* Initialize the Ring buffer

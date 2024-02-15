@@ -15,7 +15,7 @@
     "@supabase/auth-ui-react": "^0.2.6",
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/supabase-js": "^2.38.5",
-    "@syncfusion/ej2-react-charts": "^23.1.42",
+    "@syncfusion/ej2-react-charts": "^24.1.41",
     "core-js": "^3.33.3",
     "cors": "^2.8.5",
     "express": "^4.18.2",
@@ -25,11 +25,11 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.16.0",
     "serialport": "^12.0.0",
-    "uuid": "^7.0.0"
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.1",
-    "@types/cors": "^2.8.14",
+    "@types/cors": "^2.8.17",
     "@types/express": "^4.17.19",
     "@types/node": "^20.8.4",
     "@types/react": "^18.2.15",
@@ -48,8 +48,8 @@
     "supabase": "^1.100.1",
     "tailwindcss": "^3.3.5",
     "ts-node": "^10.9.1",
-    "typescript": "^5.2.2",
+    "typescript": "^5.3.3",
     "yarn": "^1.22.21",
-    "vite": "^4.5.1"
+    "vite": "^4.5.2"
   }
 }
