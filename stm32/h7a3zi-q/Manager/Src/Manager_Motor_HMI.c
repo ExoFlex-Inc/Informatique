@@ -16,11 +16,11 @@
 
 #define MOTOR_STEP 1
 
-#define TIMER 100
+#define TRY 3
+uint8_t tryCount = 0;
 
 motorInfo_t motors[MOTOR_NBR];
 uint8_t motorIndexes[MOTOR_NBR];
-uint32_t timerMs = 0;
 
 //Prototypes
 void ManagerMotorHMI_ReceiveFromMotors();
@@ -49,18 +49,24 @@ void ManagerMotorHMI_Init()
 void ManagerMotorHMI_Task()
 {
 
-	//Machine à état qui prend en compte l'initialisation des moteurs, première lecture et home
-	if (HAL_GetTick() - timerMs >= TIMER)
+	// Read les moteurs avant chacune des etapes
+	ManagerMotorHMI_ReceiveFromMotors(); //Ajouter gestion erreur si moteurs renvoi rien
+
+	// Machine à état qui prend en compte l'initialisation des moteurs, première lecture et home
+	switch(MOTOR_STATE)
 	{
-		ManagerMotorHMI_ReceiveFromMotors();
+			case SET_ORIGIN:
+				ManagerMotorHMI_SetOrigines();
+				break;
 
-		ManagerMotorHMI_CalculateNextPositions();
+			case READY2MOVE:
+				ManagerMotorHMI_SendToMotors();
+				ManagerMotorHMI_CalculateNextPositions(); //Devient un manager a part entiere
+				ManagerMotorHMI_SendToHMI();
+				break;
 
-		ManagerMotorHMI_SendToMotors();
-
-		ManagerMotorHMI_SendToHMI();
-
-		timerMs = HAL_GetTick();
+			case ERROR:
+				break;
 	}
 }
 
@@ -199,6 +205,33 @@ uint8_t ManagerMotorHMI_CANExtractControllerID(uint32_t ext_id)
 {
 	return (uint8_t)(ext_id & 0xFF);
 }
+
+void ManagerMotorHMI_SetOrigines()
+{
+
+	if (motors[MOTOR_1].position == 0.0 && motors[MOTOR_2].position == 0.0 && motors[MOTOR_3].position == 0.0)
+	{
+		MOTOR_STATE = READY2MOVE;
+		retryCount = 0;
+	}
+	else if (tryCount < TRY)
+	{
+		comm_can_set_origin(1);
+		HAL_Delay(50);
+		comm_can_set_origin(2);
+		HAL_Delay(50);
+		comm_can_set_origin(3);
+		HAL_Delay(50);
+
+		tryCount += 1;
+	}
+	else
+	{
+		MOTOR_STATE = ERROR;
+		// Return le code d'erreur ??
+	}
+}
+
 
 
 
