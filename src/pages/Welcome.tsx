@@ -120,4 +120,3 @@ function validateUsername(username: string): string | undefined {
   }
   return undefined;
 }
-
