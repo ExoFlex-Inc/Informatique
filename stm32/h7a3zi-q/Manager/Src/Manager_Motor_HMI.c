@@ -14,7 +14,7 @@
 #define MOTOR_2 1
 #define MOTOR_3 2
 
-#define MOTOR_STEP 0.1
+#define MOTOR_STEP 1
 
 #define TIMER 100
 
