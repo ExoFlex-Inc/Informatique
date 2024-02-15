@@ -17,7 +17,6 @@ export async function manualInit(navigate) {
     if (responseSerialPort.ok) {
       console.log("Serial port initialized successfully.");
       return { loaded: true };
-
     } else {
       console.error("Failed to initialize serial port: Check STM32 connection ");
       window.alert("Failed to initialize serial port: Check STM32 connection ");
@@ -31,10 +30,8 @@ export async function manualInit(navigate) {
 }
 
 export default function Manual() {
-
   const navigate = useNavigate();
-  
-  
+
   const handleBackClick = async () => {
     navigate("/");
 
@@ -42,10 +39,9 @@ export default function Manual() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-2rem)] justify-between">
-
-    <div className="mt-32 mb-4 flex justify-center">
+      <div className="mt-32 mb-4 flex justify-center">
         <Button label="Motor1H" toSend="motor1H" className="mr-4" />
-        <Button label="Motor1AH" toSend="motor1AH" className="mr-8"/>
+        <Button label="Motor1AH" toSend="motor1AH" className="mr-8" />
         <Button label="Motor2H" toSend="motor2H" className="mr-4" />
         <Button label="Motor2AH" toSend="motor2AH" className="mr-8" />
         <Button label="Motor3H" toSend="motor3H" className="mr-4" />
@@ -54,13 +50,13 @@ export default function Manual() {
 
       <div className="mb-4 flex justify-center">
         <Button label="EversionL" toSend="eversionL" className="mr-4" />
-        <Button label="EversionR" toSend="eversionR" className="mr-8"/>
+        <Button label="EversionR" toSend="eversionR" className="mr-8" />
         <Button label="DorsiflexionU" toSend="dorsiflexionU" className="mr-4" />
         <Button label="DorsiflexionD" toSend="dorsiflexionD" className="mr-8" />
         <Button label="ExtensionU" toSend="extensionU" className="mr-4" />
         <Button label="ExtensionD" toSend="extensionD" className="mr-8" />
       </div>
-  
+
       <div className="mb-4 flex justify-center">
         <Button label="goHome1" toSend="goHome1" className="mr-4" />
         <Button label="goHome2" toSend="goHome2" className="mr-4" />
@@ -74,8 +70,4 @@ export default function Manual() {
       </div>
     </div>
   );
-  
-  
-  
-  
 }

@@ -27,9 +27,7 @@ export default function Home() {
                 padding: "10px",
               }}
             >
-              <p>
-                Dorsiflexion
-              </p>
+              <p>Dorsiflexion</p>
             </div>
           </div>
 
@@ -50,9 +48,7 @@ export default function Home() {
                 padding: "10px",
               }}
             >
-              <p>
-                Eversion
-              </p>
+              <p>Eversion</p>
             </div>
           </div>
         </div>
