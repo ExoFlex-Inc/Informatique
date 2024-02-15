@@ -571,136 +571,135 @@
     "@supabase/realtime-js" "^2.8.4"
     "@supabase/storage-js" "^2.5.4"
 
-"@syncfusion/ej2-base@~23.1.36", "@syncfusion/ej2-base@~23.1.41":
-  version "23.1.41"
-  resolved "https://registry.npmjs.org/@syncfusion/ej2-base/-/ej2-base-23.1.41.tgz"
+"@syncfusion/ej2-base@~24.1.41":
+  version "24.1.41"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-base/-/ej2-base-24.1.41.tgz#e0997a70dcdde71fb3596d29e7ccd3dce5e53a71"
   dependencies:
-    "@syncfusion/ej2-icons" "~23.1.36"
+    "@syncfusion/ej2-icons" "~24.1.41"
 
-"@syncfusion/ej2-buttons@~23.1.41", "@syncfusion/ej2-buttons@~23.1.43":
-  version "23.1.43"
-  resolved "https://registry.npmjs.org/@syncfusion/ej2-buttons/-/ej2-buttons-23.1.43.tgz"
+"@syncfusion/ej2-buttons@~24.1.41":
+  version "24.1.41"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-buttons/-/ej2-buttons-24.1.41.tgz#b5196c18c075f53a9803d69694ff6efe71d86e01"
   dependencies:
-    "@syncfusion/ej2-base" "~23.1.41"
+    "@syncfusion/ej2-base" "~24.1.41"
 
-"@syncfusion/ej2-calendars@~23.1.41":
-  version "23.1.41"
-  resolved "https://registry.npmjs.org/@syncfusion/ej2-calendars/-/ej2-calendars-23.1.41.tgz"
+"@syncfusion/ej2-calendars@~24.1.41":
+  version "24.1.41"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-calendars/-/ej2-calendars-24.1.41.tgz#eaae6008123bb069b266422509a7fb19462310a4"
   dependencies:
-    "@syncfusion/ej2-base" "~23.1.41"
-    "@syncfusion/ej2-buttons" "~23.1.41"
-    "@syncfusion/ej2-inputs" "~23.1.40"
-    "@syncfusion/ej2-lists" "~23.1.36"
-    "@syncfusion/ej2-popups" "~23.1.38"
+    "@syncfusion/ej2-base" "~24.1.41"
+    "@syncfusion/ej2-buttons" "~24.1.41"
+    "@syncfusion/ej2-inputs" "~24.1.41"
+    "@syncfusion/ej2-lists" "~24.1.41"
+    "@syncfusion/ej2-popups" "~24.1.41"
 
-"@syncfusion/ej2-charts@23.1.44":
-  version "23.1.44"
-  resolved "https://registry.npmjs.org/@syncfusion/ej2-charts/-/ej2-charts-23.1.44.tgz"
+"@syncfusion/ej2-charts@24.1.41":
+  version "24.1.41"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-charts/-/ej2-charts-24.1.41.tgz#f13a9895198ef671f00daee23ee2726e0a13c121"
   dependencies:
-    "@syncfusion/ej2-base" "~23.1.41"
-    "@syncfusion/ej2-calendars" "~23.1.41"
-    "@syncfusion/ej2-compression" "~23.1.36"
-    "@syncfusion/ej2-data" "~23.1.44"
-    "@syncfusion/ej2-excel-export" "~23.1.36"
-    "@syncfusion/ej2-file-utils" "~23.1.36"
-    "@syncfusion/ej2-navigations" "~23.1.44"
-    "@syncfusion/ej2-pdf-export" "~23.1.43"
-    "@syncfusion/ej2-svg-base" "~23.1.36"
+    "@syncfusion/ej2-base" "~24.1.41"
+    "@syncfusion/ej2-calendars" "~24.1.41"
+    "@syncfusion/ej2-data" "~24.1.41"
+    "@syncfusion/ej2-excel-export" "~24.1.41"
+    "@syncfusion/ej2-navigations" "~24.1.41"
+    "@syncfusion/ej2-pdf-export" "~24.1.41"
+    "@syncfusion/ej2-svg-base" "~24.1.41"
 
-"@syncfusion/ej2-compression@~23.1.36":
-  version "23.1.36"
-  resolved "https://registry.npmjs.org/@syncfusion/ej2-compression/-/ej2-compression-23.1.36.tgz"
+"@syncfusion/ej2-compression@~24.1.41":
+  version "24.1.41"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-compression/-/ej2-compression-24.1.41.tgz#1db94f260485ba8c3c294fe9e672b892fc019292"
   dependencies:
-    "@syncfusion/ej2-file-utils" "~23.1.36"
+    "@syncfusion/ej2-file-utils" "~24.1.41"
 
-"@syncfusion/ej2-data@~23.1.43", "@syncfusion/ej2-data@~23.1.44":
-  version "23.1.44"
-  resolved "https://registry.npmjs.org/@syncfusion/ej2-data/-/ej2-data-23.1.44.tgz"
+"@syncfusion/ej2-data@~24.1.41":
+  version "24.1.41"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-data/-/ej2-data-24.1.41.tgz#045a604c14c1332160177ac6dcb57be8d275df63"
   dependencies:
-    "@syncfusion/ej2-base" "~23.1.41"
+    "@syncfusion/ej2-base" "~24.1.41"
 
-"@syncfusion/ej2-excel-export@~23.1.36":
-  version "23.1.36"
-  resolved "https://registry.npmjs.org/@syncfusion/ej2-excel-export/-/ej2-excel-export-23.1.36.tgz"
+"@syncfusion/ej2-excel-export@~24.1.41":
+  version "24.1.41"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-excel-export/-/ej2-excel-export-24.1.41.tgz#e1ad9c8f0796804f28495df7ef27948147943049"
   dependencies:
-    "@syncfusion/ej2-base" "~23.1.36"
-    "@syncfusion/ej2-compression" "~23.1.36"
+    "@syncfusion/ej2-base" "~24.1.41"
+    "@syncfusion/ej2-compression" "~24.1.41"
 
-"@syncfusion/ej2-file-utils@~23.1.36":
-  version "23.1.36"
-  resolved "https://registry.npmjs.org/@syncfusion/ej2-file-utils/-/ej2-file-utils-23.1.36.tgz"
+"@syncfusion/ej2-file-utils@~24.1.41":
+  version "24.1.41"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-file-utils/-/ej2-file-utils-24.1.41.tgz#506228ab8aee3be7460b04645a92ec3ce1192560"
 
-"@syncfusion/ej2-icons@~23.1.36":
-  version "23.1.36"
-  resolved "https://registry.npmjs.org/@syncfusion/ej2-icons/-/ej2-icons-23.1.36.tgz"
+"@syncfusion/ej2-icons@~24.1.41":
+  version "24.1.41"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-icons/-/ej2-icons-24.1.41.tgz#87b49c7ac177526616779d68535e222919e93274"
 
-"@syncfusion/ej2-inputs@~23.1.40", "@syncfusion/ej2-inputs@~23.1.43":
-  version "23.1.43"
-  resolved "https://registry.npmjs.org/@syncfusion/ej2-inputs/-/ej2-inputs-23.1.43.tgz"
+"@syncfusion/ej2-inputs@~24.1.41":
+  version "24.1.41"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-inputs/-/ej2-inputs-24.1.41.tgz#99ee482102baafa1d7f304ab594c7334290c039e"
   dependencies:
-    "@syncfusion/ej2-base" "~23.1.41"
-    "@syncfusion/ej2-buttons" "~23.1.43"
-    "@syncfusion/ej2-popups" "~23.1.43"
-    "@syncfusion/ej2-splitbuttons" "~23.1.43"
+    "@syncfusion/ej2-base" "~24.1.41"
+    "@syncfusion/ej2-buttons" "~24.1.41"
+    "@syncfusion/ej2-popups" "~24.1.41"
+    "@syncfusion/ej2-splitbuttons" "~24.1.41"
 
-"@syncfusion/ej2-lists@~23.1.36", "@syncfusion/ej2-lists@~23.1.43":
-  version "23.1.43"
-  resolved "https://registry.npmjs.org/@syncfusion/ej2-lists/-/ej2-lists-23.1.43.tgz"
+"@syncfusion/ej2-lists@~24.1.41":
+  version "24.1.41"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-lists/-/ej2-lists-24.1.41.tgz#4967f98f695279c430181bbcdac9ef94d4feb4f2"
   dependencies:
-    "@syncfusion/ej2-base" "~23.1.41"
-    "@syncfusion/ej2-buttons" "~23.1.43"
-    "@syncfusion/ej2-data" "~23.1.43"
+    "@syncfusion/ej2-base" "~24.1.41"
+    "@syncfusion/ej2-buttons" "~24.1.41"
+    "@syncfusion/ej2-data" "~24.1.41"
+    "@syncfusion/ej2-popups" "~24.1.41"
 
-"@syncfusion/ej2-navigations@~23.1.44":
-  version "23.1.44"
-  resolved "https://registry.npmjs.org/@syncfusion/ej2-navigations/-/ej2-navigations-23.1.44.tgz"
+"@syncfusion/ej2-navigations@~24.1.41":
+  version "24.1.41"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-navigations/-/ej2-navigations-24.1.41.tgz#e17446ac4adf694f34e7691e496b72d0a6609931"
   dependencies:
-    "@syncfusion/ej2-base" "~23.1.41"
-    "@syncfusion/ej2-buttons" "~23.1.43"
-    "@syncfusion/ej2-data" "~23.1.44"
-    "@syncfusion/ej2-inputs" "~23.1.43"
-    "@syncfusion/ej2-lists" "~23.1.43"
-    "@syncfusion/ej2-popups" "~23.1.44"
+    "@syncfusion/ej2-base" "~24.1.41"
+    "@syncfusion/ej2-buttons" "~24.1.41"
+    "@syncfusion/ej2-data" "~24.1.41"
+    "@syncfusion/ej2-inputs" "~24.1.41"
+    "@syncfusion/ej2-lists" "~24.1.41"
+    "@syncfusion/ej2-popups" "~24.1.41"
 
-"@syncfusion/ej2-pdf-export@~23.1.43":
-  version "23.1.43"
-  resolved "https://registry.npmjs.org/@syncfusion/ej2-pdf-export/-/ej2-pdf-export-23.1.43.tgz"
+"@syncfusion/ej2-pdf-export@~24.1.41":
+  version "24.1.41"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-pdf-export/-/ej2-pdf-export-24.1.41.tgz#1519389783cf34d1d73114579142aba97e41cd18"
   dependencies:
-    "@syncfusion/ej2-compression" "~23.1.36"
+    "@syncfusion/ej2-compression" "~24.1.41"
 
-"@syncfusion/ej2-popups@~23.1.38", "@syncfusion/ej2-popups@~23.1.43", "@syncfusion/ej2-popups@~23.1.44":
-  version "23.1.44"
-  resolved "https://registry.npmjs.org/@syncfusion/ej2-popups/-/ej2-popups-23.1.44.tgz"
+"@syncfusion/ej2-popups@~24.1.41":
+  version "24.1.41"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-popups/-/ej2-popups-24.1.41.tgz#e01ca25696f824c6535c56e676fa93cda2ba250f"
   dependencies:
-    "@syncfusion/ej2-base" "~23.1.41"
-    "@syncfusion/ej2-buttons" "~23.1.43"
+    "@syncfusion/ej2-base" "~24.1.41"
+    "@syncfusion/ej2-buttons" "~24.1.41"
 
-"@syncfusion/ej2-react-base@~23.1.43":
-  version "23.1.43"
-  resolved "https://registry.npmjs.org/@syncfusion/ej2-react-base/-/ej2-react-base-23.1.43.tgz"
+"@syncfusion/ej2-react-base@~24.1.41":
+  version "24.1.41"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-react-base/-/ej2-react-base-24.1.41.tgz#78c412a80a74b9adb0585832b9713cf8c6bc3e2e"
   dependencies:
-    "@syncfusion/ej2-base" "~23.1.41"
+    "@syncfusion/ej2-base" "~24.1.41"
 
-"@syncfusion/ej2-react-charts@^23.1.42":
-  version "23.1.44"
-  resolved "https://registry.npmjs.org/@syncfusion/ej2-react-charts/-/ej2-react-charts-23.1.44.tgz"
+"@syncfusion/ej2-react-charts@^24.1.41":
+  version "24.1.41"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-react-charts/-/ej2-react-charts-24.1.41.tgz#414273e73880730a419de6c1a3909083b768a034"
   dependencies:
-    "@syncfusion/ej2-base" "~23.1.41"
-    "@syncfusion/ej2-charts" "23.1.44"
-    "@syncfusion/ej2-react-base" "~23.1.43"
+    "@syncfusion/ej2-base" "~24.1.41"
+    "@syncfusion/ej2-charts" "24.1.41"
+    "@syncfusion/ej2-react-base" "~24.1.41"
 
-"@syncfusion/ej2-splitbuttons@~23.1.43":
-  version "23.1.43"
-  resolved "https://registry.npmjs.org/@syncfusion/ej2-splitbuttons/-/ej2-splitbuttons-23.1.43.tgz"
+"@syncfusion/ej2-splitbuttons@~24.1.41":
+  version "24.1.41"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-splitbuttons/-/ej2-splitbuttons-24.1.41.tgz#4640748e8f048747f91ec3f64bb8e039966e2ad8"
   dependencies:
-    "@syncfusion/ej2-base" "~23.1.41"
-    "@syncfusion/ej2-popups" "~23.1.43"
+    "@syncfusion/ej2-base" "~24.1.41"
+    "@syncfusion/ej2-popups" "~24.1.41"
 
-"@syncfusion/ej2-svg-base@~23.1.36":
-  version "23.1.36"
-  resolved "https://registry.npmjs.org/@syncfusion/ej2-svg-base/-/ej2-svg-base-23.1.36.tgz"
+"@syncfusion/ej2-svg-base@~24.1.41":
+  version "24.1.41"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-svg-base/-/ej2-svg-base-24.1.41.tgz#b545c4e1620d616d00d0ab81bd699ddef75901d9"
   dependencies:
-    "@syncfusion/ej2-base" "~23.1.36"
+    "@syncfusion/ej2-base" "~24.1.41"
 
 "@tsconfig/node10@^1.0.7":
   version "1.0.9"
