@@ -31,8 +31,8 @@ jobs:
       - name: Run Prettier
         run: prettier --write .
       
-      - name: Run Black
-        run: black .
+      # - name: Run Black
+      #   run: black .
         
       - name: Format code with Clang-Format
         run: clang-format -i  stm32/h7a3zi-q/Manager/Src/*.c stm32/h7a3zi-q/Manager/Inc/*.h stm32/h7a3zi-q/UnitTests/test/*.c stm32/h7a3zi-q/Periph/Inc/*.h stm32/h7a3zi-q/Periph/Src/*.c
