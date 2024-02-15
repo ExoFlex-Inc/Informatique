@@ -22,10 +22,10 @@ export default function UserMenu() {
           </Link>
         </li>
         <li className="nav-message-board-list-item">
-        <Link to="/activity" className="nav-message-board-link">
+          <Link to="/activity" className="nav-message-board-link">
             Activity
           </Link>
-          </li>
+        </li>
         <li className="nav-message-board-list-item">
           <div className="flex flex-col">
             <h2>Welcome {profile?.username || "client"}.</h2>
