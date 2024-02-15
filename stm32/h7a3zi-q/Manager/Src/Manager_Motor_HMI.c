@@ -24,10 +24,15 @@
 #define READY2MOVE 2
 #define ERROR 3
 
+// Error Codes
+#define SET_ORIGINES_MOTORS_ERROR -1
+#define CAN_CONNECTION_MOTORS_ERROR -2
+
+
 #define MOTOR_STEP 1
 
 #define TIMER 100
-#define TRY 3
+#define MAX_TRY 5
 
 uint8_t tryCount = 0;
 uint32_t timerMs = 0;
@@ -36,6 +41,7 @@ motorInfo_t motors[MOTOR_NBR];
 uint8_t motorIndexes[MOTOR_NBR];
 
 uint8_t motorState;
+uint32_t errorCode = 0;
 
 //Prototypes
 void ManagerMotorHMI_ReceiveFromMotors();
@@ -254,7 +260,7 @@ void ManagerMotorHMI_SetOrigines()
 		motorState = READY2MOVE;
 		tryCount = 0;
 	}
-	else if (tryCount < TRY)
+	else if (tryCount < MAX_TRY)
 	{
 		CanMotorServo_SetOrigin(MOTOR_1_CAN_ID);
 		HAL_Delay(50);
@@ -268,7 +274,7 @@ void ManagerMotorHMI_SetOrigines()
 	else
 	{
 		motorState = ERROR;
-		// Return le code d'erreur ??
+		errorCode = SET_ORIGINES_MOTORS_ERROR;
 	}
 }
 
@@ -277,6 +283,16 @@ void ManagerMotorHMI_CANVerif()
 	if (motors[MOTOR_1].detected && motors[MOTOR_2].detected && motors[MOTOR_3].detected)
 	{
 		motorState = SET_ORIGIN;
+		tryCount = 0;
+	}
+	else if (tryCount < MAX_TRY)
+	{
+		tryCount += 1;
+	}
+	else
+	{
+		motorState = ERROR;
+		errorCode = CAN_CONNECTION_MOTORS_ERROR;
 	}
 }
 
