@@ -15,7 +15,6 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 
-
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -51,16 +50,20 @@ const ProSidebar = () => {
     }
   }, [location.pathname]);
 
+  useEffect(() => {
+    setIsCollapsed(isTablet);
+  }, [isTablet]);
+
   return (
     <Box
       sx={{
-      display: 'flex',
-      height: '100vh',
+        display: 'flex',
+        height: '100%',
       }}
-    
     >
-      <Sidebar backgroundColor={colors.primary[400]} collapsed={isCollapsed}>
-      <Menu
+      <Sidebar 
+      backgroundColor={colors.primary[400]} collapsed={isCollapsed}>
+        <Menu
           menuItemStyles={{
             button: ({ level, active, disabled }) => {
               if (level === 0)
@@ -83,9 +86,10 @@ const ProSidebar = () => {
                     fontWeight: "bold !important",
                   },
                 };
-            },
+            }
           }}
         >
+
           <MenuItem
             onClick={() => setIsCollapsed(!isCollapsed)}
             icon={isCollapsed ? <MenuOutlinedIcon /> : undefined}
@@ -167,12 +171,12 @@ const ProSidebar = () => {
               />
             </SubMenu>
             <Item
-                title="Settings"
-                to="/settings"
-                icon={<SettingsOutlinedIcon />}
-                selected={selected}
-                setSelected={setSelected}
-              />
+              title="Settings"
+              to="/settings"
+              icon={<SettingsOutlinedIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
           </Box>
           <Box 
             display="flex"

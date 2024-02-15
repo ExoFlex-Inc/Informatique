@@ -62,7 +62,7 @@ export function Welcome() {
                 ])
                 .then(({ error }) => {
                   if (error) {
-                    setServerError(`Username "${userName}" is already taken`);
+                    // setServerError(`Username "${userName}" is already taken`);
                   } else {
                     const target = localStorage.getItem("returnPath") || "/";
                     localStorage.removeItem("returnPath");
@@ -151,7 +151,7 @@ function validateInput(value: string, fieldName: string): string | undefined {
   if (!value) {
     return `${fieldName} is required`;
   }
-  const regex = /^[a-zA-Z0-9_À-ÿ]+$/; // Updated regex to include accented characters
+  const regex = /^[a-zA-ZÀ-ÿ]+$/;
   if (value.length < 4) {
     return `${fieldName} must be at least 4 characters long`;
   }
@@ -159,10 +159,7 @@ function validateInput(value: string, fieldName: string): string | undefined {
     return `${fieldName} must be less than 50 characters long`;
   }
   if (!regex.test(value)) {
-    return `${fieldName} can only contain letters, numbers, and underscores`;
-  }
-  if (/\d/.test(value)) {
-    return `${fieldName} cannot contain digits`;
+    return `${fieldName} can only contain letters`;
   }
   return undefined;
 }
