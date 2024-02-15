@@ -4,7 +4,7 @@
 #include "main.h"
 
 typedef struct{
-	uint8_t index;
+	uint8_t canID;
     float position;
     float speed;
     float current;

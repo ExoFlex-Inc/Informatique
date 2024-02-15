@@ -26,8 +26,11 @@
 
 #define MOTOR_STEP 1
 
+#define TIMER 100
 #define TRY 3
+
 uint8_t tryCount = 0;
+uint32_t timerMs = 0;
 
 motorInfo_t motors[MOTOR_NBR];
 uint8_t motorIndexes[MOTOR_NBR];
@@ -47,9 +50,9 @@ void ManagerMotorHMI_Init()
 {
 	CanMotorServo_Init();
 
+	// Init Struct motors
 	for (uint8_t i = 0; i < MOTOR_NBR; i++)
 	{
-		motors[i].index = i + 1;
 		motors[i].position = 0;
 		motors[i].nextPosition = 0;
 		motors[i].speed = 0;
@@ -59,6 +62,13 @@ void ManagerMotorHMI_Init()
 		motors[i].update = false;
 		motors[i].detected = false;
 	}
+
+	// Init motor canID
+	motors[MOTOR_1].canID = MOTOR_1_CAN_ID;
+	motors[MOTOR_2].canID = MOTOR_2_CAN_ID;
+	motors[MOTOR_3].canID = MOTOR_3_CAN_ID;
+
+	// Init State machine
 	motorState = CAN_VERIF;
 }
 
@@ -67,25 +77,29 @@ void ManagerMotorHMI_Task()
 	// Read les moteurs avant chacune des etapes
 	ManagerMotorHMI_ReceiveFromMotors(); //Ajouter gestion erreur si moteurs renvoi rien
 
-	// Machine à état qui prend en compte l'initialisation des moteurs, première lecture et home
-	switch(motorState)
+	// Machine à état qui prend en compte l'initialisation des moteurs, première lecture et envoie des commandes aux moteurs
+	if (HAL_GetTick() - timerMs >= TIMER)
 	{
-		case CAN_VERIF:
-			ManagerMotorHMI_CANVerif();
-			break;
+		switch(motorState)
+		{
+			case CAN_VERIF:
+				ManagerMotorHMI_CANVerif();
+				break;
 
-		case SET_ORIGIN:
-			ManagerMotorHMI_SetOrigines();
-			break;
+			case SET_ORIGIN:
+				ManagerMotorHMI_SetOrigines();
+				break;
 
-		case READY2MOVE:
-			ManagerMotorHMI_SendToMotors();
-			ManagerMotorHMI_CalculateNextPositions(); //Devient un manager a part entiere
-			ManagerMotorHMI_SendToHMI();
-			break;
+			case READY2MOVE:
+				ManagerMotorHMI_SendToMotors();
+				ManagerMotorHMI_CalculateNextPositions(); //Devient un manager a part entiere
+				ManagerMotorHMI_SendToHMI();
+				break;
 
-		case ERROR:
-			break;
+			case ERROR:
+				break;
+		}
+		timerMs = HAL_GetTick();
 	}
 }
 
@@ -108,10 +122,6 @@ void ManagerMotorHMI_ReceiveFromMotors()
 		CanMotorServo_Receive(&motors[MOTOR_3].position, &motors[MOTOR_3].speed, &motors[MOTOR_3].current, &motors[MOTOR_3].temp, &motors[MOTOR_3].error);
 		motors[MOTOR_3].detected = true;
 	}
-//	else
-//	{
-//		motorState = ERROR;
-//	}
 }
 
 
@@ -199,7 +209,7 @@ void ManagerMotorHMI_SendToMotors()
 	{
 		if (motors[i].update)
 		{
-			CanMotorServo_SetPos(motors[i].index, motors[i].nextPosition);
+			CanMotorServo_SetPos(motors[i].canID, motors[i].nextPosition);
 			motors[i].update = false;
 		}
 	}
