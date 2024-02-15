@@ -3,16 +3,8 @@
 #include "string.h"
 #include <stdlib.h>
 
-// Define the UART1 and UART2 handles and DMA handles
-extern UART_HandleTypeDef huart3;
-extern DMA_HandleTypeDef hdma_usart3_rx;
 
-#define MAIN_BUF_SIZE_UART 1024
-#define RX_BUF_SIZE_UART 512
 
-// Variables for UART2
-uint8_t MainBuf_UART[MAIN_BUF_SIZE_UART];
-uint8_t RxBuf_UART[RX_BUF_SIZE_UART];
 uint16_t oldPos_UART = 0;
 uint16_t newPos_UART = 0;
 
