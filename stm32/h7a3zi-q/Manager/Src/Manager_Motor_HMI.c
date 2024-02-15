@@ -97,6 +97,7 @@ void ManagerMotorHMI_Task()
 				break;
 
 			case ERROR:
+				//Send la valeur de l'erreur au HMI?
 				break;
 		}
 		timerMs = HAL_GetTick();
@@ -123,7 +124,6 @@ void ManagerMotorHMI_ReceiveFromMotors()
 		motors[MOTOR_3].detected = true;
 	}
 }
-
 
 void ManagerMotorHMI_CalculateNextPositions()
 {
