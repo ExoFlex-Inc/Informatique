@@ -18,21 +18,16 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "cmsis_os.h"
-#include "fatfs.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+
 
 #include "cJSON.h"
 #include "uartRingBufDMA.h"
-#include "comUtils_UART2.h"
-#include "CAN_Motor_Servo.h"
-#include "File_Handling_RTOS.h"
+
+#include <Manager_Motor_HMI.h>
+
 
 /* USER CODE END Includes */
 
@@ -44,7 +39,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-#define MAX_JSON_LENGTH 20
+
 
 /* USER CODE END PD */
 
@@ -62,9 +57,6 @@ SPI_HandleTypeDef hspi1;
 UART_HandleTypeDef huart3;
 DMA_HandleTypeDef hdma_usart3_rx;
 
-osThreadId SendJSONHandle;
-osThreadId ReceiveHMIHandle;
-osThreadId SDCardHandle;
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -77,10 +69,6 @@ static void MX_USB_OTG_HS_USB_Init(void);
 static void MX_FDCAN1_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_USART3_UART_Init(void);
-void SendJSONTask(void const * argument);
-void ReceiveHMITask(void const * argument);
-void SDCard_Task(void const * argument);
-
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -88,33 +76,19 @@ void SDCard_Task(void const * argument);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-// COM Variables
-#define MainBuf_UART_SIZE 1024
-
-extern uint8_t MainBuf_UART[MainBuf_UART_SIZE];
-
-extern char id[20];
+// Variables for UART2
+uint8_t MainBuf_UART[MAIN_BUF_SIZE_UART];
+uint8_t RxBuf_UART[RX_BUF_SIZE_UART];
 
 FDCAN_TxHeaderTypeDef TxHeader;
 FDCAN_RxHeaderTypeDef RxHeader;
 FDCAN_FilterTypeDef fdcanFilterConfig;
-
 
 uint8_t TxData[8];
 uint8_t RxData[8];
 
 uint32_t TxMailbox;
 
-// Motor values
-float p_in_1 = 0.0f;
-float p_in_2 = 0.0f;
-float p_in_3 = 0.0f;
-
-void parseFileContent(char *fileContent, float *p_in_1, float *p_in_2, float *p_in_3) {
-    // Assuming the content format is "1. %f 2. %f 3. %f"
-    sscanf(fileContent, "1. %f 2. %f 3. %f", p_in_1, p_in_2, p_in_3);
-    vPortFree(fileContent);
-}
 
 /* USER CODE END 0 */
 
@@ -134,7 +108,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  cJSON_InitHooks(NULL);
+
 
   /* USER CODE END Init */
 
@@ -151,75 +125,24 @@ int main(void)
   MX_USB_OTG_HS_USB_Init();
   MX_FDCAN1_Init();
   MX_SPI1_Init();
-  MX_FATFS_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  Ringbuf_Init();
-
-  if(HAL_FDCAN_Start(&hfdcan1) != HAL_OK)
-  {
-	 Error_Handler();
-  }
-
-  if(HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE,0) != HAL_OK)
-  {
-	 Error_Handler();
-  }
-
-//  Mount_SD("/");
-//  char* homeBuff = Read_File("home.txt");
-//  parseFileContent(homeBuff, &p_in_1, &p_in_2, &p_in_3);
-//  Format_SD();
-//  Create_File("home.txt");
-//  Unmount_SD("/");
-
   /* USER CODE END 2 */
 
-  /* USER CODE BEGIN RTOS_MUTEX */
-  /* add mutexes, ... */
-  /* USER CODE END RTOS_MUTEX */
-
-  /* USER CODE BEGIN RTOS_SEMAPHORES */
-  /* add semaphores, ... */
-  /* USER CODE END RTOS_SEMAPHORES */
-
-  /* USER CODE BEGIN RTOS_TIMERS */
-  /* start timers, add new ones, ... */
-  /* USER CODE END RTOS_TIMERS */
-
-  /* USER CODE BEGIN RTOS_QUEUES */
-  /* add queues, ... */
-  /* USER CODE END RTOS_QUEUES */
-
-  /* Create the thread(s) */
-  /* definition and creation of SendJSON */
-  osThreadDef(SendJSON, SendJSONTask, osPriorityNormal, 0, 220);
-  SendJSONHandle = osThreadCreate(osThread(SendJSON), NULL);
-
-  /* definition and creation of ReceiveHMI */
-  osThreadDef(ReceiveHMI, ReceiveHMITask, osPriorityRealtime, 0, 128);
-  ReceiveHMIHandle = osThreadCreate(osThread(ReceiveHMI), NULL);
-
-  /* definition and creation of SDCard */
-  osThreadDef(SDCard, SDCard_Task, osPriorityHigh, 0, 220);
-  SDCardHandle = osThreadCreate(osThread(SDCard), NULL);
-
-  /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
-  /* USER CODE END RTOS_THREADS */
-
-  /* Start scheduler */
-  osKernelStart();
-
-  /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-//  uint8_t result = add(2,3);
+
+
+  cJSON_InitHooks(NULL);
+  Ringbuf_Init();
+  ManagerMotorHMI_Init();
 
   while (1)
   {
+	  ManagerMotorHMI_Task();
+
 
     /* USER CODE END WHILE */
 
@@ -323,7 +246,7 @@ static void MX_FDCAN1_Init(void)
   hfdcan1.Init.MessageRAMOffset = 0;
   hfdcan1.Init.StdFiltersNbr = 0;
   hfdcan1.Init.ExtFiltersNbr = 1;
-  hfdcan1.Init.RxFifo0ElmtsNbr = 1;
+  hfdcan1.Init.RxFifo0ElmtsNbr = 32;
   hfdcan1.Init.RxFifo0ElmtSize = FDCAN_DATA_BYTES_8;
   hfdcan1.Init.RxFifo1ElmtsNbr = 0;
   hfdcan1.Init.RxFifo1ElmtSize = FDCAN_DATA_BYTES_8;
@@ -331,7 +254,7 @@ static void MX_FDCAN1_Init(void)
   hfdcan1.Init.RxBufferSize = FDCAN_DATA_BYTES_8;
   hfdcan1.Init.TxEventsNbr = 0;
   hfdcan1.Init.TxBuffersNbr = 0;
-  hfdcan1.Init.TxFifoQueueElmtsNbr = 1;
+  hfdcan1.Init.TxFifoQueueElmtsNbr = 32;
   hfdcan1.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
   hfdcan1.Init.TxElmtSize = FDCAN_DATA_BYTES_8;
   if (HAL_FDCAN_Init(&hfdcan1) != HAL_OK)
@@ -486,7 +409,7 @@ static void MX_DMA_Init(void)
 
   /* DMA interrupt init */
   /* DMA1_Stream0_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 5, 0);
+  HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
 
 }
@@ -582,259 +505,6 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
-
-/* USER CODE BEGIN Header_SendJSONTask */
-/**
-  * @brief  Function implementing the SendJSON thread.
-  * @param  argument: Not used
-  * @retval None
-  */
-
-/* USER CODE END Header_SendJSONTask */
-void SendJSONTask(void const * argument)
-{
-  /* USER CODE BEGIN 5 */
-    /* Infinite loop */
-
-    // Initialize motor variables
-    float motor1_pos = 0.0f;
-    float motor1_spd = 0.0f;
-    float motor1_cur = 0.0f;
-    uint8_t motor1_temp = 0;
-    uint8_t motor1_error = 0;
-
-    float motor2_pos = 0.0f;
-    float motor2_spd = 0.0f;
-    float motor2_cur = 0.0f;
-    uint8_t motor2_temp = 0;
-    uint8_t motor2_error = 0;
-
-    float motor3_pos = 0.0f;
-    float motor3_spd = 0.0f;
-    float motor3_cur = 0.0f;
-    uint8_t motor3_temp = 0;
-    uint8_t motor3_error = 0;
-
-    for (;;)
-    {
-        uint8_t comm_can_extract_controller_id(uint32_t ext_id)
-        {
-            return (uint8_t)(ext_id & 0xFF);
-        }
-        uint8_t received_controller_id = comm_can_extract_controller_id(RxHeader.Identifier);
-
-        if (received_controller_id == 1)
-        {
-            motor_receive(&motor1_pos, &motor1_spd, &motor1_cur, &motor1_temp, &motor1_error);
-        }
-        else if (received_controller_id == 2)
-        {
-            motor_receive(&motor2_pos, &motor2_spd, &motor2_cur, &motor2_temp, &motor2_error);
-        }
-        else if (received_controller_id == 3)
-        {
-            motor_receive(&motor3_pos, &motor3_spd, &motor3_cur, &motor3_temp, &motor3_error);
-        }
-
-        cJSON *root = cJSON_CreateObject();
-
-        // Convert numbers to strings using sprintf
-        char *eversionStr = pvPortMalloc(15 * sizeof(char));
-        char *dorsiflexionStr = pvPortMalloc(15 * sizeof(char));
-        char *extensionStr = pvPortMalloc(15 * sizeof(char));
-
-        sprintf(eversionStr, "%.2f", motor1_pos);
-        sprintf(dorsiflexionStr, "%.2f", motor2_pos);
-        sprintf(extensionStr, "%.2f", motor3_pos);
-
-        // Add strings to the JSON object
-        cJSON_AddStringToObject(root, "dorsiflexion", dorsiflexionStr);
-        cJSON_AddStringToObject(root, "eversion", eversionStr);
-        cJSON_AddStringToObject(root, "extension", extensionStr);
-
-        // Print the JSON object
-        char *jsonMessage = cJSON_PrintUnformatted(root);
-
-        // Send JSON string over UART
-        HAL_UART_Transmit(&huart3, (uint8_t *)jsonMessage, strlen(jsonMessage), HAL_MAX_DELAY);
-
-        free(jsonMessage);
-        cJSON_Delete(root);  // Correct way to free cJSON memory
-
-        // Free dynamically allocated cJSON strings
-        vPortFree(eversionStr);
-        vPortFree(dorsiflexionStr);
-        vPortFree(extensionStr);
-
-        // Free the JSON string
-
-        vTaskDelay(100 / portTICK_PERIOD_MS);
-    }
-  /* USER CODE END 5 */
-}
-
-/* USER CODE BEGIN Header_ReceiveHMITask */
-/**
-* @brief Function implementing the ReceiveHMI thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_ReceiveHMITask */
-void ReceiveHMITask(void const * argument)
-{
-  /* USER CODE BEGIN ReceiveHMITask */
-  /* Infinite loop */
-  for(;;)
-  {
-	  float p_step = 0.1;
-
-	  char* foundWord = searchWord((char*) MainBuf_UART);
-
-	  if (strcmp(foundWord, "eversionR") == 0) {
-	      p_in_1 -= p_step;
-	      comm_can_set_pos(1, p_in_1);
-
-	      p_in_2 += p_step;
-	      comm_can_set_pos(2, p_in_2);
-
-
-	  }
-	  else if (strcmp(foundWord, "eversionL") == 0) {
-	      p_in_1 += p_step;
-	      comm_can_set_pos(1, p_in_1);
-
-	      p_in_2 -= p_step;
-	      comm_can_set_pos(2, p_in_2);
-
-	  }
-	  else if (strcmp(foundWord, "dorsiflexionU") == 0) {
-	      p_in_1 += p_step;
-	      comm_can_set_pos(1, p_in_1);
-
-	      p_in_2 += p_step;
-	      comm_can_set_pos(2, p_in_2);
-
-	  }
-	  else if (strcmp(foundWord, "dorsiflexionD") == 0) {
-	      p_in_1 -= p_step;
-	      comm_can_set_pos(1, p_in_1);
-
-	      p_in_2 -= p_step;
-	      comm_can_set_pos(2, p_in_2);
-
-	  }
-	  else if (strcmp(foundWord, "extensionU") == 0) {
-	      p_in_3 += p_step;
-	      comm_can_set_pos(3, p_in_3);
-
-	  }
-	  else if (strcmp(foundWord, "extensionD") == 0) {
-	      p_in_3 -= p_step;
-	      comm_can_set_pos(3, p_in_3);
-
-	  }
-	  else if (strcmp(foundWord, "motor1H") == 0) {
-
-	      p_in_1 -= p_step;
-	      comm_can_set_pos(1, p_in_1);
-
-	  }
-	  else if (strcmp(foundWord, "motor1AH") == 0) {
-
-	      p_in_1 += p_step;
-	      comm_can_set_pos(1, p_in_1);
-
-	  }
-	  else if (strcmp(foundWord, "motor2H") == 0) {
-
-	      p_in_2 -= p_step;
-	      comm_can_set_pos(2, p_in_2);
-
-	  }
-	  else if (strcmp(foundWord, "motor2AH") == 0) {
-
-	      p_in_2 += p_step;
-	      comm_can_set_pos(2, p_in_2);
-
-	  }
-	  else if (strcmp(foundWord, "motor3H") == 0) {
-
-	      p_in_3 -= p_step;
-	      comm_can_set_pos(3, p_in_3);
-
-	  }
-	  else if (strcmp(foundWord, "motor3AH") == 0) {
-
-	      p_in_3 += p_step;
-	      comm_can_set_pos(3, p_in_3);
-
-	  }
-	  else if (strcmp(foundWord, "goHome1") == 0) {
-
-		  comm_can_set_pos_spd(1, 0.0, 500, 1000);
-	      p_in_1 = 0.0;
-
-	  }
-	  else if (strcmp(foundWord, "goHome2") == 0) {
-
-		  comm_can_set_pos_spd(2, 0.0, 1000, 1000);
-	      p_in_2 = 0.0;
-
-	  }
-	  else if (strcmp(foundWord, "goHome3") == 0) {
-
-		  comm_can_set_pos_spd(3, 0.0, 1000, 1000);
-	       p_in_3 = 0.0;
-
-	  }
-	  else if (strcmp(foundWord, "setHome") == 0) {
-
-			comm_can_set_origin(1);
-			comm_can_set_origin(2);
-			comm_can_set_origin(3);
-
-
-	  }
-	  else if (strcmp(foundWord, "goHome") == 0) {
-
-		  comm_can_set_pos_spd(1, 0.0, 1000, 1000);
-		  comm_can_set_pos_spd(2, 0.0, 1000, 1000);
-		  comm_can_set_pos_spd(3, 0.0, 1000, 1000);
-
-	  }
-
-
-	  vTaskDelay(100 / portTICK_PERIOD_MS);
-
-  }
-  /* USER CODE END ReceiveHMITask */
-}
-
-/* USER CODE BEGIN Header_SDCard_Task */
-/**
-* @brief Function implementing the SDCard thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_SDCard_Task */
-void SDCard_Task(void const * argument)
-{
-  /* USER CODE BEGIN SDCard_Task */
-    /* Infinite loop */
-    for (;;)
-    {
-//        char buffer[50];
-//        snprintf(buffer, sizeof(buffer), "1. %.2f 2. %.2f 3. %.2f", (double)p_in_1, (double)p_in_2, (double)p_in_3);
-//
-//        Mount_SD("/");
-//        Update_File("home.txt", buffer);
-//        Unmount_SD("/");
-
-//        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    	  vTaskDelay(1 / portTICK_PERIOD_MS);
-    }
-  /* USER CODE END SDCard_Task */
-}
 
 /**
   * @brief  Period elapsed callback in non blocking mode
