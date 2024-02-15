@@ -14,6 +14,16 @@
 #define MOTOR_2 1
 #define MOTOR_3 2
 
+#define MOTOR_1_CAN_ID 4
+#define MOTOR_2_CAN_ID 2
+#define MOTOR_3_CAN_ID 3
+
+// States
+#define CAN_VERIF 0
+#define SET_ORIGIN 1
+#define READY2MOVE 2
+#define ERROR 3
+
 #define MOTOR_STEP 1
 
 #define TRY 3
@@ -22,12 +32,16 @@ uint8_t tryCount = 0;
 motorInfo_t motors[MOTOR_NBR];
 uint8_t motorIndexes[MOTOR_NBR];
 
+uint8_t motorState;
+
 //Prototypes
 void ManagerMotorHMI_ReceiveFromMotors();
 void ManagerMotorHMI_CalculateNextPositions();
 void ManagerMotorHMI_SendToMotors();
 void ManagerMotorHMI_SendToHMI();
 uint8_t ManagerMotorHMI_CANExtractControllerID(uint32_t ext_id);
+void ManagerMotorHMI_SetOrigines();
+void ManagerMotorHMI_CANVerif();
 
 void ManagerMotorHMI_Init()
 {
@@ -43,44 +57,61 @@ void ManagerMotorHMI_Init()
 		motors[i].temp = 0;
 		motors[i].error = 0;
 		motors[i].update = false;
+		motors[i].detected = false;
 	}
+	motorState = CAN_VERIF;
 }
 
 void ManagerMotorHMI_Task()
 {
-
 	// Read les moteurs avant chacune des etapes
 	ManagerMotorHMI_ReceiveFromMotors(); //Ajouter gestion erreur si moteurs renvoi rien
 
 	// Machine à état qui prend en compte l'initialisation des moteurs, première lecture et home
-	switch(MOTOR_STATE)
+	switch(motorState)
 	{
-			case SET_ORIGIN:
-				ManagerMotorHMI_SetOrigines();
-				break;
+		case CAN_VERIF:
+			ManagerMotorHMI_CANVerif();
+			break;
 
-			case READY2MOVE:
-				ManagerMotorHMI_SendToMotors();
-				ManagerMotorHMI_CalculateNextPositions(); //Devient un manager a part entiere
-				ManagerMotorHMI_SendToHMI();
-				break;
+		case SET_ORIGIN:
+			ManagerMotorHMI_SetOrigines();
+			break;
 
-			case ERROR:
-				break;
+		case READY2MOVE:
+			ManagerMotorHMI_SendToMotors();
+			ManagerMotorHMI_CalculateNextPositions(); //Devient un manager a part entiere
+			ManagerMotorHMI_SendToHMI();
+			break;
+
+		case ERROR:
+			break;
 	}
 }
-
-
 
 void ManagerMotorHMI_ReceiveFromMotors()
 {
 	uint8_t received_controller_id = ManagerMotorHMI_CANExtractControllerID(RxHeader.Identifier);
 
-	if (received_controller_id >= 1 && received_controller_id <= 3  )
+	if (received_controller_id == MOTOR_1_CAN_ID)
 	{
-		uint8_t motorIndex = received_controller_id - 1 ;
-		CanMotorServo_Receive(&motors[motorIndex].position, &motors[motorIndex].speed, &motors[motorIndex].current, &motors[motorIndex].temp, &motors[motorIndex].error);
+		CanMotorServo_Receive(&motors[MOTOR_1].position, &motors[MOTOR_1].speed, &motors[MOTOR_1].current, &motors[MOTOR_1].temp, &motors[MOTOR_1].error);
+		motors[MOTOR_1].detected = true;
 	}
+	else if (received_controller_id == MOTOR_2_CAN_ID)
+	{
+		CanMotorServo_Receive(&motors[MOTOR_2].position, &motors[MOTOR_2].speed, &motors[MOTOR_2].current, &motors[MOTOR_2].temp, &motors[MOTOR_2].error);
+		motors[MOTOR_2].detected = true;
+	}
+	else if (received_controller_id == MOTOR_3_CAN_ID)
+	{
+		CanMotorServo_Receive(&motors[MOTOR_3].position, &motors[MOTOR_3].speed, &motors[MOTOR_3].current, &motors[MOTOR_3].temp, &motors[MOTOR_3].error);
+		motors[MOTOR_3].detected = true;
+	}
+//	else
+//	{
+//		motorState = ERROR;
+//	}
 }
 
 
@@ -145,9 +176,9 @@ void ManagerMotorHMI_CalculateNextPositions()
   }
   else if (strcmp(foundWord, "setHome") == 0) {
 
-	CanMotorServo_SetOrigin(1);
-	CanMotorServo_SetOrigin(2);
-	CanMotorServo_SetOrigin(3);
+	CanMotorServo_SetOrigin(MOTOR_1_CAN_ID);
+	CanMotorServo_SetOrigin(MOTOR_2_CAN_ID);
+	CanMotorServo_SetOrigin(MOTOR_3_CAN_ID);
 	motors[MOTOR_1].nextPosition = 0;
 	motors[MOTOR_2].nextPosition = 0;
 	motors[MOTOR_3].nextPosition = 0;
@@ -208,30 +239,35 @@ uint8_t ManagerMotorHMI_CANExtractControllerID(uint32_t ext_id)
 
 void ManagerMotorHMI_SetOrigines()
 {
-
 	if (motors[MOTOR_1].position == 0.0 && motors[MOTOR_2].position == 0.0 && motors[MOTOR_3].position == 0.0)
 	{
-		MOTOR_STATE = READY2MOVE;
-		retryCount = 0;
+		motorState = READY2MOVE;
+		tryCount = 0;
 	}
 	else if (tryCount < TRY)
 	{
-		comm_can_set_origin(1);
+		CanMotorServo_SetOrigin(MOTOR_1_CAN_ID);
 		HAL_Delay(50);
-		comm_can_set_origin(2);
+		CanMotorServo_SetOrigin(MOTOR_2_CAN_ID);
 		HAL_Delay(50);
-		comm_can_set_origin(3);
+		CanMotorServo_SetOrigin(MOTOR_3_CAN_ID);
 		HAL_Delay(50);
 
 		tryCount += 1;
 	}
 	else
 	{
-		MOTOR_STATE = ERROR;
+		motorState = ERROR;
 		// Return le code d'erreur ??
 	}
 }
 
-
+void ManagerMotorHMI_CANVerif()
+{
+	if (motors[MOTOR_1].detected && motors[MOTOR_2].detected && motors[MOTOR_3].detected)
+	{
+		motorState = SET_ORIGIN;
+	}
+}
 
 
