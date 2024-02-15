@@ -1,6 +1,12 @@
 import { useState, useEffect, useContext } from "react";
 import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
-import { Box, IconButton, Typography, useTheme, useMediaQuery } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  Typography,
+  useTheme,
+  useMediaQuery,
+} from "@mui/material";
 
 import { Link, useNavigate } from "react-router-dom";
 import { tokens } from "../../hooks/theme.ts";
@@ -10,9 +16,9 @@ import { UserContext } from "../../App.tsx";
 
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
-import TvIcon from '@mui/icons-material/Tv';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import TvIcon from "@mui/icons-material/Tv";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
@@ -31,7 +37,6 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
         <Typography color={colors.grey[100]}>{title}</Typography>
       </MenuItem>
     </Link>
-
   );
 };
 
@@ -41,7 +46,7 @@ const ProSidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected, setSelected] = useState("Dashboard");
   const { profile } = useContext(UserContext);
-  const isTablet = useMediaQuery('(max-width: 768px)');
+  const isTablet = useMediaQuery("(max-width: 768px)");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -57,39 +62,43 @@ const ProSidebar = () => {
   return (
     <Box
       sx={{
-        display: 'flex',
-        height: '100%',
+        display: "flex",
+        height: "100%",
       }}
     >
-      <Sidebar 
-      backgroundColor={colors.primary[400]} collapsed={isCollapsed}>
+      <Sidebar backgroundColor={colors.primary[400]} collapsed={isCollapsed}>
         <Menu
           menuItemStyles={{
             button: ({ level, active, disabled }) => {
               if (level === 0)
                 return {
                   color: disabled ? `${colors.primary[200]}` : undefined,
-                  backgroundColor: active ? `${colors.blueAccent[500]}` : `${colors.primary[400]}`,
-                  transition: 'background-color 0.3s',
+                  backgroundColor: active
+                    ? `${colors.blueAccent[500]}`
+                    : `${colors.primary[400]}`,
+                  transition: "background-color 0.3s",
                   "&:hover": {
-                    backgroundColor: `${colors.blueAccent[400]}` + " !important",
+                    backgroundColor:
+                      `${colors.blueAccent[400]}` + " !important",
                     color: "white !important",
                     fontWeight: "bold !important",
                   },
                 };
               if (level === 1)
                 return {
-                  backgroundColor: active ? `${colors.greenAccent[500]}` :`${colors.primary[400]}`,
+                  backgroundColor: active
+                    ? `${colors.greenAccent[500]}`
+                    : `${colors.primary[400]}`,
                   "&:hover": {
-                    backgroundColor: `${colors.greenAccent[500]}` + " !important",
+                    backgroundColor:
+                      `${colors.greenAccent[500]}` + " !important",
                     color: "white !important",
                     fontWeight: "bold !important",
                   },
                 };
-            }
+            },
           }}
         >
-
           <MenuItem
             onClick={() => setIsCollapsed(!isCollapsed)}
             icon={isCollapsed ? <MenuOutlinedIcon /> : undefined}
@@ -114,15 +123,11 @@ const ProSidebar = () => {
 
           {!isCollapsed && (
             <Box mb="25px">
-              <Box 
-                display="flex" 
-                justifyContent="center" 
-                alignItems="center"
-              >
+              <Box display="flex" justifyContent="center" alignItems="center">
                 <img
                   alt="profile-user"
                   width={isTablet ? "50px" : "100px"}
-                  height={isTablet ? "50px" : "100px"} 
+                  height={isTablet ? "50px" : "100px"}
                   src={`../assets/user.png`}
                   style={{ cursor: "pointer", borderRadius: "50%" }}
                 />
@@ -137,8 +142,11 @@ const ProSidebar = () => {
                 >
                   {profile?.username || "Client"}
                 </Typography>
-                <Typography variant={isTablet ? "h6" : "h5"} color={colors.greenAccent[500]}>
-                {profile?.speciality || "Speciality"}
+                <Typography
+                  variant={isTablet ? "h6" : "h5"}
+                  color={colors.greenAccent[500]}
+                >
+                  {profile?.speciality || "Speciality"}
                 </Typography>
               </Box>
             </Box>
@@ -156,7 +164,7 @@ const ProSidebar = () => {
               <Item
                 title="Activity"
                 to="/activity"
-                icon={<NavigateNextIcon style={{ fontSize: 'small' }} />}
+                icon={<NavigateNextIcon style={{ fontSize: "small" }} />}
                 selected={selected}
                 setSelected={setSelected}
               />
@@ -165,7 +173,7 @@ const ProSidebar = () => {
               <Item
                 title="Manual"
                 to="/manual"
-                icon={<NavigateNextIcon style={{ fontSize: 'small' }} />}
+                icon={<NavigateNextIcon style={{ fontSize: "small" }} />}
                 selected={selected}
                 setSelected={setSelected}
               />
@@ -178,22 +186,21 @@ const ProSidebar = () => {
               setSelected={setSelected}
             />
           </Box>
-          <Box 
+          <Box
             display="flex"
-            justifyContent="center" 
-            alignItems="center" 
+            justifyContent="center"
+            alignItems="center"
             position="absolute"
             bottom="0"
             width="100%"
           >
             <img
               alt="logo"
-              width={isTablet ? "200px" : "400px"} 
-              height={isTablet ? "200px" : "400px"} 
+              width={isTablet ? "200px" : "400px"}
+              height={isTablet ? "200px" : "400px"}
               src={`../assets/logo.png`}
             />
           </Box>
-
         </Menu>
       </Sidebar>
     </Box>

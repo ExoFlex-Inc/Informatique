@@ -31,10 +31,18 @@ export function Welcome() {
   const [speciality, setSpeciality] = useState("");
   const [specialityDirty, setSpecialityDirty] = useState(false);
   const [serverError, setServerError] = useState("");
-  const invalidUserName = useMemo(() => validateInput(userName, "Name"), [userName]);
-  const invalidLastName = useMemo(() => validateInput(lastName, "Lastname"), [lastName]);
-  const invalidSpeciality = useMemo(() => validateInput(speciality, "Speciality"), [speciality]);
-  
+  const invalidUserName = useMemo(
+    () => validateInput(userName, "Name"),
+    [userName],
+  );
+  const invalidLastName = useMemo(
+    () => validateInput(lastName, "Lastname"),
+    [lastName],
+  );
+  const invalidSpeciality = useMemo(
+    () => validateInput(speciality, "Speciality"),
+    [speciality],
+  );
 
   return (
     <Dialog
@@ -132,7 +140,11 @@ export function Welcome() {
             <button
               className="welcome-form-submit-button"
               type="submit"
-              disabled={invalidUserName != null || invalidLastName != null || invalidSpeciality != null}
+              disabled={
+                invalidUserName != null ||
+                invalidLastName != null ||
+                invalidSpeciality != null
+              }
             >
               Submit
             </button>
@@ -163,4 +175,3 @@ function validateInput(value: string, fieldName: string): string | undefined {
   }
   return undefined;
 }
-

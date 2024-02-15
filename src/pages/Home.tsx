@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 export default function Home() {
   const dorsiflexiongifUrl = "../assets/dorsiflexion.gif";
-  const eversiongifUrl = "../assets/eversion.gif"
+  const eversiongifUrl = "../assets/eversion.gif";
   const destinationUrl = "/hmi";
 
   return (

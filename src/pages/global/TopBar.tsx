@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { Box, IconButton, useTheme } from '@mui/material';
+import { Box, IconButton, useTheme } from "@mui/material";
 import { ColorModeContext, tokens } from "../../hooks/theme.ts";
 
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";

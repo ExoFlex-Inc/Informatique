@@ -12,7 +12,6 @@ export default function Login() {
   const { session } = useContext(UserContext);
   const { palette } = useTheme();
 
-
   useEffect(() => {
     if (session?.user) {
       setShowModal(false);
@@ -36,7 +35,7 @@ export default function Login() {
         >
           login
         </button>{" "}
-        <span className={`p-2 ${palette.mode === 'light' ? 'text-black' : ''}`}>
+        <span className={`p-2 ${palette.mode === "light" ? "text-black" : ""}`}>
           &nbsp;or
         </span>{" "}
         <button

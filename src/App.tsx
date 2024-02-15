@@ -35,15 +35,17 @@ function Layout() {
   return (
     <UserContext.Provider value={supabaseUserInfo}>
       <>
-      {supabaseUserInfo.session && (
-        <ProSideBar/>
-      )}
+        {supabaseUserInfo.session && <ProSideBar />}
         <main className="content">
           <TopBar />
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/activity" element={<Activity />} />
-            <Route path="/welcome" element={<Welcome />} loader={welcomeLoader} />
+            <Route
+              path="/welcome"
+              element={<Welcome />}
+              loader={welcomeLoader}
+            />
             <Route path="/manual" element={<Manual />} loader={manualInit} />
             <Route path="/hmi" element={<HMI />} loader={hmiInit} />
             <Route path="/settings" element={<Settings />} />

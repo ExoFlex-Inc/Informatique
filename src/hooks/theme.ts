@@ -36,7 +36,7 @@ export const tokens = (mode) => ({
           600: "#22925c",
           700: "#1a6d45",
           800: "#11492e",
-          900: "#092417"
+          900: "#092417",
         },
         redAccent: {
           100: "#f8dcdb",
@@ -58,7 +58,7 @@ export const tokens = (mode) => ({
           600: "#0162bb",
           700: "#014a8c",
           800: "#00315e",
-          900: "#00192f"
+          900: "#00192f",
         },
       }
     : {
@@ -205,7 +205,7 @@ export const useMode = () => {
       toggleColorMode: () =>
         setMode((prev) => (prev === "light" ? "dark" : "light")),
     }),
-    []
+    [],
   );
 
   const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);

@@ -18,7 +18,9 @@ export async function manualInit(navigate) {
       console.log("Serial port initialized successfully.");
       return { loaded: true };
     } else {
-      console.error("Failed to initialize serial port: Check STM32 connection ");
+      console.error(
+        "Failed to initialize serial port: Check STM32 connection ",
+      );
       window.alert("Failed to initialize serial port: Check STM32 connection ");
       return navigate("/");
     }
@@ -34,8 +36,7 @@ export default function Manual() {
 
   const handleBackClick = async () => {
     navigate("/");
-
-  }
+  };
 
   return (
     <div className="flex flex-col h-[calc(100vh-2rem)] justify-between">
