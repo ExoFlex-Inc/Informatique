@@ -31,7 +31,7 @@
 #define MOTOR_STEP 1
 
 #define TIMER   100
-#define MAX_TRY 5
+#define MAX_TRY 50 //Correspond a 5 secondes d attente avant de faire une erreur
 
 uint8_t  tryCount = 0;
 uint32_t timerMs  = 0;
@@ -40,7 +40,7 @@ motorInfo_t motors[MOTOR_NBR];
 uint8_t     motorIndexes[MOTOR_NBR];
 
 uint8_t  motorState;
-uint32_t errorCode = 0;
+int8_t errorCode = 0;
 
 // Prototypes
 void    ManagerMotorHMI_ReceiveFromMotors();
