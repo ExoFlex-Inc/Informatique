@@ -99,9 +99,8 @@ void ManagerMotorHMI_Task()
             break;
 
         case READY2MOVE:
+        	ManagerMotorHMI_CalculateNextPositions();  // Devient un manager a part entiere
             ManagerMotorHMI_SendToMotors();
-            ManagerMotorHMI_CalculateNextPositions();  // Devient un manager a
-                                                       // part entiere
             ManagerMotorHMI_SendToHMI();
             break;
 
