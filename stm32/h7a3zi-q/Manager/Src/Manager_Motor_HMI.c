@@ -1,204 +1,309 @@
 #include <Manager_Motor_HMI.h>
-#include "CanMotorServo.h"
-
-#include "cJSON.h"
-#include <string.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
+#include <string.h>
+
+#include "CanMotorServo.h"
+#include "cJSON.h"
 #include "comUtils_UART2.h"
 #include "uartRingBufDMA.h"
 
 #define MOTOR_NBR 3
-#define MOTOR_1 0
-#define MOTOR_2 1
-#define MOTOR_3 2
+#define MOTOR_1   0
+#define MOTOR_2   1
+#define MOTOR_3   2
 
-#define MOTOR_STEP 0.1
+#define MOTOR_1_CAN_ID 4
+#define MOTOR_2_CAN_ID 2
+#define MOTOR_3_CAN_ID 3
+
+// States
+#define CAN_VERIF  0
+#define SET_ORIGIN 1
+#define READY2MOVE 2
+#define ERROR      3
+
+// Error Codes
+#define SET_ORIGINES_MOTORS_ERROR   -1
+#define CAN_CONNECTION_MOTORS_ERROR -2
+
+#define MOTOR_STEP 1
 
 #define TIMER 100
+#define MAX_TRY                                                                \
+    50  // Correspond a 5 secondes d attente avant de faire une erreur
+
+uint8_t  tryCount = 0;
+uint32_t timerMs  = 0;
 
 motorInfo_t motors[MOTOR_NBR];
-uint8_t motorIndexes[MOTOR_NBR];
-uint32_t timerMs = 0;
+uint8_t     motorIndexes[MOTOR_NBR];
 
-//Prototypes
-void ManagerMotorHMI_ReceiveFromMotors();
-void ManagerMotorHMI_CalculateNextPositions();
-void ManagerMotorHMI_SendToMotors();
-void ManagerMotorHMI_SendToHMI();
+uint8_t motorState;
+int8_t  errorCode = 0;
+
+// Prototypes
+void    ManagerMotorHMI_ReceiveFromMotors();
+void    ManagerMotorHMI_CalculateNextPositions();
+void    ManagerMotorHMI_SendToMotors();
+void    ManagerMotorHMI_SendToHMI();
 uint8_t ManagerMotorHMI_CANExtractControllerID(uint32_t ext_id);
+void    ManagerMotorHMI_SetOrigines();
+void    ManagerMotorHMI_CANVerif();
 
 void ManagerMotorHMI_Init()
 {
-	CanMotorServo_Init();
+    CanMotorServo_Init();
 
-	for (uint8_t i = 0; i < MOTOR_NBR; i++)
-	{
-		motors[i].index = i + 1;
-		motors[i].position = 0;
-		motors[i].nextPosition = 0;
-		motors[i].speed = 0;
-		motors[i].current = 0;
-		motors[i].temp = 0;
-		motors[i].error = 0;
-		motors[i].update = false;
-	}
+    // Init Struct motors
+    for (uint8_t i = 0; i < MOTOR_NBR; i++)
+    {
+        motors[i].position     = 0;
+        motors[i].nextPosition = 0;
+        motors[i].speed        = 0;
+        motors[i].current      = 0;
+        motors[i].temp         = 0;
+        motors[i].error        = 0;
+        motors[i].update       = false;
+        motors[i].detected     = false;
+    }
+
+    // Init motor canID
+    motors[MOTOR_1].canID = MOTOR_1_CAN_ID;
+    motors[MOTOR_2].canID = MOTOR_2_CAN_ID;
+    motors[MOTOR_3].canID = MOTOR_3_CAN_ID;
+
+    // Init State machine
+    motorState = CAN_VERIF;
 }
 
 void ManagerMotorHMI_Task()
 {
+    // Read les moteurs avant chacune des etapes
+    ManagerMotorHMI_ReceiveFromMotors();  // Ajouter gestion erreur si moteurs
+                                          // renvoi rien
 
-	//Machine à état qui prend en compte l'initialisation des moteurs, première lecture et home
-	if (HAL_GetTick() - timerMs >= TIMER)
-	{
-		ManagerMotorHMI_ReceiveFromMotors();
+    // Machine à état qui prend en compte l'initialisation des moteurs, première
+    // lecture et envoie des commandes aux moteurs
+    if (HAL_GetTick() - timerMs >= TIMER)
+    {
+        switch (motorState)
+        {
+        case CAN_VERIF:
+            ManagerMotorHMI_CANVerif();
+            break;
 
-		ManagerMotorHMI_CalculateNextPositions();
+        case SET_ORIGIN:
+            ManagerMotorHMI_SetOrigines();
+            break;
 
-		ManagerMotorHMI_SendToMotors();
+        case READY2MOVE:
+            ManagerMotorHMI_CalculateNextPositions();  // Devient un manager a
+                                                       // part entiere
+            ManagerMotorHMI_SendToMotors();
+            ManagerMotorHMI_SendToHMI();
+            break;
 
-		ManagerMotorHMI_SendToHMI();
-
-		timerMs = HAL_GetTick();
-	}
+        case ERROR:
+            // Send la valeur de l'erreur au HMI?
+            break;
+        }
+        timerMs = HAL_GetTick();
+    }
 }
-
-
 
 void ManagerMotorHMI_ReceiveFromMotors()
 {
-	uint8_t received_controller_id = ManagerMotorHMI_CANExtractControllerID(RxHeader.Identifier);
+    uint8_t received_controller_id =
+        ManagerMotorHMI_CANExtractControllerID(RxHeader.Identifier);
 
-	if (received_controller_id >= 1 && received_controller_id <= 3  )
-	{
-		uint8_t motorIndex = received_controller_id - 1 ;
-		CanMotorServo_Receive(&motors[motorIndex].position, &motors[motorIndex].speed, &motors[motorIndex].current, &motors[motorIndex].temp, &motors[motorIndex].error);
-	}
+    if (received_controller_id == MOTOR_1_CAN_ID)
+    {
+        CanMotorServo_Receive(&motors[MOTOR_1].position, &motors[MOTOR_1].speed,
+                              &motors[MOTOR_1].current, &motors[MOTOR_1].temp,
+                              &motors[MOTOR_1].error);
+        motors[MOTOR_1].detected = true;
+    }
+    else if (received_controller_id == MOTOR_2_CAN_ID)
+    {
+        CanMotorServo_Receive(&motors[MOTOR_2].position, &motors[MOTOR_2].speed,
+                              &motors[MOTOR_2].current, &motors[MOTOR_2].temp,
+                              &motors[MOTOR_2].error);
+        motors[MOTOR_2].detected = true;
+    }
+    else if (received_controller_id == MOTOR_3_CAN_ID)
+    {
+        CanMotorServo_Receive(&motors[MOTOR_3].position, &motors[MOTOR_3].speed,
+                              &motors[MOTOR_3].current, &motors[MOTOR_3].temp,
+                              &motors[MOTOR_3].error);
+        motors[MOTOR_3].detected = true;
+    }
 }
-
 
 void ManagerMotorHMI_CalculateNextPositions()
 {
+    char* foundWord = searchWord((char*) MainBuf_UART);
 
-
-  char* foundWord = searchWord((char*) MainBuf_UART);
-
-  if (strcmp(foundWord, "eversionR") == 0) {
-	  motors[MOTOR_1].nextPosition -= MOTOR_STEP;
-	  motors[MOTOR_2].nextPosition += MOTOR_STEP;
-	  motors[MOTOR_1].update = true;
-	  motors[MOTOR_2].update = true;
-  }
-  else if (strcmp(foundWord, "eversionL") == 0) {
-	  motors[MOTOR_1].nextPosition += MOTOR_STEP;
-	  motors[MOTOR_2].nextPosition -= MOTOR_STEP;
-	  motors[MOTOR_1].update = true;
-	  motors[MOTOR_2].update = true;
-  }
-  else if (strcmp(foundWord, "dorsiflexionU") == 0) {
-	  motors[MOTOR_1].nextPosition += MOTOR_STEP;
-	  motors[MOTOR_2].nextPosition += MOTOR_STEP;
-	  motors[MOTOR_1].update = true;
-	  motors[MOTOR_2].update = true;
-  }
-  else if (strcmp(foundWord, "dorsiflexionD") == 0) {
-	  motors[MOTOR_1].nextPosition -= MOTOR_STEP;
-	  motors[MOTOR_2].nextPosition -= MOTOR_STEP;
-	  motors[MOTOR_1].update = true;
-	  motors[MOTOR_2].update = true;
-
-  }
-  else if (strcmp(foundWord, "extensionU") == 0) {
-	  motors[MOTOR_3].nextPosition += MOTOR_STEP;
-	  motors[MOTOR_3].update = true;
-
-  }
-  else if (strcmp(foundWord, "extensionD") == 0) {
-	  motors[MOTOR_3].nextPosition -= MOTOR_STEP;
-	  motors[MOTOR_3].update = true;
-
-  }
-  else if (strcmp(foundWord, "goHome1") == 0) {
-
-	  motors[MOTOR_1].nextPosition = 0;
-	  motors[MOTOR_1].update = true;
-
-  }
-  else if (strcmp(foundWord, "goHome2") == 0) {
-
-	  motors[MOTOR_2].nextPosition = 0;
-	  motors[MOTOR_2].update = true;
-
-  }
-  else if (strcmp(foundWord, "goHome3") == 0) {
-
-	  motors[MOTOR_3].nextPosition = 0;
-	  motors[MOTOR_3].update = true;
-
-  }
-  else if (strcmp(foundWord, "setHome") == 0) {
-
-	CanMotorServo_SetOrigin(1);
-	CanMotorServo_SetOrigin(2);
-	CanMotorServo_SetOrigin(3);
-	motors[MOTOR_1].nextPosition = 0;
-	motors[MOTOR_2].nextPosition = 0;
-	motors[MOTOR_3].nextPosition = 0;
-  }
-  else if (strcmp(foundWord, "goHome") == 0) {
-	  motors[MOTOR_1].nextPosition = 0;
-	  motors[MOTOR_2].nextPosition = 0;
-	  motors[MOTOR_3].nextPosition = 0;
-	  motors[MOTOR_1].update = true;
-	  motors[MOTOR_2].update = true;
-	  motors[MOTOR_3].update = true;
-  }
+    if (strcmp(foundWord, "eversionR") == 0)
+    {
+        motors[MOTOR_1].nextPosition -= MOTOR_STEP;
+        motors[MOTOR_2].nextPosition += MOTOR_STEP;
+        motors[MOTOR_1].update = true;
+        motors[MOTOR_2].update = true;
+    }
+    else if (strcmp(foundWord, "eversionL") == 0)
+    {
+        motors[MOTOR_1].nextPosition += MOTOR_STEP;
+        motors[MOTOR_2].nextPosition -= MOTOR_STEP;
+        motors[MOTOR_1].update = true;
+        motors[MOTOR_2].update = true;
+    }
+    else if (strcmp(foundWord, "dorsiflexionU") == 0)
+    {
+        motors[MOTOR_1].nextPosition += MOTOR_STEP;
+        motors[MOTOR_2].nextPosition += MOTOR_STEP;
+        motors[MOTOR_1].update = true;
+        motors[MOTOR_2].update = true;
+    }
+    else if (strcmp(foundWord, "dorsiflexionD") == 0)
+    {
+        motors[MOTOR_1].nextPosition -= MOTOR_STEP;
+        motors[MOTOR_2].nextPosition -= MOTOR_STEP;
+        motors[MOTOR_1].update = true;
+        motors[MOTOR_2].update = true;
+    }
+    else if (strcmp(foundWord, "extensionU") == 0)
+    {
+        motors[MOTOR_3].nextPosition += MOTOR_STEP;
+        motors[MOTOR_3].update = true;
+    }
+    else if (strcmp(foundWord, "extensionD") == 0)
+    {
+        motors[MOTOR_3].nextPosition -= MOTOR_STEP;
+        motors[MOTOR_3].update = true;
+    }
+    else if (strcmp(foundWord, "goHome1") == 0)
+    {
+        motors[MOTOR_1].nextPosition = 0;
+        motors[MOTOR_1].update       = true;
+    }
+    else if (strcmp(foundWord, "goHome2") == 0)
+    {
+        motors[MOTOR_2].nextPosition = 0;
+        motors[MOTOR_2].update       = true;
+    }
+    else if (strcmp(foundWord, "goHome3") == 0)
+    {
+        motors[MOTOR_3].nextPosition = 0;
+        motors[MOTOR_3].update       = true;
+    }
+    else if (strcmp(foundWord, "setHome") == 0)
+    {
+        CanMotorServo_SetOrigin(MOTOR_1_CAN_ID);
+        CanMotorServo_SetOrigin(MOTOR_2_CAN_ID);
+        CanMotorServo_SetOrigin(MOTOR_3_CAN_ID);
+        motors[MOTOR_1].nextPosition = 0;
+        motors[MOTOR_2].nextPosition = 0;
+        motors[MOTOR_3].nextPosition = 0;
+    }
+    else if (strcmp(foundWord, "goHome") == 0)
+    {
+        motors[MOTOR_1].nextPosition = 0;
+        motors[MOTOR_2].nextPosition = 0;
+        motors[MOTOR_3].nextPosition = 0;
+        motors[MOTOR_1].update       = true;
+        motors[MOTOR_2].update       = true;
+        motors[MOTOR_3].update       = true;
+    }
 }
 
 void ManagerMotorHMI_SendToMotors()
 {
-	for(uint8_t i = 0; i<MOTOR_NBR; i++)
-	{
-		if (motors[i].update)
-		{
-			CanMotorServo_SetPos(motors[i].index, motors[i].nextPosition);
-			motors[i].update = false;
-		}
-	}
+    for (uint8_t i = 0; i < MOTOR_NBR; i++)
+    {
+        if (motors[i].update)
+        {
+            CanMotorServo_SetPos(motors[i].canID, motors[i].nextPosition);
+            motors[i].update = false;
+        }
+    }
 }
 
 void ManagerMotorHMI_SendToHMI()
 {
-	cJSON *root = cJSON_CreateObject();
+    cJSON* root = cJSON_CreateObject();
 
-	// Convert numbers to strings using sprintf
-	char eversionStr[15];
-	char dorsiflexionStr[15];
-	char extensionStr[15];
-	sprintf(eversionStr, "%.2f", motors[MOTOR_1].position);
-	sprintf(dorsiflexionStr, "%.2f", motors[MOTOR_2].position);
-	sprintf(extensionStr, "%.2f", motors[MOTOR_3].position);
+    // Convert numbers to strings using sprintf
+    char eversionStr[15];
+    char dorsiflexionStr[15];
+    char extensionStr[15];
+    sprintf(eversionStr, "%.2f", motors[MOTOR_1].position);
+    sprintf(dorsiflexionStr, "%.2f", motors[MOTOR_2].position);
+    sprintf(extensionStr, "%.2f", motors[MOTOR_3].position);
 
-	// Add strings to the JSON object
-	cJSON_AddStringToObject(root, "dorsiflexion", dorsiflexionStr);
-	cJSON_AddStringToObject(root, "eversion", eversionStr);
-	cJSON_AddStringToObject(root, "extension", extensionStr);
+    // Add strings to the JSON object
+    cJSON_AddStringToObject(root, "dorsiflexion", dorsiflexionStr);
+    cJSON_AddStringToObject(root, "eversion", eversionStr);
+    cJSON_AddStringToObject(root, "extension", extensionStr);
 
-	// Print the JSON object
-	char *jsonMessage = cJSON_PrintUnformatted(root);
+    // Print the JSON object
+    char* jsonMessage = cJSON_PrintUnformatted(root);
 
-	// Send JSON string over UART
-	HAL_UART_Transmit(&huart3, (uint8_t *)jsonMessage, strlen(jsonMessage), HAL_MAX_DELAY);
+    // Send JSON string over UART
+    HAL_UART_Transmit(&huart3, (uint8_t*) jsonMessage, strlen(jsonMessage),
+                      HAL_MAX_DELAY);
 
-	free(jsonMessage);
-	cJSON_Delete(root);  // Correct way to free cJSON memory
+    free(jsonMessage);
+    cJSON_Delete(root);  // Correct way to free cJSON memory
 }
 
 uint8_t ManagerMotorHMI_CANExtractControllerID(uint32_t ext_id)
 {
-	return (uint8_t)(ext_id & 0xFF);
+    return (uint8_t) (ext_id & 0xFF);
 }
 
+void ManagerMotorHMI_SetOrigines()
+{
+    if (motors[MOTOR_1].position == 0.0 && motors[MOTOR_2].position == 0.0 &&
+        motors[MOTOR_3].position == 0.0)
+    {
+        motorState = READY2MOVE;
+        tryCount   = 0;
+    }
+    else if (tryCount < MAX_TRY)
+    {
+        CanMotorServo_SetOrigin(MOTOR_1_CAN_ID);
+        HAL_Delay(50);
+        CanMotorServo_SetOrigin(MOTOR_2_CAN_ID);
+        HAL_Delay(50);
+        CanMotorServo_SetOrigin(MOTOR_3_CAN_ID);
+        HAL_Delay(50);
 
+        tryCount += 1;
+    }
+    else
+    {
+        motorState = ERROR;
+        errorCode  = SET_ORIGINES_MOTORS_ERROR;
+    }
+}
 
+void ManagerMotorHMI_CANVerif()
+{
+    if (motors[MOTOR_1].detected && motors[MOTOR_2].detected &&
+        motors[MOTOR_3].detected)
+    {
+        motorState = SET_ORIGIN;
+        tryCount   = 0;
+    }
+    else if (tryCount < MAX_TRY)
+    {
+        tryCount += 1;
+    }
+    else
+    {
+        motorState = ERROR;
+        errorCode  = CAN_CONNECTION_MOTORS_ERROR;
+    }
+}
