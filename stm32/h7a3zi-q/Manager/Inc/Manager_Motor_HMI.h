@@ -5,7 +5,7 @@
 
 typedef struct
 {
-    uint8_t index;
+    uint8_t canID;
     float   position;
     float   speed;
     float   current;
@@ -13,6 +13,7 @@ typedef struct
     uint8_t error;
     float   nextPosition;
     bool    update;
+    bool    detected;
 } motorInfo_t;
 
 void ManagerMotorHMI_Init();
