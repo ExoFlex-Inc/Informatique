@@ -52,7 +52,7 @@ export function Welcome() {
         <>
           <h2 className="welcome-header">Welcome to ExoFlex!</h2>
           <p className="text-center">
-            Let's get started by creating a username:
+            Let's get started by entering your account informations:
           </p>
           <form
             className="welcome-name-form"
