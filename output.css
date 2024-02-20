@@ -1902,7 +1902,7 @@ svg {
   margin-bottom: 2rem;
   border-radius: 0.25rem;
   --tw-bg-opacity: 1;
-  background-color: rgb(74 222 128 / var(--tw-bg-opacity));
+  background-color: rgb(74 222 128 / var(--tw-bg-opacity)) !important;
   padding: 0.5rem;
   text-align: center;
   font-family: cubano, sans-serif;
