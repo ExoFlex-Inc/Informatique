@@ -66,7 +66,7 @@ const ProSidebar = () => {
         height: "100%",
       }}
     >
-      <Sidebar backgroundColor={colors.primary[400]} collapsed={isCollapsed}>
+      <Sidebar className="sidebar-no-border" backgroundColor={colors.primary[400]}  collapsed={isCollapsed}>
         <Menu
           menuItemStyles={{
             button: ({ level, active, disabled }) => {

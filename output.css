@@ -1851,6 +1851,10 @@ svg {
   }
 }
 
+.sidebar-no-border {
+  border: none !important; /* Use !important to ensure this rule takes precedence */
+}
+
 /* Welcome component styles */
 
 .welcome-header {
