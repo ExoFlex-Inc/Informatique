@@ -1,4 +1,10 @@
 #ifndef CAN_Motor_Servo_H
+#define CAN_Motor_Servo_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 #include "main.h"
 
@@ -25,5 +31,9 @@ void CanMotorServo_SetRPM(uint8_t controller_id, float rpm);
 void CanMotorServo_SetCurrentBreak(uint8_t controller_id, float current);
 void CanMotorServo_SetCurrent(uint8_t controller_id, float current);
 void CanMotorServo_SetDuty(uint8_t controller_id, float duty);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

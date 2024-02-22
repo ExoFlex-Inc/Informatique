@@ -1,6 +1,10 @@
 #ifndef MANAGER_MOTOR_HMI_H
 #define MANAGER_MOTOR_HMI_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "main.h"
 
 typedef struct
@@ -18,5 +22,9 @@ typedef struct
 
 void ManagerMotorHMI_Init();
 void ManagerMotorHMI_Task();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
