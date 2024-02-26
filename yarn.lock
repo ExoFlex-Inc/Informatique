@@ -503,21 +503,17 @@
   version "1.2.8"
   resolved "https://registry.npmjs.org/@stitches/core/-/core-1.2.8.tgz"
 
-"@stitches/react@^1.2.8":
-  version "1.2.8"
-  resolved "https://registry.npmjs.org/@stitches/react/-/react-1.2.8.tgz"
-
-"@supabase/auth-ui-react@^0.2.6":
-  version "0.2.8"
-  resolved "https://registry.npmjs.org/@supabase/auth-ui-react/-/auth-ui-react-0.2.8.tgz"
+"@supabase/auth-ui-react@^0.4.7":
+  version "0.4.7"
+  resolved "https://registry.yarnpkg.com/@supabase/auth-ui-react/-/auth-ui-react-0.4.7.tgz#6e3f941fc82a9798ba2033fab865a9f5fdfa0d32"
   dependencies:
     "@stitches/core" "^1.2.8"
-    "@stitches/react" "^1.2.8"
+    "@supabase/auth-ui-shared" "0.1.8"
     prop-types "^15.7.2"
-  optionalDependencies:
-    fsevents "^2.3.2"
+    react "^18.2.0"
+    react-dom "^18.2.0"
 
-"@supabase/auth-ui-shared@^0.1.8":
+"@supabase/auth-ui-shared@0.1.8", "@supabase/auth-ui-shared@^0.1.8":
   version "0.1.8"
   resolved "https://registry.npmjs.org/@supabase/auth-ui-shared/-/auth-ui-shared-0.1.8.tgz"
 
@@ -1647,7 +1643,7 @@ fsevents@2.3.2:
   version "2.3.2"
   resolved "https://registry.npmjs.org/fsevents/-/fsevents-2.3.2.tgz"
 
-fsevents@^2.3.2, fsevents@~2.3.2:
+fsevents@~2.3.2:
   version "2.3.3"
   resolved "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz"
 
