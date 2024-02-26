@@ -116,7 +116,7 @@ void CanMotorServo_Transmit(uint32_t id, uint8_t dlc, uint8_t* data)
     TxHeader.Identifier          = id;  // ID
     TxHeader.IdType              = FDCAN_STANDARD_ID;
     TxHeader.TxFrameType         = FDCAN_DATA_FRAME;
-    TxHeader.DataLength          = dlc;  // data length
+    TxHeader.DataLength          = FDCAN_DLC_BYTES_8;  // data length
     TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
     TxHeader.BitRateSwitch      = FDCAN_BRS_OFF;  // Disable BRS for Classic CAN
     TxHeader.FDFormat           = FDCAN_CLASSIC_CAN;  // Use Classic CAN format
@@ -210,13 +210,15 @@ int main(void)
 	ak10_1.enable();
 	HAL_Delay(1000);
 
+	ak10_1.enable();
+
 	ak10_1.setZeroPosition();
 	HAL_Delay(1000);
 
-	ak10_1.move(0.0, -50, 0, 0.4, 0.2);
+	ak10_1.move(5, 0, 0, 1, 0.8);
 	HAL_Delay(1000);
 
-	ak10_1.move(3.1415, -50, -10, 2, 0.2);
+	ak10_1.move(-5, 0, 0, 1, 0.8);
 	HAL_Delay(1000);
 
 	uint32_t timerMs  = 0;
@@ -328,7 +330,7 @@ static void MX_FDCAN1_Init(void)
   hfdcan1.Init.AutoRetransmission = ENABLE;
   hfdcan1.Init.TransmitPause = DISABLE;
   hfdcan1.Init.ProtocolException = DISABLE;
-  hfdcan1.Init.NominalPrescaler = 16;
+  hfdcan1.Init.NominalPrescaler = 8;
   hfdcan1.Init.NominalSyncJumpWidth = 13;
   hfdcan1.Init.NominalTimeSeg1 = 5;
   hfdcan1.Init.NominalTimeSeg2 = 10;
