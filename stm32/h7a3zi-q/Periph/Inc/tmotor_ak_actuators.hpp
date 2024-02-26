@@ -7,9 +7,19 @@
 
 #include <stdint.h>
 
+
+	typedef struct
+	{
+	  float position;
+	  float velocity;
+	  float torque;
+	} MotorState;
+
+
 /// @brief T-Motor/CubMars actuators.
 namespace TMotorActuators
 {
+
   typedef struct
   {
     float positionMin;
@@ -46,18 +56,13 @@ namespace TMotorActuators
   public:
     typedef void (*SendCanDataFunction)(uint32_t id, uint8_t dlc, uint8_t *data);
 
-    typedef struct
-    {
-      uint16_t id;
-      float position;
-      float velocity;
-      float torque;
-    } MotorState;
+
 
   private:
     /// @brief Motor ID, same as CAN ID.
     uint8_t mId;
     MotorParameters mMotorParameters;
+    MotorState mState;
 
     /// @brief Send CAN Bus data function.
     SendCanDataFunction sendCanData;
@@ -90,12 +95,17 @@ namespace TMotorActuators
     /// @param kd PID kd.
     void move(float position, float velocity, float torque, float kp, float kd = 0);
 
-    MotorState parseMotorState(uint8_t *canData);
+    void parseMotorState(uint8_t *canData);
 
     /// @brief Get the motor ID.
     ///
     /// @return Motor ID
     uint8_t getId(void);
+
+    /// @brief Get the motor stste.
+    ///
+    /// @return Motor state
+    MotorState getMotorState(void);
   };
 }
 

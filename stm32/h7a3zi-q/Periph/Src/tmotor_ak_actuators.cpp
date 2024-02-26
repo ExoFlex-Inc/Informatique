@@ -54,19 +54,15 @@ namespace TMotorActuators
     sendCanData(mId, 8, data);
   }
 
-  AkActuators::MotorState AkActuators::parseMotorState(uint8_t *canData)
+  void AkActuators::parseMotorState(uint8_t *canData)
   {
     uint16_t pInt = (canData[1] << 8) | canData[2];
     uint16_t vInt = (canData[3] << 4) | (canData[4] >> 4);
     uint16_t tInt = ((canData[4] & 0xF) << 8) | canData[5];
 
-    MotorState state;
-    state.id = canData[0];
-    state.position = convUintToFloat(pInt, mMotorParameters.positionMin, mMotorParameters.positionMax, 16);
-    state.velocity = convUintToFloat(vInt, mMotorParameters.velocityMin, mMotorParameters.velocityMax, 12);
-    state.torque = convUintToFloat(tInt, -mMotorParameters.torqueMax, mMotorParameters.torqueMax, 12);
-
-    return state;
+    mState.position = convUintToFloat(pInt, mMotorParameters.positionMin, mMotorParameters.positionMax, 16);
+    mState.velocity = convUintToFloat(vInt, mMotorParameters.velocityMin, mMotorParameters.velocityMax, 12);
+    mState.torque = convUintToFloat(tInt, -mMotorParameters.torqueMax, mMotorParameters.torqueMax, 12);
   }
 
   int32_t AkActuators::convFloatToUint(float val, float min, float max, uint8_t bits)
@@ -94,5 +90,10 @@ namespace TMotorActuators
   uint8_t AkActuators::getId(void)
   {
     return this->mId;
+  }
+
+  MotorState AkActuators::getMotorState(void)
+  {
+    return this->mState;
   }
 }

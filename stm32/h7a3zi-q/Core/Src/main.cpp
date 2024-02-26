@@ -204,24 +204,34 @@ int main(void)
 	}
 
 	TMotorActuators::AkActuators ak10_1 = TMotorActuators::AkActuators(1, TMotorActuators::ak10_9_v1_1, CanMotorServo_Transmit);
+	TMotorActuators::AkActuators ak10_2 = TMotorActuators::AkActuators(2, TMotorActuators::ak10_9_v1_1, CanMotorServo_Transmit);
 
 	HAL_Delay(1000);
 
 	ak10_1.enable();
+	ak10_2.enable();
 	HAL_Delay(1000);
 
 	ak10_1.enable();
+	ak10_2.enable();
+
 
 	ak10_1.setZeroPosition();
+	ak10_2.setZeroPosition();
 	HAL_Delay(1000);
 
 	ak10_1.move(5, 0, 0, 1, 0.8);
+	ak10_2.move(5, 0, 0, 1, 0.8);
 	HAL_Delay(1000);
 
 	ak10_1.move(-5, 0, 0, 1, 0.8);
+	ak10_2.move(-5, 0, 0, 1, 0.8);
 	HAL_Delay(1000);
 
 	uint32_t timerMs  = 0;
+
+	MotorState m1;
+	MotorState m2;
 
   while (1)
   {
@@ -233,6 +243,12 @@ int main(void)
 		if (received_controller_id == 1)
 		{
 		  ak10_1.parseMotorState(RxData);
+		  m1 = ak10_1.getMotorState();
+		}
+		if (received_controller_id == 2)
+		{
+		  ak10_2.parseMotorState(RxData);
+		  m2 = ak10_2.getMotorState();
 		}
 
 		timerMs = HAL_GetTick();
