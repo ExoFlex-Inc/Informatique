@@ -18,19 +18,19 @@ namespace TMotorActuators
   void AkActuators::enable(void)
   {
     uint8_t data[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFC};
-    sendCanData(mId, 8, data);
+    sendCanData(mId, data);
   }
 
   void AkActuators::disable(void)
   {
     uint8_t data[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFD};
-    sendCanData(mId, 8, data);
+    sendCanData(mId, data);
   }
 
   void AkActuators::setZeroPosition(void)
   {
     uint8_t data[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE};
-    sendCanData(mId, 8, data);
+    sendCanData(mId, data);
   }
 
   void AkActuators::move(float position, float velocity, float torque, float kp, float kd)
@@ -51,7 +51,7 @@ namespace TMotorActuators
     data[6] = ((kdInt & 0xF) << 4 | (tInt >> 8));
     data[7] = tInt & 0xFF;
 
-    sendCanData(mId, 8, data);
+    sendCanData(mId, data);
   }
 
   void AkActuators::parseMotorState(uint8_t *canData)

@@ -47,13 +47,16 @@ extern FDCAN_RxHeaderTypeDef RxHeader;
 extern UART_HandleTypeDef huart3;
 extern DMA_HandleTypeDef hdma_usart3_rx;
 
+extern FDCAN_FilterTypeDef fdcanFilterConfig;
 extern uint8_t TxData[8];
 extern uint8_t RxData[8];
+extern uint32_t TxMailbox;
+
 
 extern uint8_t MainBuf_UART[MAIN_BUF_SIZE_UART];
 extern uint8_t RxBuf_UART[RX_BUF_SIZE_UART];
 
-extern uint32_t TxMailbox;
+
 
 /* USER CODE END ET */
 

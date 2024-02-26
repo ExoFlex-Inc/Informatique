@@ -25,6 +25,7 @@
 
 #include "cJSON.h"
 #include "uartRingBufDMA.h"
+#include "Periph_Canbus.h"
 #include "tmotor_ak_actuators.hpp"
 
 
@@ -79,6 +80,7 @@ static void MX_USART3_UART_Init(void);
 uint8_t MainBuf_UART[MAIN_BUF_SIZE_UART];
 uint8_t RxBuf_UART[RX_BUF_SIZE_UART];
 
+
 FDCAN_TxHeaderTypeDef TxHeader;
 FDCAN_RxHeaderTypeDef RxHeader;
 FDCAN_FilterTypeDef fdcanFilterConfig;
@@ -88,57 +90,6 @@ uint8_t RxData[8];
 
 uint32_t TxMailbox;
 
-void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef* hfdcan, uint32_t RxFifo0ITs)
-{
-    if ((RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) != RESET)
-    {
-        /* Retreive Rx messages from RX FIFO0 */
-        if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &RxHeader, RxData) !=
-            HAL_OK)
-        {
-            /* Reception Error */
-            Error_Handler();
-        }
-
-        if (HAL_FDCAN_ActivateNotification(
-                hfdcan, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK)
-        {
-            /* Notification Error */
-            Error_Handler();
-        }
-    }
-}
-
-void CanMotorServo_Transmit(uint32_t id, uint8_t dlc, uint8_t* data)
-{
-    uint8_t i = 0;
-
-    TxHeader.Identifier          = id;  // ID
-    TxHeader.IdType              = FDCAN_STANDARD_ID;
-    TxHeader.TxFrameType         = FDCAN_DATA_FRAME;
-    TxHeader.DataLength          = FDCAN_DLC_BYTES_8;  // data length
-    TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
-    TxHeader.BitRateSwitch      = FDCAN_BRS_OFF;  // Disable BRS for Classic CAN
-    TxHeader.FDFormat           = FDCAN_CLASSIC_CAN;  // Use Classic CAN format
-    TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
-    TxHeader.MessageMarker      = 0;
-
-    // Copy data to TxData
-	for (i = 0; i < dlc; i++)
-	{
-		TxData[i] = data[i];
-	}
-
-    if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, TxData) != HAL_OK)
-    {
-        uint8_t test = 0;
-    }
-}
-
-uint8_t CANExtractControllerID(uint32_t ext_id)
-{
-    return (uint8_t) (ext_id & 0xFF);
-}
 
 
 
@@ -192,19 +143,9 @@ int main(void)
 	Ringbuf_Init();
 
 
-	if (HAL_FDCAN_Start(&hfdcan1) != HAL_OK)
-	{
-	  Error_Handler();
-	}
 
-	if (HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE,
-									 0) != HAL_OK)
-	{
-	  Error_Handler();
-	}
-
-	TMotorActuators::AkActuators ak10_1 = TMotorActuators::AkActuators(1, TMotorActuators::ak10_9_v1_1, CanMotorServo_Transmit);
-	TMotorActuators::AkActuators ak10_2 = TMotorActuators::AkActuators(2, TMotorActuators::ak10_9_v1_1, CanMotorServo_Transmit);
+	TMotorActuators::AkActuators ak10_1 = TMotorActuators::AkActuators(1, TMotorActuators::ak10_9_v1_1, PeriphCanbus_TransmitDLC8);
+	TMotorActuators::AkActuators ak10_2 = TMotorActuators::AkActuators(2, TMotorActuators::ak10_9_v1_1, PeriphCanbus_TransmitDLC8);
 
 	HAL_Delay(1000);
 
@@ -238,7 +179,7 @@ int main(void)
 
 	if (HAL_GetTick() - timerMs >= 50)
 	{
-		uint8_t received_controller_id = CANExtractControllerID(RxHeader.Identifier);
+		uint8_t received_controller_id = PeriphCanbus_ExtractControllerID(RxHeader.Identifier);
 
 		if (received_controller_id == 1)
 		{
@@ -374,19 +315,7 @@ static void MX_FDCAN1_Init(void)
   }
   /* USER CODE BEGIN FDCAN1_Init 2 */
 
-  // Set filter ID and mask
-  fdcanFilterConfig.IdType = FDCAN_EXTENDED_ID;
-  fdcanFilterConfig.FilterIndex = 0;
-  fdcanFilterConfig.FilterType = FDCAN_FILTER_MASK;
-  fdcanFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
-  fdcanFilterConfig.FilterID1 = 0x0000;
-  fdcanFilterConfig.FilterID2 = 0x0000;
-  fdcanFilterConfig.RxBufferIndex = 0;
-  if (HAL_FDCAN_ConfigFilter(&hfdcan1, &fdcanFilterConfig) != HAL_OK)
-  {
-    // Filter configuration error
-    Error_Handler();
-  }
+
 
   /* USER CODE END FDCAN1_Init 2 */
 

@@ -54,7 +54,7 @@ namespace TMotorActuators
   class AkActuators
   {
   public:
-    typedef void (*SendCanDataFunction)(uint32_t id, uint8_t dlc, uint8_t *data);
+    typedef void (*SendCanDataFunction)(uint32_t id, uint8_t *data);
 
 
 
