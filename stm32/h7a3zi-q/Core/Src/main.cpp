@@ -142,10 +142,12 @@ int main(void)
 	cJSON_InitHooks(NULL);
 	Ringbuf_Init();
 
+	PeriphCanbus_Init();
+
 
 
 	TMotorActuators::AkActuators ak10_1 = TMotorActuators::AkActuators(1, TMotorActuators::ak10_9_v1_1, PeriphCanbus_TransmitDLC8);
-	TMotorActuators::AkActuators ak10_2 = TMotorActuators::AkActuators(2, TMotorActuators::ak10_9_v1_1, PeriphCanbus_TransmitDLC8);
+	TMotorActuators::AkActuators ak10_2 = TMotorActuators::AkActuators(3, TMotorActuators::ak10_9_v1_1, PeriphCanbus_TransmitDLC8);
 
 	HAL_Delay(1000);
 
