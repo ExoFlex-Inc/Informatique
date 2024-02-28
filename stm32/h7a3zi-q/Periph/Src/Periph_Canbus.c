@@ -2,11 +2,12 @@
 #include <string.h>
 
 #define CAN_NODE_NBR 3
+#define MSG_LENGTH 8
 
 typedef struct
 {
   uint8_t id;
-  uint8_t msg[8];
+  uint8_t msg[MSG_LENGTH];
 } CanNode;
 
 CanNode CanNodes[CAN_NODE_NBR];
@@ -16,6 +17,17 @@ void PeriphCanbus_UpdateNodeMsg();
 
 void PeriphCanbus_Init()
 {
+	for (uint8_t i = 0; i < CAN_NODE_NBR; i++)
+	{
+		CanNodes[i].id = i + 1;
+
+		for (uint8_t j = 0; j < MSG_LENGTH; j++)
+		{
+			CanNodes[i].msg[j] = 0;
+		}
+	}
+
+
 	// Set filter ID and mask
 	fdcanFilterConfig.IdType = FDCAN_EXTENDED_ID;
 	fdcanFilterConfig.FilterIndex = 0;
@@ -70,25 +82,18 @@ void PeriphCanbus_UpdateNodeMsg()
 {
 	uint8_t receivedId = PeriphCanbus_ExtractControllerID(RxHeader.Identifier);
 
-	for (uint8_t i = 0; i < CAN_NODE_NBR; i++)
+	if (receivedId < CAN_NODE_NBR)
 	{
-		if (CanNodes[i].id == receivedId)
-		{
-			memcpy(CanNodes[i].msg, RxData, 8);
-			break;
-		}
+		memcpy(CanNodes[receivedId-1].msg, RxData, 8);
 	}
 }
 
 bool PeriphCanbus_GetNodeMsg(uint8_t id, uint8_t *data)
 {
-	for (uint8_t i = 0; i < CAN_NODE_NBR; i++)
+	if (id <= CAN_NODE_NBR)
 	{
-		if (CanNodes[i].id == id)
-		{
-			data = CanNodes[i].msg;
-			return true;
-		}
+		data = CanNodes[id-1].msg;
+		return true;
 	}
 	return false;
 }
@@ -106,7 +111,7 @@ void PeriphCanbus_TransmitDLC8(uint32_t id, uint8_t* data)
     TxHeader.MessageMarker      = 0;
 
     // Copy data to TxData
-	for (uint8_t i = 0; i < 8; i++)
+	for (uint8_t i = 0; i < MSG_LENGTH; i++)
 	{
 		TxData[i] = data[i];
 	}
