@@ -182,8 +182,15 @@ int main(void)
 
 	if (HAL_GetTick() - timerMs >= 50)
 	{
-		uint8_t received_controller_id = PeriphCanbus_ExtractControllerID(RxHeader.Identifier);
+		uint8_t data[8];
+		PeriphCanbus_GetNodeMsg(m1.id, data);
+		PeriphMotors_ParseMotorState(&m1, data);
 
+		PeriphCanbus_GetNodeMsg(m2.id, data);
+		PeriphMotors_ParseMotorState(&m2, data);
+
+		PeriphCanbus_GetNodeMsg(m3.id, data);
+		PeriphMotors_ParseMotorState(&m3, data);
 
 		timerMs = HAL_GetTick();
 	}

@@ -1,20 +1,34 @@
 #include "Periph_Canbus.h"
+#include <string.h>
+
+#define CAN_NODE_NBR 3
+
+typedef struct
+{
+  uint8_t id;
+  uint8_t msg[8];
+} CanNode;
+
+CanNode CanNodes[CAN_NODE_NBR];
+
+uint8_t PeriphCanbus_ExtractControllerID(uint32_t ext_id);
+void PeriphCanbus_UpdateNodeMsg();
 
 void PeriphCanbus_Init()
 {
-	  // Set filter ID and mask
-	  fdcanFilterConfig.IdType = FDCAN_EXTENDED_ID;
-	  fdcanFilterConfig.FilterIndex = 0;
-	  fdcanFilterConfig.FilterType = FDCAN_FILTER_MASK;
-	  fdcanFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
-	  fdcanFilterConfig.FilterID1 = 0x0000;
-	  fdcanFilterConfig.FilterID2 = 0x0000;
-	  fdcanFilterConfig.RxBufferIndex = 0;
-	  if (HAL_FDCAN_ConfigFilter(&hfdcan1, &fdcanFilterConfig) != HAL_OK)
-	  {
-		// Filter configuration error
-		Error_Handler();
-	  }
+	// Set filter ID and mask
+	fdcanFilterConfig.IdType = FDCAN_EXTENDED_ID;
+	fdcanFilterConfig.FilterIndex = 0;
+	fdcanFilterConfig.FilterType = FDCAN_FILTER_MASK;
+	fdcanFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+	fdcanFilterConfig.FilterID1 = 0x0000;
+	fdcanFilterConfig.FilterID2 = 0x0000;
+	fdcanFilterConfig.RxBufferIndex = 0;
+	if (HAL_FDCAN_ConfigFilter(&hfdcan1, &fdcanFilterConfig) != HAL_OK)
+	{
+	// Filter configuration error
+	Error_Handler();
+	}
 
 	if (HAL_FDCAN_Start(&hfdcan1) != HAL_OK)
 	{
@@ -41,6 +55,8 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef* hfdcan, uint32_t RxFifo0ITs)
             Error_Handler();
         }
 
+        PeriphCanbus_UpdateNodeMsg();
+
         if (HAL_FDCAN_ActivateNotification(
                 hfdcan, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK)
         {
@@ -48,6 +64,33 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef* hfdcan, uint32_t RxFifo0ITs)
             Error_Handler();
         }
     }
+}
+
+void PeriphCanbus_UpdateNodeMsg()
+{
+	uint8_t receivedId = PeriphCanbus_ExtractControllerID(RxHeader.Identifier);
+
+	for (uint8_t i = 0; i < CAN_NODE_NBR; i++)
+	{
+		if (CanNodes[i].id == receivedId)
+		{
+			memcpy(CanNodes[i].msg, RxData, 8);
+			break;
+		}
+	}
+}
+
+bool PeriphCanbus_GetNodeMsg(uint8_t id, uint8_t *data)
+{
+	for (uint8_t i = 0; i < CAN_NODE_NBR; i++)
+	{
+		if (CanNodes[i].id == id)
+		{
+			data = CanNodes[i].msg;
+			return true;
+		}
+	}
+	return false;
 }
 
 void PeriphCanbus_TransmitDLC8(uint32_t id, uint8_t* data)

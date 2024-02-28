@@ -14,11 +14,10 @@ extern "C" {
 
 #include "main.h"
 
-
-
 void PeriphCanbus_Init();
 void PeriphCanbus_TransmitDLC8(uint32_t id, uint8_t* data);
-uint8_t PeriphCanbus_ExtractControllerID(uint32_t ext_id);
+bool PeriphCanbus_GetNodeMsg(uint8_t id, uint8_t *data);
+
 
 #ifdef __cplusplus
 }
