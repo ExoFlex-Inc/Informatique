@@ -46,6 +46,12 @@ void PeriphMotors_Enable(Motor *pMotor)
    PeriphMotors_SendCanData(pMotor->id, data);
  }
 
+void PeriphMotors_SubscribeToRx(Motor *pMotor)
+ {
+   uint8_t data[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFC};
+   PeriphMotors_SendCanData(pMotor->id, data);
+ }
+
  void PeriphMotors_Disable(Motor *pMotor)
  {
    uint8_t data[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFD};

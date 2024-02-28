@@ -152,6 +152,11 @@ int main(void)
 	PeriphMotors_InitMotor(&m1, 1, MOTOR_AK10_9);
 	PeriphMotors_InitMotor(&m2, 2, MOTOR_AK10_9);
 	PeriphMotors_InitMotor(&m3, 3, MOTOR_AK80_64);
+
+
+	PeriphMotors_Enable(&m1);
+	PeriphMotors_Enable(&m2);
+	PeriphMotors_Enable(&m3);
 	HAL_Delay(250);
 
 	PeriphMotors_Enable(&m1);
@@ -165,14 +170,15 @@ int main(void)
 	HAL_Delay(250);
 
 	float pos = 3.14f;
-	PeriphMotors_Move(&m1, pos, 0, 0, 1, 1);
-	PeriphMotors_Move(&m2, pos, 0, 0, 1, 1);
-	PeriphMotors_Move(&m3, pos, 0, 0, 1, 1);
+	float kp = 0.5f;
+	PeriphMotors_Move(&m1, pos, 0, 0, kp, 1);
+	PeriphMotors_Move(&m2, pos, 0, 0, kp, 1);
+	PeriphMotors_Move(&m3, pos, 0, 0, 1.5*kp, 1);
 	HAL_Delay(1000);
 
-	PeriphMotors_Move(&m1, -pos, 0, 0, 1, 1);
-	PeriphMotors_Move(&m2, -pos, 0, 0, 1, 1);
-	PeriphMotors_Move(&m3, -pos, 0, 0, 1, 1);
+	PeriphMotors_Move(&m1, -pos, 0, 0, kp, 1);
+	PeriphMotors_Move(&m2, -pos, 0, 0, kp, 1);
+	PeriphMotors_Move(&m3, -pos, 0, 0, 1.5*kp, 1);
 	HAL_Delay(250);
 
 	uint32_t timerMs  = 0;
