@@ -26,7 +26,7 @@
 #include "cJSON.h"
 #include "uartRingBufDMA.h"
 #include "Periph_Canbus.h"
-#include "tmotor_ak_actuators.hpp"
+#include "Periph_Motors.h"
 
 
 /* USER CODE END Includes */
@@ -143,47 +143,39 @@ int main(void)
 	Ringbuf_Init();
 
 	PeriphCanbus_Init();
+	PeriphMotors_Init(PeriphCanbus_TransmitDLC8);
 
+	Motor m1;
+	Motor m2;
+	Motor m3;
 
+	PeriphMotors_InitMotor(&m1, 1, MOTOR_AK10_9);
+	PeriphMotors_InitMotor(&m2, 2, MOTOR_AK10_9);
+	PeriphMotors_InitMotor(&m3, 3, MOTOR_AK80_64);
+	HAL_Delay(250);
 
-	TMotorActuators::AkActuators ak10_1 = TMotorActuators::AkActuators(1, TMotorActuators::ak10_9_v1_1, PeriphCanbus_TransmitDLC8);
-	TMotorActuators::AkActuators ak10_2 = TMotorActuators::AkActuators(2, TMotorActuators::ak10_9_v1_1, PeriphCanbus_TransmitDLC8);
-	TMotorActuators::AkActuators ak10_3 = TMotorActuators::AkActuators(3, TMotorActuators::ak10_9_v1_1, PeriphCanbus_TransmitDLC8);
+	PeriphMotors_Enable(&m1);
+	PeriphMotors_Enable(&m2);
+	PeriphMotors_Enable(&m3);
+	HAL_Delay(250);
 
-	HAL_Delay(1000);
-
-	ak10_1.enable();
-	ak10_2.enable();
-	ak10_3.enable();
-	HAL_Delay(1000);
-
-	ak10_1.enable();
-	ak10_2.enable();
-	ak10_3.enable();
-
-
-	ak10_1.setZeroPosition();
-	ak10_2.setZeroPosition();
-	ak10_3.setZeroPosition();
-	HAL_Delay(1000);
+	PeriphMotors_SetZeroPosition(&m1);
+	PeriphMotors_SetZeroPosition(&m2);
+	PeriphMotors_SetZeroPosition(&m3);
+	HAL_Delay(250);
 
 	float pos = 3.14f;
-
-	ak10_1.move(pos, 0, 0, 1, 1);
-	ak10_2.move(pos, 0, 0, 1, 1);
-	ak10_3.move(pos, 0, 0, 1, 1);
+	PeriphMotors_Move(&m1, pos, 0, 0, 1, 1);
+	PeriphMotors_Move(&m2, pos, 0, 0, 1, 1);
+	PeriphMotors_Move(&m3, pos, 0, 0, 1, 1);
 	HAL_Delay(1000);
 
-	ak10_1.move(-pos, 0, 0, 1, 1);
-	ak10_2.move(-pos, 0, 0, 1, 1);
-	ak10_3.move(-pos, 0, 0, 1, 1);
-	HAL_Delay(1000);
+	PeriphMotors_Move(&m1, -pos, 0, 0, 1, 1);
+	PeriphMotors_Move(&m2, -pos, 0, 0, 1, 1);
+	PeriphMotors_Move(&m3, -pos, 0, 0, 1, 1);
+	HAL_Delay(250);
 
 	uint32_t timerMs  = 0;
-
-	MotorState m1;
-	MotorState m2;
-	MotorState m3;
 
   while (1)
   {
@@ -192,21 +184,6 @@ int main(void)
 	{
 		uint8_t received_controller_id = PeriphCanbus_ExtractControllerID(RxHeader.Identifier);
 
-		if (received_controller_id == 1)
-		{
-		  ak10_1.parseMotorState(RxData);
-		  m1 = ak10_1.getMotorState();
-		}
-		if (received_controller_id == 2)
-		{
-		  ak10_2.parseMotorState(RxData);
-		  m2 = ak10_2.getMotorState();
-		}
-		if (received_controller_id == 3)
-		{
-		  ak10_3.parseMotorState(RxData);
-		  m3 = ak10_3.getMotorState();
-		}
 
 		timerMs = HAL_GetTick();
 	}
