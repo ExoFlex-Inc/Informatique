@@ -67,7 +67,7 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef* hfdcan, uint32_t RxFifo0ITs)
             Error_Handler();
         }
 
-        //PeriphCanbus_UpdateNodeMsg();
+        PeriphCanbus_UpdateNodeMsg();
 
         if (HAL_FDCAN_ActivateNotification(
                 hfdcan, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK)
@@ -82,9 +82,9 @@ void PeriphCanbus_UpdateNodeMsg()
 {
 	uint8_t receivedId = PeriphCanbus_ExtractControllerID(RxHeader.Identifier);
 
-	if (receivedId < CAN_NODE_NBR)
+	if (receivedId <= CAN_NODE_NBR && receivedId > 0)
 	{
-		memcpy(CanNodes[receivedId-1].msg, RxData, 8);
+		memcpy(CanNodes[receivedId-1].msg, RxData, 8 * sizeof(uint8_t));
 	}
 }
 
