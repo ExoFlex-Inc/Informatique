@@ -28,7 +28,7 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
 
   const handleClick = () => {
     setSelected(title);
-    navigate(to); 
+    navigate(to);
   };
 
   return (
