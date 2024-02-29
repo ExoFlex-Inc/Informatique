@@ -67,7 +67,7 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef* hfdcan, uint32_t RxFifo0ITs)
             Error_Handler();
         }
 
-        PeriphCanbus_UpdateNodeMsg();
+        //PeriphCanbus_UpdateNodeMsg();
 
         if (HAL_FDCAN_ActivateNotification(
                 hfdcan, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK)
@@ -116,7 +116,9 @@ void PeriphCanbus_TransmitDLC8(uint32_t id, uint8_t* data)
 		TxData[i] = data[i];
 	}
 
-    if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, TxData) != HAL_OK)
+	HAL_StatusTypeDef status = HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, TxData);
+
+    if (status != HAL_OK)
     {
         uint8_t test = 0;
     }

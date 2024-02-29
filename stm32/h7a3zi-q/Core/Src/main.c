@@ -149,54 +149,83 @@ int main(void)
 	Motor m2;
 	Motor m3;
 
+	float pos = -3.14f;
+	float kp = 0.5f;
+
 	PeriphMotors_InitMotor(&m1, 1, MOTOR_AK10_9);
 	PeriphMotors_InitMotor(&m2, 2, MOTOR_AK10_9);
 	PeriphMotors_InitMotor(&m3, 3, MOTOR_AK80_64);
+	HAL_Delay(50);
 
+//	PeriphMotors_Move(&m1, 0, 0, 0, 0, 0);
+//	PeriphMotors_Move(&m2, 0, 0, 0, 0, 0);
+//	PeriphMotors_Move(&m3, 0, 0, 0, 0, 0);
+//	HAL_Delay(250);
+
+//	PeriphMotors_SetZeroPosition(&m1);
+//	PeriphMotors_SetZeroPosition(&m2);
+//	PeriphMotors_SetZeroPosition(&m3);
+//	HAL_Delay(250);
 
 	PeriphMotors_Enable(&m1);
 	PeriphMotors_Enable(&m2);
 	PeriphMotors_Enable(&m3);
-	HAL_Delay(250);
+	HAL_Delay(50);
 
-	PeriphMotors_Enable(&m1);
-	PeriphMotors_Enable(&m2);
-	PeriphMotors_Enable(&m3);
-	HAL_Delay(250);
+	PeriphMotors_Move(&m1, 0, 0, 0, 0, 0);
+	PeriphMotors_Move(&m2, 0, 0, 0, 0, 0);
+	PeriphMotors_Move(&m3, 0, 0, 0, 0, 0);
+	HAL_Delay(50);
 
 	PeriphMotors_SetZeroPosition(&m1);
 	PeriphMotors_SetZeroPosition(&m2);
 	PeriphMotors_SetZeroPosition(&m3);
-	HAL_Delay(250);
+	HAL_Delay(50);
 
-	float pos = 3.14f;
-	float kp = 0.5f;
+	PeriphMotors_SetZeroPosition(&m3);
+	HAL_Delay(50);
+	PeriphMotors_SetZeroPosition(&m3);
+	HAL_Delay(50);
+	PeriphMotors_SetZeroPosition(&m3);
+	HAL_Delay(50);
+
+//	PeriphMotors_Move(&m1, 0, 0, 0, 0, 0);
+//	PeriphMotors_Move(&m2, 0, 0, 0, 0, 0);
+//	PeriphMotors_Move(&m3, 0, 0, 0, 0, 0);
+//	HAL_Delay(50);
+
+
 	PeriphMotors_Move(&m1, pos, 0, 0, kp, 1);
 	PeriphMotors_Move(&m2, pos, 0, 0, kp, 1);
-	PeriphMotors_Move(&m3, pos, 0, 0, 1.5*kp, 1);
-	HAL_Delay(1000);
+	PeriphMotors_Move(&m3, pos, 0, 0, 2*kp, 1);
+	HAL_Delay(1);
 
-	PeriphMotors_Move(&m1, -pos, 0, 0, kp, 1);
-	PeriphMotors_Move(&m2, -pos, 0, 0, kp, 1);
-	PeriphMotors_Move(&m3, -pos, 0, 0, 1.5*kp, 1);
-	HAL_Delay(250);
+//	PeriphMotors_Move(&m1, -pos, 0, 0, kp, 1);
+//	PeriphMotors_Move(&m2, -pos, 0, 0, kp, 1);
+//	PeriphMotors_Move(&m3, -pos, 0, 0, 1.5*kp, 1);
+//	HAL_Delay(100);
 
 	uint32_t timerMs  = 0;
+	uint8_t data[8];
 
   while (1)
   {
 
-	if (HAL_GetTick() - timerMs >= 50)
+	if (HAL_GetTick() - timerMs >= 5)
 	{
-		uint8_t data[8];
-		PeriphCanbus_GetNodeMsg(m1.id, data);
-		PeriphMotors_ParseMotorState(&m1, data);
+		PeriphMotors_Move(&m1, pos, 0, 0, kp, 1);
+		PeriphMotors_Move(&m2, pos, 0, 0, kp, 1);
+		PeriphMotors_Move(&m3, pos, 0, 0, 2*kp, 1);
 
-		PeriphCanbus_GetNodeMsg(m2.id, data);
-		PeriphMotors_ParseMotorState(&m2, data);
 
-		PeriphCanbus_GetNodeMsg(m3.id, data);
-		PeriphMotors_ParseMotorState(&m3, data);
+//		PeriphCanbus_GetNodeMsg(m1.id, data);
+//		PeriphMotors_ParseMotorState(&m1, data);
+//
+//		PeriphCanbus_GetNodeMsg(m2.id, data);
+//		PeriphMotors_ParseMotorState(&m2, data);
+//
+//		PeriphCanbus_GetNodeMsg(m3.id, data);
+//		PeriphMotors_ParseMotorState(&m3, data);
 
 		timerMs = HAL_GetTick();
 	}
