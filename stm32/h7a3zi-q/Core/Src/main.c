@@ -149,8 +149,8 @@ int main(void)
 	Motor m2;
 	Motor m3;
 
-	float pos = 0.0f;
-	float kp = 0.5f;
+	float pos = 3.0f;
+	float kp = 2.0f;
 
 	PeriphMotors_InitMotor(&m1, 1, MOTOR_AK10_9);
 	PeriphMotors_InitMotor(&m2, 2, MOTOR_AK10_9);
@@ -174,20 +174,25 @@ int main(void)
 
 	PeriphMotors_Move(&m1, pos, 0, 0, kp, 1);
 	PeriphMotors_Move(&m2, pos, 0, 0, kp, 1);
-	PeriphMotors_Move(&m3, pos, 0, 0, 2*kp, 1);
+	PeriphMotors_Move(&m3, pos, 0, 0, kp, 1);
 	HAL_Delay(1);
 
 	uint32_t timerMs  = 0;
 	uint8_t data[8];
+
+	for (uint8_t i = 0; i < 8; i++)
+	{
+		data[i] = 0;
+	}
 
   while (1)
   {
 
 	if (HAL_GetTick() - timerMs >= 5)
 	{
-		PeriphMotors_Move(&m1, pos, 0, 0, kp, 1);
-		PeriphMotors_Move(&m2, pos, 0, 0, kp, 1);
-		PeriphMotors_Move(&m3, pos, 0, 0, 2*kp, 1);
+		PeriphMotors_Move(&m1, pos, 0, 0, kp, 0.5f);
+		PeriphMotors_Move(&m2, pos, 0, 0, kp, 0.5f);
+		PeriphMotors_Move(&m3, pos, 0, 0, 2*kp, 0.5f);
 
 
 		PeriphCanbus_GetNodeMsg(m1.id, data);

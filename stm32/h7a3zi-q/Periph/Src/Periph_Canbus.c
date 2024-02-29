@@ -88,11 +88,11 @@ void PeriphCanbus_UpdateNodeMsg()
 	}
 }
 
-bool PeriphCanbus_GetNodeMsg(uint8_t id, uint8_t *data)
+bool PeriphCanbus_GetNodeMsg(uint8_t id, uint8_t* data)
 {
-	if (id <= CAN_NODE_NBR)
+	if (id <= CAN_NODE_NBR && id > 0)
 	{
-		data = CanNodes[id-1].msg;
+		memcpy(data, CanNodes[id-1].msg, 8 * sizeof(uint8_t));
 		return true;
 	}
 	return false;
