@@ -8,7 +8,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { tokens } from "../../hooks/theme.ts";
 
 import { manualInit } from "../Manual.tsx";
@@ -24,19 +24,24 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    setSelected(title);
+    navigate(to); 
+  };
+
   return (
-    <Link to={to}>
-      <MenuItem
-        active={selected === title}
-        style={{
-          color: colors.grey[100],
-        }}
-        onClick={() => setSelected(title)}
-        icon={icon}
-      >
-        <Typography color={colors.grey[100]}>{title}</Typography>
-      </MenuItem>
-    </Link>
+    <MenuItem
+      active={selected === title}
+      style={{
+        color: colors.grey[100],
+      }}
+      onClick={handleClick}
+      icon={icon}
+    >
+      <Typography color={colors.grey[100]}>{title}</Typography>
+    </MenuItem>
   );
 };
 
