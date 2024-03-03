@@ -17,6 +17,7 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+#include <Manager_Motor.h>
 #include "main.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -27,7 +28,6 @@
 #include "uartRingBufDMA.h"
 #include "Periph_Canbus.h"
 #include "Periph_Motors.h"
-#include <Manager_Motor_HMI.h>
 
 
 /* USER CODE END Includes */
@@ -143,11 +143,11 @@ int main(void)
 	cJSON_InitHooks(NULL);
 	Ringbuf_Init();
 
-	ManagerMotorHMI_Init();
+	ManagerMotor_Init();
 
   while (1)
   {
-	  ManagerMotorHMI_Task();
+	  ManagerMotor_Task();
 
 
     /* USER CODE END WHILE */
