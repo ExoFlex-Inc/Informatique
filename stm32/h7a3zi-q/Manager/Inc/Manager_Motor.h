@@ -14,7 +14,7 @@ typedef struct
 	bool    detected;
 } MotorInfo;
 
-void ManagerMotorHMI_Init();
-void ManagerMotorHMI_Task();
+void ManagerMotor_Init();
+void ManagerMotor_Task();
 
 #endif
