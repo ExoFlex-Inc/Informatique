@@ -7,12 +7,12 @@
 
 typedef struct
 {
-	MotorStatus motorInfo;
+	Motor motor;
 	uint8_t temp;
 	uint8_t error;
 	float   nextPosition;
 	bool    detected;
-} Motor;
+} MotorInfo;
 
 void ManagerMotorHMI_Init();
 void ManagerMotorHMI_Task();
