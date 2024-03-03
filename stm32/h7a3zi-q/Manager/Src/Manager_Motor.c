@@ -1,9 +1,8 @@
-#include <math.h>
 #include <Manager_Motor.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 
 #include "cJSON.h"
 #include "comUtils_UART2.h"
@@ -30,37 +29,36 @@
 
 #define MOTOR_STEP 1
 
-#define TIMER 5
-#define MAX_TRY                                                                \
-    50  // 250 ms before flagging an error
+#define TIMER   5
+#define MAX_TRY 50  // 250 ms before flagging an error
 
 typedef struct
 {
-	uint8_t state;
-	float kp;
-	float kd;
-	int8_t  errorCode;
+    uint8_t state;
+    float   kp;
+    float   kd;
+    int8_t  errorCode;
 
-}managerMotor_t;
+} managerMotor_t;
 
 uint8_t  tryCount = 0;
 uint32_t timerMs  = 0;
 
 MotorInfo motors[MOTOR_NBR];
-uint8_t     motorIndexes[MOTOR_NBR];
+uint8_t   motorIndexes[MOTOR_NBR];
 
 managerMotor_t managerMotor;
 
 uint8_t data[8];
 
 // Prototypes
-void    ManagerMotor_ReceiveFromMotors();
-void    ManagerMotor_CalculateNextPositions();
-void    ManagerMotor_SendToMotors();
-void    ManagerMotor_SendToHMI();
-void    ManagerMotor_SetOrigines();
-void    ManagerMotor_CANVerif();
-void 	ManagerMotor_enableMotors();
+void ManagerMotor_ReceiveFromMotors();
+void ManagerMotor_CalculateNextPositions();
+void ManagerMotor_SendToMotors();
+void ManagerMotor_SendToHMI();
+void ManagerMotor_SetOrigines();
+void ManagerMotor_CANVerif();
+void ManagerMotor_enableMotors();
 
 void ManagerMotor_Init()
 {
@@ -70,25 +68,28 @@ void ManagerMotor_Init()
     HAL_Delay(50);
 
     // Init Struct motors
-    PeriphMotors_InitMotor(&motors[MOTOR_1].motor, MOTOR_1_CAN_ID, MOTOR_AK10_9);
-	PeriphMotors_InitMotor(&motors[MOTOR_2].motor, MOTOR_2_CAN_ID, MOTOR_AK10_9);
-	PeriphMotors_InitMotor(&motors[MOTOR_3].motor, MOTOR_3_CAN_ID, MOTOR_AK80_64);
-	HAL_Delay(50);
-	PeriphMotors_Enable(&motors[MOTOR_1].motor);
-	PeriphMotors_Enable(&motors[MOTOR_2].motor);
-	PeriphMotors_Enable(&motors[MOTOR_3].motor);
+    PeriphMotors_InitMotor(&motors[MOTOR_1].motor, MOTOR_1_CAN_ID,
+                           MOTOR_AK10_9);
+    PeriphMotors_InitMotor(&motors[MOTOR_2].motor, MOTOR_2_CAN_ID,
+                           MOTOR_AK10_9);
+    PeriphMotors_InitMotor(&motors[MOTOR_3].motor, MOTOR_3_CAN_ID,
+                           MOTOR_AK80_64);
+    HAL_Delay(50);
+    PeriphMotors_Enable(&motors[MOTOR_1].motor);
+    PeriphMotors_Enable(&motors[MOTOR_2].motor);
+    PeriphMotors_Enable(&motors[MOTOR_3].motor);
 
     for (uint8_t i = 0; i < MOTOR_NBR; i++)
-	{
-		motors[i].nextPosition = 0.0;
-		motors[i].temp         = 0.0;
-		motors[i].error        = 0.0;
-		motors[i].detected     = false;
-	}
+    {
+        motors[i].nextPosition = 0.0;
+        motors[i].temp         = 0.0;
+        motors[i].error        = 0.0;
+        motors[i].detected     = false;
+    }
     // Init Data for canBus messages
     for (uint8_t i = 0; i < 8; i++)
     {
-    	data[i] = 0;
+        data[i] = 0;
     }
 
     // Set Kp and Kd
@@ -101,10 +102,11 @@ void ManagerMotor_Init()
 
 void ManagerMotor_Task()
 {
-    // State machine that Init, sets to zero, reads informations and sends informations to the motors
+    // State machine that Init, sets to zero, reads informations and sends
+    // informations to the motors
     if (HAL_GetTick() - timerMs >= TIMER)
     {
-    	ManagerMotor_ReceiveFromMotors();
+        ManagerMotor_ReceiveFromMotors();
         switch (managerMotor.state)
         {
         case CAN_VERIF:
@@ -116,14 +118,15 @@ void ManagerMotor_Task()
             break;
 
         case READY2MOVE:
-            ManagerMotor_CalculateNextPositions();  // Will become his own manager
+            ManagerMotor_CalculateNextPositions();  // Will become his own
+                                                    // manager
 
             ManagerMotor_SendToMotors();
-            ManagerMotor_SendToHMI(); // Will go in manager_HMI
+            ManagerMotor_SendToHMI();  // Will go in manager_HMI
             break;
 
         case ERROR:
-        	//Send error value to HMI ?
+            // Send error value to HMI ?
             break;
         }
         timerMs = HAL_GetTick();
@@ -132,24 +135,26 @@ void ManagerMotor_Task()
 
 void ManagerMotor_ReceiveFromMotors()
 {
-	if (PeriphCanbus_GetNodeMsg(motors[MOTOR_1].motor.id, data) && data[0] != '\0')
-	{
-		PeriphMotors_ParseMotorState(&motors[MOTOR_1].motor, data);
-		motors[MOTOR_1].detected = true;
-	}
+    if (PeriphCanbus_GetNodeMsg(motors[MOTOR_1].motor.id, data) &&
+        data[0] != '\0')
+    {
+        PeriphMotors_ParseMotorState(&motors[MOTOR_1].motor, data);
+        motors[MOTOR_1].detected = true;
+    }
 
-	if (PeriphCanbus_GetNodeMsg(motors[MOTOR_2].motor.id, data) && data[0] != '\0')
-	{
-		PeriphMotors_ParseMotorState(&motors[MOTOR_2].motor, data);
-		motors[MOTOR_2].detected = true;
-	}
+    if (PeriphCanbus_GetNodeMsg(motors[MOTOR_2].motor.id, data) &&
+        data[0] != '\0')
+    {
+        PeriphMotors_ParseMotorState(&motors[MOTOR_2].motor, data);
+        motors[MOTOR_2].detected = true;
+    }
 
-
-	if (PeriphCanbus_GetNodeMsg(motors[MOTOR_3].motor.id, data) && data[0] != '\0')
-	{
-		PeriphMotors_ParseMotorState(&motors[MOTOR_3].motor, data);
-		motors[MOTOR_3].detected = true;
-	}
+    if (PeriphCanbus_GetNodeMsg(motors[MOTOR_3].motor.id, data) &&
+        data[0] != '\0')
+    {
+        PeriphMotors_ParseMotorState(&motors[MOTOR_3].motor, data);
+        motors[MOTOR_3].detected = true;
+    }
 }
 
 void ManagerMotor_CalculateNextPositions()
@@ -198,7 +203,7 @@ void ManagerMotor_CalculateNextPositions()
     }
     else if (strcmp(foundWord, "setHome") == 0)
     {
-    	managerMotor.state = SET_ORIGIN;
+        managerMotor.state           = SET_ORIGIN;
         motors[MOTOR_1].nextPosition = 0;
         motors[MOTOR_2].nextPosition = 0;
         motors[MOTOR_3].nextPosition = 0;
@@ -215,7 +220,8 @@ void ManagerMotor_SendToMotors()
 {
     for (uint8_t i = 0; i < MOTOR_NBR; i++)
     {
-    	PeriphMotors_Move(&motors[i].motor, motors[i].nextPosition, 0, 0, managerMotor.kp, managerMotor.kd);
+        PeriphMotors_Move(&motors[i].motor, motors[i].nextPosition, 0, 0,
+                          managerMotor.kp, managerMotor.kd);
     }
 }
 
@@ -249,24 +255,25 @@ void ManagerMotor_SendToHMI()
 
 void ManagerMotor_SetOrigines()
 {
-    if (motors[MOTOR_1].motor.position <= 0.001 && motors[MOTOR_2].motor.position <= 0.001 &&
-    		motors[MOTOR_3].motor.position <= 0.001)
+    if (motors[MOTOR_1].motor.position <= 0.001 &&
+        motors[MOTOR_2].motor.position <= 0.001 &&
+        motors[MOTOR_3].motor.position <= 0.001)
     {
-    	managerMotor.state = READY2MOVE;
-        tryCount   = 0;
+        managerMotor.state = READY2MOVE;
+        tryCount           = 0;
     }
     else if (tryCount < MAX_TRY)
     {
-    	PeriphMotors_SetZeroPosition(&motors[MOTOR_1].motor);
-		PeriphMotors_SetZeroPosition(&motors[MOTOR_2].motor);
-		PeriphMotors_SetZeroPosition(&motors[MOTOR_3].motor);
+        PeriphMotors_SetZeroPosition(&motors[MOTOR_1].motor);
+        PeriphMotors_SetZeroPosition(&motors[MOTOR_2].motor);
+        PeriphMotors_SetZeroPosition(&motors[MOTOR_3].motor);
 
         tryCount += 1;
     }
     else
     {
-    	managerMotor.state = ERROR;
-    	managerMotor.errorCode  = SET_ORIGINES_MOTORS_ERROR;
+        managerMotor.state     = ERROR;
+        managerMotor.errorCode = SET_ORIGINES_MOTORS_ERROR;
     }
 }
 
@@ -275,25 +282,25 @@ void ManagerMotor_CANVerif()
     if (motors[MOTOR_1].detected && motors[MOTOR_2].detected &&
         motors[MOTOR_3].detected)
     {
-    	managerMotor.state = SET_ORIGIN;
-        tryCount   = 0;
+        managerMotor.state = SET_ORIGIN;
+        tryCount           = 0;
     }
     else if (tryCount < MAX_TRY)
     {
-    	ManagerMotor_enableMotors();
+        ManagerMotor_enableMotors();
 
         tryCount += 1;
     }
     else
     {
-    	managerMotor.state = ERROR;
-    	managerMotor.errorCode = CAN_CONNECTION_MOTORS_ERROR;
+        managerMotor.state     = ERROR;
+        managerMotor.errorCode = CAN_CONNECTION_MOTORS_ERROR;
     }
 }
 
 void ManagerMotor_enableMotors()
 {
-	PeriphMotors_Move(&motors[MOTOR_1].motor, 0, 0, 0, 0, 0);
-	PeriphMotors_Move(&motors[MOTOR_2].motor, 0, 0, 0, 0, 0);
-	PeriphMotors_Move(&motors[MOTOR_3].motor, 0, 0, 0, 0, 0);
+    PeriphMotors_Move(&motors[MOTOR_1].motor, 0, 0, 0, 0, 0);
+    PeriphMotors_Move(&motors[MOTOR_2].motor, 0, 0, 0, 0, 0);
+    PeriphMotors_Move(&motors[MOTOR_3].motor, 0, 0, 0, 0, 0);
 }
