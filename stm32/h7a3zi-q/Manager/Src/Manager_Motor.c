@@ -1,5 +1,5 @@
-#include <Manager_Motor_HMI.h>
 #include <math.h>
+#include <Manager_Motor.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -54,15 +54,15 @@ managerMotor_t managerMotor;
 uint8_t data[8];
 
 // Prototypes
-void    ManagerMotorHMI_ReceiveFromMotors();
-void    ManagerMotorHMI_CalculateNextPositions();
-void    ManagerMotorHMI_SendToMotors();
-void    ManagerMotorHMI_SendToHMI();
-void    ManagerMotorHMI_SetOrigines();
-void    ManagerMotorHMI_CANVerif();
-void 	ManagerMotorHMI_enableMotors();
+void    ManagerMotor_ReceiveFromMotors();
+void    ManagerMotor_CalculateNextPositions();
+void    ManagerMotor_SendToMotors();
+void    ManagerMotor_SendToHMI();
+void    ManagerMotor_SetOrigines();
+void    ManagerMotor_CANVerif();
+void 	ManagerMotor_enableMotors();
 
-void ManagerMotorHMI_Init()
+void ManagerMotor_Init()
 {
     // InitCanBus
     PeriphCanbus_Init();
@@ -99,27 +99,27 @@ void ManagerMotorHMI_Init()
     managerMotor.state = CAN_VERIF;
 }
 
-void ManagerMotorHMI_Task()
+void ManagerMotor_Task()
 {
     // State machine that Init, sets to zero, reads informations and sends informations to the motors
     if (HAL_GetTick() - timerMs >= TIMER)
     {
-    	ManagerMotorHMI_ReceiveFromMotors();
+    	ManagerMotor_ReceiveFromMotors();
         switch (managerMotor.state)
         {
         case CAN_VERIF:
-            ManagerMotorHMI_CANVerif();
+            ManagerMotor_CANVerif();
             break;
 
         case SET_ORIGIN:
-            ManagerMotorHMI_SetOrigines();
+            ManagerMotor_SetOrigines();
             break;
 
         case READY2MOVE:
-            ManagerMotorHMI_CalculateNextPositions();  // Will become his own manager
+            ManagerMotor_CalculateNextPositions();  // Will become his own manager
 
-            ManagerMotorHMI_SendToMotors();
-            ManagerMotorHMI_SendToHMI(); // Will go in manager_HMI
+            ManagerMotor_SendToMotors();
+            ManagerMotor_SendToHMI(); // Will go in manager_HMI
             break;
 
         case ERROR:
@@ -130,7 +130,7 @@ void ManagerMotorHMI_Task()
     }
 }
 
-void ManagerMotorHMI_ReceiveFromMotors()
+void ManagerMotor_ReceiveFromMotors()
 {
 	if (PeriphCanbus_GetNodeMsg(motors[MOTOR_1].motor.id, data) && data[0] != '\0')
 	{
@@ -152,7 +152,7 @@ void ManagerMotorHMI_ReceiveFromMotors()
 	}
 }
 
-void ManagerMotorHMI_CalculateNextPositions()
+void ManagerMotor_CalculateNextPositions()
 {
     char* foundWord = searchWord((char*) MainBuf_UART);
 
@@ -211,7 +211,7 @@ void ManagerMotorHMI_CalculateNextPositions()
     }
 }
 
-void ManagerMotorHMI_SendToMotors()
+void ManagerMotor_SendToMotors()
 {
     for (uint8_t i = 0; i < MOTOR_NBR; i++)
     {
@@ -219,7 +219,7 @@ void ManagerMotorHMI_SendToMotors()
     }
 }
 
-void ManagerMotorHMI_SendToHMI()
+void ManagerMotor_SendToHMI()
 {
     cJSON* root = cJSON_CreateObject();
 
@@ -247,7 +247,7 @@ void ManagerMotorHMI_SendToHMI()
     cJSON_Delete(root);  // Correct way to free cJSON memory
 }
 
-void ManagerMotorHMI_SetOrigines()
+void ManagerMotor_SetOrigines()
 {
     if (motors[MOTOR_1].motor.position <= 0.001 && motors[MOTOR_2].motor.position <= 0.001 &&
     		motors[MOTOR_3].motor.position <= 0.001)
@@ -270,7 +270,7 @@ void ManagerMotorHMI_SetOrigines()
     }
 }
 
-void ManagerMotorHMI_CANVerif()
+void ManagerMotor_CANVerif()
 {
     if (motors[MOTOR_1].detected && motors[MOTOR_2].detected &&
         motors[MOTOR_3].detected)
@@ -280,7 +280,7 @@ void ManagerMotorHMI_CANVerif()
     }
     else if (tryCount < MAX_TRY)
     {
-    	ManagerMotorHMI_enableMotors();
+    	ManagerMotor_enableMotors();
 
         tryCount += 1;
     }
@@ -291,7 +291,7 @@ void ManagerMotorHMI_CANVerif()
     }
 }
 
-void ManagerMotorHMI_enableMotors()
+void ManagerMotor_enableMotors()
 {
 	PeriphMotors_Move(&motors[MOTOR_1].motor, 0, 0, 0, 0, 0);
 	PeriphMotors_Move(&motors[MOTOR_2].motor, 0, 0, 0, 0, 0);
