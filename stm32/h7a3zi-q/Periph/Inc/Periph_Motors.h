@@ -8,11 +8,6 @@
 #ifndef INC_PERIPH_MOTORS_H_
 #define INC_PERIPH_MOTORS_H_
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 #include "main.h"
 
 #define MOTOR_AK10_9  0
@@ -56,9 +51,5 @@ extern "C"
     void PeriphMotors_Move(Motor* pMotor, float position, float velocity,
                            float torque, float kp, float kd);
     void PeriphMotors_ParseMotorState(Motor* pMotor, uint8_t* canData);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* INC_PERIPH_MOTORS_H_ */
