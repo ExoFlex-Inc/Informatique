@@ -16,7 +16,7 @@ extern "C" {
 
 void PeriphCanbus_Init();
 void PeriphCanbus_TransmitDLC8(uint32_t id, uint8_t* data);
-bool PeriphCanbus_GetNodeMsg(uint8_t id, uint8_t *data);
+bool PeriphCanbus_GetNodeMsg(uint8_t id, uint8_t* data);
 
 
 #ifdef __cplusplus
