@@ -8,10 +8,6 @@
 #ifndef INC_UARTRINGBUFDMA_H_
 #define INC_UARTRINGBUFDMA_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "main.h"
 
 #include <stdint.h>
@@ -25,9 +21,5 @@ void Ringbuf_Init (void);
  * Resets the Head and Tail, also the buffers
  * */
 void Ringbuf_Reset (UART_HandleTypeDef *huart);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* INC_UARTRINGBUFDMA_H_ */
