@@ -80,9 +80,9 @@ void ManagerMotorHMI_Init()
 
     for (uint8_t i = 0; i < MOTOR_NBR; i++)
 	{
-		motors[i].nextPosition = 0;
-		motors[i].temp         = 0;
-		motors[i].error        = 0;
+		motors[i].nextPosition = 0.0;
+		motors[i].temp         = 0.0;
+		motors[i].error        = 0.0;
 		motors[i].detected     = false;
 	}
 
@@ -136,20 +136,20 @@ void ManagerMotorHMI_Task()
 void ManagerMotorHMI_ReceiveFromMotors()
 {
 	;
-	if (PeriphCanbus_GetNodeMsg(motors[MOTOR_1].motor.id, data)/*&& data[0] != '\0'*/)
+	if (PeriphCanbus_GetNodeMsg(motors[MOTOR_1].motor.id, data) && data[0] != '\0')
 	{
 		PeriphMotors_ParseMotorState(&motors[MOTOR_1].motor, data);
 		motors[MOTOR_1].detected = true;
 	}
 
-	if (PeriphCanbus_GetNodeMsg(motors[MOTOR_2].motor.id, data) /*&& data[0] != '\0'*/)
+	if (PeriphCanbus_GetNodeMsg(motors[MOTOR_2].motor.id, data) && data[0] != '\0')
 	{
 		PeriphMotors_ParseMotorState(&motors[MOTOR_2].motor, data);
 		motors[MOTOR_2].detected = true;
 	}
 
 
-	if (PeriphCanbus_GetNodeMsg(motors[MOTOR_3].motor.id, data) /*&& data[0] != '\0'*/)
+	if (PeriphCanbus_GetNodeMsg(motors[MOTOR_3].motor.id, data) && data[0] != '\0')
 	{
 		PeriphMotors_ParseMotorState(&motors[MOTOR_3].motor, data);
 		motors[MOTOR_3].detected = true;
@@ -252,8 +252,8 @@ void ManagerMotorHMI_SendToHMI()
 
 void ManagerMotorHMI_SetOrigines()
 {
-    if (motors[MOTOR_1].motor.position == 0.0 && motors[MOTOR_2].motor.position == 0.0 &&
-    		motors[MOTOR_3].motor.position == 0.0)
+    if (motors[MOTOR_1].motor.position <= 0.001 && motors[MOTOR_2].motor.position <= 0.001 &&
+    		motors[MOTOR_3].motor.position <= 0.001)
     {
     	managerMotor.state = READY2MOVE;
         tryCount   = 0;
