@@ -32,7 +32,7 @@
 
 #define TIMER 5
 #define MAX_TRY                                                                \
-    50  // Correspond a 5 secondes d attente avant de faire une erreur
+    50  // 250 ms before flagging an error
 
 typedef struct
 {
@@ -85,12 +85,13 @@ void ManagerMotorHMI_Init()
 		motors[i].error        = 0.0;
 		motors[i].detected     = false;
 	}
-
+    // Init Data for canBus messages
     for (uint8_t i = 0; i < 8; i++)
     {
     	data[i] = 0;
     }
 
+    // Set Kp and Kd
     managerMotor.kp = 3.0f;
     managerMotor.kd = 2.0f;
 
@@ -100,11 +101,7 @@ void ManagerMotorHMI_Init()
 
 void ManagerMotorHMI_Task()
 {
-    // Read les moteurs avant chacune des etapes
-     // Ajouter gestion erreur si moteurs
-                                          // renvoi rien
-    // Machine à état qui prend en compte l'initialisation des moteurs, première
-    // lecture et envoie des commandes aux moteurs
+    // State machine that Init, sets to zero, reads informations and sends informations to the motors
     if (HAL_GetTick() - timerMs >= TIMER)
     {
     	ManagerMotorHMI_ReceiveFromMotors();
@@ -119,14 +116,14 @@ void ManagerMotorHMI_Task()
             break;
 
         case READY2MOVE:
-            ManagerMotorHMI_CalculateNextPositions();  // Devient un manager a
-                                                       // part entiere
+            ManagerMotorHMI_CalculateNextPositions();  // Will become his own manager
+
             ManagerMotorHMI_SendToMotors();
-            //ManagerMotorHMI_SendToHMI();
+            ManagerMotorHMI_SendToHMI(); // Will go in manager_HMI
             break;
 
         case ERROR:
-            // Send la valeur de l'erreur au HMI?
+        	//Send error value to HMI ?
             break;
         }
         timerMs = HAL_GetTick();
@@ -135,7 +132,6 @@ void ManagerMotorHMI_Task()
 
 void ManagerMotorHMI_ReceiveFromMotors()
 {
-	;
 	if (PeriphCanbus_GetNodeMsg(motors[MOTOR_1].motor.id, data) && data[0] != '\0')
 	{
 		PeriphMotors_ParseMotorState(&motors[MOTOR_1].motor, data);
@@ -202,6 +198,7 @@ void ManagerMotorHMI_CalculateNextPositions()
     }
     else if (strcmp(foundWord, "setHome") == 0)
     {
+    	managerMotor.state = SET_ORIGIN;
         motors[MOTOR_1].nextPosition = 0;
         motors[MOTOR_2].nextPosition = 0;
         motors[MOTOR_3].nextPosition = 0;
@@ -264,7 +261,7 @@ void ManagerMotorHMI_SetOrigines()
 		PeriphMotors_SetZeroPosition(&motors[MOTOR_2].motor);
 		PeriphMotors_SetZeroPosition(&motors[MOTOR_3].motor);
 
-        //tryCount += 1;
+        tryCount += 1;
     }
     else
     {
@@ -285,7 +282,7 @@ void ManagerMotorHMI_CANVerif()
     {
     	ManagerMotorHMI_enableMotors();
 
-        //tryCount += 1;
+        tryCount += 1;
     }
     else
     {
