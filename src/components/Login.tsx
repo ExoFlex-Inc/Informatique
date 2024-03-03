@@ -2,13 +2,15 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { useContext, useEffect, useState } from "react";
 import { UserContext } from "../App.tsx";
-import Dialog from "../components/Dialog.tsx";
+import Dialog from "./Dialog.tsx";
 import { supaClient } from "../hooks/supa-client.ts";
+import { useTheme } from "@emotion/react";
 
 export default function Login() {
   const [showModal, setShowModal] = useState(false);
   const [authMode, setAuthMode] = useState<"sign_in" | "sign_up">("sign_in");
   const { session } = useContext(UserContext);
+  const { palette } = useTheme();
 
   useEffect(() => {
     if (session?.user) {
@@ -24,7 +26,7 @@ export default function Login() {
     <>
       <div className="flex m-4 place-items-center">
         <button
-          className="login-button"
+          className="login-button border-black border"
           onClick={() => {
             setShowModal(true);
             setAuthMode("sign_in");
@@ -33,9 +35,11 @@ export default function Login() {
         >
           login
         </button>{" "}
-        <span className="p-2"> or </span>{" "}
+        <span className={`p-2 ${palette.mode === "light" ? "text-black" : ""}`}>
+          &nbsp;or
+        </span>{" "}
         <button
-          className="login-button"
+          className="login-button border-black border"
           onClick={() => {
             setAuthMode("sign_up");
             setShowModal(true);
