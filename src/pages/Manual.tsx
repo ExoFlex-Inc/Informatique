@@ -3,7 +3,7 @@ import { redirect, useNavigate } from "react-router-dom";
 import { supaClient } from "../hooks/supa-client.ts";
 import Button from "../components/Button..tsx";
 
-export async function manualInit() {
+export async function manualInit(navigate) {
   try {
     console.log("Attempting to initialize serial port...");
 
@@ -18,12 +18,16 @@ export async function manualInit() {
       console.log("Serial port initialized successfully.");
       return { loaded: true };
     } else {
-      console.error("Failed to initialize serial port");
-      return redirect("/home");
+      console.error(
+        "Failed to initialize serial port: Check STM32 connection ",
+      );
+      window.alert("Failed to initialize serial port: Check STM32 connection ");
+      return navigate("/");
     }
   } catch (error) {
     console.error("An error occurred:", error);
-    return redirect("/home");
+    window.alert("An error occurred: " + error);
+    return navigate("/");
   }
 }
 
@@ -31,7 +35,7 @@ export default function Manual() {
   const navigate = useNavigate();
 
   const handleBackClick = async () => {
-    navigate("/home");
+    navigate("/");
   };
 
   return (
