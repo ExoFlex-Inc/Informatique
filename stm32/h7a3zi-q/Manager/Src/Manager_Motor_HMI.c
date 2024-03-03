@@ -67,11 +67,16 @@ void ManagerMotorHMI_Init()
     // InitCanBus
     PeriphCanbus_Init();
     PeriphMotors_Init(PeriphCanbus_TransmitDLC8);
+    HAL_Delay(50);
 
     // Init Struct motors
     PeriphMotors_InitMotor(&motors[MOTOR_1].motor, MOTOR_1_CAN_ID, MOTOR_AK10_9);
 	PeriphMotors_InitMotor(&motors[MOTOR_2].motor, MOTOR_2_CAN_ID, MOTOR_AK10_9);
 	PeriphMotors_InitMotor(&motors[MOTOR_3].motor, MOTOR_3_CAN_ID, MOTOR_AK80_64);
+	HAL_Delay(50);
+	PeriphMotors_Enable(&motors[MOTOR_1].motor);
+	PeriphMotors_Enable(&motors[MOTOR_2].motor);
+	PeriphMotors_Enable(&motors[MOTOR_3].motor);
 
     for (uint8_t i = 0; i < MOTOR_NBR; i++)
 	{
@@ -81,17 +86,13 @@ void ManagerMotorHMI_Init()
 		motors[i].detected     = false;
 	}
 
+    for (uint8_t i = 0; i < 8; i++)
+    {
+    	data[i] = 0;
+    }
+
     managerMotor.kp = 3.0f;
     managerMotor.kd = 2.0f;
-
-    for (uint8_t i = 0; i < 8; i++)
-	{
-		data[i] = 0;
-	}
-
-    PeriphMotors_Enable(&motors[MOTOR_1].motor);
-	PeriphMotors_Enable(&motors[MOTOR_2].motor);
-	PeriphMotors_Enable(&motors[MOTOR_3].motor);
 
     // Init State machine
     managerMotor.state = CAN_VERIF;
@@ -100,13 +101,13 @@ void ManagerMotorHMI_Init()
 void ManagerMotorHMI_Task()
 {
     // Read les moteurs avant chacune des etapes
-    ManagerMotorHMI_ReceiveFromMotors();  // Ajouter gestion erreur si moteurs
+     // Ajouter gestion erreur si moteurs
                                           // renvoi rien
-
     // Machine à état qui prend en compte l'initialisation des moteurs, première
     // lecture et envoie des commandes aux moteurs
     if (HAL_GetTick() - timerMs >= TIMER)
     {
+    	ManagerMotorHMI_ReceiveFromMotors();
         switch (managerMotor.state)
         {
         case CAN_VERIF:
