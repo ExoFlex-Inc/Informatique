@@ -20,23 +20,29 @@ import TvIcon from "@mui/icons-material/Tv";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    setSelected(title);
+    navigate(to); 
+  };
+
   return (
-    <Link to={to}>
-      <MenuItem
-        active={selected === title}
-        style={{
-          color: colors.grey[100],
-        }}
-        onClick={() => setSelected(title)}
-        icon={icon}
-      >
-        <Typography color={colors.grey[100]}>{title}</Typography>
-      </MenuItem>
-    </Link>
+    <MenuItem
+      active={selected === title}
+      style={{
+        color: colors.grey[100],
+      }}
+      onClick={handleClick}
+      icon={icon}
+    >
+      <Typography color={colors.grey[100]}>{title}</Typography>
+    </MenuItem>
   );
 };
 
@@ -173,6 +179,13 @@ const ProSidebar = () => {
                 setSelected={setSelected}
               />
             </SubMenu>
+            <Item
+              title="Planning"
+              to="/planning"
+              icon={<FitnessCenterIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
             <SubMenu label="Control Page" icon={<TvIcon />}>
               <Item
                 title="Manual"

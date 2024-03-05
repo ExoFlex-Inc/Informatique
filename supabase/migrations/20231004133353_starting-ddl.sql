@@ -23,6 +23,13 @@ CREATE TABLE machine (
   user_id uuid references auth.users(id) not null
 );
 
+CREATE TABLE plans (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+  user_id uuid references auth.users(id) not null,
+  plan JSONB,
+  created_at DATE DEFAULT CURRENT_DATE
+);
+
 CREATE TABLE encoder (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
   machine_id UUID REFERENCES machine(id),
@@ -86,6 +93,30 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION push_planning(user_id UUID, plan JSONB)
+RETURNS VOID AS $$
+BEGIN
+  -- Debug statement to check input parameters
+  RAISE NOTICE 'user_id: %, plan: %', user_id, plan;
+  
+  IF EXISTS (SELECT 1 FROM plans WHERE plans.user_id = push_planning.user_id) THEN
+    -- Debug statement to check if entering the IF block
+    RAISE NOTICE 'Updating plan for user_id: %', user_id;
+    
+    UPDATE plans
+    SET plan = jsonb_set(plans.plan, '{}', push_planning.plan)
+    WHERE plans.user_id = push_planning.user_id;
+  ELSE
+    -- Debug statement to check if entering the ELSE block
+    RAISE NOTICE 'Inserting plan for user_id: %', user_id;
+    
+    INSERT INTO plans(user_id, plan)
+    VALUES (push_planning.user_id, push_planning.plan);
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+
 /*
 .########...#######..##.......####..######..####.########..######.
 .##.....##.##.....##.##........##..##....##..##..##.......##....##
@@ -99,6 +130,7 @@ $$ LANGUAGE plpgsql;
 alter table user_profiles enable row level security;
 alter table machine enable row level security;
 alter table encoder enable row level security;
+alter table plans enable row level security;
 
 CREATE POLICY "all can see" ON "public"."user_profiles"
 AS PERMISSIVE FOR SELECT
@@ -132,6 +164,16 @@ TO public
 USING (true);
 
 CREATE POLICY "users can insert encoder" ON "public"."encoder"
+AS PERMISSIVE FOR INSERT
+TO public
+WITH CHECK (auth.uid() IS NOT NULL);
+
+CREATE POLICY "all can see" ON "public"."plans"
+AS PERMISSIVE FOR SELECT
+TO public
+USING (true);
+
+CREATE POLICY "users can insert encoder" ON "public"."plans"
 AS PERMISSIVE FOR INSERT
 TO public
 WITH CHECK (auth.uid() IS NOT NULL);

@@ -315,7 +315,6 @@ app.post("/push-supabase", async (_, res) => {
 
             if (error) {
               console.error(`Error for file ${file}:`, error);
-              // You may choose to break the loop if there's an error in one file
             } else {
               console.log(`Success for file ${file}:`, data);
 
@@ -337,6 +336,29 @@ app.post("/push-supabase", async (_, res) => {
   }
 });
 
+app.post("/push-plan-supabase", async (req, res) => {
+  try{
+
+      const { plan } = req.body;
+      const {
+        data: { user },
+      } = await supaClient.auth.getUser();
+      console.log(plan)
+      const { data, error } = await supaClient.rpc("push_planning", {
+        user_id: user?.id,
+        plan: plan
+      });
+    
+      if (error) {
+        console.error(`Error sending plan:`, error);
+      } else {
+        console.log(`Success sending plan:`, data);
+      }
+  } catch (err) {
+    console.error("Error sending plan:", err);
+    res.status(500).send("Success sending plan");
+  }
+});
 /*
 .##........#######...######.....###....##...........######..########.########..##.....##.########.########.
 .##.......##.....##.##....##...##.##...##..........##....##.##.......##.....##.##.....##.##.......##.....##

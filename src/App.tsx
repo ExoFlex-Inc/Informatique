@@ -1,4 +1,4 @@
-import { createContext, useEffect } from "react";
+import { createContext, useEffect, useState } from "react";
 import { Routes, Route, BrowserRouter, useNavigate } from "react-router-dom";
 import { ColorModeContext, useMode } from "./hooks/theme.ts";
 import { CssBaseline, ThemeProvider } from "@mui/material";
@@ -16,6 +16,7 @@ import ProSideBar from "./pages/global/Sidebar.tsx";
 
 import { SupabaseUserInfo, useSession } from "./hooks/use-session.ts";
 import Settings from "./pages/Settings.tsx";
+import Planning from "./pages/Planning.tsx";
 
 export const UserContext = createContext<SupabaseUserInfo>({
   session: null,
@@ -27,10 +28,10 @@ function Layout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (supabaseUserInfo.session) {
-      // navigate("/home");
+    if (!supabaseUserInfo.session) {
+      navigate("/");
     }
-  }, [supabaseUserInfo.session, navigate]);
+  }, [supabaseUserInfo.session]);
 
   return (
     <UserContext.Provider value={supabaseUserInfo}>
@@ -48,6 +49,7 @@ function Layout() {
             />
             <Route path="/manual" element={<Manual />} loader={manualInit} />
             <Route path="/hmi" element={<HMI />} loader={hmiInit} />
+            <Route path="/planning" element={<Planning />} />
             <Route path="/settings" element={<Settings />} />
           </Routes>
         </main>
