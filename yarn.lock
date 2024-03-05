@@ -2944,9 +2944,9 @@ react-lifecycles-compat@^3.0.4:
   version "3.0.4"
   resolved "https://registry.npmjs.org/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz"
 
-react-pro-sidebar@^1.1.0-alpha.2:
-  version "1.1.0-alpha.2"
-  resolved "https://registry.npmjs.org/react-pro-sidebar/-/react-pro-sidebar-1.1.0-alpha.2.tgz"
+react-pro-sidebar@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/react-pro-sidebar/-/react-pro-sidebar-1.1.0.tgz#e8f4ca0d7c4ff9fd2c38f8a0b85664083173b7ac"
   dependencies:
     "@emotion/react" "^11.10.5"
     "@emotion/styled" "^11.10.5"
