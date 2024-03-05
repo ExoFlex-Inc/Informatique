@@ -22,5 +22,4 @@ void Ringbuf_Init (void);
  * */
 void Ringbuf_Reset (UART_HandleTypeDef *huart);
 
-
 #endif /* INC_UARTRINGBUFDMA_H_ */

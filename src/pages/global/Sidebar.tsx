@@ -8,7 +8,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { tokens } from "../../hooks/theme.ts";
 
 import { manualInit } from "../Manual.tsx";
@@ -29,7 +29,7 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
 
   const handleClick = () => {
     setSelected(title);
-    navigate(to); 
+    navigate(to);
   };
 
   return (
