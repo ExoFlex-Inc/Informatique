@@ -1,4 +1,4 @@
-import express, { Application } from "express";
+import express, { Application, Request, Response, NextFunction } from "express";
 import { SerialPort } from "serialport";
 import cors from "cors";
 import fs from "fs";
@@ -41,6 +41,7 @@ function resetMachineData(): MachineData {
 
 let jsonFilename = "";
 let machine_id = "";
+
 
 /*
 ..######..########.########..####....###....##..........########...#######..########..########
@@ -285,7 +286,30 @@ app.post("/home-machine", (_, res) => {
 ..######...#######..##........##.....##.########..##.....##..######..########.....######..########.##.....##....###....########.##.....##
 */
 
-app.post("/push-supabase", async (_, res) => {
+// Middleware to check if session is lost
+async function checkSession(_: Request, res: Response, next: NextFunction) {
+  try {
+    const { data } = await supaClient.auth.getSession();
+
+    const access_token = data.session?.access_token;
+    const refresh_token = data.session?.refresh_token;
+
+    if (!access_token || !refresh_token) {
+      // Session is lost, handle it here
+      console.error("Session lost");
+      res.status(401).json({ error: "Session lost" });
+    } else {
+      console.log(data)
+      // Session is still valid, continue with the request
+      next();
+    }
+  } catch (error) {
+    console.error("Error checking session:", error);
+    res.status(500).json({ error: "Error checking session" });
+  }
+}
+
+app.post("/push-supabase", checkSession, async (_, res) => {
   const folderPath = "./machineAngles";
 
   try {
@@ -336,7 +360,7 @@ app.post("/push-supabase", async (_, res) => {
   }
 });
 
-app.post("/push-plan-supabase", async (req, res) => {
+app.post("/push-plan-supabase", checkSession, async (req, res) => {
   try{
 
       const { plan } = req.body;
@@ -346,7 +370,7 @@ app.post("/push-plan-supabase", async (req, res) => {
       console.log(plan)
       const { data, error } = await supaClient.rpc("push_planning", {
         user_id: user?.id,
-        plan: plan
+        new_plan: plan
       });
     
       if (error) {
@@ -369,34 +393,33 @@ app.post("/push-plan-supabase", async (req, res) => {
 .########..#######...######..##.....##.########.....######..########.##.....##....###....########.##.....##
 */
 
+
 app.post("/setup-local-server", async (req, res) => {
-  const access_token = req.body.access_token;
-  const refresh_token = req.body.refresh_token;
+  try {
+    const access_token = req.body.access_token;
+    const refresh_token = req.body.refresh_token;
 
-  const {
-    data: { session },
-  } = await supaClient.auth.setSession({
-    access_token,
-    refresh_token,
-  });
+    const {
+      data: { session },
+    } = await supaClient.auth.setSession({
+      access_token,
+      refresh_token,
+    });
 
-  if (session) {
-    const { data, error } = await supaClient.rpc(
-      "get_or_create_machine_for_user",
-      { search_id: session.user.id },
-    );
-
-    if (error) {
-      res.status(500).json({ error: "Error setting up local server" });
+    if (session) {
+      // Optionally, you can perform additional setup actions here
+      console.log("Local server setup successful.");
+      res.status(200).send("Local server setup successful.");
     } else {
-      machine_id = data;
-
-      res.status(200).send("local server has been setup");
+      res.status(401).json({ error: "Session not established" });
     }
-  } else {
-    res.status(401).json({ error: "Session not established" });
+  } catch (error) {
+    console.error("Error setting up local server:", error);
+    res.status(500).json({ error: "Error setting up local server" });
   }
 });
+
+
 
 /*
 ..######..########.########..##.....##.########.########......######..########.########.##.....##.########.

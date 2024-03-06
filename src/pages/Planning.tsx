@@ -48,13 +48,8 @@ const handleInputChange = (index, event) => {
     // Function to save plan to Supabase
     const savePlanToSupabase = async (plan) => {
         try {
-            const { data } = await supaClient.auth.getSession();
-            const access_token = data.session?.access_token;
-            const refresh_token = data.session?.refresh_token;
 
             const requestBody = {
-                access_token: access_token,
-                refresh_token: refresh_token,
                 plan: plan
             };
 

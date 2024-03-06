@@ -93,28 +93,28 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION push_planning(user_id UUID, plan JSONB)
-RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION push_planning(user_id UUID, new_plan JSONB)
+RETURNS JSONB AS $$
+DECLARE
+  updated_plan JSONB;
 BEGIN
-  -- Debug statement to check input parameters
-  RAISE NOTICE 'user_id: %, plan: %', user_id, plan;
-  
   IF EXISTS (SELECT 1 FROM plans WHERE plans.user_id = push_planning.user_id) THEN
-    -- Debug statement to check if entering the IF block
-    RAISE NOTICE 'Updating plan for user_id: %', user_id;
-    
     UPDATE plans
-    SET plan = jsonb_set(plans.plan, '{}', push_planning.plan)
-    WHERE plans.user_id = push_planning.user_id;
+    SET plan = new_plan
+    WHERE plans.user_id = push_planning.user_id
+    RETURNING new_plan INTO updated_plan;
   ELSE
-    -- Debug statement to check if entering the ELSE block
-    RAISE NOTICE 'Inserting plan for user_id: %', user_id;
-    
     INSERT INTO plans(user_id, plan)
-    VALUES (push_planning.user_id, push_planning.plan);
+    VALUES (push_planning.user_id, new_plan)
+    RETURNING new_plan INTO updated_plan;
   END IF;
+
+  RETURN updated_plan;
 END;
 $$ LANGUAGE plpgsql;
+
+
+
 
 
 /*
@@ -168,12 +168,19 @@ AS PERMISSIVE FOR INSERT
 TO public
 WITH CHECK (auth.uid() IS NOT NULL);
 
-CREATE POLICY "all can see" ON "public"."plans"
+CREATE POLICY "all can see plans" ON "public"."plans"
 AS PERMISSIVE FOR SELECT
 TO public
 USING (true);
 
-CREATE POLICY "users can insert encoder" ON "public"."plans"
+CREATE POLICY "users can insert plans" ON "public"."plans"
 AS PERMISSIVE FOR INSERT
 TO public
 WITH CHECK (auth.uid() IS NOT NULL);
+
+CREATE POLICY "owners can update plans" ON "public"."plans"
+AS PERMISSIVE FOR UPDATE
+TO public
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
