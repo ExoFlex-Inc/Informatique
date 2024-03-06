@@ -4,9 +4,9 @@
 
 #include <stdint.h>
 
-/* Search for a word in a wordlist inside the buffer and deletes unfound words
- * returns the closest word found on success
- * returns NULL if no word found
+/* Search for a word in a wordlist inside the buffer and deletes unfound
+ * words returns the closest word found on success returns NULL if no word
+ * found
  */
 
 char* searchWord(char* buffertocopyfrom);

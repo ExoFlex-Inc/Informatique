@@ -17,6 +17,7 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+#include <Manager_Motor.h>
 #include "main.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -25,8 +26,8 @@
 
 #include "cJSON.h"
 #include "uartRingBufDMA.h"
-
-#include <Manager_Motor_HMI.h>
+#include "Periph_Canbus.h"
+#include "Periph_Motors.h"
 
 
 /* USER CODE END Includes */
@@ -80,6 +81,7 @@ static void MX_USART3_UART_Init(void);
 uint8_t MainBuf_UART[MAIN_BUF_SIZE_UART];
 uint8_t RxBuf_UART[RX_BUF_SIZE_UART];
 
+
 FDCAN_TxHeaderTypeDef TxHeader;
 FDCAN_RxHeaderTypeDef RxHeader;
 FDCAN_FilterTypeDef fdcanFilterConfig;
@@ -88,6 +90,9 @@ uint8_t TxData[8];
 uint8_t RxData[8];
 
 uint32_t TxMailbox;
+
+
+
 
 
 /* USER CODE END 0 */
@@ -135,13 +140,14 @@ int main(void)
 
 
 
-  cJSON_InitHooks(NULL);
-  Ringbuf_Init();
-  ManagerMotorHMI_Init();
+	cJSON_InitHooks(NULL);
+	Ringbuf_Init();
+
+	ManagerMotor_Init();
 
   while (1)
   {
-	  ManagerMotorHMI_Task();
+	  ManagerMotor_Task();
 
 
     /* USER CODE END WHILE */
@@ -235,7 +241,7 @@ static void MX_FDCAN1_Init(void)
   hfdcan1.Init.AutoRetransmission = ENABLE;
   hfdcan1.Init.TransmitPause = DISABLE;
   hfdcan1.Init.ProtocolException = DISABLE;
-  hfdcan1.Init.NominalPrescaler = 16;
+  hfdcan1.Init.NominalPrescaler = 8;
   hfdcan1.Init.NominalSyncJumpWidth = 13;
   hfdcan1.Init.NominalTimeSeg1 = 5;
   hfdcan1.Init.NominalTimeSeg2 = 10;
@@ -263,19 +269,7 @@ static void MX_FDCAN1_Init(void)
   }
   /* USER CODE BEGIN FDCAN1_Init 2 */
 
-  // Set filter ID and mask
-  fdcanFilterConfig.IdType = FDCAN_EXTENDED_ID;
-  fdcanFilterConfig.FilterIndex = 0;
-  fdcanFilterConfig.FilterType = FDCAN_FILTER_MASK;
-  fdcanFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
-  fdcanFilterConfig.FilterID1 = 0x0000;
-  fdcanFilterConfig.FilterID2 = 0x0000;
-  fdcanFilterConfig.RxBufferIndex = 0;
-  if (HAL_FDCAN_ConfigFilter(&hfdcan1, &fdcanFilterConfig) != HAL_OK)
-  {
-    // Filter configuration error
-    Error_Handler();
-  }
+
 
   /* USER CODE END FDCAN1_Init 2 */
 

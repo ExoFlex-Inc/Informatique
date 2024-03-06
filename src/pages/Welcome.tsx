@@ -21,14 +21,28 @@ export async function welcomeLoader() {
   }
   return { loaded: true };
 }
-
 export function Welcome() {
   const user = useContext(UserContext);
   const navigate = useNavigate();
   const [userName, setUserName] = useState("");
+  const [userNameDirty, setUserNameDirty] = useState(false);
+  const [lastName, setLastName] = useState("");
+  const [lastNameDirty, setLastNameDirty] = useState(false);
+  const [speciality, setSpeciality] = useState("");
+  const [specialityDirty, setSpecialityDirty] = useState(false);
   const [serverError, setServerError] = useState("");
-  const [formIsDirty, setFormIsDirty] = useState(false);
-  const invalidString = useMemo(() => validateUsername(userName), [userName]);
+  const invalidUserName = useMemo(
+    () => validateInput(userName, "Name"),
+    [userName],
+  );
+  const invalidLastName = useMemo(
+    () => validateInput(lastName, "Lastname"),
+    [lastName],
+  );
+  const invalidSpeciality = useMemo(
+    () => validateInput(speciality, "Speciality"),
+    [speciality],
+  );
 
   return (
     <Dialog
@@ -38,7 +52,7 @@ export function Welcome() {
         <>
           <h2 className="welcome-header">Welcome to ExoFlex!</h2>
           <p className="text-center">
-            Let's get started by creating a username:
+            Let's get started by entering your account informations:
           </p>
           <form
             className="welcome-name-form"
@@ -50,11 +64,13 @@ export function Welcome() {
                   {
                     user_id: user.session?.user.id || "",
                     username: userName,
+                    lastname: lastName,
+                    speciality: speciality,
                   },
                 ])
                 .then(({ error }) => {
                   if (error) {
-                    setServerError(`Username "${userName}" is already taken`);
+                    // setServerError(`Username "${userName}" is already taken`);
                   } else {
                     const target = localStorage.getItem("returnPath") || "/";
                     localStorage.removeItem("returnPath");
@@ -66,11 +82,11 @@ export function Welcome() {
           >
             <input
               name="username"
-              placeholder="Username"
+              placeholder="Name"
               onChange={({ target }) => {
                 setUserName(target.value);
-                if (!formIsDirty) {
-                  setFormIsDirty(true);
+                if (!userNameDirty) {
+                  setUserNameDirty(true);
                 }
                 if (serverError) {
                   setServerError("");
@@ -78,18 +94,57 @@ export function Welcome() {
               }}
               className="welcome-name-input"
             ></input>
-            {formIsDirty && (invalidString || serverError) && (
+            {userNameDirty && invalidUserName && (
               <p className="welcome-form-error-message validation-feedback">
-                {serverError || invalidString}
+                {invalidUserName}
               </p>
             )}
-            <p className="text-center">
-              This is the name people will see you as on the App
-            </p>
+            <input
+              name="lastname"
+              placeholder="Lastname"
+              onChange={({ target }) => {
+                setLastName(target.value);
+                if (!lastNameDirty) {
+                  setLastNameDirty(true);
+                }
+                if (serverError) {
+                  setServerError("");
+                }
+              }}
+              className="welcome-name-input"
+            ></input>
+            {lastNameDirty && invalidLastName && (
+              <p className="welcome-form-error-message validation-feedback">
+                {invalidLastName}
+              </p>
+            )}
+            <input
+              name="speciality"
+              placeholder="Speciality"
+              onChange={({ target }) => {
+                setSpeciality(target.value);
+                if (!specialityDirty) {
+                  setSpecialityDirty(true);
+                }
+                if (serverError) {
+                  setServerError("");
+                }
+              }}
+              className="welcome-name-input"
+            ></input>
+            {specialityDirty && invalidSpeciality && (
+              <p className="welcome-form-error-message validation-feedback">
+                {invalidSpeciality}
+              </p>
+            )}
             <button
               className="welcome-form-submit-button"
               type="submit"
-              disabled={invalidString != null}
+              disabled={
+                invalidUserName != null ||
+                invalidLastName != null ||
+                invalidSpeciality != null
+              }
             >
               Submit
             </button>
@@ -104,19 +159,19 @@ export function Welcome() {
  * This only validates the form on the front end.
  * Server side validation is done at the sql level.
  */
-function validateUsername(username: string): string | undefined {
-  if (!username) {
-    return "Username is required";
+function validateInput(value: string, fieldName: string): string | undefined {
+  if (!value) {
+    return `${fieldName} is required`;
   }
-  const regex = /^[a-zA-Z0-9_]+$/;
-  if (username.length < 4) {
-    return "Username must be at least 4 characters long";
+  const regex = /^[a-zA-ZÀ-ÿ]+$/;
+  if (value.length < 4) {
+    return `${fieldName} must be at least 4 characters long`;
   }
-  if (username.length > 14) {
-    return "Username must be less than 15 characters long";
+  if (value.length > 50) {
+    return `${fieldName} must be less than 50 characters long`;
   }
-  if (!regex.test(username)) {
-    return "Username can only contain letters, numbers, and underscores";
+  if (!regex.test(value)) {
+    return `${fieldName} can only contain letters`;
   }
   return undefined;
 }
