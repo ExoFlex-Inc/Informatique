@@ -17,7 +17,6 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include <Manager_Motor.h>
 #include "main.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -28,6 +27,10 @@
 #include "uartRingBufDMA.h"
 #include "Periph_Canbus.h"
 #include "Periph_Motors.h"
+
+#include <Manager_Motor.h>
+#include <Manager_HMI.h>
+#include <Manager_Movement.h>
 
 
 /* USER CODE END Includes */
@@ -144,10 +147,14 @@ int main(void)
 	Ringbuf_Init();
 
 	ManagerMotor_Init();
+	ManagerHMI_Init();
+	ManagerMovement_Init();
 
   while (1)
   {
-	  ManagerMotor_Task();
+	ManagerMotor_Task();
+	ManagerHMI_Task();
+	ManagerMovement_Task();
 
 
     /* USER CODE END WHILE */
