@@ -16,10 +16,13 @@
 typedef struct
 {
 	uint8_t state;
+	float motorsNextPos[MOTOR_NBR];
 
 } ManagerMovement_t;
 
 ManagerMovement_t ManagerMovement;
+
+static const Motor motorsData[MOTOR_NBR];
 
 
 void ManagerMovement_HomingPositions();
@@ -30,7 +33,14 @@ void ManagerMovement_ManualIncrement(uint8_t motorIndex, int8_t factor);
 
 void ManagerMovement_Init()
 {
-	ManagerMovement.state = MANUAL;
+    //Get motor data (const pointer : read-only)
+    for (uint8_t i = 0; i < MOTOR_NBR; i++)
+    {
+    	ManagerMotor_GetMotorData(i, motorsData);
+    	ManagerMovement.motorsNextPos[i] = 0.0f;
+    }
+
+    ManagerMovement.state = MANUAL;
 }
 
 void ManagerMovement_Task()
@@ -39,18 +49,26 @@ void ManagerMovement_Task()
 	switch (ManagerMovement.state)
 	{
 	case IDLE:
+
+		//TODO: put conditions to change state here
 		break;
 
 	case HOMING:
 		ManagerMovement_HomingPositions();
+
+		//TODO: put conditions to change state here
 		break;
 
 	case MANUAL:
-		ManagerMovement_ManualPositions();
+		//Wait for manual cmd or for state change
+
+		//TODO: put conditions to change state here
 		break;
 
 	case AUTOMATIC:
 		ManagerMovement_AutoPositions();
+
+		//TODO: put conditions to change state here
 		break;
 	}
 
@@ -64,72 +82,69 @@ void ManagerMovement_HomingPositions() // TODO
 	//faire chaucn des mouvements jusqua limit switch
 }
 
-void ManagerMovement_ManualPositions() // TODO: Changer ce qui a dans les if pour des fonctions separees
-{
-	char foundWord[STR_LENGTH];
-
-	ManagerHMI_ReceiveJSON(foundWord);
-
-	if (strcmp(foundWord, "eversionR") == 0)
-	{
-		ManagerMovement_ManualIncrement(MOTOR_1, -1);
-		ManagerMovement_ManualIncrement(MOTOR_2, 1);
-	}
-	else if (strcmp(foundWord, "eversionL") == 0)
-	{
-		ManagerMovement_ManualIncrement(MOTOR_1, 1);
-		ManagerMovement_ManualIncrement(MOTOR_2, -1);
-	}
-	else if (strcmp(foundWord, "dorsiflexionU") == 0)
-	{
-		ManagerMovement_ManualIncrement(MOTOR_1, 1);
-		ManagerMovement_ManualIncrement(MOTOR_2, 1);
-	}
-	else if (strcmp(foundWord, "dorsiflexionD") == 0)
-	{
-		ManagerMovement_ManualIncrement(MOTOR_1, -1);
-		ManagerMovement_ManualIncrement(MOTOR_2, -1);
-	}
-	else if (strcmp(foundWord, "extensionU") == 0)
-	{
-		ManagerMovement_ManualIncrement(MOTOR_3, 1);
-	}
-	else if (strcmp(foundWord, "extensionD") == 0)
-	{
-		ManagerMovement_ManualIncrement(MOTOR_3, -1);
-	}
-	else if (strcmp(foundWord, "goHome1") == 0)
-	{
-		ManagerMovement_ManualIncrement(MOTOR_1, 0);
-	}
-	else if (strcmp(foundWord, "goHome2") == 0)
-	{
-		ManagerMovement_ManualIncrement(MOTOR_2, 0);
-	}
-	else if (strcmp(foundWord, "goHome3") == 0)
-	{
-		ManagerMovement_ManualIncrement(MOTOR_3, 0);
-	}
-	else if (strcmp(foundWord, "goHome") == 0)
-	{
-		ManagerMovement_ManualIncrement(MOTOR_1, 0);
-		ManagerMovement_ManualIncrement(MOTOR_2, 0);
-		ManagerMovement_ManualIncrement(MOTOR_3, 0);
-	}
-}
-
-void ManagerMovement_ManualIncrement(uint8_t motorIndex, int8_t factor)
-{
-	ManagerMotor_SetMotorNextPos(motorIndex, 0);
-
-	//motors[motorIndex].nextPosition += factor*MOTOR_STEP;
-}
-
-
 void ManagerMovement_AutoPositions() // TODO:
 {
 	// Gerer les sequences d'etirements
 }
+
+void ManagerMovement_ManualCmdEversion(int8_t direction)
+{
+	if (ManagerMovement.state == MANUAL)
+	{
+		ManagerMovement_ManualIncrement(MOTOR_1, -1 * direction);
+		ManagerMovement_ManualIncrement(MOTOR_2, 1 * direction);
+	}
+}
+
+void ManagerMovement_ManualCmdDorsiflexion(int8_t direction)
+{
+	if (ManagerMovement.state == MANUAL)
+	{
+		ManagerMovement_ManualIncrement(MOTOR_1, 1 * direction);
+		ManagerMovement_ManualIncrement(MOTOR_2, 1 * direction);
+	}
+}
+
+void ManagerMovement_ManualCmdExtension(int8_t direction)
+{
+	if (ManagerMovement.state == MANUAL)
+	{
+		ManagerMovement_ManualIncrement(MOTOR_3, 1 * direction);
+	}
+}
+
+void ManagerMovement_ManualCmdHome(uint8_t motorIndex)
+{
+	if (ManagerMovement.state == MANUAL)
+	{
+		ManagerMovement_ManualIncrement(motorIndex, 0);
+	}
+}
+
+void ManagerMovement_ManualCmdHomeAll()
+{
+	if (ManagerMovement.state == MANUAL)
+	{
+		ManagerMovement_ManualIncrement(MOTOR_1, 0);
+		ManagerMovement_ManualIncrement(MOTOR_2, 0);
+		ManagerMovement_ManualIncrement(MOTOR_3, 0);
+	}
+}
+
+
+void ManagerMovement_ManualIncrement(uint8_t motorIndex, int8_t factor)
+{
+	//motor is ready when nextPos has been reached
+	if (ManagerMotor_IsMotorReady(motorIndex))
+	{
+		ManagerMovement.motorsNextPos[motorIndex] = motorsData[motorIndex].position + factor*MOTOR_STEP;
+		ManagerMotor_SetMotorNextPos(motorIndex, ManagerMovement.motorsNextPos[motorIndex]);
+	}
+
+	//Else : do nothing so skip command to avoid an accumulation of incrementation
+}
+
+
 
 
 

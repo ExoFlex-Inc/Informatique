@@ -15,5 +15,6 @@ void ManagerMotor_Task();
 
 void ManagerMotor_SetMotorNextPos(uint8_t motorIndex, float nextPos);
 void ManagerMotor_GetMotorData(uint8_t motorIndex, const Motor* pMotor);
+bool ManagerMotor_IsMotorReady(uint8_t motorIndex);
 
 #endif

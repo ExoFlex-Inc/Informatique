@@ -27,6 +27,7 @@ typedef struct
     float 	kp;
     float	kd;
     bool    detected;
+    bool    ready;
 } MotorControl;
 
 typedef struct
@@ -76,6 +77,8 @@ void ManagerMotor_Init()
     {
         motors[i].nextPosition = 0.0;
         motors[i].detected     = false;
+        //TODO : should be set to false, and then to true when motor is initilized
+        motors[i].ready     = true;
     }
 
     //Set Kp Kd
@@ -110,18 +113,26 @@ void ManagerMotor_Task()
         {
         case CAN_VERIF:
             ManagerMotor_CANVerif();
+
+            //TODO: put conditions to change state here
             break;
 
         case SET_ORIGIN:
             ManagerMotor_SetOrigines();
+
+            //TODO: put conditions to change state here
             break;
 
         case READY2MOVE:
             ManagerMotor_SendToMotors();
+
+            //TODO: put conditions to change state here
             break;
 
         case ERROR:
             // Send error value to HMI ?
+
+        	//TODO: put conditions to change state here
             break;
         }
         timerMs = HAL_GetTick();
@@ -149,6 +160,7 @@ void ManagerMotor_ReceiveFromMotors()
     {
         PeriphMotors_ParseMotorState(&motors[MOTOR_1].motor, data);
         motors[MOTOR_1].detected = true;
+        // TODO : check if motor has reached position, if so, motor is ready
     }
 
     if (PeriphCanbus_GetNodeMsg(motors[MOTOR_2].motor.id, data) &&
@@ -156,6 +168,7 @@ void ManagerMotor_ReceiveFromMotors()
     {
         PeriphMotors_ParseMotorState(&motors[MOTOR_2].motor, data);
         motors[MOTOR_2].detected = true;
+        // TODO : check if motor has reached position, if so, motor is ready
     }
 
     if (PeriphCanbus_GetNodeMsg(motors[MOTOR_3].motor.id, data) &&
@@ -163,6 +176,7 @@ void ManagerMotor_ReceiveFromMotors()
     {
         PeriphMotors_ParseMotorState(&motors[MOTOR_3].motor, data);
         motors[MOTOR_3].detected = true;
+        // TODO : check if motor has reached position, if so, motor is ready
     }
 }
 
@@ -228,6 +242,8 @@ void ManagerMotor_SendToMotors()
 void ManagerMotor_SetMotorNextPos(uint8_t motorIndex, float nextPos)
 {
 	motors[motorIndex].nextPosition = nextPos;
+	// TODO : set motor as not ready until it moves to desired position
+	//motors[motorIndex].ready = false;
 }
 
 void ManagerMotor_GetMotorData(uint8_t motorIndex, const Motor* pMotor)
@@ -235,4 +251,8 @@ void ManagerMotor_GetMotorData(uint8_t motorIndex, const Motor* pMotor)
 	pMotor = &motors[motorIndex].motor;
 }
 
+bool ManagerMotor_IsMotorReady(uint8_t motorIndex)
+{
+	 return motors[motorIndex].ready; //motor is ready when it has reached it's command
+}
 
