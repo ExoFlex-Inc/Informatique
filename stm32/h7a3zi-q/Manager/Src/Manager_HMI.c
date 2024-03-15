@@ -116,11 +116,11 @@ void ManagerHMI_ReceiveJSON()
 		}
 		else if (strcmp(cmd, "extensionU") == 0)
 		{
-			ManagerMovement_ManualCmdDorsiflexion(MOV_UP);
+			ManagerMovement_ManualCmdExtension(MOV_UP);
 		}
 		else if (strcmp(cmd, "extensionD") == 0)
 		{
-			ManagerMovement_ManualCmdDorsiflexion(MOV_DOWN);
+			ManagerMovement_ManualCmdExtension(MOV_DOWN);
 		}
 		else if (strcmp(cmd, "goHome1") == 0)
 		{
