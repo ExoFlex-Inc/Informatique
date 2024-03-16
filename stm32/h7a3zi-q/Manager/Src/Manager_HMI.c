@@ -23,12 +23,12 @@ typedef struct
 
 typedef struct
 {
-	MotorDataString_t motors[MOTOR_NBR];
+	MotorDataString_t strMotors[MOTOR_NBR];
 } managerHMI_t;
 
 managerHMI_t managerHMI;
 
-static const Motor motors[MOTOR_NBR];
+static const Motor* motorsData[MOTOR_NBR];
 static uint32_t timerMs = 0;
 
 void ManagerHMI_ReceiveJSON();
@@ -44,7 +44,7 @@ void ManagerHMI_Init()
     //Get motor data (const pointer : read-only)
     for (uint8_t i = 0; i < MOTOR_NBR; i++)
     {
-    	ManagerMotor_GetMotorData(i, motors);
+    	motorsData[i] = ManagerMotor_GetMotorData(i);
     }
 
 }
@@ -72,11 +72,11 @@ void ManagerHMI_SendJSON()
     for (uint8_t i = 0; i < MOTOR_NBR; i++)
     {
     	sprintf(key, "Motor%dPos", i + 1);
-        cJSON_AddStringToObject(root, key, managerHMI.motors[i].pos);
+        cJSON_AddStringToObject(root, key, managerHMI.strMotors[i].pos);
         sprintf(key, "Motor%dVel", i + 1);
-        cJSON_AddStringToObject(root, key, managerHMI.motors[i].vel);
+        cJSON_AddStringToObject(root, key, managerHMI.strMotors[i].vel);
         sprintf(key, "Motor%dTor", i + 1);
-        cJSON_AddStringToObject(root, key, managerHMI.motors[i].tor);
+        cJSON_AddStringToObject(root, key, managerHMI.strMotors[i].tor);
     }
 
     // Print the JSON object
@@ -146,9 +146,9 @@ void ManagerHMI_SetMotorDataToString()
 {
     for (uint8_t i = 0; i < MOTOR_NBR; i++)
     {
-        sprintf(managerHMI.motors[i].pos, "%.2f", motors[i].position);
-        sprintf(managerHMI.motors[i].vel, "%.2f", motors[i].velocity);
-        sprintf(managerHMI.motors[i].tor, "%.2f", motors[i].torque);
+        sprintf(managerHMI.strMotors[i].pos, "%.2f", motorsData[i]->position);
+        sprintf(managerHMI.strMotors[i].vel, "%.2f", motorsData[i]->velocity);
+        sprintf(managerHMI.strMotors[i].tor, "%.2f", motorsData[i]->torque);
     }
 }
 

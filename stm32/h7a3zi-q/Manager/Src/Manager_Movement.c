@@ -16,13 +16,13 @@
 typedef struct
 {
 	uint8_t state;
-	float motorsNextPos[MOTOR_NBR];
+	float motorsNextGoal[MOTOR_NBR];
 
 } ManagerMovement_t;
 
 ManagerMovement_t ManagerMovement;
 
-static const Motor motorsData[MOTOR_NBR];
+static const Motor* motorsData[MOTOR_NBR];
 
 
 void ManagerMovement_HomingPositions();
@@ -36,8 +36,8 @@ void ManagerMovement_Init()
     //Get motor data (const pointer : read-only)
     for (uint8_t i = 0; i < MOTOR_NBR; i++)
     {
-    	ManagerMotor_GetMotorData(i, motorsData);
-    	ManagerMovement.motorsNextPos[i] = 0.0f;
+    	motorsData[i] = ManagerMotor_GetMotorData(i);
+    	ManagerMovement.motorsNextGoal[i] = 0.0f;
     }
 
     ManagerMovement.state = MANUAL;
@@ -137,8 +137,8 @@ void ManagerMovement_ManualIncrement(uint8_t motorIndex, int8_t factor)
 	//motor is ready when nextPos has been reached
 	if (ManagerMotor_IsMotorReady(motorIndex))
 	{
-		ManagerMovement.motorsNextPos[motorIndex] = motorsData[motorIndex].position + factor*MOTOR_STEP;
-		ManagerMotor_SetMotorNextPos(motorIndex, ManagerMovement.motorsNextPos[motorIndex]);
+		ManagerMovement.motorsNextGoal[motorIndex] = motorsData[motorIndex]->position + factor*MOTOR_STEP;
+		ManagerMotor_SetMotorGoal(motorIndex, ManagerMovement.motorsNextGoal[motorIndex]);
 	}
 
 	//Else : do nothing so skip command to avoid an accumulation of incrementation

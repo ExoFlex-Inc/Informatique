@@ -239,16 +239,17 @@ void ManagerMotor_SendToMotors()
 }
 
 
-void ManagerMotor_SetMotorNextPos(uint8_t motorIndex, float nextPos)
+void ManagerMotor_SetMotorGoal(uint8_t motorIndex, float goal)
 {
-	motors[motorIndex].nextPosition = nextPos;
+	//TODO : distinction between goal and nextpos
+	motors[motorIndex].nextPosition = goal;
 	// TODO : set motor as not ready until it moves to desired position
 	//motors[motorIndex].ready = false;
 }
 
-void ManagerMotor_GetMotorData(uint8_t motorIndex, const Motor* pMotor)
+Motor* ManagerMotor_GetMotorData(uint8_t motorIndex)
 {
-	pMotor = &motors[motorIndex].motor;
+	return &motors[motorIndex].motor;
 }
 
 bool ManagerMotor_IsMotorReady(uint8_t motorIndex)
