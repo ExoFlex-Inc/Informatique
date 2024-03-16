@@ -20,10 +20,14 @@
 #define TIMER   5
 #define MAX_TRY 50  // 250 ms before flagging an error
 
+#define MOTOR_STEP	 0.1
+#define POSITION_TOL 0.1
+
 typedef struct
 {
     Motor   motor;
     float   nextPosition;
+    float	goalPosition;
     float 	kp;
     float	kd;
     bool    detected;
@@ -52,6 +56,9 @@ void ManagerMotor_ResetMotors();
 void ManagerMotor_CANVerif();
 void ManagerMotor_SetOrigines();
 void ManagerMotor_SendToMotors();
+void ManagerMotor_CalculateNextPositions();
+int8_t ManagerMotor_GetMotorDirection(uint8_t motorIndex);
+void ManagerMotor_MotorIncrement(uint8_t motorIndex, int8_t direction);
 
 void ManagerMotor_Init()
 {
@@ -76,6 +83,7 @@ void ManagerMotor_Init()
     for (uint8_t i = 0; i < MOTOR_NBR; i++)
     {
         motors[i].nextPosition = 0.0;
+        motors[i].goalPosition = 0.0;
         motors[i].detected     = false;
         //TODO : should be set to false, and then to true when motor is initilized
         motors[i].ready     = true;
@@ -124,6 +132,7 @@ void ManagerMotor_Task()
             break;
 
         case READY2MOVE:
+        	ManagerMotor_CalculateNextPositions();
             ManagerMotor_SendToMotors();
 
             //TODO: put conditions to change state here
@@ -180,7 +189,6 @@ void ManagerMotor_ReceiveFromMotors()
     }
 }
 
-
 void ManagerMotor_CANVerif()
 {
     if (motors[MOTOR_1].detected && motors[MOTOR_2].detected &&
@@ -202,8 +210,6 @@ void ManagerMotor_CANVerif()
         managerMotor.errorCode = CAN_CONNECTION_MOTORS_ERROR;
     }
 }
-
-
 
 void ManagerMotor_SetOrigines()
 {
@@ -238,13 +244,9 @@ void ManagerMotor_SendToMotors()
     }
 }
 
-
 void ManagerMotor_SetMotorGoal(uint8_t motorIndex, float goal)
 {
-	//TODO : distinction between goal and nextpos
-	motors[motorIndex].nextPosition = goal;
-	// TODO : set motor as not ready until it moves to desired position
-	//motors[motorIndex].ready = false;
+	motors[motorIndex].goalPosition = goal;
 }
 
 Motor* ManagerMotor_GetMotorData(uint8_t motorIndex)
@@ -256,4 +258,55 @@ bool ManagerMotor_IsMotorReady(uint8_t motorIndex)
 {
 	 return motors[motorIndex].ready; //motor is ready when it has reached it's command
 }
+
+void ManagerMotor_CalculateNextPositions()
+{
+	if(abs(motors[MOTOR_1].motor.position - motors[MOTOR_1].goalPosition) > POSITION_TOL)
+	{
+		ManagerMotor_MotorIncrement(MOTOR_1, ManagerMotor_GetMotorDirection(MOTOR_1));
+		motors[MOTOR_1].ready = false; //Motor is moving
+	}
+	else
+	{
+		motors[MOTOR_1].ready = true; //Motor reached his goal
+	}
+
+	if(abs(motors[MOTOR_2].motor.position - motors[MOTOR_2].goalPosition) > POSITION_TOL)
+	{
+		ManagerMotor_MotorIncrement(MOTOR_2, ManagerMotor_GetMotorDirection(MOTOR_2));
+		motors[MOTOR_2].ready = false;
+	}
+	else
+	{
+		motors[MOTOR_2].ready = true;
+	}
+
+	if(abs(motors[MOTOR_3].motor.position - motors[MOTOR_3].goalPosition) > POSITION_TOL)
+	{
+		ManagerMotor_MotorIncrement(MOTOR_3, ManagerMotor_GetMotorDirection(MOTOR_3));
+		motors[MOTOR_3].ready = false;
+	}
+	else
+	{
+		motors[MOTOR_3].ready = true;
+	}
+}
+
+int8_t ManagerMotor_GetMotorDirection(uint8_t motorIndex)
+{
+	if(abs(motors[motorIndex].goalPosition) - abs(motors[motorIndex].motor.position)  < 0)
+	{
+		return -1;
+	}
+	else
+	{
+		return 1;
+	}
+}
+
+void ManagerMotor_MotorIncrement(uint8_t motorIndex, int8_t direction)
+{
+	motors[motorIndex].nextPosition += direction*MOTOR_STEP;
+}
+
 

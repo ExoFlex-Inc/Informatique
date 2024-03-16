@@ -11,7 +11,12 @@
 #define MANUAL 2
 #define AUTOMATIC 3
 
-#define MOTOR_STEP 1
+#define MOTOR_STEP 0.1
+
+//Mouvement types
+#define DORSIFLEXION 1
+#define EVERSION 	 2
+#define EXTENSION	 3
 
 typedef struct
 {
@@ -29,6 +34,7 @@ void ManagerMovement_HomingPositions();
 void ManagerMovement_ManualPositions();
 void ManagerMovement_AutoPositions();
 void ManagerMovement_ManualIncrement(uint8_t motorIndex, int8_t factor);
+void ManagerMovement_AutoMouvement(uint8_t mouvType, float *finalPosition);
 
 
 void ManagerMovement_Init()
@@ -117,7 +123,8 @@ void ManagerMovement_ManualCmdHome(uint8_t motorIndex)
 {
 	if (ManagerMovement.state == MANUAL)
 	{
-		ManagerMovement_ManualIncrement(motorIndex, 0);
+		ManagerMovement.motorsNextGoal[motorIndex] = 0.0;
+		ManagerMotor_SetMotorGoal(motorIndex, ManagerMovement.motorsNextGoal[motorIndex]);
 	}
 }
 
@@ -125,12 +132,16 @@ void ManagerMovement_ManualCmdHomeAll()
 {
 	if (ManagerMovement.state == MANUAL)
 	{
-		ManagerMovement_ManualIncrement(MOTOR_1, 0);
-		ManagerMovement_ManualIncrement(MOTOR_2, 0);
-		ManagerMovement_ManualIncrement(MOTOR_3, 0);
+		ManagerMovement.motorsNextGoal[MOTOR_1] = 0.0;
+		ManagerMotor_SetMotorGoal(MOTOR_1, ManagerMovement.motorsNextGoal[MOTOR_1]);
+
+		ManagerMovement.motorsNextGoal[MOTOR_2] = 0.0;
+		ManagerMotor_SetMotorGoal(MOTOR_2, ManagerMovement.motorsNextGoal[MOTOR_2]);
+
+		ManagerMovement.motorsNextGoal[MOTOR_3] = 0.0;
+		ManagerMotor_SetMotorGoal(MOTOR_3, ManagerMovement.motorsNextGoal[MOTOR_3]);
 	}
 }
-
 
 void ManagerMovement_ManualIncrement(uint8_t motorIndex, int8_t factor)
 {
@@ -142,6 +153,34 @@ void ManagerMovement_ManualIncrement(uint8_t motorIndex, int8_t factor)
 	}
 
 	//Else : do nothing so skip command to avoid an accumulation of incrementation
+}
+
+void ManagerMovement_AutoMouvement(uint8_t mouvType, float *finalPosition)
+{
+	if (ManagerMovement.state == AUTOMATIC)
+	{
+		if (mouvType == DORSIFLEXION) // Set goalPosition for motor 1 and 2 for dorsiflexion
+		{
+			ManagerMovement.motorsNextGoal[MOTOR_1] = finalPosition[MOTOR_1];
+			ManagerMotor_SetMotorGoal(MOTOR_1, ManagerMovement.motorsNextGoal[MOTOR_1]);
+
+			ManagerMovement.motorsNextGoal[MOTOR_2] = finalPosition[MOTOR_2];
+			ManagerMotor_SetMotorGoal(MOTOR_2, ManagerMovement.motorsNextGoal[MOTOR_2]);
+		}
+		else if (mouvType == EVERSION) // Set goalPosition for motor 1 and 2 for eversion
+		{
+			ManagerMovement.motorsNextGoal[MOTOR_1] = -finalPosition[MOTOR_1];
+			ManagerMotor_SetMotorGoal(MOTOR_1, ManagerMovement.motorsNextGoal[MOTOR_1]);
+
+			ManagerMovement.motorsNextGoal[MOTOR_2] = finalPosition[MOTOR_2];
+			ManagerMotor_SetMotorGoal(MOTOR_2, ManagerMovement.motorsNextGoal[MOTOR_2]);
+		}
+		else if (mouvType == EXTENSION) // Set goalPosition for motor 3 for extension
+		{
+			ManagerMovement.motorsNextGoal[MOTOR_3] = finalPosition[MOTOR_3];
+			ManagerMotor_SetMotorGoal(MOTOR_3, ManagerMovement.motorsNextGoal[MOTOR_3]);
+		}
+	}
 }
 
 
