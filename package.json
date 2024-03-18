@@ -25,7 +25,7 @@
     "@nivo/line": "^0.85.1",
     "@supabase/auth-ui-react": "^0.4.7",
     "@supabase/auth-ui-shared": "^0.1.8",
-    "@supabase/supabase-js": "^2.39.7",
+    "@supabase/supabase-js": "^2.39.8",
     "@syncfusion/ej2-react-charts": "^24.2.9",
     "core-js": "^3.36.0",
     "cors": "^2.8.5",
