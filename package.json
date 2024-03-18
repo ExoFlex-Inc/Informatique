@@ -20,7 +20,7 @@
     "@fullcalendar/timegrid": "^6.1.10",
     "@mui/icons-material": "^5.15.7",
     "@mui/material": "^5.15.7",
-    "@mui/x-data-grid": "^6.19.2",
+    "@mui/x-data-grid": "^6.19.6",
     "@nivo/core": "^0.85.1",
     "@nivo/line": "^0.85.1",
     "@supabase/auth-ui-react": "^0.4.7",
