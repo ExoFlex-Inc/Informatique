@@ -294,7 +294,7 @@ void ManagerMotor_CalculateNextPositions()
 
 int8_t ManagerMotor_GetMotorDirection(uint8_t motorIndex)
 {
-	if(abs(motors[motorIndex].goalPosition) - abs(motors[motorIndex].motor.position)  < 0)
+	if(motors[motorIndex].goalPosition < motors[motorIndex].motor.position)
 	{
 		return -1;
 	}
