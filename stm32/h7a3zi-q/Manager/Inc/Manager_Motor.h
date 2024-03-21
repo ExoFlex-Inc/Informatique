@@ -9,6 +9,11 @@
 #define MOTOR_2   1
 #define MOTOR_3   2
 
+// States
+#define CAN_VERIF  0
+#define SET_ORIGIN 1
+#define READY2MOVE 2
+#define ERROR      3
 
 void ManagerMotor_Init();
 void ManagerMotor_Task();
@@ -16,5 +21,7 @@ void ManagerMotor_Task();
 void ManagerMotor_SetMotorGoal(uint8_t motorIndex, float goal);
 Motor* ManagerMotor_GetMotorData(uint8_t motorIndex);
 bool ManagerMotor_IsMotorReady(uint8_t motorIndex);
+uint8_t ManagerMotor_GetState();
+void ManagerMotor_SetMotorState(uint8_t motorIndex, bool readyState);
 
 #endif

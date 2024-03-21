@@ -1,27 +1,20 @@
 #include <Manager_Motor.h>
 #include <Periph_Canbus.h>
 
-
-
 #define MOTOR_1_CAN_ID 1
 #define MOTOR_2_CAN_ID 2
 #define MOTOR_3_CAN_ID 3
-
-// States
-#define CAN_VERIF  0
-#define SET_ORIGIN 1
-#define READY2MOVE 2
-#define ERROR      3
 
 // Error Codes
 #define SET_ORIGINES_MOTORS_ERROR   -1
 #define CAN_CONNECTION_MOTORS_ERROR -2
 
-#define TIMER   5
+#define TIMER   10
 #define MAX_TRY 50  // 250 ms before flagging an error
 
-#define MOTOR_STEP	 0.1
-#define POSITION_TOL 0.1
+#define MOTOR_STEP	 0.01
+#define MOTOR_STEP_AK80	 0.01
+#define POSITION_TOL 0.01
 
 typedef struct
 {
@@ -91,13 +84,13 @@ void ManagerMotor_Init()
 
     //Set Kp Kd
     //AK 10-9
-    motors[MOTOR_1].kp = 3.0f;
-    motors[MOTOR_1].kd = 2.0f;
-    motors[MOTOR_2].kp = 3.0f;
-    motors[MOTOR_2].kd = 2.0f;
+    motors[MOTOR_1].kp = 100.0f;
+    motors[MOTOR_1].kd = 20.0f;
+    motors[MOTOR_2].kp = 100.0f;
+    motors[MOTOR_2].kd = 20.0f;
     //AK 80-64
-    motors[MOTOR_3].kp = 3.0f;
-    motors[MOTOR_3].kd = 2.0f;
+    motors[MOTOR_3].kp = 100.0f;
+    motors[MOTOR_3].kd = 20.0f;
 
 
     // Init Data for canBus messages
@@ -191,7 +184,7 @@ void ManagerMotor_ReceiveFromMotors()
 
 void ManagerMotor_CANVerif()
 {
-    if (motors[MOTOR_1].detected && motors[MOTOR_2].detected &&
+    if (/*motors[MOTOR_1].detected &&*/ motors[MOTOR_2].detected &&
         motors[MOTOR_3].detected)
     {
         managerMotor.state = SET_ORIGIN;
@@ -213,7 +206,7 @@ void ManagerMotor_CANVerif()
 
 void ManagerMotor_SetOrigines()
 {
-    if (motors[MOTOR_1].motor.position <= 0.001 && motors[MOTOR_1].motor.position >= -0.001 &&
+    if (/*motors[MOTOR_1].motor.position <= 0.001 && motors[MOTOR_1].motor.position >= -0.001 &&*/
         motors[MOTOR_2].motor.position <= 0.001 && motors[MOTOR_2].motor.position >= -0.001 &&
         motors[MOTOR_3].motor.position <= 0.001 && motors[MOTOR_3].motor.position >= -0.001)
     {
@@ -261,34 +254,34 @@ bool ManagerMotor_IsMotorReady(uint8_t motorIndex)
 
 void ManagerMotor_CalculateNextPositions()
 {
-	if(abs(motors[MOTOR_1].motor.position - motors[MOTOR_1].goalPosition) > POSITION_TOL)
+	if(fabsf(motors[MOTOR_1].motor.position - motors[MOTOR_1].goalPosition) > 2*MOTOR_STEP && !(motors[MOTOR_1].ready))
 	{
 		ManagerMotor_MotorIncrement(MOTOR_1, ManagerMotor_GetMotorDirection(MOTOR_1));
-		motors[MOTOR_1].ready = false; //Motor is moving
 	}
 	else
 	{
 		motors[MOTOR_1].ready = true; //Motor reached his goal
+		motors[MOTOR_1].goalPosition = motors[MOTOR_1].motor.position;
 	}
 
-	if(abs(motors[MOTOR_2].motor.position - motors[MOTOR_2].goalPosition) > POSITION_TOL)
+	if(fabsf(motors[MOTOR_2].motor.position - motors[MOTOR_2].goalPosition) > 2*MOTOR_STEP && !(motors[MOTOR_2].ready))
 	{
 		ManagerMotor_MotorIncrement(MOTOR_2, ManagerMotor_GetMotorDirection(MOTOR_2));
-		motors[MOTOR_2].ready = false;
 	}
 	else
 	{
 		motors[MOTOR_2].ready = true;
+		motors[MOTOR_2].goalPosition = motors[MOTOR_2].motor.position;
 	}
 
-	if(abs(motors[MOTOR_3].motor.position - motors[MOTOR_3].goalPosition) > POSITION_TOL)
+	if(fabsf(motors[MOTOR_3].motor.position - motors[MOTOR_3].goalPosition) > 2*MOTOR_STEP_AK80 && !(motors[MOTOR_3].ready))
 	{
 		ManagerMotor_MotorIncrement(MOTOR_3, ManagerMotor_GetMotorDirection(MOTOR_3));
-		motors[MOTOR_3].ready = false;
 	}
 	else
 	{
 		motors[MOTOR_3].ready = true;
+		motors[MOTOR_3].goalPosition = motors[MOTOR_3].motor.position;
 	}
 }
 
@@ -307,6 +300,16 @@ int8_t ManagerMotor_GetMotorDirection(uint8_t motorIndex)
 void ManagerMotor_MotorIncrement(uint8_t motorIndex, int8_t direction)
 {
 	motors[motorIndex].nextPosition += direction*MOTOR_STEP;
+}
+
+uint8_t ManagerMotor_GetState()
+{
+	return managerMotor.state;
+}
+
+void ManagerMotor_SetMotorState(uint8_t motorIndex, bool readyState)
+{
+	motors[motorIndex].ready = readyState;
 }
 
 
