@@ -73,6 +73,50 @@ static void MX_SPI1_Init(void);
 /* USER CODE BEGIN 0 */
 
 
+//msg format "{number of sections; section1; section2; ... sectionx;}"
+
+#define SECTION_LENGTH 20
+#define SECTION_NBR 30
+char ParsedMsg[SECTION_NBR][SECTION_LENGTH];
+
+void HMIParser_Parse(char* msg, uint8_t maxlength, uint8_t *sectionNbr)
+{
+    // Reset ParsedMsg array
+    memset(ParsedMsg, 0, sizeof(ParsedMsg));
+
+    // Check if the message starts with '{' and ends with '}'
+    if (msg[0] != '{' || msg[maxlength - 1] != '}') {
+        // Invalid message format
+        return;
+    }
+
+    // Parse number of sections
+    uint8_t sectionCount = 0;
+    char* ptr = strtok(msg + 1, ";"); // Skip the '{'
+    while (ptr != NULL && sectionCount < SECTION_NBR)
+    {
+    	if (*ptr != '}') // Ignore '}' as a section
+    	{
+			strncpy(ParsedMsg[sectionCount], ptr, SECTION_LENGTH - 1);
+			ParsedMsg[sectionCount][SECTION_LENGTH - 1] = '\0'; // Ensure null-terminated
+			sectionCount++;
+			ptr = strtok(NULL, ";");
+    	}
+    	else
+    	{
+    		break;
+    	}
+    }
+
+    *sectionNbr = sectionCount;
+
+    // Check if the number of sections exceeds the maximum allowed
+    if (sectionCount >= SECTION_NBR) {
+        // Too many sections, truncate
+    	*sectionNbr = 0;
+        return;
+    }
+}
 
 
 /* USER CODE END 0 */
@@ -120,9 +164,16 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  char msg[50];
+
+  strcpy(msg, "{2;Auto;Start;d;}");
+
+  uint8_t sectionNbr = 0;
+  HMIParser_Parse(msg, 17, &sectionNbr);
+
+
 
   uint32_t millis = 0;
-
   while (1)
   {
 	  if (HAL_GetTick() - millis >= 500)
