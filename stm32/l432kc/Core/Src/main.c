@@ -26,6 +26,9 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "cJSON.h"
+#include "uartRingBufDMA.h"
+
 
 
 /* USER CODE END Includes */
@@ -171,7 +174,7 @@ int main(void)
   uint8_t sectionNbr = 0;
   HMIParser_Parse(msg, 17, &sectionNbr);
 
-
+  Ringbuf_Init();
 
   uint32_t millis = 0;
   while (1)
