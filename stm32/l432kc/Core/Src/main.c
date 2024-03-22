@@ -25,9 +25,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <Periph_UartRingBuf.h>
 
 #include "cJSON.h"
-#include "uartRingBufDMA.h"
 
 
 
@@ -174,14 +174,24 @@ int main(void)
   uint8_t sectionNbr = 0;
   HMIParser_Parse(msg, 17, &sectionNbr);
 
-  Ringbuf_Init();
+  PeriphUartRingBuf_Init();
 
   uint32_t millis = 0;
+  char buf[50];
+  uint32_t size = 0;
+
   while (1)
   {
-	  if (HAL_GetTick() - millis >= 500)
+	  if (HAL_GetTick() - millis >= 100)
 	  {
 		  HAL_GPIO_TogglePin (GPIOB, GPIO_PIN_0|LD3_Pin);
+		  PeriphUartRingBuf_Read(buf, &size);
+
+		  if (size > 0)
+		  {
+			  PeriphUartRingBuf_Send(buf, size);
+		  }
+
 		  millis =  HAL_GetTick();
 	  }
 
@@ -210,7 +220,7 @@ void SystemClock_Config(void)
   }
 
   /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
+  * in the RCC_OscInitTypeDef structure
   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
