@@ -11,7 +11,7 @@
 #define MANUAL 2
 #define AUTOMATIC 3
 
-#define MOTOR_STEP 0.015
+#define GOAL_STEP 0.1
 
 //Mouvement types
 #define DORSIFLEXION 1
@@ -31,8 +31,7 @@ static const Motor* motorsData[MOTOR_NBR];
 
 float finalPos[MOTOR_NBR];
 
-bool test;
-
+bool test; //test for automatic functions
 
 void ManagerMovement_HomingPositions();
 void ManagerMovement_ManualPositions();
@@ -49,10 +48,9 @@ void ManagerMovement_Init()
     	motorsData[i] = ManagerMotor_GetMotorData(i);
     	ManagerMovement.motorsNextGoal[i] = 0.0f;
     	finalPos[i] = 0.0f;
-
     }
     test = true;
-    ManagerMovement.state = AUTOMATIC;
+    ManagerMovement.state = MANUAL;
 }
 
 void ManagerMovement_Task()
@@ -60,11 +58,6 @@ void ManagerMovement_Task()
 
 	switch (ManagerMovement.state)
 	{
-	case IDLE:
-
-		//TODO: put conditions to change state here
-		break;
-
 	case HOMING:
 		ManagerMovement_HomingPositions();
 
@@ -97,18 +90,18 @@ void ManagerMovement_HomingPositions() // TODO
 void ManagerMovement_AutoPositions() // TODO:
 {
 	// Gerer les sequences d'etirements
+
 	//tests
-
-	if(ManagerMotor_IsMotorReady(MOTOR_1) && ManagerMotor_IsMotorReady(MOTOR_2) && ManagerMotor_IsMotorReady(MOTOR_3) && ManagerMotor_GetState() == READY2MOVE && test)
-	{
-		finalPos[MOTOR_1] = 2.0f;
-		finalPos[MOTOR_2] = 2.0f;
-		finalPos[MOTOR_3] = 2.0f;
-
-		ManagerMovement_AutoMouvement(DORSIFLEXION, finalPos);
-		ManagerMovement_AutoMouvement(EXTENSION, finalPos);
-		test = false;
-	}
+//	if(ManagerMotor_IsMotorReady(MOTOR_1) && ManagerMotor_IsMotorReady(MOTOR_2) && ManagerMotor_IsMotorReady(MOTOR_3) && ManagerMotor_GetState() == READY2MOVE && test)
+//	{
+//		finalPos[MOTOR_1] = 2.0f;
+//		finalPos[MOTOR_2] = 2.0f;
+//		finalPos[MOTOR_3] = 2.0f;
+//
+//		ManagerMovement_AutoMouvement(DORSIFLEXION, finalPos);
+//		ManagerMovement_AutoMouvement(EXTENSION, finalPos);
+//		test = false;
+//	}
 }
 
 void ManagerMovement_ManualCmdEversion(int8_t direction)
@@ -143,7 +136,7 @@ void ManagerMovement_ManualCmdHome(uint8_t motorIndex)
 	{
 		ManagerMovement.motorsNextGoal[motorIndex] = 0.0;
 		ManagerMotor_SetMotorGoal(motorIndex, ManagerMovement.motorsNextGoal[motorIndex]);
-		ManagerMotor_SetMotorState(motorIndex, false);
+		ManagerMotor_SetMotorGoalState(motorIndex, true);
 	}
 }
 
@@ -157,11 +150,11 @@ void ManagerMovement_ManualCmdHomeAll()
 void ManagerMovement_ManualIncrement(uint8_t motorIndex, int8_t factor)
 {
 	//motor is ready when nextPos has been reached
-	if (ManagerMotor_IsMotorReady(motorIndex))
+	if (!ManagerMotor_IsGoalStateReady(motorIndex))
 	{
-		ManagerMovement.motorsNextGoal[motorIndex] = motorsData[motorIndex]->position + factor*MOTOR_STEP;
+		ManagerMovement.motorsNextGoal[motorIndex] = motorsData[motorIndex]->position + factor*GOAL_STEP;
 		ManagerMotor_SetMotorGoal(motorIndex, ManagerMovement.motorsNextGoal[motorIndex]);
-		ManagerMotor_SetMotorState(motorIndex, false);
+		ManagerMotor_SetMotorGoalState(motorIndex, true);
 	}
 
 	//Else : do nothing so skip command to avoid an accumulation of incrementation
@@ -175,27 +168,27 @@ void ManagerMovement_AutoMouvement(uint8_t mouvType, float *Position)
 		{
 			ManagerMovement.motorsNextGoal[MOTOR_1] = Position[MOTOR_1];
 			ManagerMotor_SetMotorGoal(MOTOR_1, ManagerMovement.motorsNextGoal[MOTOR_1]);
-			ManagerMotor_SetMotorState(MOTOR_1, false);
+			ManagerMotor_SetMotorGoalState(MOTOR_1, true);
 
 			ManagerMovement.motorsNextGoal[MOTOR_2] = Position[MOTOR_2];
 			ManagerMotor_SetMotorGoal(MOTOR_2, ManagerMovement.motorsNextGoal[MOTOR_2]);
-			ManagerMotor_SetMotorState(MOTOR_2, false);
+			ManagerMotor_SetMotorGoalState(MOTOR_2, true);
 		}
 		else if (mouvType == EVERSION) // Set goalPosition for motor 1 and 2 for eversion
 		{
 			ManagerMovement.motorsNextGoal[MOTOR_1] = -Position[MOTOR_1];
 			ManagerMotor_SetMotorGoal(MOTOR_1, ManagerMovement.motorsNextGoal[MOTOR_1]);
-			ManagerMotor_SetMotorState(MOTOR_1, false);
+			ManagerMotor_SetMotorGoalState(MOTOR_1, true);
 
 			ManagerMovement.motorsNextGoal[MOTOR_2] = Position[MOTOR_2];
 			ManagerMotor_SetMotorGoal(MOTOR_2, ManagerMovement.motorsNextGoal[MOTOR_2]);
-			ManagerMotor_SetMotorState(MOTOR_2, false);
+			ManagerMotor_SetMotorGoalState(MOTOR_2, true);
 		}
 		else if (mouvType == EXTENSION) // Set goalPosition for motor 3 for extension
 		{
 			ManagerMovement.motorsNextGoal[MOTOR_3] = Position[MOTOR_3];
 			ManagerMotor_SetMotorGoal(MOTOR_3, ManagerMovement.motorsNextGoal[MOTOR_3]);
-			ManagerMotor_SetMotorState(MOTOR_3, false);
+			ManagerMotor_SetMotorGoalState(MOTOR_3, true);
 		}
 	}
 }

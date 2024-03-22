@@ -10,11 +10,10 @@
 #define CAN_CONNECTION_MOTORS_ERROR -2
 
 #define TIMER   10
-#define MAX_TRY 50  // 250 ms before flagging an error
+#define MAX_TRY 50  // 500 ms before flagging an error
 
 #define MOTOR_STEP	 0.01
-#define MOTOR_STEP_AK80	 0.01
-#define POSITION_TOL 0.01
+#define POSITION_TOL 0.02
 
 typedef struct
 {
@@ -24,7 +23,7 @@ typedef struct
     float 	kp;
     float	kd;
     bool    detected;
-    bool    ready;
+    bool    goalReady;
 } MotorControl;
 
 typedef struct
@@ -67,10 +66,9 @@ void ManagerMotor_Init()
                            MOTOR_AK10_9);
     PeriphMotors_InitMotor(&motors[MOTOR_3].motor, MOTOR_3_CAN_ID,
                            MOTOR_AK80_64);
-
+    HAL_Delay(50);
     ManagerMotor_EnableMotors();
     ManagerMotor_ResetMotors();
-
 
     //Init motor control info
     for (uint8_t i = 0; i < MOTOR_NBR; i++)
@@ -79,18 +77,18 @@ void ManagerMotor_Init()
         motors[i].goalPosition = 0.0;
         motors[i].detected     = false;
         //TODO : should be set to false, and then to true when motor is initilized
-        motors[i].ready     = true;
+        motors[i].goalReady     = false;
     }
 
     //Set Kp Kd
     //AK 10-9
     motors[MOTOR_1].kp = 100.0f;
-    motors[MOTOR_1].kd = 20.0f;
+    motors[MOTOR_1].kd = 5.0f;
     motors[MOTOR_2].kp = 100.0f;
-    motors[MOTOR_2].kd = 20.0f;
+    motors[MOTOR_2].kd = 5.0f;
     //AK 80-64
     motors[MOTOR_3].kp = 100.0f;
-    motors[MOTOR_3].kd = 20.0f;
+    motors[MOTOR_3].kd = 5.0f;
 
 
     // Init Data for canBus messages
@@ -184,7 +182,7 @@ void ManagerMotor_ReceiveFromMotors()
 
 void ManagerMotor_CANVerif()
 {
-    if (/*motors[MOTOR_1].detected &&*/ motors[MOTOR_2].detected &&
+    if (motors[MOTOR_1].detected && motors[MOTOR_2].detected &&
         motors[MOTOR_3].detected)
     {
         managerMotor.state = SET_ORIGIN;
@@ -206,7 +204,7 @@ void ManagerMotor_CANVerif()
 
 void ManagerMotor_SetOrigines()
 {
-    if (/*motors[MOTOR_1].motor.position <= 0.001 && motors[MOTOR_1].motor.position >= -0.001 &&*/
+    if (motors[MOTOR_1].motor.position <= 0.001 && motors[MOTOR_1].motor.position >= -0.001 &&
         motors[MOTOR_2].motor.position <= 0.001 && motors[MOTOR_2].motor.position >= -0.001 &&
         motors[MOTOR_3].motor.position <= 0.001 && motors[MOTOR_3].motor.position >= -0.001)
     {
@@ -247,40 +245,40 @@ Motor* ManagerMotor_GetMotorData(uint8_t motorIndex)
 	return &motors[motorIndex].motor;
 }
 
-bool ManagerMotor_IsMotorReady(uint8_t motorIndex)
+bool ManagerMotor_IsGoalStateReady(uint8_t motorIndex)
 {
-	 return motors[motorIndex].ready; //motor is ready when it has reached it's command
+	 return motors[motorIndex].goalReady; //motor is ready when it has reached it's command
 }
 
 void ManagerMotor_CalculateNextPositions()
 {
-	if(fabsf(motors[MOTOR_1].motor.position - motors[MOTOR_1].goalPosition) > 2*MOTOR_STEP && !(motors[MOTOR_1].ready))
+	if(fabsf(motors[MOTOR_1].motor.position - motors[MOTOR_1].goalPosition) > POSITION_TOL && motors[MOTOR_1].goalReady)
 	{
 		ManagerMotor_MotorIncrement(MOTOR_1, ManagerMotor_GetMotorDirection(MOTOR_1));
 	}
 	else
 	{
-		motors[MOTOR_1].ready = true; //Motor reached his goal
+		motors[MOTOR_1].goalReady = false; //Motor reached his goal
 		motors[MOTOR_1].goalPosition = motors[MOTOR_1].motor.position;
 	}
 
-	if(fabsf(motors[MOTOR_2].motor.position - motors[MOTOR_2].goalPosition) > 2*MOTOR_STEP && !(motors[MOTOR_2].ready))
+	if(fabsf(motors[MOTOR_2].motor.position - motors[MOTOR_2].goalPosition) > POSITION_TOL && motors[MOTOR_2].goalReady)
 	{
 		ManagerMotor_MotorIncrement(MOTOR_2, ManagerMotor_GetMotorDirection(MOTOR_2));
 	}
 	else
 	{
-		motors[MOTOR_2].ready = true;
+		motors[MOTOR_2].goalReady = false;
 		motors[MOTOR_2].goalPosition = motors[MOTOR_2].motor.position;
 	}
 
-	if(fabsf(motors[MOTOR_3].motor.position - motors[MOTOR_3].goalPosition) > 2*MOTOR_STEP_AK80 && !(motors[MOTOR_3].ready))
+	if(fabsf(motors[MOTOR_3].motor.position - motors[MOTOR_3].goalPosition) > POSITION_TOL && motors[MOTOR_3].goalReady)
 	{
 		ManagerMotor_MotorIncrement(MOTOR_3, ManagerMotor_GetMotorDirection(MOTOR_3));
 	}
 	else
 	{
-		motors[MOTOR_3].ready = true;
+		motors[MOTOR_3].goalReady = false;
 		motors[MOTOR_3].goalPosition = motors[MOTOR_3].motor.position;
 	}
 }
@@ -307,9 +305,9 @@ uint8_t ManagerMotor_GetState()
 	return managerMotor.state;
 }
 
-void ManagerMotor_SetMotorState(uint8_t motorIndex, bool readyState)
+void ManagerMotor_SetMotorGoalState(uint8_t motorIndex, bool readyState)
 {
-	motors[motorIndex].ready = readyState;
+	motors[motorIndex].goalReady = readyState;
 }
 
 

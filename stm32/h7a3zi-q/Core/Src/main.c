@@ -156,7 +156,6 @@ int main(void)
 	ManagerHMI_Task();
 	ManagerMovement_Task();
 
-
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

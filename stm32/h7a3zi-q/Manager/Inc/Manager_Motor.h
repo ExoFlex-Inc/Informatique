@@ -20,8 +20,8 @@ void ManagerMotor_Task();
 
 void ManagerMotor_SetMotorGoal(uint8_t motorIndex, float goal);
 Motor* ManagerMotor_GetMotorData(uint8_t motorIndex);
-bool ManagerMotor_IsMotorReady(uint8_t motorIndex);
 uint8_t ManagerMotor_GetState();
-void ManagerMotor_SetMotorState(uint8_t motorIndex, bool readyState);
+bool ManagerMotor_IsGoalStateReady(uint8_t motorIndex);
+void ManagerMotor_SetMotorGoalState(uint8_t motorIndex, bool readyState);
 
 #endif
