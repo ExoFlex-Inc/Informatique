@@ -1,8 +1,8 @@
 #ifndef MANAGER_MOTOR_H
 #define MANAGER_MOTOR_H
 
-#include "main.h"
 #include "Periph_Motors.h"
+#include "main.h"
 
 #define MOTOR_NBR 3
 #define MOTOR_1   0
@@ -18,10 +18,10 @@
 void ManagerMotor_Init();
 void ManagerMotor_Task();
 
-void ManagerMotor_SetMotorGoal(uint8_t motorIndex, float goal);
-Motor* ManagerMotor_GetMotorData(uint8_t motorIndex);
+void    ManagerMotor_SetMotorGoal(uint8_t motorIndex, float goal);
+Motor*  ManagerMotor_GetMotorData(uint8_t motorIndex);
 uint8_t ManagerMotor_GetState();
-bool ManagerMotor_IsGoalStateReady(uint8_t motorIndex);
-void ManagerMotor_SetMotorGoalState(uint8_t motorIndex, bool readyState);
+bool    ManagerMotor_IsGoalStateReady(uint8_t motorIndex);
+void    ManagerMotor_SetMotorGoalState(uint8_t motorIndex, bool readyState);
 
 #endif

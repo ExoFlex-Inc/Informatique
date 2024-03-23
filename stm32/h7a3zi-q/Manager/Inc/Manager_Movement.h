@@ -4,10 +4,9 @@
 #include "main.h"
 
 #define MOV_RIGTH 1
-#define MOV_LEFT -1
-#define MOV_UP 1
-#define MOV_DOWN -1
-
+#define MOV_LEFT  -1
+#define MOV_UP    1
+#define MOV_DOWN  -1
 
 void ManagerMovement_Init();
 void ManagerMovement_Task();
