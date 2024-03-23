@@ -90,7 +90,7 @@ void ManagerMovement_AutoPositions()  // TODO:
 
     // tests
     //	if(ManagerMotor_IsMotorReady(MOTOR_1) &&
-    //ManagerMotor_IsMotorReady(MOTOR_2) && ManagerMotor_IsMotorReady(MOTOR_3)
+    // ManagerMotor_IsMotorReady(MOTOR_2) && ManagerMotor_IsMotorReady(MOTOR_3)
     //&& ManagerMotor_GetState() == READY2MOVE && test)
     //	{
     //		finalPos[MOTOR_1] = 2.0f;
@@ -131,7 +131,8 @@ void ManagerMovement_ManualCmdExtension(int8_t direction)
 
 void ManagerMovement_ManualCmdHome(uint8_t motorIndex)
 {
-    if (ManagerMovement.state == MANUAL && !ManagerMotor_IsGoalStateReady(motorIndex))
+    if (ManagerMovement.state == MANUAL &&
+        !ManagerMotor_IsGoalStateReady(motorIndex))
     {
         ManagerMovement.motorsNextGoal[motorIndex] = 0.0;
         ManagerMotor_SetMotorGoal(motorIndex,
