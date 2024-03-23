@@ -11,15 +11,27 @@ extern DMA_HandleTypeDef hdma_usart2_rx;
 // Variables for UART2
 uint8_t rxBuf[RX_BUF_SIZE];
 
-uint16_t head, tail;
+uint16_t head, tail, peak;
+bool foundJsonStart;
+bool foundJsonEnd;
+
+
 
 void PeriphUartRingBuf_AdvanceHead(uint32_t bytesReceived);
+void PeriphUartRingBuf_GetJsonStart();
+void PeriphUartRingBuf_GetJsonEnd();
+void PeriphUartRingBuf_ReadTailToPeak(char *buf, uint32_t *size);
 
 
 void PeriphUartRingBuf_Init()
 {
 	memset(rxBuf, '\0', RX_BUF_SIZE);
 	HAL_UARTEx_ReceiveToIdle_DMA(&huart2, rxBuf, RX_BUF_SIZE);
+	head = 0;
+	tail = 0;
+	peak = 0;
+	foundJsonStart = false;
+	foundJsonEnd = false;
 }
 
 
@@ -65,6 +77,15 @@ void PeriphUartRingBuf_AdvanceHead(uint32_t bytesReceived)
 				tail = 0;
 			}
 		}
+		if( head == peak )
+		{
+			//this will discard the oldest data
+			peak++;
+			if( peak == RX_BUF_SIZE )
+			{
+				peak = 0;
+			}
+		}
 	}
 }
 
@@ -92,6 +113,83 @@ void PeriphUartRingBuf_Send(char * buf, uint32_t size)
 	HAL_UART_Transmit(&huart2, (uint8_t*)buf, size, 1000);
 }
 
+
+void PeriphUartRingBuf_ReadJson(char *buf, uint32_t *size)
+{
+	*size = 0;
+
+	if (!foundJsonStart)
+	{
+		PeriphUartRingBuf_GetJsonStart();
+	}
+
+	if (foundJsonStart)
+	{
+		PeriphUartRingBuf_GetJsonEnd();
+	}
+
+	if (foundJsonStart && foundJsonEnd)
+	{
+		PeriphUartRingBuf_ReadTailToPeak(buf, size);
+		foundJsonStart = false;
+		foundJsonEnd = false;
+	}
+}
+
+void PeriphUartRingBuf_GetJsonStart()
+{
+	while(tail != head)
+	{
+		if (rxBuf[tail] == '{')
+		{
+			foundJsonStart = true;
+			peak = tail;
+			break;
+		}
+		tail++;
+		if(tail == RX_BUF_SIZE )
+		{
+			tail = 0;
+		}
+	}
+}
+
+void PeriphUartRingBuf_GetJsonEnd()
+{
+	while(peak != head)
+	{
+		if (rxBuf[peak] == '}')
+		{
+			foundJsonEnd = true;
+			peak++;
+			if(peak == RX_BUF_SIZE )
+			{
+				peak = 0;
+			}
+			break;
+		}
+		peak++;
+		if(peak == RX_BUF_SIZE )
+		{
+			peak = 0;
+		}
+	}
+}
+
+void PeriphUartRingBuf_ReadTailToPeak(char *buf, uint32_t *size)
+{
+	*size = 0;
+	while(tail != peak)
+	{
+		*(buf++) = rxBuf[tail];
+		tail++;
+		(*size)++;
+		if(tail == RX_BUF_SIZE )
+		{
+			tail = 0;
+		}
+	}
+}
 
 
 

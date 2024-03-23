@@ -18,6 +18,7 @@
 void PeriphUartRingBuf_Init();
 void PeriphUartRingBuf_Read(char *buf, uint32_t *size);
 void PeriphUartRingBuf_Send(char * buf, uint32_t size);
+void PeriphUartRingBuf_ReadJson(char *buf, uint32_t *size);
 
 
 

@@ -185,7 +185,8 @@ int main(void)
 	  if (HAL_GetTick() - millis >= 100)
 	  {
 		  HAL_GPIO_TogglePin (GPIOB, GPIO_PIN_0|LD3_Pin);
-		  PeriphUartRingBuf_Read(buf, &size);
+
+		  PeriphUartRingBuf_ReadJson(buf, &size);
 
 		  if (size > 0)
 		  {
