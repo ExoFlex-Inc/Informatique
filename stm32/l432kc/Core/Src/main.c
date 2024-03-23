@@ -172,7 +172,7 @@ int main(void)
   strcpy(msg, "{2;Auto;Start;d;}");
 
   uint8_t sectionNbr = 0;
-  HMIParser_Parse(msg, 17, &sectionNbr);
+
 
   PeriphUartRingBuf_Init();
 
@@ -191,6 +191,7 @@ int main(void)
 		  if (size > 0)
 		  {
 			  PeriphUartRingBuf_Send(buf, size);
+			  HMIParser_Parse(buf, size, &sectionNbr);
 		  }
 
 		  millis =  HAL_GetTick();
