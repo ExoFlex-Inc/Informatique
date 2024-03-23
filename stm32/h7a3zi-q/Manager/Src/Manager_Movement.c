@@ -131,7 +131,7 @@ void ManagerMovement_ManualCmdExtension(int8_t direction)
 
 void ManagerMovement_ManualCmdHome(uint8_t motorIndex)
 {
-    if (ManagerMovement.state == MANUAL)
+    if (ManagerMovement.state == MANUAL && !ManagerMotor_IsGoalStateReady(motorIndex))
     {
         ManagerMovement.motorsNextGoal[motorIndex] = 0.0;
         ManagerMotor_SetMotorGoal(motorIndex,
