@@ -1,4 +1,5 @@
 #include <Manager_HMI.h>
+#include <Periph_UartRingBuf.h>
 #include <Manager_Motor.h>
 #include <Manager_Movement.h>
 #include <stdio.h>
@@ -6,8 +7,10 @@
 #include <string.h>
 
 #include "cJSON.h"
-#include "comUtils_UART2.h"
-#include "uartRingBufDMA.h"
+
+#define SECTION_LENGTH 20
+#define SECTION_NBR 30
+char ParsedMsg[SECTION_NBR][SECTION_LENGTH];
 
 #define M_HMI_TIMER 100
 
@@ -28,14 +31,21 @@ managerHMI_t managerHMI;
 static const Motor* motorsData[MOTOR_NBR];
 static uint32_t     timerMs = 0;
 
+char buf[50];
+
+
 void ManagerHMI_ReceiveJSON();
 void ManagerHMI_SendJSON();
 void ManagerHMI_SetMotorDataToString();
+void ManagerHMI_ParseJson(char* msg, uint8_t maxlength, uint8_t *sectionNbr);
+void ManagerHMI_ExecuteJson(uint8_t sectionNbr);
+void ManagerHMI_ExecuteManualIncrement(char *cmd);
+void ManagerHMI_ExecuteManualHoming(char *cmd);
 
 void ManagerHMI_Init()
 {
     cJSON_InitHooks(NULL);
-    Ringbuf_Init();
+    PeriphUartRingBuf_Init();
 
     // Get motor data (const pointer : read-only)
     for (uint8_t i = 0; i < MOTOR_NBR; i++)
@@ -78,8 +88,7 @@ void ManagerHMI_SendJSON()
     char* jsonMessage = cJSON_PrintUnformatted(root);
 
     // Send JSON string over UART
-    HAL_UART_Transmit(&huart3, (uint8_t*) jsonMessage, strlen(jsonMessage),
-                      HAL_MAX_DELAY);
+    PeriphUartRingBuf_Send(jsonMessage, strlen(jsonMessage));
 
     free(jsonMessage);
     cJSON_Delete(root);
@@ -87,52 +96,17 @@ void ManagerHMI_SendJSON()
 
 void ManagerHMI_ReceiveJSON()
 {
-    char* cmd;
-    cmd = searchWord((char*) MainBuf_UART);
+	uint32_t size = 0;
+	PeriphUartRingBuf_ReadJson(buf, &size);
 
-    if (cmd != NULL)
-    {
-        if (strcmp(cmd, "eversionR") == 0)
-        {
-            ManagerMovement_ManualCmdEversion(MOV_RIGTH);
-        }
-        else if (strcmp(cmd, "eversionL") == 0)
-        {
-            ManagerMovement_ManualCmdEversion(MOV_LEFT);
-        }
-        else if (strcmp(cmd, "dorsiflexionU") == 0)
-        {
-            ManagerMovement_ManualCmdDorsiflexion(MOV_UP);
-        }
-        else if (strcmp(cmd, "dorsiflexionD") == 0)
-        {
-            ManagerMovement_ManualCmdDorsiflexion(MOV_DOWN);
-        }
-        else if (strcmp(cmd, "extensionU") == 0)
-        {
-            ManagerMovement_ManualCmdExtension(MOV_UP);
-        }
-        else if (strcmp(cmd, "extensionD") == 0)
-        {
-            ManagerMovement_ManualCmdExtension(MOV_DOWN);
-        }
-        else if (strcmp(cmd, "goHome1") == 0)
-        {
-            ManagerMovement_ManualCmdHome(MOTOR_1);
-        }
-        else if (strcmp(cmd, "goHome2") == 0)
-        {
-            ManagerMovement_ManualCmdHome(MOTOR_2);
-        }
-        else if (strcmp(cmd, "goHome3") == 0)
-        {
-            ManagerMovement_ManualCmdHome(MOTOR_3);
-        }
-        else if (strcmp(cmd, "goHome") == 0)
-        {
-            ManagerMovement_ManualCmdHomeAll();
-        }
-    }
+	if (size > 0)
+	{
+		PeriphUartRingBuf_Send(buf, size); //Used to test com
+
+		uint8_t sectionNbr = 0;
+		ManagerHMI_ParseJson(buf, size, &sectionNbr);
+		ManagerHMI_ExecuteJson(sectionNbr);
+	}
 }
 
 void ManagerHMI_SetMotorDataToString()
@@ -143,4 +117,132 @@ void ManagerHMI_SetMotorDataToString()
         sprintf(managerHMI.strMotors[i].vel, "%.2f", motorsData[i]->velocity);
         sprintf(managerHMI.strMotors[i].tor, "%.2f", motorsData[i]->torque);
     }
+}
+
+void ManagerHMI_ParseJson(char* msg, uint8_t maxlength, uint8_t *sectionNbr)
+{
+    // Reset ParsedMsg array
+    memset(ParsedMsg, 0, sizeof(ParsedMsg));
+
+    // Check if the message starts with '{' and ends with '}'
+    if (msg[0] != '{' || msg[maxlength - 1] != '}') {
+        // Invalid message format
+        return;
+    }
+
+    // Parse number of sections
+    uint8_t sectionCount = 0;
+    char* ptr = strtok(msg + 1, ";"); // Skip the '{'
+    while (ptr != NULL && sectionCount < SECTION_NBR)
+    {
+    	if (*ptr != '}') // Ignore '}' as a section
+    	{
+			strncpy(ParsedMsg[sectionCount], ptr, SECTION_LENGTH - 1);
+			ParsedMsg[sectionCount][SECTION_LENGTH - 1] = '\0'; // Ensure null-terminated
+			sectionCount++;
+			ptr = strtok(NULL, ";");
+    	}
+    	else
+    	{
+    		break;
+    	}
+    }
+
+    *sectionNbr = sectionCount;
+
+    // Check if the number of sections exceeds the maximum allowed
+    if (sectionCount >= SECTION_NBR) {
+        // Too many sections, truncate
+    	*sectionNbr = 0;
+        return;
+    }
+}
+
+void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
+{
+	if (sectionNbr > 3)
+	{
+		if (strcmp(ParsedMsg[0], "Manual") == 0)
+		{
+			if (strcmp(ParsedMsg[1], "Increment") == 0)
+			{
+				ManagerHMI_ExecuteManualIncrement(ParsedMsg[2]);
+			}
+		}
+		else if (strcmp(ParsedMsg[0], "Auto") == 0)
+		{
+
+		}
+	}
+}
+
+void ManagerHMI_ExecuteManualIncrement(char *cmd)
+{
+	if (cmd != NULL)
+	{
+		if (strcmp(cmd, "eversionR") == 0)
+		{
+			ManagerMovement_ManualCmdEversion(MOV_RIGTH);
+		}
+		else if (strcmp(cmd, "eversionL") == 0)
+		{
+			ManagerMovement_ManualCmdEversion(MOV_LEFT);
+		}
+		else if (strcmp(cmd, "dorsiflexionU") == 0)
+		{
+			ManagerMovement_ManualCmdDorsiflexion(MOV_UP);
+		}
+		else if (strcmp(cmd, "dorsiflexionD") == 0)
+		{
+			ManagerMovement_ManualCmdDorsiflexion(MOV_DOWN);
+		}
+		else if (strcmp(cmd, "extensionU") == 0)
+		{
+			ManagerMovement_ManualCmdExtension(MOV_UP);
+		}
+		else if (strcmp(cmd, "extensionD") == 0)
+		{
+			ManagerMovement_ManualCmdExtension(MOV_DOWN);
+		}
+		else if (strcmp(cmd, "goHome1") == 0)
+		{
+			ManagerMovement_ManualCmdHome(MOTOR_1);
+		}
+		else if (strcmp(cmd, "goHome2") == 0)
+		{
+			ManagerMovement_ManualCmdHome(MOTOR_2);
+		}
+		else if (strcmp(cmd, "goHome3") == 0)
+		{
+			ManagerMovement_ManualCmdHome(MOTOR_3);
+		}
+		else if (strcmp(cmd, "goHome") == 0)
+		{
+			ManagerMovement_ManualCmdHomeAll();
+		}
+	}
+}
+
+
+void ManagerHMI_ExecuteManualHoming(char *cmd)
+{
+	if (cmd != NULL)
+	{
+		if (strcmp(cmd, "goHome1") == 0)
+		{
+			ManagerMovement_ManualCmdHome(MOTOR_1);
+		}
+		else if (strcmp(cmd, "goHome2") == 0)
+		{
+			ManagerMovement_ManualCmdHome(MOTOR_2);
+		}
+		else if (strcmp(cmd, "goHome3") == 0)
+		{
+			ManagerMovement_ManualCmdHome(MOTOR_3);
+		}
+		else if (strcmp(cmd, "goHome") == 0)
+		{
+			ManagerMovement_ManualCmdHomeAll();
+		}
+	}
 }

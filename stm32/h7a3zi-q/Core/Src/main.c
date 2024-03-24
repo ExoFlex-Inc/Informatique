@@ -23,11 +23,6 @@
 /* USER CODE BEGIN Includes */
 
 
-#include "cJSON.h"
-#include "uartRingBufDMA.h"
-#include "Periph_Canbus.h"
-#include "Periph_Motors.h"
-
 #include <Manager_Motor.h>
 #include <Manager_HMI.h>
 #include <Manager_Movement.h>
@@ -140,11 +135,6 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-
-
-
-	cJSON_InitHooks(NULL);
-	Ringbuf_Init();
 
 	ManagerMotor_Init();
 	ManagerHMI_Init();
