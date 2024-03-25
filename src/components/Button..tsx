@@ -2,7 +2,9 @@ import React, { useRef } from "react";
 
 interface ButtonProps {
   label: string;
-  toSend?: string;
+  mode?: string;
+  action?: string;
+  content?: string;
   onMouseDown?: () => void;
   onClick?: () => void;
   className?: string;
@@ -10,7 +12,9 @@ interface ButtonProps {
 
 const Button: React.FC<ButtonProps> = ({
   label,
-  toSend,
+  mode,
+  action,
+  content,
   onMouseDown,
   onClick,
   className,
@@ -30,7 +34,7 @@ const Button: React.FC<ButtonProps> = ({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ buttonClicked: toSend }),
+        body: JSON.stringify({ mode: mode, action: action, content: content }),
       });
 
       if (response.ok) {
@@ -59,7 +63,7 @@ const Button: React.FC<ButtonProps> = ({
     isMouseDown.current = true;
 
     // Start sending requests with interval for mouse down event
-    intervalRef.current = setInterval(startSendingRequests, 100);
+    intervalRef.current = setInterval(startSendingRequests, 20);
 
     // Add event listener for mouseup
     window.addEventListener("mouseup", () => {
@@ -77,7 +81,7 @@ const Button: React.FC<ButtonProps> = ({
     }
 
     // Start sending requests once for click event only if there was no mouse down event
-    if (!isMouseDown.current && toSend) {
+    if (!isMouseDown.current) {
       startSendingRequests();
     }
   };
