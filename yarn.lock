@@ -263,9 +263,9 @@
   version "0.8.1"
   resolved "https://registry.npmjs.org/@emotion/memoize/-/memoize-0.8.1.tgz"
 
-"@emotion/react@^11.10.5", "@emotion/react@^11.11.3":
-  version "11.11.3"
-  resolved "https://registry.npmjs.org/@emotion/react/-/react-11.11.3.tgz"
+"@emotion/react@^11.10.5", "@emotion/react@^11.11.4":
+  version "11.11.4"
+  resolved "https://registry.yarnpkg.com/@emotion/react/-/react-11.11.4.tgz#3a829cac25c1f00e126408fab7f891f00ecc3c1d"
   dependencies:
     "@babel/runtime" "^7.18.3"
     "@emotion/babel-plugin" "^11.11.0"
@@ -763,11 +763,11 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@playwright/test@^1.40.1":
-  version "1.40.1"
-  resolved "https://registry.yarnpkg.com/@playwright/test/-/test-1.40.1.tgz#9e66322d97b1d74b9f8718bacab15080f24cde65"
+"@playwright/test@^1.42.1":
+  version "1.42.1"
+  resolved "https://registry.yarnpkg.com/@playwright/test/-/test-1.42.1.tgz#9eff7417bcaa770e9e9a00439e078284b301f31c"
   dependencies:
-    playwright "1.40.1"
+    playwright "1.42.1"
 
 "@popperjs/core@^2.11.6", "@popperjs/core@^2.11.8":
   version "2.11.8"
@@ -1011,135 +1011,135 @@
     "@supabase/realtime-js" "2.9.3"
     "@supabase/storage-js" "2.5.5"
 
-"@syncfusion/ej2-base@~24.2.3", "@syncfusion/ej2-base@~24.2.7":
-  version "24.2.8"
-  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-base/-/ej2-base-24.2.8.tgz#9f6d80a8992042f3b3f400a2730f5546069caaef"
+"@syncfusion/ej2-base@~25.1.35":
+  version "25.1.35"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-base/-/ej2-base-25.1.35.tgz#c0323435a77b7d2c1abcd520320dcb87573a269b"
   dependencies:
-    "@syncfusion/ej2-icons" "~24.2.3"
+    "@syncfusion/ej2-icons" "~25.1.35"
 
-"@syncfusion/ej2-buttons@~24.2.7":
-  version "24.2.7"
-  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-buttons/-/ej2-buttons-24.2.7.tgz#960caa55acdcad724a3703aa4aaab124f4d086b8"
+"@syncfusion/ej2-buttons@~25.1.35":
+  version "25.1.35"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-buttons/-/ej2-buttons-25.1.35.tgz#d80860e317deaefd44007686a67be4d1341ecac2"
   dependencies:
-    "@syncfusion/ej2-base" "~24.2.7"
+    "@syncfusion/ej2-base" "~25.1.35"
 
-"@syncfusion/ej2-calendars@~24.2.9":
-  version "24.2.9"
-  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-calendars/-/ej2-calendars-24.2.9.tgz#04686be6154588911793314b95e26c1253ca6488"
+"@syncfusion/ej2-calendars@~25.1.35":
+  version "25.1.35"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-calendars/-/ej2-calendars-25.1.35.tgz#5e6e5354c5168c80b3cd8232fc18b745edda9aff"
   dependencies:
-    "@syncfusion/ej2-base" "~24.2.7"
-    "@syncfusion/ej2-buttons" "~24.2.7"
-    "@syncfusion/ej2-inputs" "~24.2.9"
-    "@syncfusion/ej2-lists" "~24.2.8"
-    "@syncfusion/ej2-popups" "~24.2.9"
+    "@syncfusion/ej2-base" "~25.1.35"
+    "@syncfusion/ej2-buttons" "~25.1.35"
+    "@syncfusion/ej2-inputs" "~25.1.35"
+    "@syncfusion/ej2-lists" "~25.1.35"
+    "@syncfusion/ej2-popups" "~25.1.35"
 
-"@syncfusion/ej2-charts@24.2.9":
-  version "24.2.9"
-  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-charts/-/ej2-charts-24.2.9.tgz#a0afc93574da4b0dbda2d26b06083536a1ac8688"
+"@syncfusion/ej2-charts@25.1.35":
+  version "25.1.35"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-charts/-/ej2-charts-25.1.35.tgz#d15aa3c2535a103c4f6825995efc71dd61de09dc"
   dependencies:
-    "@syncfusion/ej2-base" "~24.2.7"
-    "@syncfusion/ej2-calendars" "~24.2.9"
-    "@syncfusion/ej2-data" "~24.2.3"
-    "@syncfusion/ej2-excel-export" "~24.2.4"
-    "@syncfusion/ej2-navigations" "~24.2.8"
-    "@syncfusion/ej2-pdf-export" "~24.2.3"
-    "@syncfusion/ej2-svg-base" "~24.2.3"
+    "@syncfusion/ej2-base" "~25.1.35"
+    "@syncfusion/ej2-calendars" "~25.1.35"
+    "@syncfusion/ej2-data" "~25.1.35"
+    "@syncfusion/ej2-excel-export" "~25.1.35"
+    "@syncfusion/ej2-navigations" "~25.1.35"
+    "@syncfusion/ej2-pdf-export" "~25.1.35"
+    "@syncfusion/ej2-svg-base" "~25.1.35"
 
-"@syncfusion/ej2-compression@~24.2.3":
-  version "24.2.3"
-  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-compression/-/ej2-compression-24.2.3.tgz#dcab1e3f76b2fa0126cb44a547997248a758c16b"
+"@syncfusion/ej2-compression@~25.1.35":
+  version "25.1.35"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-compression/-/ej2-compression-25.1.35.tgz#ada609ccec7567dcde440e89ee02540cfe381fe2"
   dependencies:
-    "@syncfusion/ej2-file-utils" "~24.2.3"
+    "@syncfusion/ej2-file-utils" "~25.1.35"
 
-"@syncfusion/ej2-data@~24.2.3":
-  version "24.2.3"
-  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-data/-/ej2-data-24.2.3.tgz#d7b20d8ec8c5e4f75a4561abc558f4aa2c3bb89c"
+"@syncfusion/ej2-data@~25.1.35":
+  version "25.1.35"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-data/-/ej2-data-25.1.35.tgz#f71e532b3c8058421d1c0bc692a28bea299ea06b"
   dependencies:
-    "@syncfusion/ej2-base" "~24.2.3"
+    "@syncfusion/ej2-base" "~25.1.35"
 
-"@syncfusion/ej2-excel-export@~24.2.4":
-  version "24.2.4"
-  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-excel-export/-/ej2-excel-export-24.2.4.tgz#fbabfc9bb33a4e95126bc907d984b53ed4617a16"
+"@syncfusion/ej2-excel-export@~25.1.35":
+  version "25.1.35"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-excel-export/-/ej2-excel-export-25.1.35.tgz#d62b21aa790631be58b2b7b5f1d10a58788d4613"
   dependencies:
-    "@syncfusion/ej2-base" "~24.2.3"
-    "@syncfusion/ej2-compression" "~24.2.3"
+    "@syncfusion/ej2-base" "~25.1.35"
+    "@syncfusion/ej2-compression" "~25.1.35"
 
-"@syncfusion/ej2-file-utils@~24.2.3":
-  version "24.2.3"
-  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-file-utils/-/ej2-file-utils-24.2.3.tgz#7180086e613b3d8fd43ed24cfcf0bc0a9fb01191"
+"@syncfusion/ej2-file-utils@~25.1.35":
+  version "25.1.35"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-file-utils/-/ej2-file-utils-25.1.35.tgz#ced86ac890da66b9261b7baf24f5019edfb0ead0"
 
-"@syncfusion/ej2-icons@~24.2.3":
-  version "24.2.3"
-  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-icons/-/ej2-icons-24.2.3.tgz#8cbb15a812a39b5acb9a08b5e384ea137432ba7d"
+"@syncfusion/ej2-icons@~25.1.35":
+  version "25.1.35"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-icons/-/ej2-icons-25.1.35.tgz#e24db28f0f9ca52ec5c8f8572bf6c0c8d20d2000"
 
-"@syncfusion/ej2-inputs@~24.2.7", "@syncfusion/ej2-inputs@~24.2.9":
-  version "24.2.9"
-  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-inputs/-/ej2-inputs-24.2.9.tgz#e18be0e30bc691bdcbad184b0541b10146c2301c"
+"@syncfusion/ej2-inputs@~25.1.35":
+  version "25.1.35"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-inputs/-/ej2-inputs-25.1.35.tgz#cdc888128a82dcbc28c1b3307f31836491e401ed"
   dependencies:
-    "@syncfusion/ej2-base" "~24.2.7"
-    "@syncfusion/ej2-buttons" "~24.2.7"
-    "@syncfusion/ej2-popups" "~24.2.9"
-    "@syncfusion/ej2-splitbuttons" "~24.2.7"
+    "@syncfusion/ej2-base" "~25.1.35"
+    "@syncfusion/ej2-buttons" "~25.1.35"
+    "@syncfusion/ej2-popups" "~25.1.35"
+    "@syncfusion/ej2-splitbuttons" "~25.1.35"
 
-"@syncfusion/ej2-lists@~24.2.8":
-  version "24.2.8"
-  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-lists/-/ej2-lists-24.2.8.tgz#0f14a8d6ece87e0634f09fcb178e9a1ee8abc3bd"
+"@syncfusion/ej2-lists@~25.1.35":
+  version "25.1.35"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-lists/-/ej2-lists-25.1.35.tgz#74f20f69d8dcd182a28029602392a854ab0057b1"
   dependencies:
-    "@syncfusion/ej2-base" "~24.2.7"
-    "@syncfusion/ej2-buttons" "~24.2.7"
-    "@syncfusion/ej2-data" "~24.2.3"
-    "@syncfusion/ej2-popups" "~24.2.8"
+    "@syncfusion/ej2-base" "~25.1.35"
+    "@syncfusion/ej2-buttons" "~25.1.35"
+    "@syncfusion/ej2-data" "~25.1.35"
+    "@syncfusion/ej2-popups" "~25.1.35"
 
-"@syncfusion/ej2-navigations@~24.2.8":
-  version "24.2.8"
-  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-navigations/-/ej2-navigations-24.2.8.tgz#f8044e64fc6a856d940ae3d79c1e36bd3432aa76"
+"@syncfusion/ej2-navigations@~25.1.35":
+  version "25.1.35"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-navigations/-/ej2-navigations-25.1.35.tgz#961a5c4286a2c3fb0f54f95f86766b91ce006861"
   dependencies:
-    "@syncfusion/ej2-base" "~24.2.7"
-    "@syncfusion/ej2-buttons" "~24.2.7"
-    "@syncfusion/ej2-data" "~24.2.3"
-    "@syncfusion/ej2-inputs" "~24.2.7"
-    "@syncfusion/ej2-lists" "~24.2.8"
-    "@syncfusion/ej2-popups" "~24.2.8"
+    "@syncfusion/ej2-base" "~25.1.35"
+    "@syncfusion/ej2-buttons" "~25.1.35"
+    "@syncfusion/ej2-data" "~25.1.35"
+    "@syncfusion/ej2-inputs" "~25.1.35"
+    "@syncfusion/ej2-lists" "~25.1.35"
+    "@syncfusion/ej2-popups" "~25.1.35"
 
-"@syncfusion/ej2-pdf-export@~24.2.3":
-  version "24.2.3"
-  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-pdf-export/-/ej2-pdf-export-24.2.3.tgz#9726e5b975225903a32ed0de4498fc1e621c8c1b"
+"@syncfusion/ej2-pdf-export@~25.1.35":
+  version "25.1.35"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-pdf-export/-/ej2-pdf-export-25.1.35.tgz#7f587fdc200459c7d73260907d8fefb79ec59bdb"
   dependencies:
-    "@syncfusion/ej2-compression" "~24.2.3"
+    "@syncfusion/ej2-compression" "~25.1.35"
 
-"@syncfusion/ej2-popups@~24.2.5", "@syncfusion/ej2-popups@~24.2.8", "@syncfusion/ej2-popups@~24.2.9":
-  version "24.2.10"
-  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-popups/-/ej2-popups-24.2.10.tgz#be79d0c27048cd61c1d083187c852595902cb5bc"
+"@syncfusion/ej2-popups@~25.1.35":
+  version "25.1.35"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-popups/-/ej2-popups-25.1.35.tgz#0d1879a51055817f49e086756ebba3c53d1b658f"
   dependencies:
-    "@syncfusion/ej2-base" "~24.2.7"
-    "@syncfusion/ej2-buttons" "~24.2.7"
+    "@syncfusion/ej2-base" "~25.1.35"
+    "@syncfusion/ej2-buttons" "~25.1.35"
 
-"@syncfusion/ej2-react-base@~24.2.7":
-  version "24.2.7"
-  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-react-base/-/ej2-react-base-24.2.7.tgz#572981030d92e998a63b12edf7fa6556ccc81b5b"
+"@syncfusion/ej2-react-base@~25.1.35":
+  version "25.1.35"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-react-base/-/ej2-react-base-25.1.35.tgz#6b9b5236dc4ce367e3a2e6414927ceaf9c7801cf"
   dependencies:
-    "@syncfusion/ej2-base" "~24.2.7"
+    "@syncfusion/ej2-base" "~25.1.35"
 
-"@syncfusion/ej2-react-charts@^24.2.9":
-  version "24.2.9"
-  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-react-charts/-/ej2-react-charts-24.2.9.tgz#9fb7cff78e09ebd7d92b0710fb641cb16322b854"
+"@syncfusion/ej2-react-charts@^25.1.35":
+  version "25.1.35"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-react-charts/-/ej2-react-charts-25.1.35.tgz#918f9c2350b42ea812d97b1cdc494203dc69ac4f"
   dependencies:
-    "@syncfusion/ej2-base" "~24.2.7"
-    "@syncfusion/ej2-charts" "24.2.9"
-    "@syncfusion/ej2-react-base" "~24.2.7"
+    "@syncfusion/ej2-base" "~25.1.35"
+    "@syncfusion/ej2-charts" "25.1.35"
+    "@syncfusion/ej2-react-base" "~25.1.35"
 
-"@syncfusion/ej2-splitbuttons@~24.2.7":
-  version "24.2.7"
-  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-splitbuttons/-/ej2-splitbuttons-24.2.7.tgz#044ccefc60ed6b5d0f177aad30fc99c9fb626b48"
+"@syncfusion/ej2-splitbuttons@~25.1.35":
+  version "25.1.35"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-splitbuttons/-/ej2-splitbuttons-25.1.35.tgz#e8158f3c5e87de89e9e8ba3b41886070202fe9be"
   dependencies:
-    "@syncfusion/ej2-base" "~24.2.7"
-    "@syncfusion/ej2-popups" "~24.2.5"
+    "@syncfusion/ej2-base" "~25.1.35"
+    "@syncfusion/ej2-popups" "~25.1.35"
 
-"@syncfusion/ej2-svg-base@~24.2.3":
-  version "24.2.3"
-  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-svg-base/-/ej2-svg-base-24.2.3.tgz#bcbab4f14fe63096c9a74810bfa479d772e64f7b"
+"@syncfusion/ej2-svg-base@~25.1.35":
+  version "25.1.35"
+  resolved "https://registry.yarnpkg.com/@syncfusion/ej2-svg-base/-/ej2-svg-base-25.1.35.tgz#dd42a4b7891d3a5d2f1e212328c2c3a25a15dba7"
   dependencies:
-    "@syncfusion/ej2-base" "~24.2.3"
+    "@syncfusion/ej2-base" "~25.1.35"
 
 "@tsconfig/node10@^1.0.7":
   version "1.0.9"
@@ -1984,9 +1984,9 @@ dom-helpers@^5.0.1:
     "@babel/runtime" "^7.8.7"
     csstype "^3.0.2"
 
-dotenv@^16.3.1:
-  version "16.3.1"
-  resolved "https://registry.npmjs.org/dotenv/-/dotenv-16.3.1.tgz"
+dotenv@^16.4.5:
+  version "16.4.5"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.4.5.tgz#cdd3b3b604cb327e286b4762e13502f717cb099f"
 
 ee-first@1.1.1:
   version "1.1.1"
@@ -2855,15 +2855,15 @@ pirates@^4.0.1:
   version "4.0.6"
   resolved "https://registry.npmjs.org/pirates/-/pirates-4.0.6.tgz"
 
-playwright-core@1.40.1:
-  version "1.40.1"
-  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.40.1.tgz#442d15e86866a87d90d07af528e0afabe4c75c05"
+playwright-core@1.42.1:
+  version "1.42.1"
+  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.42.1.tgz#13c150b93c940a3280ab1d3fbc945bc855c9459e"
 
-playwright@1.40.1:
-  version "1.40.1"
-  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.40.1.tgz#a11bf8dca15be5a194851dbbf3df235b9f53d7ae"
+playwright@1.42.1:
+  version "1.42.1"
+  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.42.1.tgz#79c828b51fe3830211137550542426111dc8239f"
   dependencies:
-    playwright-core "1.40.1"
+    playwright-core "1.42.1"
   optionalDependencies:
     fsevents "2.3.2"
 
@@ -3386,9 +3386,9 @@ type-is@~1.6.18:
     media-typer "0.3.0"
     mime-types "~2.1.24"
 
-typescript@^5.4.2:
-  version "5.4.2"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.4.2.tgz#0ae9cebcfae970718474fe0da2c090cad6577372"
+typescript@^5.4.3:
+  version "5.4.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.4.3.tgz#5c6fedd4c87bee01cd7a528a30145521f8e0feff"
 
 undici-types@~5.26.4:
   version "5.26.5"
