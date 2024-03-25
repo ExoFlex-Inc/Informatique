@@ -263,9 +263,9 @@
   version "0.8.1"
   resolved "https://registry.npmjs.org/@emotion/memoize/-/memoize-0.8.1.tgz"
 
-"@emotion/react@^11.10.5", "@emotion/react@^11.11.3":
-  version "11.11.3"
-  resolved "https://registry.npmjs.org/@emotion/react/-/react-11.11.3.tgz"
+"@emotion/react@^11.10.5", "@emotion/react@^11.11.4":
+  version "11.11.4"
+  resolved "https://registry.yarnpkg.com/@emotion/react/-/react-11.11.4.tgz#3a829cac25c1f00e126408fab7f891f00ecc3c1d"
   dependencies:
     "@babel/runtime" "^7.18.3"
     "@emotion/babel-plugin" "^11.11.0"
