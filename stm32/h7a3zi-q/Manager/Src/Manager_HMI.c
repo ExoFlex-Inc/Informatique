@@ -93,7 +93,7 @@ void ManagerHMI_SendJSON()
     char* jsonMessage = cJSON_PrintUnformatted(root);
 
     // Send JSON string over UART
-    //PeriphUartRingBuf_Send(jsonMessage, strlen(jsonMessage));
+    PeriphUartRingBuf_Send(jsonMessage, strlen(jsonMessage));
 
     free(jsonMessage);
     cJSON_Delete(root);
@@ -104,10 +104,8 @@ void ManagerHMI_ReceiveJSON()
 	uint32_t size = 0;
 	PeriphUartRingBuf_ReadJson(buf, &size);
 
-	if (size > 0)
+	if (size > 0 && size < BUF_LENGTH)
 	{
-		PeriphUartRingBuf_Send(buf, size); //Used to test com
-
 		uint8_t sectionNbr = 0;
 		ManagerHMI_ParseJson(buf, size, &sectionNbr);
 		ManagerHMI_ExecuteJson(sectionNbr);
@@ -165,7 +163,7 @@ void ManagerHMI_ParseJson(char* msg, uint8_t maxlength, uint8_t *sectionNbr)
 
 void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
 {
-	if (sectionNbr > 3)
+	if (sectionNbr >= 3)
 	{
 		if (strcmp(ParsedMsg[0], "Manual") == 0)
 		{

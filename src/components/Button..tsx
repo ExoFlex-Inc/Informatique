@@ -63,7 +63,7 @@ const Button: React.FC<ButtonProps> = ({
     isMouseDown.current = true;
 
     // Start sending requests with interval for mouse down event
-    intervalRef.current = setInterval(startSendingRequests, 100);
+    intervalRef.current = setInterval(startSendingRequests, 20);
 
     // Add event listener for mouseup
     window.addEventListener("mouseup", () => {
