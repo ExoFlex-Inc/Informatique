@@ -28,6 +28,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stdbool.h"
+#include "stdlib.h"
+#include "math.h"
 
 /* USER CODE END Includes */
 

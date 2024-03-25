@@ -1,5 +1,5 @@
 {
-  "name": "subavite-app",
+  "name": "exoflex-info",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -12,7 +12,7 @@
     "server": "npx ts-node --esm -r dotenv/config src/server.ts"
   },
   "dependencies": {
-    "@emotion/react": "^11.11.3",
+    "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.0",
     "@fullcalendar/core": "^6.1.10",
     "@fullcalendar/daygrid": "^6.1.10",
@@ -20,13 +20,13 @@
     "@fullcalendar/timegrid": "^6.1.10",
     "@mui/icons-material": "^5.15.7",
     "@mui/material": "^5.15.7",
-    "@mui/x-data-grid": "^6.19.2",
+    "@mui/x-data-grid": "^6.19.6",
     "@nivo/core": "^0.85.1",
     "@nivo/line": "^0.85.1",
     "@supabase/auth-ui-react": "^0.4.7",
     "@supabase/auth-ui-shared": "^0.1.8",
-    "@supabase/supabase-js": "^2.39.7",
-    "@syncfusion/ej2-react-charts": "^24.2.9",
+    "@supabase/supabase-js": "^2.39.8",
+    "@syncfusion/ej2-react-charts": "^25.1.35",
     "core-js": "^3.36.0",
     "cors": "^2.8.5",
     "express": "^4.18.3",
@@ -42,28 +42,28 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@playwright/test": "^1.40.1",
+    "@playwright/test": "^1.42.1",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/node": "^20.11.20",
     "@types/react": "^18.2.64",
     "@types/react-dom": "^18.2.7",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^6.21.0",
     "@vitejs/plugin-react": "^4.2.1",
     "add": "^2.0.6",
     "autoprefixer": "^10.4.17",
     "detect-port": "^1.5.1",
-    "dotenv": "^16.3.1",
+    "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.5",
+    "eslint-plugin-react-refresh": "^0.4.6",
     "postcss": "^8.4.35",
     "supabase": "^1.145.4",
     "tailwindcss": "^3.4.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3",
+    "typescript": "^5.4.3",
     "yarn": "^1.22.22",
-    "vite": "^4.5.2"
+    "vite": "^5.1.6"
   }
 }
