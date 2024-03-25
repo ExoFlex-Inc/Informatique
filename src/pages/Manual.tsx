@@ -41,29 +41,29 @@ export default function Manual() {
   return (
     <div className="flex flex-col h-[calc(100vh-2rem)] justify-between">
       <div className="mt-32 mb-4 flex justify-center">
-        <Button label="Motor1H" toSend="motor1H" className="mr-4" />
-        <Button label="Motor1AH" toSend="motor1AH" className="mr-8" />
-        <Button label="Motor2H" toSend="motor2H" className="mr-4" />
-        <Button label="Motor2AH" toSend="motor2AH" className="mr-8" />
-        <Button label="Motor3H" toSend="motor3H" className="mr-4" />
-        <Button label="Motor3AH" toSend="motor3AH" className="mr-8" />
+        <Button label="Motor1H" mode="Manual" action="Increment" content ="motor1H" className="mr-4" />
+        <Button label="Motor1AH" mode="Manual" action="Increment" content ="motor1AH" className="mr-8" />
+        <Button label="Motor2H" mode="Manual" action="Increment" content ="motor2H" className="mr-4" />
+        <Button label="Motor2AH" mode="Manual" action="Increment" content ="motor2AH" className="mr-8" />
+        <Button label="Motor3H" mode="Manual" action="Increment" content ="motor3H" className="mr-4" />
+        <Button label="Motor3AH" mode="Manual" action="Increment" content ="motor3AH" className="mr-8" />
       </div>
 
       <div className="mb-4 flex justify-center">
-        <Button label="EversionL" toSend="eversionL" className="mr-4" />
-        <Button label="EversionR" toSend="eversionR" className="mr-8" />
-        <Button label="DorsiflexionU" toSend="dorsiflexionU" className="mr-4" />
-        <Button label="DorsiflexionD" toSend="dorsiflexionD" className="mr-8" />
-        <Button label="ExtensionU" toSend="extensionU" className="mr-4" />
-        <Button label="ExtensionD" toSend="extensionD" className="mr-8" />
+        <Button label="EversionL" mode="Manual" action="Increment" content ="eversionL" className="mr-4" />
+        <Button label="EversionR" mode="Manual" action="Increment" content ="eversionR" className="mr-8" />
+        <Button label="DorsiflexionU" mode="Manual" action="Increment" content ="dorsiflexionU" className="mr-4" />
+        <Button label="DorsiflexionD" mode="Manual" action="Increment" content ="dorsiflexionD" className="mr-8" />
+        <Button label="ExtensionU" mode="Manual" action="Increment" content ="extensionU" className="mr-4" />
+        <Button label="ExtensionD" mode="Manual" action="Increment" content ="extensionD" className="mr-8" />
       </div>
 
       <div className="mb-4 flex justify-center">
-        <Button label="goHome1" toSend="goHome1" className="mr-4" />
-        <Button label="goHome2" toSend="goHome2" className="mr-4" />
-        <Button label="goHome3" toSend="goHome3" className="mr-4" />
-        <Button label="goHome" toSend="goHome" className="mr-4" />
-        <Button label="setHome" toSend="setHome" className="mr-4" />
+        <Button label="Home1" mode="Manual" action="Homing" content="1" className="mr-4" />
+        <Button label="Home2" mode="Manual" action="Homing" content ="2" className="mr-4" />
+        <Button label="Home3" mode="Manual" action="Homing" content ="3" className="mr-4" />
+        <Button label="Home" mode="Manual" action="Homing" content ="all" className="mr-4" />
+        <Button label="setHome" mode="Manual" action="Homing" content ="setHome" className="mr-4" />
       </div>
 
       <div className="flex justify-start p-5">
