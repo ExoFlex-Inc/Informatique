@@ -240,7 +240,12 @@ app.post("/fetch-patient-data", (_, res) => {
 
 app.post("/hmi-button-click", (req, res) => {
   const { mode, action, content } = req.body;
-  console.log(`Button clicked:{${mode};${action};${content};}`, mode, action, content);
+  console.log(
+    `Button clicked:{${mode};${action};${content};}`,
+    mode,
+    action,
+    content,
+  );
 
   if (!port) {
     console.error("Serial port is not initialized.");
