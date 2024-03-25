@@ -10,9 +10,8 @@
 
 #define SECTION_LENGTH 20
 #define SECTION_NBR 30
-char ParsedMsg[SECTION_NBR][SECTION_LENGTH];
-
-#define M_HMI_TIMER 100
+#define BUF_LENGTH 50
+#define M_HMI_TIMER 50
 
 typedef struct
 {
@@ -30,8 +29,8 @@ managerHMI_t managerHMI;
 
 static const Motor* motorsData[MOTOR_NBR];
 static uint32_t     timerMs = 0;
-
-char buf[50];
+char ParsedMsg[SECTION_NBR][SECTION_LENGTH];
+char buf[BUF_LENGTH];
 
 
 void ManagerHMI_ReceiveJSON();
@@ -51,6 +50,12 @@ void ManagerHMI_Init()
     for (uint8_t i = 0; i < MOTOR_NBR; i++)
     {
         motorsData[i] = ManagerMotor_GetMotorData(i);
+    }
+
+    // Get motor data (const pointer : read-only)
+    for (uint8_t i = 0; i < BUF_LENGTH; i++)
+    {
+        buf[i] = 0;
     }
 }
 
@@ -88,7 +93,7 @@ void ManagerHMI_SendJSON()
     char* jsonMessage = cJSON_PrintUnformatted(root);
 
     // Send JSON string over UART
-    PeriphUartRingBuf_Send(jsonMessage, strlen(jsonMessage));
+    //PeriphUartRingBuf_Send(jsonMessage, strlen(jsonMessage));
 
     free(jsonMessage);
     cJSON_Delete(root);

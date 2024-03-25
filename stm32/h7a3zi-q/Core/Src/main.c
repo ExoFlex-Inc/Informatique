@@ -74,12 +74,6 @@ static void MX_USART3_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
-// Variables for UART2
-uint8_t MainBuf_UART[MAIN_BUF_SIZE_UART];
-uint8_t RxBuf_UART[RX_BUF_SIZE_UART];
-
-
 FDCAN_TxHeaderTypeDef TxHeader;
 FDCAN_RxHeaderTypeDef RxHeader;
 FDCAN_FilterTypeDef fdcanFilterConfig;
