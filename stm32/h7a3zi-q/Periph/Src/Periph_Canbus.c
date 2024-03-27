@@ -11,6 +11,12 @@ typedef struct
     uint8_t msg[MSG_LENGTH];
 } CanNode;
 
+FDCAN_TxHeaderTypeDef TxHeader;
+FDCAN_RxHeaderTypeDef RxHeader;
+FDCAN_FilterTypeDef   fdcanFilterConfig;
+uint8_t               TxData[8];
+uint8_t               RxData[8];
+
 CanNode CanNodes[CAN_NODE_NBR];
 
 uint8_t PeriphCanbus_ExtractControllerID(uint32_t ext_id);

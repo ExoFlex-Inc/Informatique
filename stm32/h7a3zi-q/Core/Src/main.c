@@ -23,11 +23,6 @@
 /* USER CODE BEGIN Includes */
 
 
-#include "cJSON.h"
-#include "uartRingBufDMA.h"
-#include "Periph_Canbus.h"
-#include "Periph_Motors.h"
-
 #include <Manager_Motor.h>
 #include <Manager_HMI.h>
 #include <Manager_Movement.h>
@@ -80,19 +75,6 @@ static void MX_USART3_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-// Variables for UART2
-uint8_t MainBuf_UART[MAIN_BUF_SIZE_UART];
-uint8_t RxBuf_UART[RX_BUF_SIZE_UART];
-
-
-FDCAN_TxHeaderTypeDef TxHeader;
-FDCAN_RxHeaderTypeDef RxHeader;
-FDCAN_FilterTypeDef fdcanFilterConfig;
-
-uint8_t TxData[8];
-uint8_t RxData[8];
-
-uint32_t TxMailbox;
 
 
 
@@ -140,11 +122,6 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-
-
-
-	cJSON_InitHooks(NULL);
-	Ringbuf_Init();
 
 	ManagerMotor_Init();
 	ManagerHMI_Init();

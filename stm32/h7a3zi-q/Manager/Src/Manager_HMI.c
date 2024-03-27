@@ -1,15 +1,17 @@
 #include <Manager_HMI.h>
 #include <Manager_Motor.h>
 #include <Manager_Movement.h>
+#include <Periph_UartRingBuf.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "cJSON.h"
-#include "comUtils_UART2.h"
-#include "uartRingBufDMA.h"
 
-#define M_HMI_TIMER 100
+#define SECTION_LENGTH 20
+#define SECTION_NBR    30
+#define BUF_LENGTH     50
+#define M_HMI_TIMER    50
 
 typedef struct
 {
@@ -27,20 +29,32 @@ managerHMI_t managerHMI;
 
 static const Motor* motorsData[MOTOR_NBR];
 static uint32_t     timerMs = 0;
+char                ParsedMsg[SECTION_NBR][SECTION_LENGTH];
+char                buf[BUF_LENGTH];
 
 void ManagerHMI_ReceiveJSON();
 void ManagerHMI_SendJSON();
 void ManagerHMI_SetMotorDataToString();
+void ManagerHMI_ParseJson(char* msg, uint8_t maxlength, uint8_t* sectionNbr);
+void ManagerHMI_ExecuteJson(uint8_t sectionNbr);
+void ManagerHMI_ExecuteManualIncrement(char* cmd);
+void ManagerHMI_ExecuteManualHoming(char* cmd);
 
 void ManagerHMI_Init()
 {
     cJSON_InitHooks(NULL);
-    Ringbuf_Init();
+    PeriphUartRingBuf_Init();
 
     // Get motor data (const pointer : read-only)
     for (uint8_t i = 0; i < MOTOR_NBR; i++)
     {
         motorsData[i] = ManagerMotor_GetMotorData(i);
+    }
+
+    // Get motor data (const pointer : read-only)
+    for (uint8_t i = 0; i < BUF_LENGTH; i++)
+    {
+        buf[i] = 0;
     }
 }
 
@@ -78,8 +92,7 @@ void ManagerHMI_SendJSON()
     char* jsonMessage = cJSON_PrintUnformatted(root);
 
     // Send JSON string over UART
-    HAL_UART_Transmit(&huart3, (uint8_t*) jsonMessage, strlen(jsonMessage),
-                      HAL_MAX_DELAY);
+    PeriphUartRingBuf_Send(jsonMessage, strlen(jsonMessage));
 
     free(jsonMessage);
     cJSON_Delete(root);
@@ -87,9 +100,88 @@ void ManagerHMI_SendJSON()
 
 void ManagerHMI_ReceiveJSON()
 {
-    char* cmd;
-    cmd = searchWord((char*) MainBuf_UART);
+    uint32_t size = 0;
+    PeriphUartRingBuf_ReadJson(buf, &size);
 
+    if (size > 0 && size < BUF_LENGTH)
+    {
+        uint8_t sectionNbr = 0;
+        ManagerHMI_ParseJson(buf, size, &sectionNbr);
+        ManagerHMI_ExecuteJson(sectionNbr);
+    }
+}
+
+void ManagerHMI_SetMotorDataToString()
+{
+    for (uint8_t i = 0; i < MOTOR_NBR; i++)
+    {
+        sprintf(managerHMI.strMotors[i].pos, "%.2f", motorsData[i]->position);
+        sprintf(managerHMI.strMotors[i].vel, "%.2f", motorsData[i]->velocity);
+        sprintf(managerHMI.strMotors[i].tor, "%.2f", motorsData[i]->torque);
+    }
+}
+
+void ManagerHMI_ParseJson(char* msg, uint8_t maxlength, uint8_t* sectionNbr)
+{
+    // Reset ParsedMsg array
+    memset(ParsedMsg, 0, sizeof(ParsedMsg));
+
+    // Check if the message starts with '{' and ends with '}'
+    if (msg[0] != '{' || msg[maxlength - 1] != '}')
+    {
+        // Invalid message format
+        return;
+    }
+
+    // Parse number of sections
+    uint8_t sectionCount = 0;
+    char*   ptr          = strtok(msg + 1, ";");  // Skip the '{'
+    while (ptr != NULL && sectionCount < SECTION_NBR)
+    {
+        if (*ptr != '}')  // Ignore '}' as a section
+        {
+            strncpy(ParsedMsg[sectionCount], ptr, SECTION_LENGTH - 1);
+            ParsedMsg[sectionCount][SECTION_LENGTH - 1] =
+                '\0';  // Ensure null-terminated
+            sectionCount++;
+            ptr = strtok(NULL, ";");
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    *sectionNbr = sectionCount;
+
+    // Check if the number of sections exceeds the maximum allowed
+    if (sectionCount >= SECTION_NBR)
+    {
+        // Too many sections, truncate
+        *sectionNbr = 0;
+        return;
+    }
+}
+
+void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
+{
+    if (sectionNbr >= 3)
+    {
+        if (strcmp(ParsedMsg[0], "Manual") == 0)
+        {
+            if (strcmp(ParsedMsg[1], "Increment") == 0)
+            {
+                ManagerHMI_ExecuteManualIncrement(ParsedMsg[2]);
+            }
+        }
+        else if (strcmp(ParsedMsg[0], "Auto") == 0)
+        {
+        }
+    }
+}
+
+void ManagerHMI_ExecuteManualIncrement(char* cmd)
+{
     if (cmd != NULL)
     {
         if (strcmp(cmd, "eversionR") == 0)
@@ -135,12 +227,25 @@ void ManagerHMI_ReceiveJSON()
     }
 }
 
-void ManagerHMI_SetMotorDataToString()
+void ManagerHMI_ExecuteManualHoming(char* cmd)
 {
-    for (uint8_t i = 0; i < MOTOR_NBR; i++)
+    if (cmd != NULL)
     {
-        sprintf(managerHMI.strMotors[i].pos, "%.2f", motorsData[i]->position);
-        sprintf(managerHMI.strMotors[i].vel, "%.2f", motorsData[i]->velocity);
-        sprintf(managerHMI.strMotors[i].tor, "%.2f", motorsData[i]->torque);
+        if (strcmp(cmd, "goHome1") == 0)
+        {
+            ManagerMovement_ManualCmdHome(MOTOR_1);
+        }
+        else if (strcmp(cmd, "goHome2") == 0)
+        {
+            ManagerMovement_ManualCmdHome(MOTOR_2);
+        }
+        else if (strcmp(cmd, "goHome3") == 0)
+        {
+            ManagerMovement_ManualCmdHome(MOTOR_3);
+        }
+        else if (strcmp(cmd, "goHome") == 0)
+        {
+            ManagerMovement_ManualCmdHomeAll();
+        }
     }
 }
