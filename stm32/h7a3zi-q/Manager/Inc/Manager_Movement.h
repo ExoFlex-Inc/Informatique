@@ -16,14 +16,14 @@ uint8_t ManagerMovement_GetState();
 void ManagerMovement_SetState(uint8_t state);
 
 //Auto Setup
-void ManagerMovement_ResetExercise();
 void ManagerMovement_AddExercise(uint8_t exerciseIdx, uint8_t exerciseType, uint8_t reps, float time);
+void ManagerMovement_SetFinalPos(uint8_t exerciseIdx, float finalPosition);
+void ManagerMovement_ResetExercise();
 
 //Auto buttons
 void ManagerMovement_StartExercise();
 void ManagerMovement_StopExercise();
 void ManagerMovement_NextExercise();
-
 
 //Movement commands
 void ManagerMovement_ManualCmdEversion(int8_t direction);
