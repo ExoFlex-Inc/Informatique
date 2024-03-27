@@ -16,7 +16,7 @@
 #define AUTO_STRETCHING 2
 #define AUTO_2FIRST_POS 3
 
-#define GOAL_STEP 0.1
+#define GOAL_STEP 0.03
 
 // Mouvement types
 #define DORSIFLEXION 1
@@ -24,7 +24,6 @@
 #define EXTENSION    3
 
 #define MAX_EXERCISES 5
-#define AUTO_DELTA_POS 0.5
 
 typedef struct
 {
@@ -104,7 +103,7 @@ void ManagerMovement_Init()
     test = true;
 
     commandSent = false;
-    ManagerMovement.state = AUTOMATIC;
+    ManagerMovement.state = MANUAL;
     ManagerMovement.autoState = AUTO_IDLE;
 }
 
