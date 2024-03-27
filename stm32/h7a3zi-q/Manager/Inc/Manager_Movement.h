@@ -19,6 +19,12 @@ void ManagerMovement_SetState(uint8_t state);
 void ManagerMovement_ResetExercise();
 void ManagerMovement_AddExercise(uint8_t exerciseIdx, uint8_t exerciseType, uint8_t reps, float time);
 
+//Auto buttons
+void ManagerMovement_StartExercise();
+void ManagerMovement_StopExercise();
+void ManagerMovement_NextExercise();
+
+
 //Movement commands
 void ManagerMovement_ManualCmdEversion(int8_t direction);
 void ManagerMovement_ManualCmdDorsiflexion(int8_t direction);
