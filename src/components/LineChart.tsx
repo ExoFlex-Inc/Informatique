@@ -1,43 +1,74 @@
 import React from "react";
 import { Line } from "react-chartjs-2";
-import { ChartData, ChartOptions } from "chart.js";
+import "chartjs-adapter-luxon";
+// import { ChartData } from "react-chartjs-2"
+import Chart from "chart.js/auto";
+import {CategoryScale, Ticks} from 'chart.js';
+import StreamingPlugin from "chartjs-plugin-streaming";
+Chart.register(CategoryScale);
+Chart.register(StreamingPlugin);
 
 interface LineChartProps {
   chartData: {
-    labels: number[];
     datasets: {
       label: string;
-      data: number[];
-      backgroundColor: string[];
+      backgroundColor: string;
       borderColor: string;
-      borderWidth: number;
+      borderDash: number[];
+      fill: boolean;
+      data: number[];
     }[];
   };
 }
 
-// const options: ChartOptions<"line"> = {
-//   responsive: true,
-//   scales: {
-//     x: {
-//       type: 'category'
-//     },
-//     y: {
-//       type: 'category'
-//     }
-//   },
-//   plugins: {
-//     legend: {
-//       position: 'top' as const,
-//     },
-//     title: {
-//       display: true,
-//       text: 'Chart.js Line Chart',
-//     },
-//   },
-// };
+interface RealtimeOptions {
+  delay: number;
+  onRefresh: (chart: Chart) => void;
+}
+
+interface XAxisOptions {
+  type: 'realtime';
+  realtime: RealtimeOptions;
+}
+
+interface ScalesOptions {
+  [key: string]: XAxisOptions;
+  // x: XAxisOptions;
+
+}
+
+interface ChartOptions {
+  scales: ScalesOptions;
+}
+
+interface Dataset {
+  data: {
+    x: number;
+    y: number;
+  }[];
+}
+
+const LineChartOptions: ChartOptions = {
+    scales: {
+        x: {
+            type: 'realtime',
+            realtime: {
+              delay: 2000,
+              onRefresh: chart => {
+                  chart.data.datasets.forEach((dataset: Dataset) => {
+                    dataset.data.push({
+                      x: Date.now(),
+                      y: Math.random()
+                    })
+                  });
+              },
+            },
+        }
+    },
+}
 
 const LineChart: React.FC<LineChartProps> = ({ chartData }) => {
-  return <Line data={chartData} />;
+  return <Line data={chartData} options={LineChartOptions}/>;
 }
 
 export default LineChart;
