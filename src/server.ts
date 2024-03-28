@@ -9,7 +9,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app: Application = express();
-let port: SerialPort | null = null;
+let serialPort: SerialPort | null = null;
 let receivedDataBuffer: string = "";
 
 app.use(express.json());
@@ -54,51 +54,45 @@ let machine_id = "";
 */
 
 app.post("/initialize-serial-port", (_, res) => {
-  const closeSerialPort = () => {
-    if (port && port.isOpen) {
-      port.close((err) => {
-        if (err) {
-          console.error("Error closing the port:", err.message);
-        } else {
-          console.log("Serial port closed.");
-        }
-      });
-    } else {
-      console.warn("Serial port is not open. No need to close.");
-    }
-  };
 
-  if (port && port.isOpen) {
-    res.status(200).send("Serial port already initialized.");
-  } else {
-    SerialPort.list().then((ports) => {
-      const scannerPort = ports.find(
-        (port) => port.manufacturer === "STMicroelectronics",
-      );
+  SerialPort.list().then((ports) => {
+    const scannerPort = ports.find(
+      (serialPort) => serialPort.manufacturer === "STMicroelectronics",
+    );
 
-      if (scannerPort) {
-        console.log("Scanner port:", scannerPort.path);
-        port = new SerialPort({
+    if (scannerPort) {
+      console.log("Scanner port:", scannerPort.path);
+      if (!serialPort || !serialPort.isOpen) {
+        serialPort = new SerialPort({
           path: scannerPort.path,
           baudRate: 115200,
         });
 
-        port.on("error", (error) => {
-          console.error("Error opening the port:", error.message);
-          machineData = resetMachineData();
-          closeSerialPort();
+        serialPort.on("error", (error) => {
+          console.log("Serial port error:", error.message);
+          serialPort = null;
         });
 
-        port.on("open", () => {
+        serialPort.on("open", () => {
           console.log("Serial port opened.");
           res.status(200).send("Serial port initialized and ready.");
         });
+
+        serialPort.on("close", () => {
+          console.log("Serial port closed");
+          serialPort = null;
+        });
+
       } else {
-        console.error("No scanner port found.");
-        res.status(500).send("No scanner port found.");
+        console.log("Serial port already initialized.");
+        res.status(200).send("Serial port already initialized.");
       }
-    });
-  }
+    } else {
+      serialPort = null;
+      console.error("No scanner port found.");
+      res.status(500).send("No scanner port found.");
+    }
+  });
 });
 
 app.post("/reset-serial-port", (_, res) => {
@@ -106,8 +100,8 @@ app.post("/reset-serial-port", (_, res) => {
     machineData = resetMachineData();
 
     // Close the serial port when the server is closed
-    if (port && port.isOpen) {
-      port.close((err) => {
+    if (serialPort && serialPort.isOpen) {
+      serialPort.close((err) => {
         if (err) {
           console.error("Error closing the port:", err.message);
         } else {
@@ -157,11 +151,11 @@ app.post("/fetch-patient-data", (_, res) => {
     receivedDataBuffer = "";
   };
 
-  if (port) {
+  if (serialPort) {
     createJSON();
 
     // Add event listener for data received from the serial port
-    port.on("data", (data) => {
+    serialPort.on("data", (data) => {
       console.log("Received data:", data.toString());
       receivedDataBuffer += data.toString();
 
@@ -230,13 +224,13 @@ app.post("/fetch-patient-data", (_, res) => {
 });
 
 /*
-.##.....##.##.....##.####
-.##.....##.###...###..##.
-.##.....##.####.####..##.
-.#########.##.###.##..##.
-.##.....##.##.....##..##.
-.##.....##.##.....##..##.
-.##.....##.##.....##.####
+..######..########.##.....##..#######...#######.
+.##....##....##....###...###.##.....##.##.....##
+.##..........##....####.####........##........##
+..######.....##....##.###.##..#######...#######.
+.......##....##....##.....##........##.##.......
+.##....##....##....##.....##.##.....##.##.......
+..######.....##....##.....##..#######..#########
 */
 
 app.post("/hmi-button-click", (req, res) => {
@@ -248,31 +242,26 @@ app.post("/hmi-button-click", (req, res) => {
     content,
   );
 
-  if (!port) {
-    console.error("Serial port is not initialized.");
-    res.status(500).send("Serial port is not initialized.");
-    return;
-  }
-
   const dataToSend = `{${mode};${action};${content};}`;
-
-  port.write(dataToSend, (err) => {
-    if (err) {
-      console.error("Error writing to serial port:", err);
-      res.status(500).send("Error writing to serial port.");
-    } else {
-      console.log("Data sent to serial port:", dataToSend);
-      res.status(200).send("Data sent to serial port.");
-    }
-  });
+  if (serialPort && serialPort.isOpen) {
+    serialPort.write(dataToSend, (err) => {
+      if (err) {
+        console.error("Error writing to serial port:", err);
+        res.status(500).send("Serial Error");
+      } else {
+        console.log("Data sent to serial port:", dataToSend);
+        res.status(200).send("Data sent to serial port.");
+      }
+    });
+  }
 });
 
 app.post("/home-machine", (_, res) => {
-  if (port && port.isOpen) {
-    port.write("home", (err) => {
+  if (serialPort && serialPort.isOpen) {
+    serialPort.write("home", (err) => {
       if (err) {
         console.error("Error while homing the machine:", err);
-        res.status(500).send("Error homing the machine");
+        res.status(500).send("Serial Error");
       } else {
         console.log("Data sent to serial port:", "home");
         res.status(500).send("Homing was successfully sent");
@@ -304,8 +293,6 @@ async function checkSession(_: Request, res: Response, next: NextFunction) {
       console.error("Session lost");
       res.status(401).json({ error: "Session lost" });
     } else {
-      console.log(data)
-      // Session is still valid, continue with the request
       next();
     }
   } catch (error) {
@@ -372,7 +359,6 @@ app.post("/push-plan-supabase", checkSession, async (req, res) => {
       const {
         data: { user },
       } = await supaClient.auth.getUser();
-      console.log(plan)
       const { data, error } = await supaClient.rpc("push_planning", {
         user_id: user?.id,
         new_plan: plan
@@ -388,6 +374,30 @@ app.post("/push-plan-supabase", checkSession, async (req, res) => {
     res.status(500).send("Success sending plan");
   }
 });
+
+app.get("/get-plan", checkSession, async (_, res) => {
+  try {
+    const {
+      data: { user },
+    } = await supaClient.auth.getUser();
+
+    const { data, error } = await supaClient.rpc("get_planning", {
+      search_id: user?.id
+    });
+
+    if (error) {
+      console.error(`Error getting current plan:`, error);
+      res.status(500).json({ error: "Error getting current plan" });
+    } else {
+      console.log(`Success getting current plan:`, data);
+      res.status(200).json(data);
+    }
+  } catch (err) {
+    console.error("Error getting current plan:", err);
+    res.status(500).json({ error: "Error getting current plan" });
+  }
+});
+
 /*
 .##........#######...######.....###....##...........######..########.########..##.....##.########.########.
 .##.......##.....##.##....##...##.##...##..........##....##.##.......##.....##.##.....##.##.......##.....##
@@ -412,7 +422,6 @@ app.post("/setup-local-server", async (req, res) => {
     });
 
     if (session) {
-      // Optionally, you can perform additional setup actions here
       console.log("Local server setup successful.");
       res.status(200).send("Local server setup successful.");
     } else {
@@ -444,8 +453,8 @@ const server = app.listen(3001, () => {
 process.on("SIGINT", () => {
   console.log("\n Server is shutting down...");
   // Close the serial port when the server is closed
-  if (port && port.isOpen) {
-    port.close((err) => {
+  if (serialPort && serialPort.isOpen) {
+    serialPort.close((err) => {
       if (err) {
         console.error("Error closing the port:", err.message);
       } else {

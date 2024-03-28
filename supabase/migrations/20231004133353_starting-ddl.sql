@@ -26,7 +26,7 @@ CREATE TABLE machine (
 CREATE TABLE plans (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
   user_id uuid references auth.users(id) not null,
-  plan JSONB,
+  plan_content JSONB,
   created_at DATE DEFAULT CURRENT_DATE
 );
 
@@ -100,11 +100,11 @@ DECLARE
 BEGIN
   IF EXISTS (SELECT 1 FROM plans WHERE plans.user_id = push_planning.user_id) THEN
     UPDATE plans
-    SET plan = new_plan
+    SET plan_content = new_plan
     WHERE plans.user_id = push_planning.user_id
     RETURNING new_plan INTO updated_plan;
   ELSE
-    INSERT INTO plans(user_id, plan)
+    INSERT INTO plans(user_id, plan_content)
     VALUES (push_planning.user_id, new_plan)
     RETURNING new_plan INTO updated_plan;
   END IF;
@@ -113,7 +113,17 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+CREATE FUNCTION get_planning(search_id UUID)
+RETURNS TABLE (plan_content jsonb) AS $$
+BEGIN
+    RAISE LOG 'Searching for plan content with user_id:%', search_id;
+    
+    RETURN QUERY
+    SELECT p.plan_content
+    FROM plans p
+    WHERE p.user_id = search_id;
+END;
+$$ LANGUAGE plpgsql;
 
 
 

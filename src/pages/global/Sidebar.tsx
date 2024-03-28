@@ -11,7 +11,6 @@ import {
 import { useNavigate } from "react-router-dom";
 import { tokens } from "../../hooks/theme.ts";
 
-import { manualInit } from "../Manual.tsx";
 import { UserContext } from "../../App.tsx";
 
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
@@ -20,7 +19,7 @@ import TvIcon from "@mui/icons-material/Tv";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
+import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
@@ -53,13 +52,6 @@ const ProSidebar = () => {
   const [selected, setSelected] = useState("Dashboard");
   const { profile } = useContext(UserContext);
   const isTablet = useMediaQuery("(max-width: 768px)");
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (location.pathname === "/manual") {
-      manualInit(navigate);
-    }
-  }, [location.pathname]);
 
   useEffect(() => {
     setIsCollapsed(isTablet);

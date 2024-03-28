@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 
 interface ButtonProps {
   label: string;
@@ -8,6 +8,8 @@ interface ButtonProps {
   onMouseDown?: () => void;
   onClick?: () => void;
   className?: string;
+  disabled?: boolean;
+  onError: (error: boolean) => void;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -18,6 +20,8 @@ const Button: React.FC<ButtonProps> = ({
   onMouseDown,
   onClick,
   className,
+  disabled,
+  onError,
 }) => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const isMouseDown = useRef(false);
@@ -41,9 +45,13 @@ const Button: React.FC<ButtonProps> = ({
         console.log("Button click sent successfully.");
       } else {
         console.error("Failed to send button click.");
+        clearInterval(intervalRef.current!);
+        onError(true);
       }
     } catch (error) {
       console.error("An error occurred:", error);
+      clearInterval(intervalRef.current!);
+      onError(true);
     }
   };
 
@@ -91,6 +99,7 @@ const Button: React.FC<ButtonProps> = ({
       className={`bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ${className}`}
       onMouseDown={handleMouseDown}
       onClick={handleClick}
+      disabled={disabled}
     >
       {label}
     </button>
