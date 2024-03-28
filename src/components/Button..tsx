@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 
 interface ButtonProps {
   label: string;
@@ -6,8 +6,9 @@ interface ButtonProps {
   action?: string;
   content?: string;
   onMouseDown?: () => void;
-  onClick?: () => void;
   className?: string;
+  disabled?: boolean;
+  onError: (error: boolean) => void;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -15,17 +16,11 @@ const Button: React.FC<ButtonProps> = ({
   mode,
   action,
   content,
-  onMouseDown,
-  onClick,
   className,
+  disabled,
+  onError,
 }) => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const isMouseDown = useRef(false);
-
-  const handleMouseUp = () => {
-    clearIntervalRef();
-    window.removeEventListener("mouseup", handleMouseUp);
-  };
 
   const startSendingRequests = async () => {
     try {
@@ -41,9 +36,13 @@ const Button: React.FC<ButtonProps> = ({
         console.log("Button click sent successfully.");
       } else {
         console.error("Failed to send button click.");
+        clearInterval(intervalRef.current!);
+        onError(true);
       }
     } catch (error) {
       console.error("An error occurred:", error);
+      clearInterval(intervalRef.current!);
+      onError(true);
     }
   };
 
@@ -54,35 +53,26 @@ const Button: React.FC<ButtonProps> = ({
     }
   };
 
-  const handleMouseDown = () => {
-    if (onMouseDown) {
-      onMouseDown();
-    }
-
-    // Set the flag to indicate mouse down
-    isMouseDown.current = true;
-
-    // Start sending requests with interval for mouse down event
-    intervalRef.current = setInterval(startSendingRequests, 20);
-
-    // Add event listener for mouseup
-    window.addEventListener("mouseup", () => {
-      isMouseDown.current = false;
-      clearIntervalRef();
-      window.removeEventListener("mouseup", handleMouseUp);
-    });
+  const handleMouseUp = () => {
+    clearIntervalRef();
+    window.removeEventListener("mouseup", handleMouseUp);
   };
 
-  const handleClick = () => {
-    clearIntervalRef();
-
-    if (onClick) {
-      onClick();
+  const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (e.button === 2) {
+      handleMouseUp();
     }
 
-    // Start sending requests once for click event only if there was no mouse down event
-    if (!isMouseDown.current) {
-      startSendingRequests();
+    if (e.button === 0) {
+      // Start sending requests with interval for mouse down event
+      intervalRef.current = setInterval(startSendingRequests, 20);
+
+      // Add event listener for mouseup
+      const handleMouseUpWithIntervalClear = () => {
+        handleMouseUp();
+        window.removeEventListener("mouseup", handleMouseUpWithIntervalClear); // Remove the event listener after cleanup
+      };
+      window.addEventListener("mouseup", handleMouseUpWithIntervalClear);
     }
   };
 
@@ -90,7 +80,7 @@ const Button: React.FC<ButtonProps> = ({
     <button
       className={`bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ${className}`}
       onMouseDown={handleMouseDown}
-      onClick={handleClick}
+      disabled={disabled}
     >
       {label}
     </button>
