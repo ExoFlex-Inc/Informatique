@@ -16,7 +16,7 @@ uint8_t ManagerMovement_GetState();
 void ManagerMovement_SetState(uint8_t state);
 
 //Auto Setup
-void ManagerMovement_AddExercise(uint8_t exerciseIdx, uint8_t exerciseType, uint8_t reps, float time);
+void ManagerMovement_AddExercise(uint8_t exerciseIdx, uint8_t exerciseType, uint8_t reps, float eTime, float pTime);
 void ManagerMovement_SetFinalPos(uint8_t exerciseIdx, float finalPosition);
 void ManagerMovement_ResetExercise();
 
