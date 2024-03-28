@@ -357,12 +357,15 @@ app.post("/push-plan-supabase", checkSession, async (req, res) => {
 
     if (error) {
       console.error(`Error sending plan:`, error);
+      res.status(500).send("Error sending plan");
+      return;
     } else {
       console.log(`Success sending plan:`, data);
+      res.status(200).send("Success sending plan");
     }
   } catch (err) {
     console.error("Error sending plan:", err);
-    res.status(500).send("Success sending plan");
+    res.status(500).send("Error sending plan");
   }
 });
 

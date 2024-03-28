@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { tokens } from "../hooks/theme.ts";
 import { useTheme } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { UserContext } from "../App.tsx";
 
 export async function planInit() {
   try {
@@ -33,7 +32,7 @@ const exerciseOptions = ["Extension", "Dorsiflexion", "Eversion"];
 
 export default function Planning() {
   const [plan, setPlan] = useState([
-    { exercise: "", repetitions: 0, sets: 0, time: 0 },
+    { exercise: "", repetitions: 0, sets: 0, rest: 0, target_angle: 0, target_torque: 0, time: 0},
   ]);
   const [limits, setLimits] = useState({
     torque: { dorsiflexion: 0, extension: 0, eversion: 0 },
@@ -43,17 +42,27 @@ export default function Planning() {
   const colors = tokens(theme.palette.mode);
 
   useEffect(() => {
-    async function fetchPlanData() {
-      const data = await planInit();
-      if (data.loaded && data.planData[0]) {
-        setPlan(data.planData[0].plan_content.plan);
-        setLimits(data.planData[0].plan_content.limits);
+    const savedPlan = localStorage.getItem("plan");
+    if (savedPlan) {
+      const parsedPlan = JSON.parse(savedPlan);
+      setPlan(parsedPlan.plan);
+      setLimits(parsedPlan.limits);
+    } else {
+      async function fetchPlanData() {
+        const data = await planInit();
+        if (data.loaded && data.planData[0]) {
+          setPlan(data.planData[0].plan_content.plan);
+          setLimits(data.planData[0].plan_content.limits);
+        }
       }
+      fetchPlanData();
     }
-    fetchPlanData();
-  }, []);
+  }, []);  
 
-  // Function to handle changes in plan attributes
+  const saveToLocalStorage = (data) => {
+    localStorage.setItem("plan", JSON.stringify(data));
+  };
+
   const handleInputChange = (index, event) => {
     const { name, value } = event.target;
     let parsedValue = "";
@@ -63,39 +72,40 @@ export default function Planning() {
     const updatedPlan = [...plan];
     updatedPlan[index][name] = parsedValue;
     setPlan(updatedPlan);
+    saveToLocalStorage({ plan: updatedPlan, limits });
   };
-
-  // Function to handle changes in torque limits
+  
   const handleTorqueLimitChange = (event) => {
     const { name, value } = event.target;
-    let parsedValue = ""; // Initialize parsedValue outside the if block
+    let parsedValue = "";
     if (value !== "") {
-      parsedValue = Math.max(0, parseInt(value)); // Assign the parsed value inside the if block
+      parsedValue = Math.max(0, parseInt(value));
     }
     setLimits((prevLimits) => ({
       ...prevLimits,
       torque: { ...prevLimits.torque, [name]: parsedValue },
     }));
+    saveToLocalStorage({ plan, limits: { ...limits, torque: { ...limits.torque, [name]: parsedValue } } });
   };
-
-  // Function to handle changes in angle limits
+  
   const handleAngleLimitChange = (event) => {
     const { name, value } = event.target;
-    console.log(value);
-    let parsedValue = ""; // Initialize parsedValue outside the if block
+    let parsedValue = "";
     if (value !== "") {
-      parsedValue = Math.max(0, parseInt(value)); // Assign the parsed value inside the if block
+      parsedValue = Math.max(0, parseInt(value));
     }
     setLimits((prevLimits) => ({
       ...prevLimits,
       angles: { ...prevLimits.angles, [name]: parsedValue },
     }));
+    saveToLocalStorage({ plan, limits: { ...limits, angles: { ...limits.angles, [name]: parsedValue } } });
   };
+  
   // Function to handle adding a new exercise to the plan
   const addExercise = () => {
     setPlan((prevPlan) => [
       ...prevPlan,
-      { exercise: "", repetitions: 0, sets: 0, time: 0 },
+      { exercise: "", repetitions: 0, sets: 0, rest: 0, target_angle: 0, target_torque: 0, time: 0},
     ]);
   };
 
@@ -111,7 +121,6 @@ export default function Planning() {
       // Save plan to Supabase
       await savePlanToSupabase(planWithLimits);
       // Save plan to local storage
-      localStorage.setItem("plan", JSON.stringify(planWithLimits));
       console.log("Plan and limits saved successfully.");
     } catch (error) {
       console.error("Error saving plan and limits:", error);
@@ -146,15 +155,15 @@ export default function Planning() {
   // Function to generate JSON plan
   const generateJsonPlan = () => {
     const allExercises = plan.map((exercise, index) => {
-      const { exercise: exerciseName, repetitions, sets, time } = exercise;
-      return { exercise: exerciseName, repetitions, sets, time };
+      const { exercise: exerciseName, repetitions, sets, rest, target_angle, target_torque, time } = exercise;
+      return { exercise: exerciseName, repetitions, sets, rest, target_angle, target_torque, time };
     });
 
     return JSON.stringify({ plan: allExercises, limits }, null, 2);
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-100px)] justify-between">
+    <div className="flex flex-col h-[calc(100vh-100px)]">
       <div className="mt-4 ml-10 mr-10">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50 divide-y divide-gray-200">
@@ -200,7 +209,6 @@ export default function Planning() {
                 <input
                   type="number"
                   name="dorsiflexion"
-                  placeholder="Dorsiflexion Torque Limit"
                   value={limits.torque.dorsiflexion}
                   onChange={handleTorqueLimitChange}
                   className="text-black border border-gray-300 rounded px-2 py-1 w-full"
@@ -210,7 +218,6 @@ export default function Planning() {
                 <input
                   type="number"
                   name="extension"
-                  placeholder="Extension Torque Limit"
                   value={limits.torque.extension}
                   onChange={handleTorqueLimitChange}
                   className="text-black border border-gray-300 rounded px-2 py-1 w-full"
@@ -220,7 +227,6 @@ export default function Planning() {
                 <input
                   type="number"
                   name="eversion"
-                  placeholder="Eversion Torque Limit"
                   value={limits.torque.eversion}
                   onChange={handleTorqueLimitChange}
                   className="text-black border border-gray-300 rounded px-2 py-1 w-full"
@@ -230,7 +236,6 @@ export default function Planning() {
                 <input
                   type="number"
                   name="dorsiflexion"
-                  placeholder="Dorsiflexion Angle Limit"
                   value={limits.angles.dorsiflexion}
                   onChange={handleAngleLimitChange}
                   className="text-black border border-gray-300 rounded px-2 py-1 w-full"
@@ -240,7 +245,6 @@ export default function Planning() {
                 <input
                   type="number"
                   name="extension"
-                  placeholder="Extension Angle Limit"
                   value={limits.angles.extension}
                   onChange={handleAngleLimitChange}
                   className="text-black border border-gray-300 rounded px-2 py-1 w-full"
@@ -250,7 +254,6 @@ export default function Planning() {
                 <input
                   type="number"
                   name="eversion"
-                  placeholder="Eversion Angle Limit"
                   value={limits.angles.eversion}
                   onChange={handleAngleLimitChange}
                   className="text-black border border-gray-300 rounded px-2 py-1 w-full"
@@ -273,6 +276,15 @@ export default function Planning() {
               </th>
               <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Sets
+              </th>
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Rest (sec)
+              </th>
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Target Angle
+              </th>
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Target Torque
               </th>
               <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Time (sec)
@@ -321,6 +333,36 @@ export default function Planning() {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input
                     type="number"
+                    name="rest"
+                    placeholder="Rest"
+                    value={exercise.rest}
+                    onChange={(e) => handleInputChange(index, e)}
+                    className="text-black border border-gray-300 rounded px-2 py-1 w-full"
+                  />
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <input
+                    type="number"
+                    name="target_angle"
+                    placeholder="Angle"
+                    value={exercise.target_angle}
+                    onChange={(e) => handleInputChange(index, e)}
+                    className="text-black border border-gray-300 rounded px-2 py-1 w-full"
+                  />
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <input
+                    type="number"
+                    name="target_torque"
+                    placeholder="Torque"
+                    value={exercise.target_torque}
+                    onChange={(e) => handleInputChange(index, e)}
+                    className="text-black border border-gray-300 rounded px-2 py-1 w-full"
+                  />
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <input
+                    type="number"
                     name="time"
                     placeholder="Time"
                     value={exercise.time}
@@ -359,7 +401,7 @@ export default function Planning() {
         <textarea
           value={generateJsonPlan()}
           className="text-black border border-gray-300 rounded px-2 py-1 w-full"
-          rows={10}
+          rows={20}
           readOnly
         />
       </div>
