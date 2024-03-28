@@ -38,6 +38,7 @@
     "react-pro-sidebar": "^1.1.0",
     "react-router-dom": "^6.16.0",
     "serialport": "^12.0.0",
+    "supabase": "^1.145.4",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
