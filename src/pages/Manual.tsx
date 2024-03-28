@@ -56,8 +56,8 @@ export default function Manual() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-100px)] justify-between">
-      <div className="mt-32 mb-4 flex justify-center">
+    <div className="flex flex-col h-[calc(100vh-100px)] justify-center">
+      <div className="mt-32 mb-20 flex justify-center">
         <Button
           label="Motor1H"
           mode="Manual"
@@ -114,7 +114,7 @@ export default function Manual() {
         />
       </div>
 
-      <div className="mb-3 flex justify-center">
+      <div className="mb-20 flex justify-center">
         <Button
           label="EversionL"
           mode="Manual"
@@ -171,7 +171,7 @@ export default function Manual() {
         />
       </div>
 
-      <div className="mb-3 flex justify-center">
+      <div className="flex justify-center">
         <Button
           label="Home1"
           mode="Manual"
