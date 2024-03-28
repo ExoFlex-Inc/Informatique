@@ -42,7 +42,6 @@ function resetMachineData(): MachineData {
 let jsonFilename = "";
 let machine_id = "";
 
-
 /*
 ..######..########.########..####....###....##..........########...#######..########..########
 .##....##.##.......##.....##..##....##.##...##..........##.....##.##.....##.##.....##....##...
@@ -54,7 +53,6 @@ let machine_id = "";
 */
 
 app.post("/initialize-serial-port", (_, res) => {
-
   SerialPort.list().then((ports) => {
     const scannerPort = ports.find(
       (serialPort) => serialPort.manufacturer === "STMicroelectronics",
@@ -82,7 +80,6 @@ app.post("/initialize-serial-port", (_, res) => {
           console.log("Serial port closed");
           serialPort = null;
         });
-
       } else {
         console.log("Serial port already initialized.");
         res.status(200).send("Serial port already initialized.");
@@ -235,9 +232,7 @@ app.post("/fetch-patient-data", (_, res) => {
 
 app.post("/hmi-button-click", (req, res) => {
   const { mode, action, content } = req.body;
-  console.log(
-    `Button clicked:{${mode};${action};${content};}`
-  );
+  console.log(`Button clicked:{${mode};${action};${content};}`);
 
   const dataToSend = `{${mode};${action};${content};}`;
   if (serialPort && serialPort.isOpen) {
@@ -350,22 +345,21 @@ app.post("/push-supabase", checkSession, async (_, res) => {
 });
 
 app.post("/push-plan-supabase", checkSession, async (req, res) => {
-  try{
+  try {
+    const { plan } = req.body;
+    const {
+      data: { user },
+    } = await supaClient.auth.getUser();
+    const { data, error } = await supaClient.rpc("push_planning", {
+      user_id: user?.id,
+      new_plan: plan,
+    });
 
-      const { plan } = req.body;
-      const {
-        data: { user },
-      } = await supaClient.auth.getUser();
-      const { data, error } = await supaClient.rpc("push_planning", {
-        user_id: user?.id,
-        new_plan: plan
-      });
-    
-      if (error) {
-        console.error(`Error sending plan:`, error);
-      } else {
-        console.log(`Success sending plan:`, data);
-      }
+    if (error) {
+      console.error(`Error sending plan:`, error);
+    } else {
+      console.log(`Success sending plan:`, data);
+    }
   } catch (err) {
     console.error("Error sending plan:", err);
     res.status(500).send("Success sending plan");
@@ -379,7 +373,7 @@ app.get("/get-plan", checkSession, async (_, res) => {
     } = await supaClient.auth.getUser();
 
     const { data, error } = await supaClient.rpc("get_planning", {
-      search_id: user?.id
+      search_id: user?.id,
     });
 
     if (error) {
@@ -405,7 +399,6 @@ app.get("/get-plan", checkSession, async (_, res) => {
 .########..#######...######..##.....##.########.....######..########.##.....##....###....########.##.....##
 */
 
-
 app.post("/setup-local-server", async (req, res) => {
   try {
     const access_token = req.body.access_token;
@@ -429,8 +422,6 @@ app.post("/setup-local-server", async (req, res) => {
     res.status(500).json({ error: "Error setting up local server" });
   }
 });
-
-
 
 /*
 ..######..########.########..##.....##.########.########......######..########.########.##.....##.########.

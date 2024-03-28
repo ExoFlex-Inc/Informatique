@@ -1,5 +1,13 @@
 import { createContext, useEffect, useState } from "react";
-import { Route, Outlet, createBrowserRouter, createRoutesFromElements, RouterProvider, useNavigate, useLocation } from "react-router-dom";
+import {
+  Route,
+  Outlet,
+  createBrowserRouter,
+  createRoutesFromElements,
+  RouterProvider,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import { ColorModeContext, useMode } from "./hooks/theme.ts";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import "./App.css";
@@ -28,13 +36,14 @@ const router = createBrowserRouter(
     <Route path="/" element={<Layout />}>
       {/* <Route path="/" element={<Dashboard />} /> */}
       <Route path="/activity" element={<Activity />} />
-      <Route path="/welcome" element={<Welcome />} loader={welcomeLoader}/>
+      <Route path="/welcome" element={<Welcome />} loader={welcomeLoader} />
       <Route path="/manual" element={<Manual />} />
-      <Route path="/planning" element={<Planning />}/>
+      <Route path="/planning" element={<Planning />} />
       <Route path="/hmi" element={<HMI />} loader={hmiInit} />
       <Route path="/settings" element={<Settings />} />
-    </Route>
-  ))
+    </Route>,
+  ),
+);
 
 function Layout() {
   const supabaseUserInfo = useSession();
@@ -75,9 +84,9 @@ function App() {
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-          <div className="app">
-            <RouterProvider router={router}/>
-          </div>
+        <div className="app">
+          <RouterProvider router={router} />
+        </div>
       </ThemeProvider>
     </ColorModeContext.Provider>
   );

@@ -59,9 +59,7 @@ const Button: React.FC<ButtonProps> = ({
   };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
-
     if (e.button === 0) {
-
       // Start sending requests with interval for mouse down event
       intervalRef.current = setInterval(startSendingRequests, 20);
 

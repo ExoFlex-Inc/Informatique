@@ -4,7 +4,6 @@ import { supaClient } from "../hooks/supa-client.ts";
 import Button from "../components/Button..tsx";
 
 export async function manualInit() {
-
   try {
     console.log("Attempting to initialize STM32 serial port...");
 
@@ -20,10 +19,8 @@ export async function manualInit() {
       window.alert("STM32 serial port initialized successfully");
       return { loaded: true };
     } else {
-      console.error(
-        "Failed to initialize serial port: Check STM32 connection",
-      );
-      return { loaded: false }; 
+      console.error("Failed to initialize serial port: Check STM32 connection");
+      return { loaded: false };
     }
   } catch (error) {
     console.error("An error occurred:", error);
@@ -42,23 +39,21 @@ export default function Manual() {
 
       // If initialization fails, prompt the user to retry
       if (!result.loaded) {
-        window.confirm("Failed to initialize serial port. Retry?") && initialize();
-      }
-      else{
-        setRetryInit(false)
+        window.confirm("Failed to initialize serial port. Retry?") &&
+          initialize();
+      } else {
+        setRetryInit(false);
       }
     };
 
     if (retryInit) {
       initialize();
     }
-
   }, [retryInit]);
 
   const handleButtonError = (error) => {
     setRetryInit(error);
   };
-
 
   return (
     <div className="flex flex-col h-[calc(100vh-100px)] justify-between">
