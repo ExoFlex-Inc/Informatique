@@ -15,8 +15,9 @@
 #define AUTO_2GOAL 1
 #define AUTO_STRETCHING 2
 #define AUTO_2FIRST_POS 3
+#define AUTO_PAUSE 4
 
-#define GOAL_STEP 0.1
+#define GOAL_STEP 0.03
 
 // Mouvement types
 #define DORSIFLEXION 1
@@ -24,7 +25,6 @@
 #define EXTENSION    3
 
 #define MAX_EXERCISES 5
-#define AUTO_DELTA_POS 0.2
 
 typedef struct
 {
@@ -45,10 +45,13 @@ uint8_t repsCount;
 uint8_t exercises[MAX_EXERCISES];
 uint8_t repetitions[MAX_EXERCISES];
 float exercisesTime[MAX_EXERCISES];
+float pauseTime[MAX_EXERCISES];
 float finalPos[MAX_EXERCISES];
+float firstPos[MAX_EXERCISES];
 
 bool commandSent;
 static uint32_t exerciseTimer  = 0;
+static uint32_t pauseTimer = 0;
 
 // Buttons
 bool startButton;
@@ -59,6 +62,9 @@ void ManagerMovement_AutoIdle();
 void ManagerMovement_Auto2Goal();
 void ManagerMovement_AutoStrectching();
 void ManagerMovement_Auto2FirstPos();
+void ManagerMovement_AutoPause();
+
+void ManagerMovement_SetFirstPos(uint8_t exerciseIdx);
 
 //Buttons functions
 void ManagerMovement_VerifyStopButton();
@@ -70,6 +76,8 @@ void ManagerMovement_AutoPositions();
 void ManagerMovement_ManualIncrement(uint8_t motorIndex, int8_t factor);
 void ManagerMovement_AutoMovement(uint8_t mouvType, float Position);
 
+bool test;
+
 void ManagerMovement_Init()
 {
     // Get motor data (const pointer : read-only)
@@ -77,17 +85,27 @@ void ManagerMovement_Init()
     {
         motorsData[i]                     = ManagerMotor_GetMotorData(i);
         ManagerMovement.motorsNextGoal[i] = 0.0f;
-        finalPos[i]                      = 0.0f;
 
-        exercises[i] = 0;
-        repetitions[i] = 0;
-        exercisesTime[i] = 0.0f;
+    }
+
+    for (uint8_t i = 0; i < MAX_EXERCISES; i++)
+    {
+    	finalPos[i]                      = 0.0f;
+    	firstPos[i]                      = 0.0f;
+
+		exercises[i] = 0;
+		repetitions[i] = 0;
+		exercisesTime[i] = 0.0f;
+		pauseTime[i] = 0.0f;
     }
 
     startButton = false;
     nextButton = false;
 
     exerciseIdx = 0;
+    repsCount= 0;
+
+    test = true;
 
     commandSent = false;
     ManagerMovement.state = MANUAL;
@@ -103,19 +121,35 @@ void ManagerMovement_Task()
 			case HOMING:
 				ManagerMovement_HomingPositions();
 
-				// TODO: put conditions to change state here
 				break;
 
 			case MANUAL:
 				// Wait for manual cmd or for state change
 
-				// TODO: put conditions to change state here
 				break;
 
 			case AUTOMATIC:
-				ManagerMovement_AutoPositions();
 
-				// TODO: put conditions to change state here
+				ManagerMovement_AutoPositions();
+				if (test)
+				{
+					// Ex1
+					ManagerMovement_AddExercise(0, DORSIFLEXION, 3, 5000.0, 3000.0);
+					ManagerMovement_SetFinalPos(0, -2);
+
+					// Ex2
+					ManagerMovement_AddExercise(1, EXTENSION, 2, 2000.0, 2000.0);
+					ManagerMovement_SetFinalPos(1, -1);
+
+					// Ex3
+					ManagerMovement_AddExercise(2, EVERSION, 3, 5000.0, 5000.0);
+					ManagerMovement_SetFinalPos(2, 3);
+
+					// Start Exs
+					ManagerMovement_StartExercise();
+
+					test = false;
+				}
 				break;
 			}
 	}
@@ -139,11 +173,12 @@ void ManagerMovement_SetState(uint8_t state)
 /*
  * Auto setup
  */
-void ManagerMovement_AddExercise(uint8_t exerciseIdx, uint8_t exerciseType, uint8_t reps, float time)
+void ManagerMovement_AddExercise(uint8_t exerciseIdx, uint8_t exerciseType, uint8_t reps, float eTime, float pTime)
 {
 	exercises[exerciseIdx] = exerciseType;
 	repetitions[exerciseIdx] = reps;
-	exercisesTime[exerciseIdx] = time;
+	exercisesTime[exerciseIdx] = eTime;
+	pauseTime[exerciseIdx] = pTime;
 }
 
 void ManagerMovement_ResetExercise()
@@ -153,6 +188,8 @@ void ManagerMovement_ResetExercise()
 		exercises[i] = 0;
 		repetitions[i] = 0;
 		exercisesTime[i] = 0.0f;
+		finalPos[i] = 0.0f;
+		pauseTime[i] = 0.0f;
 	}
 }
 
@@ -184,10 +221,21 @@ void ManagerMovement_VerifyStopButton()
 	}
 }
 
+void ManagerMovement_SetFirstPos(uint8_t exerciseIdx)
+{
+	if (exercises[exerciseIdx] == DORSIFLEXION || exercises[exerciseIdx] == EVERSION)
+	{
+		firstPos[exerciseIdx] = motorsData[MOTOR_1]->position; // Set first position for exercies idx to the initial position
+	}
+	else if (exercises[exerciseIdx] == EXTENSION)
+	{
+		firstPos[exerciseIdx] = motorsData[MOTOR_3]->position;
+	}
+}
 /*
  * Auto movements
  */
-void ManagerMovement_AutoPositions()  // TODO:
+void ManagerMovement_AutoPositions()
 {
     // Gerer les sequences d'etirements
 	ManagerMovement_VerifyStopButton();
@@ -213,6 +261,9 @@ void ManagerMovement_AutoPositions()  // TODO:
 		ManagerMovement_Auto2FirstPos();
 
 		break;
+	case AUTO_PAUSE:
+		ManagerMovement_AutoPause();
+
 	}
 }
 
@@ -222,7 +273,13 @@ void ManagerMovement_AutoIdle()
 
 	if (startButton && exercises[exerciseIdx] != 0 && exerciseIdx != MAX_EXERCISES)
 	{
-		if (nextButton || exerciseIdx == 0)
+		// Set the position that the exercise is starting
+		if (repsCount == 0)
+		{
+			ManagerMovement_SetFirstPos(exerciseIdx);
+		}
+
+		if (nextButton || exerciseIdx == 0 || repsCount != 0)
 		{
 			ManagerMovement.autoState = AUTO_2GOAL;
 			nextButton = false;
@@ -248,13 +305,12 @@ void ManagerMovement_Auto2Goal()
 
 void ManagerMovement_AutoStrectching()
 {
+	// Keep the position until time is over
 	// Serait la place ou mettre un commande en force
 
 	if (HAL_GetTick() - exerciseTimer >= exercisesTime[exerciseIdx])
 	{
 		ManagerMovement.autoState = AUTO_2FIRST_POS;
-
-		exerciseTimer = HAL_GetTick();
 	}
 }
 
@@ -262,21 +318,31 @@ void ManagerMovement_Auto2FirstPos()
 {
 	if (!ManagerMotor_IsGoalStateReady(MOTOR_1) && !ManagerMotor_IsGoalStateReady(MOTOR_2) && !ManagerMotor_IsGoalStateReady(MOTOR_3) && !commandSent)
 	{
-		ManagerMovement_AutoMovement(exercises[exerciseIdx], finalPos[exerciseIdx] - AUTO_DELTA_POS);
+		ManagerMovement_AutoMovement(exercises[exerciseIdx], (firstPos[exerciseIdx]));
 		commandSent = true;
 	}
 	else if (!ManagerMotor_IsGoalStateReady(MOTOR_1) && !ManagerMotor_IsGoalStateReady(MOTOR_2) && !ManagerMotor_IsGoalStateReady(MOTOR_3))
 	{
-		ManagerMovement.autoState = IDLE;
+		ManagerMovement.autoState = AUTO_PAUSE;
 
 		commandSent = false;
 		repsCount ++;
 
-		if (repsCount == repetitions[exerciseIdx])
+		if (repsCount >= repetitions[exerciseIdx])
 		{
 			exerciseIdx ++;
+			repsCount = 0;
 		}
+		pauseTimer = HAL_GetTick();
+	}
 
+}
+
+void ManagerMovement_AutoPause()
+{
+	if (HAL_GetTick() - pauseTimer >= exercisesTime[exerciseIdx])
+	{
+		ManagerMovement.autoState = IDLE;
 	}
 }
 
