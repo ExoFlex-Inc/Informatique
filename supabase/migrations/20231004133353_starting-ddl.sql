@@ -23,6 +23,13 @@ CREATE TABLE machine (
   user_id uuid references auth.users(id) not null
 );
 
+CREATE TABLE plans (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+  user_id uuid references auth.users(id) not null,
+  plan_content JSONB,
+  created_at DATE DEFAULT CURRENT_DATE
+);
+
 CREATE TABLE encoder (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
   machine_id UUID REFERENCES machine(id),
@@ -86,6 +93,40 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION push_planning(user_id UUID, new_plan JSONB)
+RETURNS JSONB AS $$
+DECLARE
+  updated_plan JSONB;
+BEGIN
+  IF EXISTS (SELECT 1 FROM plans WHERE plans.user_id = push_planning.user_id) THEN
+    UPDATE plans
+    SET plan_content = new_plan
+    WHERE plans.user_id = push_planning.user_id
+    RETURNING new_plan INTO updated_plan;
+  ELSE
+    INSERT INTO plans(user_id, plan_content)
+    VALUES (push_planning.user_id, new_plan)
+    RETURNING new_plan INTO updated_plan;
+  END IF;
+
+  RETURN updated_plan;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION get_planning(search_id UUID)
+RETURNS TABLE (plan_content jsonb) AS $$
+BEGIN
+    RAISE LOG 'Searching for plan content with user_id:%', search_id;
+    
+    RETURN QUERY
+    SELECT p.plan_content
+    FROM plans p
+    WHERE p.user_id = search_id;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
 /*
 .########...#######..##.......####..######..####.########..######.
 .##.....##.##.....##.##........##..##....##..##..##.......##....##
@@ -99,6 +140,7 @@ $$ LANGUAGE plpgsql;
 alter table user_profiles enable row level security;
 alter table machine enable row level security;
 alter table encoder enable row level security;
+alter table plans enable row level security;
 
 CREATE POLICY "all can see" ON "public"."user_profiles"
 AS PERMISSIVE FOR SELECT
@@ -135,3 +177,20 @@ CREATE POLICY "users can insert encoder" ON "public"."encoder"
 AS PERMISSIVE FOR INSERT
 TO public
 WITH CHECK (auth.uid() IS NOT NULL);
+
+CREATE POLICY "all can see plans" ON "public"."plans"
+AS PERMISSIVE FOR SELECT
+TO public
+USING (true);
+
+CREATE POLICY "users can insert plans" ON "public"."plans"
+AS PERMISSIVE FOR INSERT
+TO public
+WITH CHECK (auth.uid() IS NOT NULL);
+
+CREATE POLICY "owners can update plans" ON "public"."plans"
+AS PERMISSIVE FOR UPDATE
+TO public
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+

@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { redirect, useNavigate } from "react-router-dom";
 import { supaClient } from "../hooks/supa-client.ts";
 import Button from "../components/Button..tsx";
 
-export async function manualInit(navigate) {
+export async function manualInit() {
   try {
-    console.log("Attempting to initialize serial port...");
+    console.log("Attempting to initialize STM32 serial port...");
 
     const responseSerialPort = await fetch(
       "http://localhost:3001/initialize-serial-port",
@@ -15,38 +15,57 @@ export async function manualInit(navigate) {
     );
 
     if (responseSerialPort.ok) {
-      console.log("Serial port initialized successfully.");
+      console.log("STM32 serial port initialized successfully.");
+      window.alert("STM32 serial port initialized successfully");
       return { loaded: true };
     } else {
-      console.error(
-        "Failed to initialize serial port: Check STM32 connection ",
-      );
-      window.alert("Failed to initialize serial port: Check STM32 connection ");
-      return navigate("/");
+      console.error("Failed to initialize serial port: Check STM32 connection");
+      return { loaded: false };
     }
   } catch (error) {
     console.error("An error occurred:", error);
-    window.alert("An error occurred: " + error);
-    return navigate("/");
+    return { loaded: false };
   }
 }
 
 export default function Manual() {
-  const navigate = useNavigate();
+  const [loaded, setLoaded] = useState(false);
+  const [retryInit, setRetryInit] = useState(true); // New state for retry
 
-  const handleBackClick = async () => {
-    navigate("/");
+  useEffect(() => {
+    const initialize = async () => {
+      const result = await manualInit();
+      setLoaded(result.loaded);
+
+      // If initialization fails, prompt the user to retry
+      if (!result.loaded) {
+        window.confirm("Failed to initialize serial port. Retry?") &&
+          initialize();
+      } else {
+        setRetryInit(false);
+      }
+    };
+
+    if (retryInit) {
+      initialize();
+    }
+  }, [retryInit]);
+
+  const handleButtonError = (error) => {
+    setRetryInit(error);
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-2rem)] justify-between">
-      <div className="mt-32 mb-4 flex justify-center">
+    <div className="flex flex-col h-[calc(100vh-100px)] justify-center">
+      <div className="mt-32 mb-20 flex justify-center">
         <Button
           label="Motor1H"
           mode="Manual"
           action="Increment"
           content="motor1H"
           className="mr-4"
+          onError={handleButtonError}
+          disabled={!loaded}
         />
         <Button
           label="Motor1AH"
@@ -54,6 +73,8 @@ export default function Manual() {
           action="Increment"
           content="motor1AH"
           className="mr-8"
+          onError={handleButtonError}
+          disabled={!loaded}
         />
         <Button
           label="Motor2H"
@@ -61,6 +82,8 @@ export default function Manual() {
           action="Increment"
           content="motor2H"
           className="mr-4"
+          onError={handleButtonError}
+          disabled={!loaded}
         />
         <Button
           label="Motor2AH"
@@ -68,6 +91,8 @@ export default function Manual() {
           action="Increment"
           content="motor2AH"
           className="mr-8"
+          onError={handleButtonError}
+          disabled={!loaded}
         />
         <Button
           label="Motor3H"
@@ -75,6 +100,8 @@ export default function Manual() {
           action="Increment"
           content="motor3H"
           className="mr-4"
+          onError={handleButtonError}
+          disabled={!loaded}
         />
         <Button
           label="Motor3AH"
@@ -82,16 +109,20 @@ export default function Manual() {
           action="Increment"
           content="motor3AH"
           className="mr-8"
+          onError={handleButtonError}
+          disabled={!loaded}
         />
       </div>
 
-      <div className="mb-4 flex justify-center">
+      <div className="mb-20 flex justify-center">
         <Button
           label="EversionL"
           mode="Manual"
           action="Increment"
           content="eversionL"
           className="mr-4"
+          onError={handleButtonError}
+          disabled={!loaded}
         />
         <Button
           label="EversionR"
@@ -99,6 +130,8 @@ export default function Manual() {
           action="Increment"
           content="eversionR"
           className="mr-8"
+          onError={handleButtonError}
+          disabled={!loaded}
         />
         <Button
           label="DorsiflexionU"
@@ -106,6 +139,8 @@ export default function Manual() {
           action="Increment"
           content="dorsiflexionU"
           className="mr-4"
+          onError={handleButtonError}
+          disabled={!loaded}
         />
         <Button
           label="DorsiflexionD"
@@ -113,6 +148,8 @@ export default function Manual() {
           action="Increment"
           content="dorsiflexionD"
           className="mr-8"
+          onError={handleButtonError}
+          disabled={!loaded}
         />
         <Button
           label="ExtensionU"
@@ -120,6 +157,8 @@ export default function Manual() {
           action="Increment"
           content="extensionU"
           className="mr-4"
+          onError={handleButtonError}
+          disabled={!loaded}
         />
         <Button
           label="ExtensionD"
@@ -127,16 +166,20 @@ export default function Manual() {
           action="Increment"
           content="extensionD"
           className="mr-8"
+          onError={handleButtonError}
+          disabled={!loaded}
         />
       </div>
 
-      <div className="mb-4 flex justify-center">
+      <div className="flex justify-center">
         <Button
           label="Home1"
           mode="Manual"
           action="Homing"
           content="1"
           className="mr-4"
+          onError={handleButtonError}
+          disabled={!loaded}
         />
         <Button
           label="Home2"
@@ -144,6 +187,8 @@ export default function Manual() {
           action="Homing"
           content="2"
           className="mr-4"
+          onError={handleButtonError}
+          disabled={!loaded}
         />
         <Button
           label="Home3"
@@ -151,6 +196,8 @@ export default function Manual() {
           action="Homing"
           content="3"
           className="mr-4"
+          onError={handleButtonError}
+          disabled={!loaded}
         />
         <Button
           label="Home"
@@ -158,6 +205,8 @@ export default function Manual() {
           action="Homing"
           content="all"
           className="mr-4"
+          onError={handleButtonError}
+          disabled={!loaded}
         />
         <Button
           label="setHome"
@@ -165,11 +214,9 @@ export default function Manual() {
           action="Homing"
           content="setHome"
           className="mr-4"
+          onError={handleButtonError}
+          disabled={!loaded}
         />
-      </div>
-
-      <div className="flex justify-start p-5">
-        <Button label="Back" onClick={handleBackClick} />
       </div>
     </div>
   );
