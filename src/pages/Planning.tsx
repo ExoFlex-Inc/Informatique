@@ -32,7 +32,15 @@ const exerciseOptions = ["Extension", "Dorsiflexion", "Eversion"];
 
 export default function Planning() {
   const [plan, setPlan] = useState([
-    { exercise: "", repetitions: 0, sets: 0, rest: 0, target_angle: 0, target_torque: 0, time: 0},
+    {
+      exercise: "",
+      repetitions: 0,
+      sets: 0,
+      rest: 0,
+      target_angle: 0,
+      target_torque: 0,
+      time: 0,
+    },
   ]);
   const [limits, setLimits] = useState({
     torque: { dorsiflexion: 0, extension: 0, eversion: 0 },
@@ -57,7 +65,7 @@ export default function Planning() {
       }
       fetchPlanData();
     }
-  }, []);  
+  }, []);
 
   const saveToLocalStorage = (data) => {
     localStorage.setItem("plan", JSON.stringify(data));
@@ -74,7 +82,7 @@ export default function Planning() {
     setPlan(updatedPlan);
     saveToLocalStorage({ plan: updatedPlan, limits });
   };
-  
+
   const handleTorqueLimitChange = (event) => {
     const { name, value } = event.target;
     let parsedValue = "";
@@ -85,9 +93,12 @@ export default function Planning() {
       ...prevLimits,
       torque: { ...prevLimits.torque, [name]: parsedValue },
     }));
-    saveToLocalStorage({ plan, limits: { ...limits, torque: { ...limits.torque, [name]: parsedValue } } });
+    saveToLocalStorage({
+      plan,
+      limits: { ...limits, torque: { ...limits.torque, [name]: parsedValue } },
+    });
   };
-  
+
   const handleAngleLimitChange = (event) => {
     const { name, value } = event.target;
     let parsedValue = "";
@@ -98,14 +109,25 @@ export default function Planning() {
       ...prevLimits,
       angles: { ...prevLimits.angles, [name]: parsedValue },
     }));
-    saveToLocalStorage({ plan, limits: { ...limits, angles: { ...limits.angles, [name]: parsedValue } } });
+    saveToLocalStorage({
+      plan,
+      limits: { ...limits, angles: { ...limits.angles, [name]: parsedValue } },
+    });
   };
-  
+
   // Function to handle adding a new exercise to the plan
   const addExercise = () => {
     setPlan((prevPlan) => [
       ...prevPlan,
-      { exercise: "", repetitions: 0, sets: 0, rest: 0, target_angle: 0, target_torque: 0, time: 0},
+      {
+        exercise: "",
+        repetitions: 0,
+        sets: 0,
+        rest: 0,
+        target_angle: 0,
+        target_torque: 0,
+        time: 0,
+      },
     ]);
   };
 
@@ -155,8 +177,24 @@ export default function Planning() {
   // Function to generate JSON plan
   const generateJsonPlan = () => {
     const allExercises = plan.map((exercise, index) => {
-      const { exercise: exerciseName, repetitions, sets, rest, target_angle, target_torque, time } = exercise;
-      return { exercise: exerciseName, repetitions, sets, rest, target_angle, target_torque, time };
+      const {
+        exercise: exerciseName,
+        repetitions,
+        sets,
+        rest,
+        target_angle,
+        target_torque,
+        time,
+      } = exercise;
+      return {
+        exercise: exerciseName,
+        repetitions,
+        sets,
+        rest,
+        target_angle,
+        target_torque,
+        time,
+      };
     });
 
     return JSON.stringify({ plan: allExercises, limits }, null, 2);
