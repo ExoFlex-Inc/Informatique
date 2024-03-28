@@ -26,6 +26,7 @@
 #include <Manager_Motor.h>
 #include <Manager_HMI.h>
 #include <Manager_Movement.h>
+#include <Manager_Security.h>
 
 
 /* USER CODE END Includes */
@@ -126,12 +127,14 @@ int main(void)
 	ManagerMotor_Init();
 	ManagerHMI_Init();
 	ManagerMovement_Init();
+	ManagerSecurity_Init();
 
   while (1)
   {
 	ManagerMotor_Task();
 	ManagerHMI_Task();
 	ManagerMovement_Task();
+	ManagerSecurity_Task();
 
     /* USER CODE END WHILE */
 
