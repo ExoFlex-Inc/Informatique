@@ -59,13 +59,11 @@ const Button: React.FC<ButtonProps> = ({
   };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
-
     if (e.button === 2) {
-      handleMouseUp()
+      handleMouseUp();
     }
 
     if (e.button === 0) {
-
       // Start sending requests with interval for mouse down event
       intervalRef.current = setInterval(startSendingRequests, 20);
 
@@ -76,10 +74,8 @@ const Button: React.FC<ButtonProps> = ({
       };
       window.addEventListener("mouseup", handleMouseUpWithIntervalClear);
     }
-    
   };
-  
-  
+
   return (
     <button
       className={`bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ${className}`}
