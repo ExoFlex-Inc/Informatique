@@ -22,12 +22,12 @@ typedef struct
 
 typedef struct
 {
-    MotorDataString_t strMotors[MOTOR_NBR];
+    MotorDataString_t strMotors[MMOT_MOTOR_NBR];
 } managerHMI_t;
 
 managerHMI_t managerHMI;
 
-static const Motor* motorsData[MOTOR_NBR];
+static const Motor* motorsData[MMOT_MOTOR_NBR];
 static uint32_t     timerMs = 0;
 char                ParsedMsg[SECTION_NBR][SECTION_LENGTH];
 char                buf[BUF_LENGTH];
@@ -46,7 +46,7 @@ void ManagerHMI_Init()
     PeriphUartRingBuf_Init();
 
     // Get motor data (const pointer : read-only)
-    for (uint8_t i = 0; i < MOTOR_NBR; i++)
+    for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
     {
         motorsData[i] = ManagerMotor_GetMotorData(i);
     }
@@ -78,7 +78,7 @@ void ManagerHMI_SendJSON()
     ManagerHMI_SetMotorDataToString();
 
     char key[M_HMI_STR_LENGTH];
-    for (uint8_t i = 0; i < MOTOR_NBR; i++)
+    for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
     {
         sprintf(key, "Motor%dPos", i + 1);
         cJSON_AddStringToObject(root, key, managerHMI.strMotors[i].pos);
@@ -113,7 +113,7 @@ void ManagerHMI_ReceiveJSON()
 
 void ManagerHMI_SetMotorDataToString()
 {
-    for (uint8_t i = 0; i < MOTOR_NBR; i++)
+    for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
     {
         sprintf(managerHMI.strMotors[i].pos, "%.2f", motorsData[i]->position);
         sprintf(managerHMI.strMotors[i].vel, "%.2f", motorsData[i]->velocity);
@@ -210,15 +210,15 @@ void ManagerHMI_ExecuteManualIncrement(char* cmd)
         }
         else if (strcmp(cmd, "goHome1") == 0)
         {
-            ManagerMovement_ManualCmdHome(MOTOR_1);
+            ManagerMovement_ManualCmdHome(MMOT_MOTOR_1);
         }
         else if (strcmp(cmd, "goHome2") == 0)
         {
-            ManagerMovement_ManualCmdHome(MOTOR_2);
+            ManagerMovement_ManualCmdHome(MMOT_MOTOR_2);
         }
         else if (strcmp(cmd, "goHome3") == 0)
         {
-            ManagerMovement_ManualCmdHome(MOTOR_3);
+            ManagerMovement_ManualCmdHome(MMOT_MOTOR_3);
         }
         else if (strcmp(cmd, "goHome") == 0)
         {
@@ -233,15 +233,15 @@ void ManagerHMI_ExecuteManualHoming(char* cmd)
     {
         if (strcmp(cmd, "goHome1") == 0)
         {
-            ManagerMovement_ManualCmdHome(MOTOR_1);
+            ManagerMovement_ManualCmdHome(MMOT_MOTOR_1);
         }
         else if (strcmp(cmd, "goHome2") == 0)
         {
-            ManagerMovement_ManualCmdHome(MOTOR_2);
+            ManagerMovement_ManualCmdHome(MMOT_MOTOR_2);
         }
         else if (strcmp(cmd, "goHome3") == 0)
         {
-            ManagerMovement_ManualCmdHome(MOTOR_3);
+            ManagerMovement_ManualCmdHome(MMOT_MOTOR_3);
         }
         else if (strcmp(cmd, "goHome") == 0)
         {

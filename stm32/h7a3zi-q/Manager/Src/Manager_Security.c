@@ -6,6 +6,7 @@
  */
 
 #include <Manager_Motor.h>
+#include <Manager_Movement.h>
 
 #define MS_STATE_IDLE 0
 #define MS_STATE_WATCHING 1
@@ -17,6 +18,7 @@
 typedef struct
 {
     uint8_t state;
+    bool reset;
 
 } ManagerSecurity_t;
 void ManagerSecurity_Idle();
@@ -28,25 +30,25 @@ void ManagerSecurity_Reset();
 
 bool ManagerSecurity_VerifMotors();
 bool ManagerSecurity_VerifMouvement();
-bool ManagerSecurity_VerifHMI();
 bool ManagerSecurity_VerifCanbus();
 bool ManagerSecurity_VerifLimitSwitch();
 
 
 
 ManagerSecurity_t ManagerSecurity;
-static const Motor* motorsData[MOTOR_NBR];
+static const Motor* motorsData[MMOT_MOTOR_NBR];
 
 
 void ManagerSecurity_Init()
 {
     // Get motor data (const pointer : read-only)
-    for (uint8_t i = 0; i < MOTOR_NBR; i++)
+    for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
     {
         motorsData[i]                     = ManagerMotor_GetMotorData(i);
     }
 
     ManagerSecurity.state = MS_STATE_IDLE;
+    ManagerSecurity.reset = false;
 }
 
 void ManagerSecurity_Task()
@@ -55,7 +57,6 @@ void ManagerSecurity_Task()
 	    {
 	    case MS_STATE_IDLE:
 	    	ManagerSecurity_Idle();
-
 	        break;
 
 	    case MS_STATE_WATCHING:
@@ -69,18 +70,18 @@ void ManagerSecurity_Task()
 	    case MS_STATE_ERROR:
 	    	ManagerSecurity_Error();
 	        break;
-
-	    case MS_STATE_RESET:
-	    	ManagerSecurity_Reset();
-	        break;
 	    }
 }
 
 void ManagerSecurity_Idle()
 {
-	//Verif that motors stopped and managers are in idle
+	if (ManagerMotor_WaitingSecPass() && ManagerMovement_WaitingSecPass())
+	{
+		ManagerMotor_PassSec();
+		ManagerMovement_PassSec();
 
-	ManagerSecurity.state = MS_STATE_WATCHING;
+		ManagerSecurity.state = MS_STATE_WATCHING;
+	}
 }
 
 
@@ -93,12 +94,6 @@ void ManagerSecurity_Watch()
 	}
 
 	if  (!ManagerSecurity_VerifMouvement())
-	{
-		ManagerSecurity.state = MS_STATE_STOPPING;
-		return;
-	}
-
-	if  (!ManagerSecurity_VerifHMI())
 	{
 		ManagerSecurity.state = MS_STATE_STOPPING;
 		return;
@@ -120,26 +115,27 @@ void ManagerSecurity_Watch()
 void ManagerSecurity_Stop()
 {
 	//Call functions to set error
+	ManagerMotor_SetError();
+	ManagerMovement_SetError();
 
-	//Verif that motors stopped and managers are in error
-
-	ManagerSecurity.state = MS_STATE_ERROR;
+	if (ManagerMotor_InError() && ManagerMovement_InError())
+	{
+		ManagerSecurity.state = MS_STATE_ERROR;
+	}
 }
 
 void ManagerSecurity_Error()
 {
-
 	//If reset is requested
 
-	ManagerSecurity.state = MS_STATE_RESET;
-}
+	if (ManagerSecurity.reset)
+	{
+		ManagerMotor_Reset();
+		ManagerMovement_Reset();
+		ManagerSecurity.reset = false;
 
-void ManagerSecurity_Reset()
-{
-
-	//Verif that motors stopped and managers are idle
-
-	ManagerSecurity.state = MS_STATE_WATCHING;
+		ManagerSecurity.state = MS_STATE_IDLE;
+	}
 }
 
 bool ManagerSecurity_VerifMotors()
@@ -156,12 +152,6 @@ bool ManagerSecurity_VerifMouvement()
 	return ret;
 }
 
-bool ManagerSecurity_VerifHMI()
-{
-	bool ret = true;
-
-	return ret;
-}
 
 bool ManagerSecurity_VerifCanbus()
 {
@@ -175,6 +165,14 @@ bool ManagerSecurity_VerifLimitSwitch()
 	bool ret = true;
 
 	return ret;
+}
+
+void ManagerSecurity_Reset()
+{
+	if (ManagerSecurity.state == MS_STATE_ERROR)
+	{
+		ManagerSecurity.reset = true;
+	}
 }
 
 
