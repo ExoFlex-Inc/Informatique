@@ -6,10 +6,11 @@
 
 // States
 #define MMOV_STATE_IDLE      0
-#define MMOV_STATE_HOMING    1
-#define MMOV_STATE_MANUAL    2
-#define MMOV_STATE_AUTOMATIC 3
-#define MMOV_STATE_ERROR 4
+#define MMOV_STATE_WAITING_SECURITY      1
+#define MMOV_STATE_HOMING    2
+#define MMOV_STATE_MANUAL    3
+#define MMOV_STATE_AUTOMATIC 4
+#define MMOV_STATE_ERROR 5
 
 // Auto states
 #define MMOV_AUTO_STATE_IDLE       0
@@ -120,6 +121,17 @@ void ManagerMovement_Task()
     {
         switch (managerMovement.state)
         {
+
+        case MMOV_STATE_IDLE:
+			ManagerMovement_Idle();
+
+			break;
+
+        case MMOV_STATE_WAITING_SECURITY:
+			ManagerMovement_WaitingSecurity();
+
+			break;
+
         case MMOV_STATE_HOMING:
             ManagerMovement_HomingPositions();
 
@@ -367,6 +379,12 @@ void ManagerMovement_AutoPause()
 /*
  * Movements manual
  */
+void ManagerMovement_Idle()  // TODO
+{
+	// TODO reset movement state machine
+}
+
+
 void ManagerMovement_HomingPositions()  // TODO
 {
     // Homing en utilisant les limits switch, set origine des moteurs
