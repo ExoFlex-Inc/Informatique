@@ -69,10 +69,15 @@ void   ManagerMotor_MotorIncrement(uint8_t motorIndex, int8_t direction);
 void ManagerMotor_Init()
 {
     // InitCanBus
-    PeriphCanbus_Init();
-    PeriphMotors_Init(PeriphCanbus_TransmitDLC8);
-    HAL_Delay(50);
+	PeriphCanbus_Init();
+	PeriphMotors_Init(PeriphCanbus_TransmitDLC8);
+	HAL_Delay(50);
 
+	ManagerMotor_Reset();
+}
+
+void ManagerMotor_Reset()
+{
     // Init motors
     PeriphMotors_InitMotor(&motors[MMOT_MOTOR_1].motor, MMOT_MOTOR_1_CAN_ID,
                            MOTOR_AK10_9);
@@ -81,7 +86,10 @@ void ManagerMotor_Init()
     PeriphMotors_InitMotor(&motors[MMOT_MOTOR_3].motor, MMOT_MOTOR_3_CAN_ID,
                            MOTOR_AK80_64);
     HAL_Delay(50);
+    ManagerMotor_ResetMotors();
+    HAL_Delay(50);
     ManagerMotor_EnableMotors();
+    HAL_Delay(50);
     ManagerMotor_ResetMotors();
 
     // Init motor control info
@@ -124,16 +132,12 @@ void ManagerMotor_Task()
         ManagerMotor_ReceiveFromMotors();
         switch (managerMotor.state)
         {
-        case MMOT_STATE_RESET:
-            ManagerMotor_Init();
+        case MMOT_STATE_CAN_VERIF:
+            ManagerMotor_CANVerif();
             break;
 
         case MMOT_STATE_WAITING_SECURITY:
             ManagerMotor_WaitingSecurity();
-            break;
-
-        case MMOT_STATE_CAN_VERIF:
-            ManagerMotor_CANVerif();
             break;
 
         case MMOT_STATE_SET_ORIGIN:
@@ -203,13 +207,14 @@ void ManagerMotor_CANVerif()
     if (motors[MMOT_MOTOR_1].detected && motors[MMOT_MOTOR_2].detected &&
         motors[MMOT_MOTOR_3].detected)
     {
-        managerMotor.state = MMOT_STATE_SET_ORIGIN;
+        managerMotor.state = MMOT_STATE_WAITING_SECURITY;
         tryCount           = 0;
     }
     else if (tryCount < MAX_TRY)
     {
+    	ManagerMotor_ResetMotors();
         ManagerMotor_EnableMotors();
-        ManagerMotor_ResetMotors();
+
 
         tryCount += 1;
     }
@@ -385,7 +390,4 @@ bool ManagerMotor_InError()
 	return false;
 }
 
-void ManagerMotor_Reset()
-{
-	managerMotor.state = MMOT_STATE_RESET;
-}
+

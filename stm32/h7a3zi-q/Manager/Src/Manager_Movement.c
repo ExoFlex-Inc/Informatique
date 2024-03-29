@@ -5,7 +5,6 @@
 #include <string.h>
 
 // States
-#define MMOV_STATE_RESET     0
 #define MMOV_STATE_WAITING_SECURITY      1
 #define MMOV_STATE_HOMING    3
 #define MMOV_STATE_MANUAL    4
@@ -87,38 +86,42 @@ bool test;
 
 void ManagerMovement_Init()
 {
-    // Get motor data (const pointer : read-only)
-    for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
-    {
-        motorsData[i]                     = ManagerMotor_GetMotorData(i);
-        managerMovement.motorsNextGoal[i] = 0.0f;
-    }
+	ManagerMovement_Reset();
+}
 
-    for (uint8_t i = 0; i < MAX_EXERCISES; i++)
-    {
-        finalPos[i] = 0.0f;
-        firstPos[i] = 0.0f;
+void ManagerMovement_Reset()
+{
+	// Get motor data (const pointer : read-only)
+	for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
+	{
+		motorsData[i]                     = ManagerMotor_GetMotorData(i);
+		managerMovement.motorsNextGoal[i] = 0.0f;
+	}
 
-        exercises[i]     = 0;
-        repetitions[i]   = 0;
-        exercisesTime[i] = 0.0f;
-        pauseTime[i]     = 0.0f;
-    }
+	for (uint8_t i = 0; i < MAX_EXERCISES; i++)
+	{
+		finalPos[i] = 0.0f;
+		firstPos[i] = 0.0f;
 
-    startButton = false;
-    nextButton  = false;
+		exercises[i]     = 0;
+		repetitions[i]   = 0;
+		exercisesTime[i] = 0.0f;
+		pauseTime[i]     = 0.0f;
+	}
 
-    exerciseIdx = 0;
-    repsCount   = 0;
+	startButton = false;
+	nextButton  = false;
 
-    test = true;
+	exerciseIdx = 0;
+	repsCount   = 0;
 
-    commandSent               = false;
-    managerMovement.reset = false;
-    managerMovement.securityPass = false;
-    managerMovement.state     = MMOV_STATE_WAITING_SECURITY;
-    managerMovement.autoState = MMOV_AUTO_STATE_IDLE;
+	test = true;
 
+	commandSent               = false;
+	managerMovement.reset = false;
+	managerMovement.securityPass = false;
+	managerMovement.state     = MMOV_STATE_WAITING_SECURITY;
+	managerMovement.autoState = MMOV_AUTO_STATE_IDLE;
 }
 
 void ManagerMovement_Task()
@@ -127,10 +130,6 @@ void ManagerMovement_Task()
     {
         switch (managerMovement.state)
         {
-
-        case MMOV_STATE_RESET:
-			ManagerMovement_Init();
-			break;
 
         case MMOV_STATE_WAITING_SECURITY:
 			ManagerMovement_WaitingSecurity();
@@ -191,6 +190,7 @@ void ManagerMovement_Homing()  // TODO
 {
 	//Machine a état homing
 	//conditions pour changer d'état ici
+	managerMovement.state = MMOV_STATE_AUTOMATIC;
 }
 
 void ManagerMovement_Manual()  // TODO
@@ -261,10 +261,7 @@ bool ManagerMovement_InError()
 	return false;
 }
 
-void ManagerMovement_Reset()
-{
-	managerMovement.state = MMOV_STATE_RESET;
-}
+
 
 
 
@@ -528,7 +525,7 @@ void ManagerMovement_AutoPause()
 {
     if (HAL_GetTick() - pauseTimer >= exercisesTime[exerciseIdx])
     {
-        managerMovement.autoState = MMOV_STATE_MANUAL;
+        managerMovement.autoState = MMOV_AUTO_STATE_IDLE;
     }
 }
 

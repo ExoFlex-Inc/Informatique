@@ -38,6 +38,9 @@ bool ManagerSecurity_VerifLimitSwitch();
 ManagerSecurity_t ManagerSecurity;
 static const Motor* motorsData[MMOT_MOTOR_NBR];
 
+bool securityTestError;
+bool securityTestReset;
+
 
 void ManagerSecurity_Init()
 {
@@ -49,6 +52,9 @@ void ManagerSecurity_Init()
 
     ManagerSecurity.state = MS_STATE_IDLE;
     ManagerSecurity.reset = false;
+
+    securityTestError = true;
+    securityTestReset = false;
 }
 
 void ManagerSecurity_Task()
@@ -71,6 +77,14 @@ void ManagerSecurity_Task()
 	    	ManagerSecurity_Error();
 	        break;
 	    }
+
+	if (securityTestReset)
+	{
+		ManagerSecurity_Reset();
+		securityTestReset = false;
+		securityTestError = true;
+	}
+
 }
 
 void ManagerSecurity_Idle()
@@ -83,6 +97,7 @@ void ManagerSecurity_Idle()
 		ManagerSecurity.state = MS_STATE_WATCHING;
 	}
 }
+
 
 
 void ManagerSecurity_Watch()
@@ -106,6 +121,12 @@ void ManagerSecurity_Watch()
 	}
 
 	if  (!ManagerSecurity_VerifLimitSwitch())
+	{
+		ManagerSecurity.state = MS_STATE_STOPPING;
+		return;
+	}
+
+	if  (!securityTestError)
 	{
 		ManagerSecurity.state = MS_STATE_STOPPING;
 		return;
