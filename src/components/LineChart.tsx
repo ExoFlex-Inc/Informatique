@@ -38,6 +38,6 @@ interface LineChartProps {
 
 const LineChart: React.FC<LineChartProps> = ({ chartData }) => {
   return <Line data={chartData} />;
-}
+};
 
 export default LineChart;

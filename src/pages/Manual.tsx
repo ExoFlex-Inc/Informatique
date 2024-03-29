@@ -3,7 +3,7 @@ import { redirect, useNavigate } from "react-router-dom";
 import { supaClient } from "../hooks/supa-client.ts";
 import Button from "../components/Button..tsx";
 import LineChart from "../components/LineChart.tsx";
-import { UserData } from "./Data.tsx"
+import { UserData } from "./Data.tsx";
 
 export async function manualInit(navigate) {
   try {
@@ -62,7 +62,7 @@ export default function Manual() {
   return (
     <div>
       allo
-      <LineChart chartData={userData}/> 
+      <LineChart chartData={userData} />
     </div>
     // <div className="flex flex-col h-[calc(100vh-32rem)] justify-between">
 
