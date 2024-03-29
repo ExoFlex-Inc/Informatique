@@ -202,11 +202,8 @@ void ManagerMotor_WaitingSecurity()
 void ManagerMotor_StartMotors()
 {
     ManagerMotor_ResetMotors();
-    HAL_Delay(50);
     ManagerMotor_EnableMotors();
-    HAL_Delay(50);
     ManagerMotor_ResetMotors();
-    HAL_Delay(50);
 
 
     if (motors[MMOT_MOTOR_1].detected && motors[MMOT_MOTOR_2].detected &&
