@@ -5,8 +5,6 @@
 #define MMOT_MOTOR_2_CAN_ID 2
 #define MMOT_MOTOR_3_CAN_ID 3
 
-
-
 // Error Codes
 #define SET_ORIGINES_MOTORS_ERROR   -1
 #define CAN_CONNECTION_MOTORS_ERROR -2
@@ -32,8 +30,8 @@ typedef struct
 {
     uint8_t state;
     int8_t  errorCode;
-    bool reset;
-    bool securityPass;
+    bool    reset;
+    bool    securityPass;
 
 } managerMotor_t;
 
@@ -46,12 +44,12 @@ uint8_t      data[8];
 managerMotor_t managerMotor;
 
 // Prototypes
-void   ManagerMotor_ReceiveFromMotors();
-void   ManagerMotor_StartMotors();
-void   ManagerMotor_WaitingSecurity();
-void   ManagerMotor_SetOrigines();
-void   ManagerMotor_CalculateNextPositions();
-void   ManagerMotor_SendToMotors();
+void ManagerMotor_ReceiveFromMotors();
+void ManagerMotor_StartMotors();
+void ManagerMotor_WaitingSecurity();
+void ManagerMotor_SetOrigines();
+void ManagerMotor_CalculateNextPositions();
+void ManagerMotor_SendToMotors();
 
 void   ManagerMotor_DisableMotors();
 void   ManagerMotor_EnableMotors();
@@ -59,16 +57,14 @@ void   ManagerMotor_ResetMotors();
 int8_t ManagerMotor_GetMotorDirection(uint8_t motorIndex);
 void   ManagerMotor_MotorIncrement(uint8_t motorIndex, int8_t direction);
 
-
-
 void ManagerMotor_Init()
 {
     // InitCanBus
-	PeriphCanbus_Init();
-	PeriphMotors_Init(PeriphCanbus_TransmitDLC8);
-	HAL_Delay(50);
+    PeriphCanbus_Init();
+    PeriphMotors_Init(PeriphCanbus_TransmitDLC8);
+    HAL_Delay(50);
 
-	ManagerMotor_Reset();
+    ManagerMotor_Reset();
 }
 
 void ManagerMotor_Reset()
@@ -87,7 +83,7 @@ void ManagerMotor_Reset()
         motors[i].nextPosition = 0.0;
         motors[i].goalPosition = 0.0;
         motors[i].detected     = false;
-        motors[i].goalReady = false;
+        motors[i].goalReady    = false;
     }
 
     // Set Kp Kd
@@ -107,9 +103,9 @@ void ManagerMotor_Reset()
     }
 
     // Init State machine
-    managerMotor.reset = false;
+    managerMotor.reset        = false;
     managerMotor.securityPass = false;
-    managerMotor.state = MMOT_STATE_WAITING_SECURITY;
+    managerMotor.state        = MMOT_STATE_WAITING_SECURITY;
 }
 
 void ManagerMotor_Task()
@@ -139,7 +135,7 @@ void ManagerMotor_Task()
             break;
 
         case MMOT_STATE_ERROR:
-        	ManagerMotor_DisableMotors();
+            ManagerMotor_DisableMotors();
             break;
         }
         timerMs = HAL_GetTick();
@@ -193,10 +189,10 @@ void ManagerMotor_ReceiveFromMotors()
 
 void ManagerMotor_WaitingSecurity()
 {
-	if (managerMotor.securityPass)
-	{
-		managerMotor.state = MMOT_STATE_START_MOTORS;
-	}
+    if (managerMotor.securityPass)
+    {
+        managerMotor.state = MMOT_STATE_START_MOTORS;
+    }
 }
 
 void ManagerMotor_StartMotors()
@@ -204,7 +200,6 @@ void ManagerMotor_StartMotors()
     ManagerMotor_ResetMotors();
     ManagerMotor_EnableMotors();
     ManagerMotor_ResetMotors();
-
 
     if (motors[MMOT_MOTOR_1].detected && motors[MMOT_MOTOR_2].detected &&
         motors[MMOT_MOTOR_3].detected)
@@ -277,12 +272,12 @@ bool ManagerMotor_IsGoalStateReady(uint8_t motorIndex)
 
 void ManagerMotor_CalculateNextPositions()
 {
-    if (fabsf(motors[MMOT_MOTOR_1].motor.position - motors[MMOT_MOTOR_1].goalPosition) >
-            POSITION_TOL &&
+    if (fabsf(motors[MMOT_MOTOR_1].motor.position -
+              motors[MMOT_MOTOR_1].goalPosition) > POSITION_TOL &&
         motors[MMOT_MOTOR_1].goalReady)
     {
-        ManagerMotor_MotorIncrement(MMOT_MOTOR_1,
-                                    ManagerMotor_GetMotorDirection(MMOT_MOTOR_1));
+        ManagerMotor_MotorIncrement(
+            MMOT_MOTOR_1, ManagerMotor_GetMotorDirection(MMOT_MOTOR_1));
     }
     else
     {
@@ -290,12 +285,12 @@ void ManagerMotor_CalculateNextPositions()
         motors[MMOT_MOTOR_1].goalPosition = motors[MMOT_MOTOR_1].motor.position;
     }
 
-    if (fabsf(motors[MMOT_MOTOR_2].motor.position - motors[MMOT_MOTOR_2].goalPosition) >
-            POSITION_TOL &&
+    if (fabsf(motors[MMOT_MOTOR_2].motor.position -
+              motors[MMOT_MOTOR_2].goalPosition) > POSITION_TOL &&
         motors[MMOT_MOTOR_2].goalReady)
     {
-        ManagerMotor_MotorIncrement(MMOT_MOTOR_2,
-                                    ManagerMotor_GetMotorDirection(MMOT_MOTOR_2));
+        ManagerMotor_MotorIncrement(
+            MMOT_MOTOR_2, ManagerMotor_GetMotorDirection(MMOT_MOTOR_2));
     }
     else
     {
@@ -303,12 +298,12 @@ void ManagerMotor_CalculateNextPositions()
         motors[MMOT_MOTOR_2].goalPosition = motors[MMOT_MOTOR_2].motor.position;
     }
 
-    if (fabsf(motors[MMOT_MOTOR_3].motor.position - motors[MMOT_MOTOR_3].goalPosition) >
-            POSITION_TOL &&
+    if (fabsf(motors[MMOT_MOTOR_3].motor.position -
+              motors[MMOT_MOTOR_3].goalPosition) > POSITION_TOL &&
         motors[MMOT_MOTOR_3].goalReady)
     {
-        ManagerMotor_MotorIncrement(MMOT_MOTOR_3,
-                                    ManagerMotor_GetMotorDirection(MMOT_MOTOR_3));
+        ManagerMotor_MotorIncrement(
+            MMOT_MOTOR_3, ManagerMotor_GetMotorDirection(MMOT_MOTOR_3));
     }
     else
     {
@@ -338,7 +333,7 @@ bool ManagerMotor_IsReady2Move()
 {
     if (managerMotor.state == MMOT_STATE_READY2MOVE)
     {
-    	return true;
+        return true;
     }
     return false;
 }
@@ -348,41 +343,38 @@ void ManagerMotor_SetMotorGoalState(uint8_t motorIndex, bool readyState)
     motors[motorIndex].goalReady = readyState;
 }
 
-
 /*
  * Security commands
  */
 bool ManagerMotor_IsWaitingSecurity()
 {
-	if (managerMotor.state == MMOT_STATE_WAITING_SECURITY)
-	{
-		return true;
-	}
-	return false;
+    if (managerMotor.state == MMOT_STATE_WAITING_SECURITY)
+    {
+        return true;
+    }
+    return false;
 }
 
 void ManagerMotor_SecurityPassed()
 {
-	managerMotor.securityPass = true;
+    managerMotor.securityPass = true;
 }
 
 void ManagerMotor_SetError()
 {
-	managerMotor.state = MMOT_STATE_ERROR;
+    managerMotor.state = MMOT_STATE_ERROR;
 }
 
 bool ManagerMotor_InError()
 {
-	if (managerMotor.state == MMOT_STATE_ERROR)
-	{
-		return true;
-	}
-	return false;
+    if (managerMotor.state == MMOT_STATE_ERROR)
+    {
+        return true;
+    }
+    return false;
 }
 
 uint8_t ManagerMotor_GetState()
 {
-	return managerMotor.state;
+    return managerMotor.state;
 }
-
-

@@ -10,10 +10,8 @@
 
 #include "main.h"
 
-
 void ManagerSecurity_Init();
 void ManagerSecurity_Task();
 void ManagerSecurity_Reset();
-
 
 #endif /* INC_MANAGER_SECURITY_H_ */

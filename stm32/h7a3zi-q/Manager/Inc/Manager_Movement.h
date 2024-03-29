@@ -9,11 +9,11 @@
 #define MMOV_DOWN  -1
 
 // States
-#define MMOV_STATE_WAITING_SECURITY      1
-#define MMOV_STATE_HOMING    3
-#define MMOV_STATE_MANUAL    4
-#define MMOV_STATE_AUTOMATIC 5
-#define MMOV_STATE_ERROR 6
+#define MMOV_STATE_WAITING_SECURITY 1
+#define MMOV_STATE_HOMING           3
+#define MMOV_STATE_MANUAL           4
+#define MMOV_STATE_AUTOMATIC        5
+#define MMOV_STATE_ERROR            6
 
 void ManagerMovement_Init();
 void ManagerMovement_Reset();
@@ -45,7 +45,6 @@ bool ManagerMovement_IsWaitingSecurity();
 void ManagerMovement_SecurityPassed();
 void ManagerMovement_SetError();
 bool ManagerMovement_InError();
-
 
 uint8_t ManagerMovement_GetState();
 
