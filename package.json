@@ -18,7 +18,7 @@
     "@fullcalendar/daygrid": "^6.1.10",
     "@fullcalendar/list": "^6.1.10",
     "@fullcalendar/timegrid": "^6.1.10",
-    "@mui/icons-material": "^5.15.7",
+    "@mui/icons-material": "^5.15.14",
     "@mui/material": "^5.15.7",
     "@mui/x-data-grid": "^6.19.2",
     "@nivo/line": "^0.85.1",

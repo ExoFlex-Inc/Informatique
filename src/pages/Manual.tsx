@@ -33,27 +33,66 @@ export async function manualInit(navigate) {
 }
 
 export default function Manual() {
+  const [positionGraph, setPositionGraph] = useState(true);
   const navigate = useNavigate();
-
   const handleBackClick = async () => {
     navigate("/");
   };
 
-  const data = {
+  const positionData = {
     datasets: [{
-      label: 'Dataset 1',
-      backgroundColor: 'rgba(255, 99, 132, 0.5)',
+      label: 'Motor 1 position',
       borderColor: 'rgb(255, 99, 132)',
       borderDash: [8, 4],
       fill: true,
       data: []
-    }]
+    },
+    {
+      label: 'Motor 2 position',
+      borderColor: 'rgb(99, 255, 132)',
+      borderDash: [8, 4],
+      fill: true,
+      data: []
+    },
+    {
+      label: 'Motor 3 position',
+      borderColor: 'rgb(99, 132, 255)',
+      borderDash: [8, 4],
+      fill: true,
+      data: []
+    },
+  ]
+  };
+
+  const torqueData = {
+    datasets: [{
+      label: 'Motor 1 torque',
+      borderColor: 'rgb(255, 99, 132)',
+      borderDash: [8, 4],
+      fill: true,
+      data: []
+    },
+    {
+      label: 'Motor 2 torque',
+      borderColor: 'rgb(99, 255, 132)',
+      borderDash: [8, 4],
+      fill: true,
+      data: []
+    },
+    {
+      label: 'Motor 3 torque',
+      borderColor: 'rgb(99, 132, 255)',
+      borderDash: [8, 4],
+      fill: true,
+      data: []
+    },
+  ]
   };
 
   return (
     <div className="flex flex-col h-[calc(100vh-32rem)] justify-between">
       <div>
-        <LineChart chartData={data} />
+        <LineChart chartData={positionGraph ? positionData : torqueData} setPositionGraph={setPositionGraph} positionGraph={positionGraph} />
       </div>
       <div>
         <div className="mt-32 mb-4 flex justify-center">
