@@ -5,9 +5,8 @@
 #define MMOT_MOTOR_2_CAN_ID 2
 #define MMOT_MOTOR_3_CAN_ID 3
 
-#define MMOT_STATE_RESET  0
-#define MMOT_STATE_CAN_VERIF  1
-#define MMOT_STATE_WAITING_SECURITY  2
+#define MMOT_STATE_WAITING_SECURITY  1
+#define MMOT_STATE_START_MOTORS  2
 #define MMOT_STATE_SET_ORIGIN 3
 #define MMOT_STATE_READY2MOVE 4
 #define MMOT_STATE_ERROR      5
@@ -52,7 +51,7 @@ managerMotor_t managerMotor;
 
 // Prototypes
 void   ManagerMotor_ReceiveFromMotors();
-void   ManagerMotor_CANVerif();
+void   ManagerMotor_StartMotors();
 void   ManagerMotor_WaitingSecurity();
 void   ManagerMotor_SetOrigines();
 void   ManagerMotor_CalculateNextPositions();
@@ -85,12 +84,6 @@ void ManagerMotor_Reset()
                            MOTOR_AK10_9);
     PeriphMotors_InitMotor(&motors[MMOT_MOTOR_3].motor, MMOT_MOTOR_3_CAN_ID,
                            MOTOR_AK80_64);
-    HAL_Delay(50);
-    ManagerMotor_ResetMotors();
-    HAL_Delay(50);
-    ManagerMotor_EnableMotors();
-    HAL_Delay(50);
-    ManagerMotor_ResetMotors();
 
     // Init motor control info
     for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
@@ -120,7 +113,7 @@ void ManagerMotor_Reset()
     // Init State machine
     managerMotor.reset = false;
     managerMotor.securityPass = false;
-    managerMotor.state = MMOT_STATE_CAN_VERIF;
+    managerMotor.state = MMOT_STATE_WAITING_SECURITY;
 }
 
 void ManagerMotor_Task()
@@ -132,12 +125,12 @@ void ManagerMotor_Task()
         ManagerMotor_ReceiveFromMotors();
         switch (managerMotor.state)
         {
-        case MMOT_STATE_CAN_VERIF:
-            ManagerMotor_CANVerif();
-            break;
-
         case MMOT_STATE_WAITING_SECURITY:
             ManagerMotor_WaitingSecurity();
+            break;
+
+        case MMOT_STATE_START_MOTORS:
+            ManagerMotor_StartMotors();
             break;
 
         case MMOT_STATE_SET_ORIGIN:
@@ -202,20 +195,32 @@ void ManagerMotor_ReceiveFromMotors()
     }
 }
 
-void ManagerMotor_CANVerif()
+void ManagerMotor_WaitingSecurity()
 {
+	if (managerMotor.securityPass)
+	{
+		managerMotor.state = MMOT_STATE_START_MOTORS;
+	}
+}
+
+void ManagerMotor_StartMotors()
+{
+    ManagerMotor_ResetMotors();
+    HAL_Delay(50);
+    ManagerMotor_EnableMotors();
+    HAL_Delay(50);
+    ManagerMotor_ResetMotors();
+    HAL_Delay(50);
+
+
     if (motors[MMOT_MOTOR_1].detected && motors[MMOT_MOTOR_2].detected &&
         motors[MMOT_MOTOR_3].detected)
     {
-        managerMotor.state = MMOT_STATE_WAITING_SECURITY;
+        managerMotor.state = MMOT_STATE_SET_ORIGIN;
         tryCount           = 0;
     }
     else if (tryCount < MAX_TRY)
     {
-    	ManagerMotor_ResetMotors();
-        ManagerMotor_EnableMotors();
-
-
         tryCount += 1;
     }
     else
@@ -223,14 +228,6 @@ void ManagerMotor_CANVerif()
         managerMotor.state     = MMOT_STATE_ERROR;
         managerMotor.errorCode = CAN_CONNECTION_MOTORS_ERROR;
     }
-}
-
-void ManagerMotor_WaitingSecurity()
-{
-	if (managerMotor.securityPass)
-	{
-		managerMotor.state = MMOT_STATE_SET_ORIGIN;
-	}
 }
 
 void ManagerMotor_SetOrigines()
