@@ -21,8 +21,8 @@ bool    ManagerMotor_IsReady2Move();
 bool    ManagerMotor_IsGoalStateReady(uint8_t motorIndex);
 void    ManagerMotor_SetMotorGoalState(uint8_t motorIndex, bool readyState);
 
-bool ManagerMotor_WaitingSecPass();
-void ManagerMotor_PassSec();
+bool ManagerMotor_IsWaitingSecurity();
+void ManagerMotor_SecurityPassed();
 void ManagerMotor_SetError();
 bool ManagerMotor_InError();
 void ManagerMotor_Reset();

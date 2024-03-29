@@ -5,10 +5,12 @@
 #define MMOT_MOTOR_2_CAN_ID 2
 #define MMOT_MOTOR_3_CAN_ID 3
 
-#define MMOT_STATE_CAN_VERIF  0
-#define MMOT_STATE_SET_ORIGIN 1
-#define MMOT_STATE_READY2MOVE 2
-#define MMOT_STATE_ERROR      3
+#define MMOT_STATE_RESET  0
+#define MMOT_STATE_CAN_VERIF  1
+#define MMOT_STATE_WAITING_SECURITY  2
+#define MMOT_STATE_SET_ORIGIN 3
+#define MMOT_STATE_READY2MOVE 4
+#define MMOT_STATE_ERROR      5
 
 // Error Codes
 #define SET_ORIGINES_MOTORS_ERROR   -1
@@ -35,6 +37,8 @@ typedef struct
 {
     uint8_t state;
     int8_t  errorCode;
+    bool reset;
+    bool securityPass;
 
 } managerMotor_t;
 
@@ -48,14 +52,19 @@ managerMotor_t managerMotor;
 
 // Prototypes
 void   ManagerMotor_ReceiveFromMotors();
+void   ManagerMotor_CANVerif();
+void   ManagerMotor_WaitingSecurity();
+void   ManagerMotor_SetOrigines();
+void   ManagerMotor_CalculateNextPositions();
+void   ManagerMotor_SendToMotors();
+
+void   ManagerMotor_DisableMotors();
 void   ManagerMotor_EnableMotors();
 void   ManagerMotor_ResetMotors();
-void   ManagerMotor_CANVerif();
-void   ManagerMotor_SetOrigines();
-void   ManagerMotor_SendToMotors();
-void   ManagerMotor_CalculateNextPositions();
 int8_t ManagerMotor_GetMotorDirection(uint8_t motorIndex);
 void   ManagerMotor_MotorIncrement(uint8_t motorIndex, int8_t direction);
+
+
 
 void ManagerMotor_Init()
 {
@@ -101,6 +110,8 @@ void ManagerMotor_Init()
     }
 
     // Init State machine
+    managerMotor.reset = false;
+    managerMotor.securityPass = false;
     managerMotor.state = MMOT_STATE_CAN_VERIF;
 }
 
@@ -113,6 +124,14 @@ void ManagerMotor_Task()
         ManagerMotor_ReceiveFromMotors();
         switch (managerMotor.state)
         {
+        case MMOT_STATE_RESET:
+            ManagerMotor_Init();
+            break;
+
+        case MMOT_STATE_WAITING_SECURITY:
+            ManagerMotor_WaitingSecurity();
+            break;
+
         case MMOT_STATE_CAN_VERIF:
             ManagerMotor_CANVerif();
             break;
@@ -127,11 +146,18 @@ void ManagerMotor_Task()
             break;
 
         case MMOT_STATE_ERROR:
-            // Send error value to HMI ?
+        	ManagerMotor_DisableMotors();
             break;
         }
         timerMs = HAL_GetTick();
     }
+}
+
+void ManagerMotor_DisableMotors()
+{
+    PeriphMotors_Disable(&motors[MMOT_MOTOR_1].motor);
+    PeriphMotors_Disable(&motors[MMOT_MOTOR_2].motor);
+    PeriphMotors_Disable(&motors[MMOT_MOTOR_3].motor);
 }
 
 void ManagerMotor_EnableMotors()
@@ -192,6 +218,14 @@ void ManagerMotor_CANVerif()
         managerMotor.state     = MMOT_STATE_ERROR;
         managerMotor.errorCode = CAN_CONNECTION_MOTORS_ERROR;
     }
+}
+
+void ManagerMotor_WaitingSecurity()
+{
+	if (managerMotor.securityPass)
+	{
+		managerMotor.state = MMOT_STATE_SET_ORIGIN;
+	}
 }
 
 void ManagerMotor_SetOrigines()
@@ -320,14 +354,21 @@ void ManagerMotor_SetMotorGoalState(uint8_t motorIndex, bool readyState)
 }
 
 
-bool ManagerMotor_WaitingSecPass()
+/*
+ * Security commands
+ */
+bool ManagerMotor_IsWaitingSecurity()
 {
-	return true;
+	if (managerMotor.state == MMOT_STATE_WAITING_SECURITY)
+	{
+		return true;
+	}
+	return false;
 }
 
-void ManagerMotor_PassSec()
+void ManagerMotor_SecurityPassed()
 {
-
+	managerMotor.securityPass = true;
 }
 
 void ManagerMotor_SetError()
@@ -337,10 +378,14 @@ void ManagerMotor_SetError()
 
 bool ManagerMotor_InError()
 {
-	return true;
+	if (managerMotor.state == MMOT_STATE_ERROR)
+	{
+		return true;
+	}
+	return false;
 }
 
 void ManagerMotor_Reset()
 {
-
+	managerMotor.state = MMOT_STATE_RESET;
 }

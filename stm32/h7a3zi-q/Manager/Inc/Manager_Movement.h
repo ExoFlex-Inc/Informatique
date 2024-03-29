@@ -33,8 +33,8 @@ void ManagerMovement_ManualCmdExtension(int8_t direction);
 void ManagerMovement_ManualCmdHome(uint8_t motorIndex);
 void ManagerMovement_ManualCmdHomeAll();
 
-bool ManagerMovement_WaitingSecPass();
-void ManagerMovement_PassSec();
+bool ManagerMovement_IsWaitingSecurity();
+void ManagerMovement_SecurityPassed();
 void ManagerMovement_SetError();
 bool ManagerMovement_InError();
 void ManagerMovement_Reset();

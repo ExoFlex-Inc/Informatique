@@ -75,10 +75,10 @@ void ManagerSecurity_Task()
 
 void ManagerSecurity_Idle()
 {
-	if (ManagerMotor_WaitingSecPass() && ManagerMovement_WaitingSecPass())
+	if (ManagerMotor_IsWaitingSecurity() && ManagerMovement_IsWaitingSecurity())
 	{
-		ManagerMotor_PassSec();
-		ManagerMovement_PassSec();
+		ManagerMotor_SecurityPassed();
+		ManagerMovement_SecurityPassed();
 
 		ManagerSecurity.state = MS_STATE_WATCHING;
 	}
