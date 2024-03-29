@@ -3,12 +3,20 @@
 
 #include "main.h"
 
-#define MOV_RIGTH 1
-#define MOV_LEFT  -1
-#define MOV_UP    1
-#define MOV_DOWN  -1
+#define MMOV_RIGTH 1
+#define MMOV_LEFT  -1
+#define MMOV_UP    1
+#define MMOV_DOWN  -1
+
+// States
+#define MMOV_STATE_WAITING_SECURITY      1
+#define MMOV_STATE_HOMING    3
+#define MMOV_STATE_MANUAL    4
+#define MMOV_STATE_AUTOMATIC 5
+#define MMOV_STATE_ERROR 6
 
 void ManagerMovement_Init();
+void ManagerMovement_Reset();
 void ManagerMovement_Task();
 
 // Utilities
@@ -37,6 +45,8 @@ bool ManagerMovement_IsWaitingSecurity();
 void ManagerMovement_SecurityPassed();
 void ManagerMovement_SetError();
 bool ManagerMovement_InError();
-void ManagerMovement_Reset();
+
+
+uint8_t ManagerMovement_GetState();
 
 #endif

@@ -4,12 +4,7 @@
 #include <Manager_Movement.h>
 #include <string.h>
 
-// States
-#define MMOV_STATE_WAITING_SECURITY      1
-#define MMOV_STATE_HOMING    3
-#define MMOV_STATE_MANUAL    4
-#define MMOV_STATE_AUTOMATIC 5
-#define MMOV_STATE_ERROR 6
+
 
 // Auto states
 #define MMOV_AUTO_STATE_IDLE       0
@@ -527,6 +522,11 @@ void ManagerMovement_AutoPause()
     {
         managerMovement.autoState = MMOV_AUTO_STATE_IDLE;
     }
+}
+
+uint8_t ManagerMovement_GetState()
+{
+	return managerMovement.state;
 }
 
 

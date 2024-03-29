@@ -5,11 +5,7 @@
 #define MMOT_MOTOR_2_CAN_ID 2
 #define MMOT_MOTOR_3_CAN_ID 3
 
-#define MMOT_STATE_WAITING_SECURITY  1
-#define MMOT_STATE_START_MOTORS  2
-#define MMOT_STATE_SET_ORIGIN 3
-#define MMOT_STATE_READY2MOVE 4
-#define MMOT_STATE_ERROR      5
+
 
 // Error Codes
 #define SET_ORIGINES_MOTORS_ERROR   -1
@@ -385,6 +381,11 @@ bool ManagerMotor_InError()
 		return true;
 	}
 	return false;
+}
+
+uint8_t ManagerMotor_GetState()
+{
+	return managerMotor.state;
 }
 
 

@@ -186,27 +186,27 @@ void ManagerHMI_ExecuteManualIncrement(char* cmd)
     {
         if (strcmp(cmd, "eversionR") == 0)
         {
-            ManagerMovement_ManualCmdEversion(MOV_RIGTH);
+            ManagerMovement_ManualCmdEversion(MMOV_RIGTH);
         }
         else if (strcmp(cmd, "eversionL") == 0)
         {
-            ManagerMovement_ManualCmdEversion(MOV_LEFT);
+            ManagerMovement_ManualCmdEversion(MMOV_LEFT);
         }
         else if (strcmp(cmd, "dorsiflexionU") == 0)
         {
-            ManagerMovement_ManualCmdDorsiflexion(MOV_UP);
+            ManagerMovement_ManualCmdDorsiflexion(MMOV_UP);
         }
         else if (strcmp(cmd, "dorsiflexionD") == 0)
         {
-            ManagerMovement_ManualCmdDorsiflexion(MOV_DOWN);
+            ManagerMovement_ManualCmdDorsiflexion(MMOV_DOWN);
         }
         else if (strcmp(cmd, "extensionU") == 0)
         {
-            ManagerMovement_ManualCmdExtension(MOV_UP);
+            ManagerMovement_ManualCmdExtension(MMOV_UP);
         }
         else if (strcmp(cmd, "extensionD") == 0)
         {
-            ManagerMovement_ManualCmdExtension(MOV_DOWN);
+            ManagerMovement_ManualCmdExtension(MMOV_DOWN);
         }
         else if (strcmp(cmd, "goHome1") == 0)
         {

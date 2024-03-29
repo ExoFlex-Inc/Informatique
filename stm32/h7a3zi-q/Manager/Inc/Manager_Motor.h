@@ -9,10 +9,15 @@
 #define MMOT_MOTOR_2   1
 #define MMOT_MOTOR_3   2
 
-// States
+#define MMOT_STATE_WAITING_SECURITY  1
+#define MMOT_STATE_START_MOTORS  2
+#define MMOT_STATE_SET_ORIGIN 3
+#define MMOT_STATE_READY2MOVE 4
+#define MMOT_STATE_ERROR      5
 
 
 void ManagerMotor_Init();
+void ManagerMotor_Reset();
 void ManagerMotor_Task();
 
 void    ManagerMotor_SetMotorGoal(uint8_t motorIndex, float goal);
@@ -25,7 +30,7 @@ bool ManagerMotor_IsWaitingSecurity();
 void ManagerMotor_SecurityPassed();
 void ManagerMotor_SetError();
 bool ManagerMotor_InError();
-void ManagerMotor_Reset();
+uint8_t ManagerMotor_GetState();
 
 
 #endif
