@@ -19,6 +19,13 @@
 #define MS_IDLE_MAX_SPEED 0.05
 #define MS_IDLE_MAX_TORQUE 0.5
 
+#define MS_MOT1_MIN_POS -4
+#define MS_MOT1_MAX_POS 4
+#define MS_MOT2_MIN_POS -4
+#define MS_MOT2_MAX_POS 4
+#define MS_MOT3_MIN_POS -4
+#define MS_MOT3_MAX_POS 4
+
 
 typedef struct
 {
@@ -40,6 +47,9 @@ bool ManagerSecurity_VerifLimitSwitch();
 ManagerSecurity_t   ManagerSecurity;
 static const Motor* motorsData[MMOT_MOTOR_NBR];
 
+int8_t motorsMinPos[MMOT_MOTOR_NBR];
+int8_t motorsMaxPos[MMOT_MOTOR_NBR];
+
 bool securityTestError;
 bool securityTestReset;
 
@@ -50,6 +60,13 @@ void ManagerSecurity_Init()
     {
         motorsData[i] = ManagerMotor_GetMotorData(i);
     }
+
+    motorsMinPos[MMOT_MOTOR_1] = MS_MOT1_MIN_POS;
+    motorsMaxPos[MMOT_MOTOR_1] = MS_MOT1_MAX_POS;
+    motorsMinPos[MMOT_MOTOR_2] = MS_MOT2_MIN_POS;
+    motorsMaxPos[MMOT_MOTOR_2] = MS_MOT2_MAX_POS;
+    motorsMinPos[MMOT_MOTOR_3] = MS_MOT3_MIN_POS;
+    motorsMaxPos[MMOT_MOTOR_3] = MS_MOT3_MAX_POS;
 
     ManagerSecurity.state = MS_STATE_IDLE;
     ManagerSecurity.reset = false;
@@ -183,6 +200,12 @@ bool ManagerSecurity_VerifMotors()
         		ret = false;
         		break;
         	}
+
+        	if (motorsData[i]->position > motorsMaxPos[i] || motorsData[i]->position < -motorsMinPos[i] )
+        	{
+        		ret = false;
+        		break;
+        	}
         }
     }
 
@@ -203,6 +226,8 @@ bool ManagerSecurity_VerifMotors()
         	}
         }
     }
+
+
 
     return ret;
 }
