@@ -14,6 +14,12 @@
 #define MS_STATE_ERROR    3
 #define MS_STATE_RESET    4
 
+#define MS_MOVING_MAX_SPEED 0.5
+#define MS_MOVING_MAX_TORQUE 2
+#define MS_IDLE_MAX_SPEED 0.05
+#define MS_IDLE_MAX_TORQUE 0.5
+
+
 typedef struct
 {
     uint8_t state;
@@ -155,12 +161,62 @@ bool ManagerSecurity_VerifMotors()
 {
     bool ret = true;
 
+    uint8_t managerMotorState = ManagerMotor_GetState();
+
+    if (managerMotorState == MMOT_STATE_ERROR)
+    {
+    	ret = false;
+    }
+
+    else if (managerMotorState == MMOT_STATE_READY2MOVE)
+    {
+        for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
+        {
+        	if (motorsData[i]->velocity > MS_MOVING_MAX_SPEED || motorsData[i]->velocity < -MS_MOVING_MAX_SPEED)
+        	{
+        		ret = false;
+        		break;
+        	}
+
+        	if (motorsData[i]->torque > MS_MOVING_MAX_TORQUE || motorsData[i]->torque < -MS_MOVING_MAX_TORQUE )
+        	{
+        		ret = false;
+        		break;
+        	}
+        }
+    }
+
+    else
+    {
+        for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
+        {
+        	if (motorsData[i]->velocity > MS_IDLE_MAX_SPEED || motorsData[i]->velocity < -MS_IDLE_MAX_SPEED)
+        	{
+        		ret = false;
+        		break;
+        	}
+
+        	if (motorsData[i]->torque > MS_IDLE_MAX_TORQUE || motorsData[i]->torque < -MS_IDLE_MAX_TORQUE)
+        	{
+        		ret = false;
+        		break;
+        	}
+        }
+    }
+
     return ret;
 }
 
 bool ManagerSecurity_VerifMouvement()
 {
     bool ret = true;
+
+    uint8_t managerMovementState = ManagerMovement_GetState();
+
+    if (managerMovementState == MMOV_STATE_ERROR)
+    {
+    	ret = false;
+    }
 
     return ret;
 }
@@ -175,6 +231,16 @@ bool ManagerSecurity_VerifCanbus()
 bool ManagerSecurity_VerifLimitSwitch()
 {
     bool ret = true;
+
+    uint8_t managerMovementState = ManagerMovement_GetState();
+
+    if (managerMovementState != MMOV_STATE_HOMING)
+    {
+//    	if (PeriphSwitch_AnySwitch())
+//    	{
+//    		ret = false;
+//    	}
+    }
 
     return ret;
 }
