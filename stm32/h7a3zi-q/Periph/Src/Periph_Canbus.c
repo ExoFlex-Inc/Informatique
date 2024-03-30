@@ -9,6 +9,7 @@ typedef struct
 {
     uint8_t id;
     uint8_t msg[MSG_LENGTH];
+    uint32_t lastMsgTime;
 } CanNode;
 
 FDCAN_TxHeaderTypeDef TxHeader;
@@ -27,6 +28,7 @@ void PeriphCanbus_Init()
     for (uint8_t i = 0; i < CAN_NODE_NBR; i++)
     {
         CanNodes[i].id = i + 1;
+        CanNodes[i].lastMsgTime = 0;
 
         for (uint8_t j = 0; j < MSG_LENGTH; j++)
         {
@@ -90,14 +92,16 @@ void PeriphCanbus_UpdateNodeMsg()
     if (receivedId <= CAN_NODE_NBR && receivedId > 0)
     {
         memcpy(CanNodes[receivedId - 1].msg, RxData, 8 * sizeof(uint8_t));
+        CanNodes[receivedId - 1].lastMsgTime = HAL_GetTick();
     }
 }
 
-bool PeriphCanbus_GetNodeMsg(uint8_t id, uint8_t* data)
+bool PeriphCanbus_GetNodeMsg(uint8_t id, uint8_t* data, uint32_t *timeOfMsg)
 {
     if (id <= CAN_NODE_NBR && id > 0)
     {
         memcpy(data, CanNodes[id - 1].msg, 8 * sizeof(uint8_t));
+        *timeOfMsg = CanNodes[id - 1].lastMsgTime;
         return true;
     }
     return false;
