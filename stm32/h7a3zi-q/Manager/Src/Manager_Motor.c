@@ -5,10 +5,23 @@
 #define MMOT_MOTOR_2_CAN_ID 2
 #define MMOT_MOTOR_3_CAN_ID 3
 
+#define MMOT_MOVING_MAX_SPEED 0.5
+#define MMOT_MOVING_MAX_TORQUE 2
+#define MMOT_IDLE_MAX_SPEED 0.05
+#define MMOT_IDLE_MAX_TORQUE 0.5
+
+#define MMOT_MOT1_MIN_POS -4
+#define MMOT_MOT1_MAX_POS 4
+#define MMOT_MOT2_MIN_POS -4
+#define MMOT_MOT2_MAX_POS 4
+#define MMOT_MOT3_MIN_POS -4
+#define MMOT_MOT3_MAX_POS 4
+
 // Error Codes
 #define ERROR_SET_ORIGINES_MOTORS   -1
 #define ERROR_CAN_CONNECTION_MOTORS -2
 #define ERROR_CAN_MAX_MSG_DELAY -3
+#define ERROR_MOTOR_MINMAX -4
 
 #define TIMER   10
 #define MAX_TRY 50  // 500 ms before flagging an error
@@ -45,6 +58,9 @@ static uint32_t timerMs  = 0;
 MotorControl motors[MMOT_MOTOR_NBR];
 uint8_t      data[8];
 
+int8_t motorsMinPos[MMOT_MOTOR_NBR];
+int8_t motorsMaxPos[MMOT_MOTOR_NBR];
+
 managerMotor_t managerMotor;
 
 // Prototypes
@@ -55,6 +71,7 @@ void ManagerMotor_SetOrigines();
 void ManagerMotor_CalculateNextPositions();
 void ManagerMotor_SendToMotors();
 void ManagerMotor_VerifyMotorConnection();
+void ManagerMotor_VerifyMotorState();
 
 void   ManagerMotor_DisableMotors();
 void   ManagerMotor_EnableMotors();
@@ -102,6 +119,14 @@ void ManagerMotor_Reset()
     motors[MMOT_MOTOR_3].kp = 100.0f;
     motors[MMOT_MOTOR_3].kd = 5.0f;
 
+    //Set max min pos
+    motorsMinPos[MMOT_MOTOR_1] = MMOT_MOT1_MIN_POS;
+    motorsMaxPos[MMOT_MOTOR_1] = MMOT_MOT1_MAX_POS;
+    motorsMinPos[MMOT_MOTOR_2] = MMOT_MOT2_MIN_POS;
+    motorsMaxPos[MMOT_MOTOR_2] = MMOT_MOT2_MAX_POS;
+    motorsMinPos[MMOT_MOTOR_3] = MMOT_MOT3_MIN_POS;
+    motorsMaxPos[MMOT_MOTOR_3] = MMOT_MOT3_MAX_POS;
+
     // Init Data for canBus messages
     for (uint8_t i = 0; i < 8; i++)
     {
@@ -121,6 +146,8 @@ void ManagerMotor_Task()
     if (HAL_GetTick() - timerMs >= TIMER)
     {
         ManagerMotor_ReceiveFromMotors();
+        ManagerMotor_VerifyMotorState();
+
         switch (managerMotor.state)
         {
         case MMOT_STATE_WAITING_SECURITY:
@@ -266,6 +293,60 @@ void ManagerMotor_VerifyMotorConnection()
     	   managerMotor.errorCode = ERROR_CAN_MAX_MSG_DELAY;
        }
     }
+}
+
+void ManagerMotor_VerifyMotorState()
+{
+	bool verif = true;
+
+	if (managerMotor.state == MMOT_STATE_READY2MOVE)
+	{
+		for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
+		{
+			if (motors[i].motor.velocity > MMOT_MOVING_MAX_SPEED || motors[i].motor.velocity < -MMOT_MOVING_MAX_SPEED)
+			{
+				verif = false;
+				break;
+			}
+
+			if (motors[i].motor.torque > MMOT_MOVING_MAX_TORQUE || motors[i].motor.torque < -MMOT_MOVING_MAX_TORQUE )
+			{
+				verif = false;
+				break;
+			}
+
+			if (motors[i].motor.position > motorsMaxPos[i] || motors[i].motor.position < -motorsMinPos[i] )
+			{
+				verif = false;
+				break;
+			}
+		}
+	}
+
+	else
+	{
+		for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
+		{
+			if (motors[i].motor.velocity > MMOT_IDLE_MAX_SPEED || motors[i].motor.velocity < -MMOT_IDLE_MAX_SPEED)
+			{
+				verif = false;
+				break;
+			}
+
+			if (motors[i].motor.torque > MMOT_IDLE_MAX_TORQUE || motors[i].motor.torque < -MMOT_IDLE_MAX_TORQUE)
+			{
+				verif = false;
+				break;
+			}
+		}
+	}
+
+	if (!verif)
+	{
+	   managerMotor.state     = MMOT_STATE_ERROR;
+	   managerMotor.errorCode = ERROR_MOTOR_MINMAX;
+	}
+
 }
 
 void ManagerMotor_SetMotorGoal(uint8_t motorIndex, float goal)

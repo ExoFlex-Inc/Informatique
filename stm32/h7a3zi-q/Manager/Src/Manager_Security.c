@@ -14,17 +14,7 @@
 #define MS_STATE_ERROR    3
 #define MS_STATE_RESET    4
 
-#define MS_MOVING_MAX_SPEED 0.5
-#define MS_MOVING_MAX_TORQUE 2
-#define MS_IDLE_MAX_SPEED 0.05
-#define MS_IDLE_MAX_TORQUE 0.5
 
-#define MS_MOT1_MIN_POS -4
-#define MS_MOT1_MAX_POS 4
-#define MS_MOT2_MIN_POS -4
-#define MS_MOT2_MAX_POS 4
-#define MS_MOT3_MIN_POS -4
-#define MS_MOT3_MAX_POS 4
 
 
 typedef struct
@@ -47,8 +37,7 @@ bool ManagerSecurity_VerifLimitSwitch();
 ManagerSecurity_t   ManagerSecurity;
 static const Motor* motorsData[MMOT_MOTOR_NBR];
 
-int8_t motorsMinPos[MMOT_MOTOR_NBR];
-int8_t motorsMaxPos[MMOT_MOTOR_NBR];
+
 
 bool securityTestError;
 bool securityTestReset;
@@ -60,13 +49,6 @@ void ManagerSecurity_Init()
     {
         motorsData[i] = ManagerMotor_GetMotorData(i);
     }
-
-    motorsMinPos[MMOT_MOTOR_1] = MS_MOT1_MIN_POS;
-    motorsMaxPos[MMOT_MOTOR_1] = MS_MOT1_MAX_POS;
-    motorsMinPos[MMOT_MOTOR_2] = MS_MOT2_MIN_POS;
-    motorsMaxPos[MMOT_MOTOR_2] = MS_MOT2_MAX_POS;
-    motorsMinPos[MMOT_MOTOR_3] = MS_MOT3_MIN_POS;
-    motorsMaxPos[MMOT_MOTOR_3] = MS_MOT3_MAX_POS;
 
     ManagerSecurity.state = MS_STATE_IDLE;
     ManagerSecurity.reset = false;
@@ -129,12 +111,6 @@ void ManagerSecurity_Watch()
         return;
     }
 
-    if (!ManagerSecurity_VerifCanbus())
-    {
-        ManagerSecurity.state = MS_STATE_STOPPING;
-        return;
-    }
-
     if (!ManagerSecurity_VerifLimitSwitch())
     {
         ManagerSecurity.state = MS_STATE_STOPPING;
@@ -185,50 +161,6 @@ bool ManagerSecurity_VerifMotors()
     	ret = false;
     }
 
-    else if (managerMotorState == MMOT_STATE_READY2MOVE)
-    {
-        for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
-        {
-        	if (motorsData[i]->velocity > MS_MOVING_MAX_SPEED || motorsData[i]->velocity < -MS_MOVING_MAX_SPEED)
-        	{
-        		ret = false;
-        		break;
-        	}
-
-        	if (motorsData[i]->torque > MS_MOVING_MAX_TORQUE || motorsData[i]->torque < -MS_MOVING_MAX_TORQUE )
-        	{
-        		ret = false;
-        		break;
-        	}
-
-        	if (motorsData[i]->position > motorsMaxPos[i] || motorsData[i]->position < -motorsMinPos[i] )
-        	{
-        		ret = false;
-        		break;
-        	}
-        }
-    }
-
-    else
-    {
-        for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
-        {
-        	if (motorsData[i]->velocity > MS_IDLE_MAX_SPEED || motorsData[i]->velocity < -MS_IDLE_MAX_SPEED)
-        	{
-        		ret = false;
-        		break;
-        	}
-
-        	if (motorsData[i]->torque > MS_IDLE_MAX_TORQUE || motorsData[i]->torque < -MS_IDLE_MAX_TORQUE)
-        	{
-        		ret = false;
-        		break;
-        	}
-        }
-    }
-
-
-
     return ret;
 }
 
@@ -246,12 +178,6 @@ bool ManagerSecurity_VerifMouvement()
     return ret;
 }
 
-bool ManagerSecurity_VerifCanbus()
-{
-    bool ret = true;
-
-    return ret;
-}
 
 bool ManagerSecurity_VerifLimitSwitch()
 {
