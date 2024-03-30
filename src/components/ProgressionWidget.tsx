@@ -1,0 +1,90 @@
+import React, { useState } from "react";
+import CircularProgress, {
+CircularProgressProps,
+} from '@mui/material/CircularProgress';
+
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import LinearProgress from '@mui/material/LinearProgress';
+
+
+function CircularProgressWithLabel(
+props: CircularProgressProps & { value: number },
+) {
+return (
+    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+    <CircularProgress size="9.375rem" variant="determinate" color="success" {...props} />
+    <Box
+        sx={{
+        top: 0,
+        left: 0,
+        bottom: 0,
+        right: 0,
+        position: 'absolute',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        }}
+    >
+        <Typography
+        variant="caption"
+        component="div"
+        color="black"
+        fontSize={30}
+        >{`${Math.round(props.value)}%`}</Typography>
+    </Box>
+    </Box>
+);
+}
+
+export default function ProgressionWidget() {
+    const [stretchProgress, setStrechProgress] = useState(0);
+    const [setProgress, setSetProgress] = useState(0);
+  
+    React.useEffect(() => {
+      const timer = setInterval(() => {
+        setStrechProgress((prevProgress: number) => (prevProgress >= 100 ? 0 : prevProgress + 10));
+      }, 800);
+      return () => {
+        clearInterval(timer);
+      };
+    }, []);
+  
+    React.useEffect(() => {
+      const timer = setInterval(() => {
+        setSetProgress((oldProgress) => {
+          if (oldProgress === 100) {
+            return 0;
+          }
+          const diff = Math.random() * 10;
+          return Math.min(oldProgress + diff, 100);
+        });
+      }, 500);
+  
+      return () => {
+        clearInterval(timer);
+      } 
+    }, []);
+
+    return (
+        <div className="w-80 h-80 content-center bg-white dark:bg-secondary-dark-bg rounded-3xl">
+        <div className="flex justify-center mb-2.5">
+          <CircularProgressWithLabel value={stretchProgress}/>
+        </div>
+        <p className="text-black justify-center flex mb-7">
+          Stretch Progress
+        </p>
+        <p className="text-black justify-center flex mb-1 text-xl">
+          { Math.round(setProgress/10) + '/10'}
+        </p>
+        <div className="flex justify-center mb-1">
+          <Box sx={{ width: '75%' }}>
+            <LinearProgress color="success" variant="determinate" value={setProgress} />
+          </Box>
+        </div>
+        <p className="text-black justify-center flex">
+          Set Progress
+        </p>
+      </div>
+    );
+}
