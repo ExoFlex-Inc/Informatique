@@ -6,14 +6,17 @@
 #define MMOT_MOTOR_3_CAN_ID 3
 
 // Error Codes
-#define SET_ORIGINES_MOTORS_ERROR   -1
-#define CAN_CONNECTION_MOTORS_ERROR -2
+#define ERROR_SET_ORIGINES_MOTORS   -1
+#define ERROR_CAN_CONNECTION_MOTORS -2
+#define ERROR_CAN_MAX_MSG_DELAY -3
 
 #define TIMER   10
 #define MAX_TRY 50  // 500 ms before flagging an error
 
 #define MOTOR_STEP   0.01
 #define POSITION_TOL 0.02
+
+#define MMOT_MAX_MSG_DELAY TIMER*4
 
 typedef struct
 {
@@ -24,6 +27,7 @@ typedef struct
     float kd;
     bool  detected;
     bool  goalReady;
+    uint32_t lastMsgTime;
 } MotorControl;
 
 typedef struct
@@ -50,6 +54,7 @@ void ManagerMotor_WaitingSecurity();
 void ManagerMotor_SetOrigines();
 void ManagerMotor_CalculateNextPositions();
 void ManagerMotor_SendToMotors();
+void ManagerMotor_VerifyMotorConnection();
 
 void   ManagerMotor_DisableMotors();
 void   ManagerMotor_EnableMotors();
@@ -84,6 +89,7 @@ void ManagerMotor_Reset()
         motors[i].goalPosition = 0.0;
         motors[i].detected     = false;
         motors[i].goalReady    = false;
+        motors[i].lastMsgTime = 0;
     }
 
     // Set Kp Kd
@@ -132,6 +138,8 @@ void ManagerMotor_Task()
         case MMOT_STATE_READY2MOVE:
             ManagerMotor_CalculateNextPositions();
             ManagerMotor_SendToMotors();
+            ManagerMotor_VerifyMotorConnection();
+
             break;
 
         case MMOT_STATE_ERROR:
@@ -165,25 +173,14 @@ void ManagerMotor_ResetMotors()
 
 void ManagerMotor_ReceiveFromMotors()
 {
-    if (PeriphCanbus_GetNodeMsg(motors[MMOT_MOTOR_1].motor.id, data) &&
-        data[0] != '\0')
+    for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
     {
-        PeriphMotors_ParseMotorState(&motors[MMOT_MOTOR_1].motor, data);
-        motors[MMOT_MOTOR_1].detected = true;
-    }
-
-    if (PeriphCanbus_GetNodeMsg(motors[MMOT_MOTOR_2].motor.id, data) &&
-        data[0] != '\0')
-    {
-        PeriphMotors_ParseMotorState(&motors[MMOT_MOTOR_2].motor, data);
-        motors[MMOT_MOTOR_2].detected = true;
-    }
-
-    if (PeriphCanbus_GetNodeMsg(motors[MMOT_MOTOR_3].motor.id, data) &&
-        data[0] != '\0')
-    {
-        PeriphMotors_ParseMotorState(&motors[MMOT_MOTOR_3].motor, data);
-        motors[MMOT_MOTOR_3].detected = true;
+    	if (PeriphCanbus_GetNodeMsg(motors[i].motor.id, data, &motors[i].lastMsgTime) &&
+    	        data[0] != '\0')
+		{
+			PeriphMotors_ParseMotorState(&motors[i].motor, data);
+			motors[i].detected = true;
+		}
     }
 }
 
@@ -214,7 +211,7 @@ void ManagerMotor_StartMotors()
     else
     {
         managerMotor.state     = MMOT_STATE_ERROR;
-        managerMotor.errorCode = CAN_CONNECTION_MOTORS_ERROR;
+        managerMotor.errorCode = ERROR_CAN_CONNECTION_MOTORS;
     }
 }
 
@@ -227,6 +224,11 @@ void ManagerMotor_SetOrigines()
         motors[MMOT_MOTOR_3].motor.position <= 0.001 &&
         motors[MMOT_MOTOR_3].motor.position >= -0.001)
     {
+    	for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
+		{
+    		motors[i].lastMsgTime = HAL_GetTick();
+		}
+
         managerMotor.state = MMOT_STATE_READY2MOVE;
         tryCount           = 0;
     }
@@ -241,7 +243,7 @@ void ManagerMotor_SetOrigines()
     else
     {
         managerMotor.state     = MMOT_STATE_ERROR;
-        managerMotor.errorCode = SET_ORIGINES_MOTORS_ERROR;
+        managerMotor.errorCode = ERROR_SET_ORIGINES_MOTORS;
     }
 }
 
@@ -251,6 +253,18 @@ void ManagerMotor_SendToMotors()
     {
         PeriphMotors_Move(&motors[i].motor, motors[i].nextPosition, 0, 0,
                           motors[i].kp, motors[i].kd);
+    }
+}
+
+void ManagerMotor_VerifyMotorConnection()
+{
+    for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
+    {
+       if (HAL_GetTick() - motors[i].lastMsgTime > MMOT_MAX_MSG_DELAY)
+       {
+    	   managerMotor.state     = MMOT_STATE_ERROR;
+    	   managerMotor.errorCode = ERROR_CAN_MAX_MSG_DELAY;
+       }
     }
 }
 
