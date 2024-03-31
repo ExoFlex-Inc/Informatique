@@ -7,8 +7,8 @@
 
 typedef struct
 {
-    uint8_t id;
-    uint8_t msg[MSG_LENGTH];
+    uint8_t  id;
+    uint8_t  msg[MSG_LENGTH];
     uint32_t lastMsgTime;
 } CanNode;
 
@@ -27,7 +27,7 @@ void PeriphCanbus_Init()
 {
     for (uint8_t i = 0; i < CAN_NODE_NBR; i++)
     {
-        CanNodes[i].id = i + 1;
+        CanNodes[i].id          = i + 1;
         CanNodes[i].lastMsgTime = 0;
 
         for (uint8_t j = 0; j < MSG_LENGTH; j++)
@@ -96,7 +96,7 @@ void PeriphCanbus_UpdateNodeMsg()
     }
 }
 
-bool PeriphCanbus_GetNodeMsg(uint8_t id, uint8_t* data, uint32_t *timeOfMsg)
+bool PeriphCanbus_GetNodeMsg(uint8_t id, uint8_t* data, uint32_t* timeOfMsg)
 {
     if (id <= CAN_NODE_NBR && id > 0)
     {

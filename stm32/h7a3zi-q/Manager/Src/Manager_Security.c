@@ -14,9 +14,6 @@
 #define MS_STATE_ERROR    3
 #define MS_STATE_RESET    4
 
-
-
-
 typedef struct
 {
     uint8_t state;
@@ -36,8 +33,6 @@ bool ManagerSecurity_VerifLimitSwitch();
 
 ManagerSecurity_t   ManagerSecurity;
 static const Motor* motorsData[MMOT_MOTOR_NBR];
-
-
 
 bool securityTestError;
 bool securityTestReset;
@@ -158,7 +153,7 @@ bool ManagerSecurity_VerifMotors()
 
     if (managerMotorState == MMOT_STATE_ERROR)
     {
-    	ret = false;
+        ret = false;
     }
 
     return ret;
@@ -172,12 +167,11 @@ bool ManagerSecurity_VerifMouvement()
 
     if (managerMovementState == MMOV_STATE_ERROR)
     {
-    	ret = false;
+        ret = false;
     }
 
     return ret;
 }
-
 
 bool ManagerSecurity_VerifLimitSwitch()
 {
@@ -187,10 +181,10 @@ bool ManagerSecurity_VerifLimitSwitch()
 
     if (managerMovementState != MMOV_STATE_HOMING)
     {
-//    	if (PeriphSwitch_AnySwitch())
-//    	{
-//    		ret = false;
-//    	}
+        //    	if (PeriphSwitch_AnySwitch())
+        //    	{
+        //    		ret = false;
+        //    	}
     }
 
     return ret;
