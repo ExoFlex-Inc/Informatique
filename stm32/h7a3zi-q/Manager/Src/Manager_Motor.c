@@ -5,9 +5,23 @@
 #define MMOT_MOTOR_2_CAN_ID 2
 #define MMOT_MOTOR_3_CAN_ID 3
 
+#define MMOT_MOVING_MAX_SPEED  2
+#define MMOT_MOVING_MAX_TORQUE 2
+#define MMOT_IDLE_MAX_SPEED    2
+#define MMOT_IDLE_MAX_TORQUE   1
+
+#define MMOT_MOT1_MIN_POS -10
+#define MMOT_MOT1_MAX_POS 10
+#define MMOT_MOT2_MIN_POS -10
+#define MMOT_MOT2_MAX_POS 10
+#define MMOT_MOT3_MIN_POS -10
+#define MMOT_MOT3_MAX_POS 10
+
 // Error Codes
-#define SET_ORIGINES_MOTORS_ERROR   -1
-#define CAN_CONNECTION_MOTORS_ERROR -2
+#define ERROR_SET_ORIGINES_MOTORS   -1
+#define ERROR_CAN_CONNECTION_MOTORS -2
+#define ERROR_CAN_MAX_MSG_DELAY     -3
+#define ERROR_MOTOR_MINMAX          -4
 
 #define TIMER   10
 #define MAX_TRY 50  // 500 ms before flagging an error
@@ -15,15 +29,18 @@
 #define MOTOR_STEP   0.01
 #define POSITION_TOL 0.02
 
+#define MMOT_MAX_MSG_DELAY TIMER * 4
+
 typedef struct
 {
-    Motor motor;
-    float nextPosition;
-    float goalPosition;
-    float kp;
-    float kd;
-    bool  detected;
-    bool  goalReady;
+    Motor    motor;
+    float    nextPosition;
+    float    goalPosition;
+    float    kp;
+    float    kd;
+    bool     detected;
+    bool     goalReady;
+    uint32_t lastMsgTime;
 } MotorControl;
 
 typedef struct
@@ -32,6 +49,7 @@ typedef struct
     int8_t  errorCode;
     bool    reset;
     bool    securityPass;
+    bool    setupFirstPass;
 
 } managerMotor_t;
 
@@ -41,19 +59,27 @@ static uint32_t timerMs  = 0;
 MotorControl motors[MMOT_MOTOR_NBR];
 uint8_t      data[8];
 
+int8_t motorsMinPos[MMOT_MOTOR_NBR];
+int8_t motorsMaxPos[MMOT_MOTOR_NBR];
+
 managerMotor_t managerMotor;
 
 // Prototypes
+void ManagerMotor_Reset();
 void ManagerMotor_ReceiveFromMotors();
 void ManagerMotor_StartMotors();
+void ManagerMotor_DisableMovement();
 void ManagerMotor_WaitingSecurity();
 void ManagerMotor_SetOrigines();
 void ManagerMotor_CalculateNextPositions();
 void ManagerMotor_SendToMotors();
+void ManagerMotor_VerifyMotorConnection();
+void ManagerMotor_VerifyMotorState();
 
-void   ManagerMotor_DisableMotors();
-void   ManagerMotor_EnableMotors();
-void   ManagerMotor_ResetMotors();
+void ManagerMotor_DisableMotors();
+void ManagerMotor_EnableMotors();
+void ManagerMotor_DisableMoveCmd();
+
 int8_t ManagerMotor_GetMotorDirection(uint8_t motorIndex);
 void   ManagerMotor_MotorIncrement(uint8_t motorIndex, int8_t direction);
 
@@ -84,6 +110,7 @@ void ManagerMotor_Reset()
         motors[i].goalPosition = 0.0;
         motors[i].detected     = false;
         motors[i].goalReady    = false;
+        motors[i].lastMsgTime  = 0;
     }
 
     // Set Kp Kd
@@ -96,6 +123,14 @@ void ManagerMotor_Reset()
     motors[MMOT_MOTOR_3].kp = 100.0f;
     motors[MMOT_MOTOR_3].kd = 5.0f;
 
+    // Set max min pos
+    motorsMinPos[MMOT_MOTOR_1] = MMOT_MOT1_MIN_POS;
+    motorsMaxPos[MMOT_MOTOR_1] = MMOT_MOT1_MAX_POS;
+    motorsMinPos[MMOT_MOTOR_2] = MMOT_MOT2_MIN_POS;
+    motorsMaxPos[MMOT_MOTOR_2] = MMOT_MOT2_MAX_POS;
+    motorsMinPos[MMOT_MOTOR_3] = MMOT_MOT3_MIN_POS;
+    motorsMaxPos[MMOT_MOTOR_3] = MMOT_MOT3_MAX_POS;
+
     // Init Data for canBus messages
     for (uint8_t i = 0; i < 8; i++)
     {
@@ -103,18 +138,21 @@ void ManagerMotor_Reset()
     }
 
     // Init State machine
-    managerMotor.reset        = false;
-    managerMotor.securityPass = false;
-    managerMotor.state        = MMOT_STATE_WAITING_SECURITY;
+    managerMotor.reset          = false;
+    managerMotor.securityPass   = false;
+    managerMotor.setupFirstPass = true;
+    managerMotor.state          = MMOT_STATE_WAITING_SECURITY;
 }
 
 void ManagerMotor_Task()
 {
     // State machine that Init, sets to zero, reads informations and sends
     // informations to the motors
+    ManagerMotor_ReceiveFromMotors();
+    ManagerMotor_VerifyMotorState();
+
     if (HAL_GetTick() - timerMs >= TIMER)
     {
-        ManagerMotor_ReceiveFromMotors();
         switch (managerMotor.state)
         {
         case MMOT_STATE_WAITING_SECURITY:
@@ -125,6 +163,10 @@ void ManagerMotor_Task()
             ManagerMotor_StartMotors();
             break;
 
+        case MMOT_STATE_DISABLE_MOVE_CMD:
+            ManagerMotor_DisableMovement();
+            break;
+
         case MMOT_STATE_SET_ORIGIN:
             ManagerMotor_SetOrigines();
             break;
@@ -132,6 +174,8 @@ void ManagerMotor_Task()
         case MMOT_STATE_READY2MOVE:
             ManagerMotor_CalculateNextPositions();
             ManagerMotor_SendToMotors();
+            ManagerMotor_VerifyMotorConnection();
+
             break;
 
         case MMOT_STATE_ERROR:
@@ -156,7 +200,7 @@ void ManagerMotor_EnableMotors()
     PeriphMotors_Enable(&motors[MMOT_MOTOR_3].motor);
 }
 
-void ManagerMotor_ResetMotors()
+void ManagerMotor_DisableMoveCmd()
 {
     PeriphMotors_Move(&motors[MMOT_MOTOR_1].motor, 0, 0, 0, 0, 0);
     PeriphMotors_Move(&motors[MMOT_MOTOR_2].motor, 0, 0, 0, 0, 0);
@@ -165,25 +209,19 @@ void ManagerMotor_ResetMotors()
 
 void ManagerMotor_ReceiveFromMotors()
 {
-    if (PeriphCanbus_GetNodeMsg(motors[MMOT_MOTOR_1].motor.id, data) &&
-        data[0] != '\0')
+    for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
     {
-        PeriphMotors_ParseMotorState(&motors[MMOT_MOTOR_1].motor, data);
-        motors[MMOT_MOTOR_1].detected = true;
-    }
-
-    if (PeriphCanbus_GetNodeMsg(motors[MMOT_MOTOR_2].motor.id, data) &&
-        data[0] != '\0')
-    {
-        PeriphMotors_ParseMotorState(&motors[MMOT_MOTOR_2].motor, data);
-        motors[MMOT_MOTOR_2].detected = true;
-    }
-
-    if (PeriphCanbus_GetNodeMsg(motors[MMOT_MOTOR_3].motor.id, data) &&
-        data[0] != '\0')
-    {
-        PeriphMotors_ParseMotorState(&motors[MMOT_MOTOR_3].motor, data);
-        motors[MMOT_MOTOR_3].detected = true;
+        uint32_t lastMsgTime = motors[i].lastMsgTime;
+        if (PeriphCanbus_GetNodeMsg(motors[i].motor.id, data,
+                                    &motors[i].lastMsgTime) &&
+            data[0] != '\0')
+        {
+            if (lastMsgTime < motors[i].lastMsgTime)
+            {
+                PeriphMotors_ParseMotorState(&motors[i].motor, data);
+                motors[i].detected = true;
+            }
+        }
     }
 }
 
@@ -197,24 +235,57 @@ void ManagerMotor_WaitingSecurity()
 
 void ManagerMotor_StartMotors()
 {
-    ManagerMotor_ResetMotors();
-    ManagerMotor_EnableMotors();
-    ManagerMotor_ResetMotors();
-
-    if (motors[MMOT_MOTOR_1].detected && motors[MMOT_MOTOR_2].detected &&
-        motors[MMOT_MOTOR_3].detected)
+    if (managerMotor.setupFirstPass)
     {
-        managerMotor.state = MMOT_STATE_SET_ORIGIN;
-        tryCount           = 0;
+        motors[MMOT_MOTOR_1].detected = false;
+        motors[MMOT_MOTOR_2].detected = false;
+        motors[MMOT_MOTOR_3].detected = false;
+        managerMotor.setupFirstPass   = false;
+    }
+    else if (motors[MMOT_MOTOR_1].detected && motors[MMOT_MOTOR_2].detected &&
+             motors[MMOT_MOTOR_3].detected)
+    {
+        managerMotor.setupFirstPass = true;
+        tryCount                    = 0;
+        managerMotor.state          = MMOT_STATE_DISABLE_MOVE_CMD;
     }
     else if (tryCount < MAX_TRY)
     {
+        ManagerMotor_EnableMotors();
         tryCount += 1;
     }
     else
     {
         managerMotor.state     = MMOT_STATE_ERROR;
-        managerMotor.errorCode = CAN_CONNECTION_MOTORS_ERROR;
+        managerMotor.errorCode = ERROR_CAN_CONNECTION_MOTORS;
+    }
+}
+
+void ManagerMotor_DisableMovement()
+{
+    if (managerMotor.setupFirstPass)
+    {
+        motors[MMOT_MOTOR_1].detected = false;
+        motors[MMOT_MOTOR_2].detected = false;
+        motors[MMOT_MOTOR_3].detected = false;
+        managerMotor.setupFirstPass   = false;
+    }
+    else if (motors[MMOT_MOTOR_1].detected && motors[MMOT_MOTOR_2].detected &&
+             motors[MMOT_MOTOR_3].detected)
+    {
+        managerMotor.setupFirstPass = true;
+        tryCount                    = 0;
+        managerMotor.state          = MMOT_STATE_SET_ORIGIN;
+    }
+    else if (tryCount < MAX_TRY)
+    {
+        ManagerMotor_DisableMoveCmd();
+        tryCount += 1;
+    }
+    else
+    {
+        managerMotor.state     = MMOT_STATE_ERROR;
+        managerMotor.errorCode = ERROR_CAN_CONNECTION_MOTORS;
     }
 }
 
@@ -227,6 +298,11 @@ void ManagerMotor_SetOrigines()
         motors[MMOT_MOTOR_3].motor.position <= 0.001 &&
         motors[MMOT_MOTOR_3].motor.position >= -0.001)
     {
+        for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
+        {
+            motors[i].lastMsgTime = HAL_GetTick();
+        }
+
         managerMotor.state = MMOT_STATE_READY2MOVE;
         tryCount           = 0;
     }
@@ -235,13 +311,12 @@ void ManagerMotor_SetOrigines()
         PeriphMotors_SetZeroPosition(&motors[MMOT_MOTOR_1].motor);
         PeriphMotors_SetZeroPosition(&motors[MMOT_MOTOR_2].motor);
         PeriphMotors_SetZeroPosition(&motors[MMOT_MOTOR_3].motor);
-
         tryCount += 1;
     }
     else
     {
         managerMotor.state     = MMOT_STATE_ERROR;
-        managerMotor.errorCode = SET_ORIGINES_MOTORS_ERROR;
+        managerMotor.errorCode = ERROR_SET_ORIGINES_MOTORS;
     }
 }
 
@@ -251,6 +326,76 @@ void ManagerMotor_SendToMotors()
     {
         PeriphMotors_Move(&motors[i].motor, motors[i].nextPosition, 0, 0,
                           motors[i].kp, motors[i].kd);
+    }
+}
+
+void ManagerMotor_VerifyMotorConnection()
+{
+    for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
+    {
+        if (HAL_GetTick() - motors[i].lastMsgTime > MMOT_MAX_MSG_DELAY)
+        {
+            managerMotor.state     = MMOT_STATE_ERROR;
+            managerMotor.errorCode = ERROR_CAN_MAX_MSG_DELAY;
+        }
+    }
+}
+
+void ManagerMotor_VerifyMotorState()
+{
+    bool verif = true;
+
+    if (managerMotor.state == MMOT_STATE_READY2MOVE)
+    {
+        for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
+        {
+            if (motors[i].motor.velocity > MMOT_MOVING_MAX_SPEED ||
+                motors[i].motor.velocity < -MMOT_MOVING_MAX_SPEED)
+            {
+                verif = false;
+                break;
+            }
+
+            if (motors[i].motor.torque > MMOT_MOVING_MAX_TORQUE ||
+                motors[i].motor.torque < -MMOT_MOVING_MAX_TORQUE)
+            {
+                verif = false;
+                break;
+            }
+
+            if (motors[i].motor.position > motorsMaxPos[i] ||
+                motors[i].motor.position < motorsMinPos[i])
+            {
+                verif = false;
+                break;
+            }
+        }
+    }
+
+    else
+    {
+        for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
+        {
+            if (motors[i].motor.velocity > MMOT_IDLE_MAX_SPEED ||
+                motors[i].motor.velocity < -MMOT_IDLE_MAX_SPEED)
+            {
+                verif = false;
+                break;
+            }
+
+            if (motors[i].motor.torque > MMOT_IDLE_MAX_TORQUE ||
+                motors[i].motor.torque < -MMOT_IDLE_MAX_TORQUE)
+            {
+                verif = false;
+                break;
+            }
+        }
+    }
+
+    if (!verif)
+    {
+        managerMotor.state     = MMOT_STATE_ERROR;
+        managerMotor.errorCode = ERROR_MOTOR_MINMAX;
     }
 }
 

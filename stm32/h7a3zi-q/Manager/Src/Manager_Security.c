@@ -106,12 +106,6 @@ void ManagerSecurity_Watch()
         return;
     }
 
-    if (!ManagerSecurity_VerifCanbus())
-    {
-        ManagerSecurity.state = MS_STATE_STOPPING;
-        return;
-    }
-
     if (!ManagerSecurity_VerifLimitSwitch())
     {
         ManagerSecurity.state = MS_STATE_STOPPING;
@@ -155,6 +149,13 @@ bool ManagerSecurity_VerifMotors()
 {
     bool ret = true;
 
+    uint8_t managerMotorState = ManagerMotor_GetState();
+
+    if (managerMotorState == MMOT_STATE_ERROR)
+    {
+        ret = false;
+    }
+
     return ret;
 }
 
@@ -162,12 +163,12 @@ bool ManagerSecurity_VerifMouvement()
 {
     bool ret = true;
 
-    return ret;
-}
+    uint8_t managerMovementState = ManagerMovement_GetState();
 
-bool ManagerSecurity_VerifCanbus()
-{
-    bool ret = true;
+    if (managerMovementState == MMOV_STATE_ERROR)
+    {
+        ret = false;
+    }
 
     return ret;
 }
@@ -175,6 +176,16 @@ bool ManagerSecurity_VerifCanbus()
 bool ManagerSecurity_VerifLimitSwitch()
 {
     bool ret = true;
+
+    uint8_t managerMovementState = ManagerMovement_GetState();
+
+    if (managerMovementState != MMOV_STATE_HOMING)
+    {
+        //    	if (PeriphSwitch_AnySwitch())
+        //    	{
+        //    		ret = false;
+        //    	}
+    }
 
     return ret;
 }

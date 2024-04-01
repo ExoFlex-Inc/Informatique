@@ -11,9 +11,10 @@
 
 #define MMOT_STATE_WAITING_SECURITY 1
 #define MMOT_STATE_START_MOTORS     2
-#define MMOT_STATE_SET_ORIGIN       3
-#define MMOT_STATE_READY2MOVE       4
-#define MMOT_STATE_ERROR            5
+#define MMOT_STATE_DISABLE_MOVE_CMD 3
+#define MMOT_STATE_SET_ORIGIN       4
+#define MMOT_STATE_READY2MOVE       5
+#define MMOT_STATE_ERROR            6
 
 void ManagerMotor_Init();
 void ManagerMotor_Reset();
