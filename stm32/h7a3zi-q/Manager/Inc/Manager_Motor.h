@@ -32,4 +32,6 @@ void    ManagerMotor_SetError();
 bool    ManagerMotor_InError();
 uint8_t ManagerMotor_GetState();
 
+void ManagerMotor_SetMotorOrigine(uint8_t motorIndex);
+
 #endif

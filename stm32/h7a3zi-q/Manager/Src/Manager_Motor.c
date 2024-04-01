@@ -308,9 +308,10 @@ void ManagerMotor_SetOrigines()
     }
     else if (tryCount < MAX_TRY)
     {
-        PeriphMotors_SetZeroPosition(&motors[MMOT_MOTOR_1].motor);
-        PeriphMotors_SetZeroPosition(&motors[MMOT_MOTOR_2].motor);
-        PeriphMotors_SetZeroPosition(&motors[MMOT_MOTOR_3].motor);
+        ManagerMotor_SetMotorOrigine(MMOT_MOTOR_1);
+        ManagerMotor_SetMotorOrigine(MMOT_MOTOR_2);
+        ManagerMotor_SetMotorOrigine(MMOT_MOTOR_3);
+
         tryCount += 1;
     }
     else
@@ -318,6 +319,11 @@ void ManagerMotor_SetOrigines()
         managerMotor.state     = MMOT_STATE_ERROR;
         managerMotor.errorCode = ERROR_SET_ORIGINES_MOTORS;
     }
+}
+
+void ManagerMotor_SetMotorOrigine(uint8_t motorIndex)
+{
+	PeriphMotors_SetZeroPosition(&motors[motorIndex].motor);
 }
 
 void ManagerMotor_SendToMotors()
