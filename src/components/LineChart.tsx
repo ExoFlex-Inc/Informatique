@@ -1,11 +1,11 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { Line } from "react-chartjs-2";
 import "chartjs-adapter-luxon";
 import PauseButton from "../components/PauseButton.tsx";
 import PlayButton from "../components/PlayButton.tsx";
 // import { ChartData } from "react-chartjs-2"
 import Chart from "chart.js/auto";
-import {CategoryScale, Ticks} from 'chart.js';
+import { CategoryScale, Ticks } from "chart.js";
 import StreamingPlugin from "chartjs-plugin-streaming";
 Chart.register(CategoryScale);
 Chart.register(StreamingPlugin);
@@ -31,14 +31,13 @@ interface RealtimeOptions {
 }
 
 interface XAxisOptions {
-  type: 'realtime';
+  type: "realtime";
   realtime: RealtimeOptions;
 }
 
 interface ScalesOptions {
   [key: string]: XAxisOptions;
   // x: XAxisOptions;
-
 }
 
 interface ChartOptions {
@@ -52,25 +51,29 @@ interface Dataset {
   }[];
 }
 
-const LineChart: React.FC<LineChartProps> = ({ chartData, setPositionGraph, positionGraph }) => {
+const LineChart: React.FC<LineChartProps> = ({
+  chartData,
+  setPositionGraph,
+  positionGraph,
+}) => {
   const [graphPause, setGraphPause] = useState(false);
   const [chartOptions, setChartOptions] = useState<ChartOptions>({
     scales: {
       x: {
-          type: 'realtime',
-          realtime: {
-            refresh: 100,
-            pause: false,
-            onRefresh: chart => {
-                chart.data.datasets.forEach((dataset: Dataset) => {
-                  dataset.data.push({
-                    x: Date.now(),
-                    y: Math.random()
-                  })
-                });
-            },
+        type: "realtime",
+        realtime: {
+          refresh: 100,
+          pause: false,
+          onRefresh: (chart) => {
+            chart.data.datasets.forEach((dataset: Dataset) => {
+              dataset.data.push({
+                x: Date.now(),
+                y: Math.random(),
+              });
+            });
           },
-      }
+        },
+      },
     },
   });
 
@@ -89,7 +92,7 @@ const LineChart: React.FC<LineChartProps> = ({ chartData, setPositionGraph, posi
     }));
   }, [graphPause]);
 
-  return(
+  return (
     <div>
       <div className="flex justify-center">
         <PlayButton setGraphPause={setGraphPause} graphPause={graphPause} />
@@ -97,16 +100,27 @@ const LineChart: React.FC<LineChartProps> = ({ chartData, setPositionGraph, posi
       </div>
       <div className="flex justify-startend">
         <text>Position</text>
-        <input type="checkbox" checked={positionGraph} onClick={() => {setPositionGraph(!positionGraph)}}/>
+        <input
+          type="checkbox"
+          checked={positionGraph}
+          onClick={() => {
+            setPositionGraph(!positionGraph);
+          }}
+        />
       </div>
       <div className="flex justify-startend">
         <text>Torque</text>
-        <input type="checkbox" checked={!positionGraph} onClick={() => {setPositionGraph(!positionGraph)}}/>
+        <input
+          type="checkbox"
+          checked={!positionGraph}
+          onClick={() => {
+            setPositionGraph(!positionGraph);
+          }}
+        />
       </div>
-      <Line data={chartData} options={chartOptions}/>;
+      <Line data={chartData} options={chartOptions} />;
     </div>
   );
-
-}
+};
 
 export default LineChart;

@@ -40,59 +40,65 @@ export default function Manual() {
   };
 
   const positionData = {
-    datasets: [{
-      label: 'Motor 1 position',
-      borderColor: 'rgb(255, 99, 132)',
-      borderDash: [8, 4],
-      fill: true,
-      data: []
-    },
-    {
-      label: 'Motor 2 position',
-      borderColor: 'rgb(99, 255, 132)',
-      borderDash: [8, 4],
-      fill: true,
-      data: []
-    },
-    {
-      label: 'Motor 3 position',
-      borderColor: 'rgb(99, 132, 255)',
-      borderDash: [8, 4],
-      fill: true,
-      data: []
-    },
-  ]
+    datasets: [
+      {
+        label: "Motor 1 position",
+        borderColor: "rgb(255, 99, 132)",
+        borderDash: [8, 4],
+        fill: true,
+        data: [],
+      },
+      {
+        label: "Motor 2 position",
+        borderColor: "rgb(99, 255, 132)",
+        borderDash: [8, 4],
+        fill: true,
+        data: [],
+      },
+      {
+        label: "Motor 3 position",
+        borderColor: "rgb(99, 132, 255)",
+        borderDash: [8, 4],
+        fill: true,
+        data: [],
+      },
+    ],
   };
 
   const torqueData = {
-    datasets: [{
-      label: 'Motor 1 torque',
-      borderColor: 'rgb(255, 99, 132)',
-      borderDash: [8, 4],
-      fill: true,
-      data: []
-    },
-    {
-      label: 'Motor 2 torque',
-      borderColor: 'rgb(99, 255, 132)',
-      borderDash: [8, 4],
-      fill: true,
-      data: []
-    },
-    {
-      label: 'Motor 3 torque',
-      borderColor: 'rgb(99, 132, 255)',
-      borderDash: [8, 4],
-      fill: true,
-      data: []
-    },
-  ]
+    datasets: [
+      {
+        label: "Motor 1 torque",
+        borderColor: "rgb(255, 99, 132)",
+        borderDash: [8, 4],
+        fill: true,
+        data: [],
+      },
+      {
+        label: "Motor 2 torque",
+        borderColor: "rgb(99, 255, 132)",
+        borderDash: [8, 4],
+        fill: true,
+        data: [],
+      },
+      {
+        label: "Motor 3 torque",
+        borderColor: "rgb(99, 132, 255)",
+        borderDash: [8, 4],
+        fill: true,
+        data: [],
+      },
+    ],
   };
 
   return (
     <div className="flex flex-col h-[calc(100vh-32rem)] justify-between">
       <div>
-        <LineChart chartData={positionGraph ? positionData : torqueData} setPositionGraph={setPositionGraph} positionGraph={positionGraph} />
+        <LineChart
+          chartData={positionGraph ? positionData : torqueData}
+          setPositionGraph={setPositionGraph}
+          positionGraph={positionGraph}
+        />
       </div>
       <div>
         <div className="mt-32 mb-4 flex justify-center">
@@ -107,8 +113,16 @@ export default function Manual() {
         <div className="mb-4 flex justify-center">
           <Button label="EversionL" toSend="eversionL" className="mr-4" />
           <Button label="EversionR" toSend="eversionR" className="mr-8" />
-          <Button label="DorsiflexionU" toSend="dorsiflexionU" className="mr-4" />
-          <Button label="DorsiflexionD" toSend="dorsiflexionD" className="mr-8" />
+          <Button
+            label="DorsiflexionU"
+            toSend="dorsiflexionU"
+            className="mr-4"
+          />
+          <Button
+            label="DorsiflexionD"
+            toSend="dorsiflexionD"
+            className="mr-8"
+          />
           <Button label="ExtensionU" toSend="extensionU" className="mr-4" />
           <Button label="ExtensionD" toSend="extensionD" className="mr-8" />
         </div>
@@ -121,7 +135,6 @@ export default function Manual() {
           <Button label="setHome" toSend="setHome" className="mr-4" />
         </div>
       </div>
-
     </div>
   );
 }
