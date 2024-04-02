@@ -201,7 +201,7 @@ export default function Planning() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-100px)]">
+    <div className="flex flex-col custom-height">
       <div className="mt-4 ml-10 mr-10">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50 divide-y divide-gray-200">

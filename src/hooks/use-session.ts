@@ -61,12 +61,18 @@ export function useSession(): SupabaseUserInfo {
 
   useEffect(() => {
     supaClient.auth.getSession().then(({ data: { session } }) => {
-      setUserInfo({ ...userInfo, session });
-      supaClient.auth.onAuthStateChange((_event, session) => {
-        setUserInfo({ session, profile: null });
-      });
+      if (!session) {
+        navigate("/");
+        localStorage.removeItem("lastLocation");
+      } else {
+        setUserInfo({ ...userInfo, session });
+        supaClient.auth.onAuthStateChange((_event, session) => {
+          setUserInfo({ session, profile: null });
+        });
+      }
     });
   }, []);
+  
 
   useEffect(() => {
     if (userInfo.session?.user && !userInfo.profile) {
@@ -88,7 +94,6 @@ export function useSession(): SupabaseUserInfo {
     } else if (!userInfo.session?.user) {
       channel?.unsubscribe();
       setChannel(null);
-      navigate("/");
     }
   }, [userInfo.session]);
 

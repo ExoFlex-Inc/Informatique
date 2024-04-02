@@ -25,6 +25,7 @@ import TopBar from "./pages/global/TopBar.tsx";
 import ProSideBar from "./pages/global/Sidebar.tsx";
 
 import { SupabaseUserInfo, useSession } from "./hooks/use-session.ts";
+import Sequence from "./pages/Sequence.tsx";
 
 export const UserContext = createContext<SupabaseUserInfo>({
   session: null,
@@ -34,12 +35,12 @@ export const UserContext = createContext<SupabaseUserInfo>({
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
-      {/* <Route path="/" element={<Dashboard />} /> */}
+      <Route path="/" element={<Dashboard />} />
       <Route path="/activity" element={<Activity />} />
       <Route path="/welcome" element={<Welcome />} loader={welcomeLoader} />
       <Route path="/manual" element={<Manual />} />
+      <Route path="/hmi" element={<HMI />} />
       <Route path="/planning" element={<Planning />} />
-      <Route path="/hmi" element={<HMI />} loader={hmiInit} />
       <Route path="/settings" element={<Settings />} />
     </Route>,
   ),
@@ -49,10 +50,9 @@ function Layout() {
   const supabaseUserInfo = useSession();
   const location = useLocation();
   const navigate = useNavigate();
-
+  
   useEffect(() => {
     if (!supabaseUserInfo.session) {
-      // Store the current location in local storage
       localStorage.setItem("lastLocation", location.pathname);
     }
   }, [supabaseUserInfo.session, location.pathname]);
@@ -63,7 +63,7 @@ function Layout() {
       navigate(lastLocation);
     }
   }, [navigate]);
-
+  
   return (
     <UserContext.Provider value={supabaseUserInfo}>
       <>

@@ -11,35 +11,36 @@ dotenv.config();
 const app: Application = express();
 let serialPort: SerialPort | null = null;
 let receivedDataBuffer: string = "";
+let jsonData: string = ""; 
 
 app.use(express.json());
 app.use(cors());
 
 // Define the interface for machine data
-interface MachineData {
-  dorsiflexion: number[];
-  eversion: number[];
-  extension: number[];
-  [key: string]: any;
-}
+// interface MachineData {
+//   dorsiflexion: number[];
+//   eversion: number[];
+//   extension: number[];
+//   [key: string]: any;
+// }
 
 // Initialize machine data
-let machineData: MachineData = {
-  dorsiflexion: [],
-  eversion: [],
-  extension: [],
-};
+// let machineData: MachineData = {
+//   dorsiflexion: [],
+//   eversion: [],
+//   extension: [],
+// };
 
-// Function to reset only specific properties of MachineData
-function resetMachineData(): MachineData {
-  return {
-    dorsiflexion: [],
-    eversion: [],
-    extension: [],
-  };
-}
+// // Function to reset only specific properties of MachineData
+// function resetMachineData(): MachineData {
+//   return {
+//     dorsiflexion: [],
+//     eversion: [],
+//     extension: [],
+//   };
+// }
 
-let jsonFilename = "";
+// let jsonFilename = "";
 let machine_id = "";
 
 /*
@@ -70,16 +71,42 @@ app.post("/initialize-serial-port", (_, res) => {
           console.log("Serial port error:", error.message);
           serialPort = null;
         });
+        
+        serialPort.on("close", () => {
+          console.log("Serial port closed");
+          serialPort = null;
+        });
 
         serialPort.on("open", () => {
           console.log("Serial port opened.");
           res.status(200).send("Serial port initialized and ready.");
         });
 
-        serialPort.on("close", () => {
-          console.log("Serial port closed");
-          serialPort = null;
-        });
+        serialPort.on("data", (data) => {
+          console.log("Received data:", data.toString());
+          receivedDataBuffer += data.toString();
+      
+          // Check if the received data forms a valid JSON
+          for (let i = 0; i < receivedDataBuffer.length; i++) {
+    
+              if (receivedDataBuffer[i] === '{') {
+                receivedDataBuffer = receivedDataBuffer.slice(i); 
+              }
+              else if (receivedDataBuffer[i] === '}') {
+                const jsonDataString = receivedDataBuffer.substring(0, i + 1);
+                try {
+                    jsonData = JSON.parse(jsonDataString);
+                    console.log("Received JSON:", jsonData);
+  
+                } catch (err) {
+                    console.error("Error parsing JSON", err);
+                }
+                // Reset buffer and readingJson flag
+                receivedDataBuffer = receivedDataBuffer.slice(i + 1);
+              }
+          }
+      });
+
       } else {
         console.log("Serial port already initialized.");
         res.status(200).send("Serial port already initialized.");
@@ -92,133 +119,133 @@ app.post("/initialize-serial-port", (_, res) => {
   });
 });
 
-app.post("/reset-serial-port", (_, res) => {
-  try {
-    machineData = resetMachineData();
+// app.post("/reset-serial-port", (_, res) => {
+//   try {
+//     machineData = resetMachineData();
 
-    // Close the serial port when the server is closed
-    if (serialPort && serialPort.isOpen) {
-      serialPort.close((err) => {
-        if (err) {
-          console.error("Error closing the port:", err.message);
-        } else {
-          console.log("Serial port closed.");
-        }
-      });
-    }
+//     // Close the serial port when the server is closed
+//     if (serialPort && serialPort.isOpen) {
+//       serialPort.close((err) => {
+//         if (err) {
+//           console.error("Error closing the port:", err.message);
+//         } else {
+//           console.log("Serial port closed.");
+//         }
+//       });
+//     }
 
-    // Respond with a success message
-    res
-      .status(200)
-      .json({ message: "Serial port reset successful", machineData });
-  } catch (error: any) {
-    // Handle errors and respond with an error message
-    res
-      .status(500)
-      .json({ message: "Error resetting serial port", error: error.message });
-  }
-});
+//     // Respond with a success message
+//     res
+//       .status(200)
+//       .json({ message: "Serial port reset successful", machineData });
+//   } catch (error: any) {
+//     // Handle errors and respond with an error message
+//     res
+//       .status(500)
+//       .json({ message: "Error resetting serial port", error: error.message });
+//   }
+// });
 
-app.post("/fetch-patient-data", (_, res) => {
-  const createJSON = () => {
-    const now = new Date();
+// app.post("/fetch-patient-data", (_, res) => {
+//   const createJSON = () => {
+//     const now = new Date();
 
-    // Extracting only the date part from the current timestamp
-    const datePart = now.toISOString().split("T")[0];
+//     // Extracting only the date part from the current timestamp
+//     const datePart = now.toISOString().split("T")[0];
 
-    jsonFilename = `./machineAngles/${datePart}.json`;
+//     jsonFilename = `./machineAngles/${datePart}.json`;
 
-    fs.writeFile(jsonFilename, JSON.stringify(machineData), (err) => {
-      if (err) {
-        console.error("Error writing to JSON file:", err);
-      } else {
-        console.log(`Data has been written to ${jsonFilename}`);
-      }
-    });
-  };
+//     fs.writeFile(jsonFilename, JSON.stringify(machineData), (err) => {
+//       if (err) {
+//         console.error("Error writing to JSON file:", err);
+//       } else {
+//         console.log(`Data has been written to ${jsonFilename}`);
+//       }
+//     });
+//   };
 
-  const formatTime = (date: Date) => {
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
-    return `${hours}:${minutes}:${seconds}`;
-  };
+//   const formatTime = (date: Date) => {
+//     const hours = String(date.getHours()).padStart(2, "0");
+//     const minutes = String(date.getMinutes()).padStart(2, "0");
+//     const seconds = String(date.getSeconds()).padStart(2, "0");
+//     return `${hours}:${minutes}:${seconds}`;
+//   };
 
-  const resetDataBuffer = () => {
-    receivedDataBuffer = "";
-  };
+//   const resetDataBuffer = () => {
+//     receivedDataBuffer = "";
+//   };
 
-  if (serialPort) {
-    createJSON();
+//   if (serialPort) {
+//     createJSON();
 
-    // Add event listener for data received from the serial port
-    serialPort.on("data", (data) => {
-      console.log("Received data:", data.toString());
-      receivedDataBuffer += data.toString();
+//     // Add event listener for data received from the serial port
+//     serialPort.on("data", (data) => {
+//       console.log("Received data:", data.toString());
+//       receivedDataBuffer += data.toString();
 
-      // Check if the received data starts with '{'
-      if (!receivedDataBuffer.startsWith("{")) {
-        // If it doesn't start with '{', clear the buffer and continue buffering
-        resetDataBuffer();
-      }
+//       // Check if the received data starts with '{'
+//       if (!receivedDataBuffer.startsWith("{")) {
+//         // If it doesn't start with '{', clear the buffer and continue buffering
+//         resetDataBuffer();
+//       }
 
-      // Check if the receivedDataBuffer is more than 100 characters
-      if (receivedDataBuffer.length > 100) {
-        // If it is, clear the buffer
-        resetDataBuffer();
-      }
+//       // Check if the receivedDataBuffer is more than 100 characters
+//       if (receivedDataBuffer.length > 100) {
+//         // If it is, clear the buffer
+//         resetDataBuffer();
+//       }
 
-      // Check if the received data forms a valid JSON
-      try {
-        const jsonData = JSON.parse(receivedDataBuffer);
+//       // Check if the received data forms a valid JSON
+//       try {
+//         const jsonData = JSON.parse(receivedDataBuffer);
 
-        if (jsonData) {
-          console.log("Received JSON:", jsonData);
+//         if (jsonData) {
+//           console.log("Received JSON:", jsonData);
 
-          const currentTime = new Date(); // Get the current timestamp
+//           const currentTime = new Date(); // Get the current timestamp
 
-          // Loop through the keys in jsonData
-          for (const key in jsonData) {
-            if (key in machineData) {
-              const formattedTime = formatTime(currentTime);
-              if (Array.isArray(machineData[key])) {
-                // Check if it's an array, then push the value along with the timestamp to the array
-                machineData[key].push({
-                  data: jsonData[key],
-                  time: formattedTime,
-                });
-              } else {
-                // If it's not an array, update the value with an object containing the data and timestamp
-                machineData[key] = {
-                  data: jsonData[key],
-                  time: formattedTime,
-                };
-              }
-            }
-          }
-          // Optionally, save the updated machineData to the JSON file
-          const machineDataString = JSON.stringify(machineData);
-          fs.writeFile(jsonFilename, machineDataString, (err) => {
-            if (err) {
-              console.error("Error writing to file:", err);
-            } else {
-              console.log(`Data has been written to ${jsonFilename}`);
-            }
-          });
-          // Reset the buffer for new data
-          resetDataBuffer();
-          res.status(200).send("Data received and processed successfully.");
-        } else {
-          res
-            .status(400)
-            .json({ message: "Invalid JSON data in the request." });
-        }
-      } catch (error) {
-        // If the data does not form a complete JSON, keep buffering
-      }
-    });
-  }
-});
+//           // Loop through the keys in jsonData
+//           for (const key in jsonData) {
+//             if (key in machineData) {
+//               const formattedTime = formatTime(currentTime);
+//               if (Array.isArray(machineData[key])) {
+//                 // Check if it's an array, then push the value along with the timestamp to the array
+//                 machineData[key].push({
+//                   data: jsonData[key],
+//                   time: formattedTime,
+//                 });
+//               } else {
+//                 // If it's not an array, update the value with an object containing the data and timestamp
+//                 machineData[key] = {
+//                   data: jsonData[key],
+//                   time: formattedTime,
+//                 };
+//               }
+//             }
+//           }
+//           // Optionally, save the updated machineData to the JSON file
+//           const machineDataString = JSON.stringify(machineData);
+//           fs.writeFile(jsonFilename, machineDataString, (err) => {
+//             if (err) {
+//               console.error("Error writing to file:", err);
+//             } else {
+//               console.log(`Data has been written to ${jsonFilename}`);
+//             }
+//           });
+//           // Reset the buffer for new data
+//           resetDataBuffer();
+//           res.status(200).send("Data received and processed successfully.");
+//         } else {
+//           res
+//             .status(400)
+//             .json({ message: "Invalid JSON data in the request." });
+//         }
+//       } catch (error) {
+//         // If the data does not form a complete JSON, keep buffering
+//       }
+//     });
+//   }
+// });
 
 /*
 ..######..########.##.....##..#######...#######.
@@ -248,19 +275,46 @@ app.post("/hmi-button-click", (req, res) => {
   }
 });
 
-app.post("/home-machine", (_, res) => {
-  if (serialPort && serialPort.isOpen) {
-    serialPort.write("home", (err) => {
-      if (err) {
-        console.error("Error while homing the machine:", err);
-        res.status(500).send("Serial Error");
-      } else {
-        console.log("Data sent to serial port:", "home");
-        res.status(500).send("Homing was successfully sent");
-      }
+app.post("/send-to-stm32", async(_, res) => {
+  try {
+    const {
+      data: { user },
+    } = await supaClient.auth.getUser();
+
+    const { data, error } = await supaClient.rpc("get_planning", {
+      search_id: user?.id,
     });
+
+    console.log(data)
+
+    if (error) {
+      console.error(`Error getting current plan:`, error);
+      res.status(500).json({ error: "Error getting current plan" });
+    } else {
+      console.log(`Success getting current plan:`, data);
+      res.status(200).json(data);
+    }
+  } catch (err) {
+    console.error("Error getting current plan:", err);
+    res.status(500).json({ error: "Error getting current plan" });
   }
 });
+
+app.get("/get-stm32-data", checkSession, async (_, res) => {
+  if (serialPort) {
+    if (jsonData) {
+      console.log(jsonData)
+      res.status(200).json({ data: jsonData });
+    } else {
+      res.status(204).send("No data available"); // Return a 204 status if buffer is empty
+    }
+  } else {
+    res.status(500).send("Serial port is not available");
+  }
+});
+
+
+
 
 /*
 ..######..##.....##.########.....###....########.....###.....######..########.....######..########.########..##.....##.########.########.

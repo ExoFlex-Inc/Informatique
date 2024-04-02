@@ -1537,6 +1537,20 @@ svg {
   }
 }
 
+/*
+..######..##.....##..######..########..#######..##.....##.....######...######...######.
+.##....##.##.....##.##....##....##....##.....##.###...###....##....##.##....##.##....##
+.##.......##.....##.##..........##....##.....##.####.####....##.......##.......##......
+.##.......##.....##..######.....##....##.....##.##.###.##....##........######...######.
+.##.......##.....##.......##....##....##.....##.##.....##....##.............##.......##
+.##....##.##.....##.##....##....##....##.....##.##.....##....##....##.##....##.##....##
+..######...#######...######.....##.....#######..##.....##.....######...######...######.
+*/
+
+.custom-height {
+  height: calc(100vh - 100px);
+}
+
 /* Dialog component styles */
 
 .dialog-container {
@@ -1810,6 +1824,21 @@ svg {
   position: relative;
   margin-left: 0.5rem;
   margin-right: 1.5rem;
+}
+
+/* Plan Grid*/
+
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); /* Adjust minmax values as needed */
+  grid-template-rows: auto; /* Adjust as needed */
+  gap: 1rem; /* Adjust gap size as needed */
+}
+
+@media screen and (max-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); /* Adjust minmax values for smaller screens */
+  }
 }
 
 /* UserMenu component styles */

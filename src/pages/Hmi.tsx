@@ -1,11 +1,20 @@
-import { useState, useRef } from "react";
-import { redirect, useNavigate } from "react-router-dom";
-import { supaClient } from "../hooks/supa-client.ts";
+import React, { useEffect, useState } from "react";
 import Button from "../components/Button..tsx";
+
+interface Stm32Data {
+  errorcode: string;
+  exercise: string;
+  mode: string;
+  positions: number[];
+  repetitions: number;
+  sets: number;
+  torques: number[];
+}
+
 
 export async function hmiInit() {
   try {
-    console.log("Attempting to initialize serial port...");
+    console.log("Attempting to initialize STM32 serial port...");
 
     const responseSerialPort = await fetch(
       "http://localhost:3001/initialize-serial-port",
@@ -15,128 +24,204 @@ export async function hmiInit() {
     );
 
     if (responseSerialPort.ok) {
-      console.log("Serial port initialized successfully.");
-
-      console.log("Attempting to fetch patient data...");
-
-      const responseDataFetch = await fetch(
-        "http://localhost:3001/fetch-patient-data",
-        {
-          method: "POST",
-        },
-      );
-
-      if (responseDataFetch.ok) {
-        console.log("Patient data fetched successfully.");
-        return { loaded: true };
-      } else {
-        console.error("Failed to fetch patient data");
-        return redirect("/home");
-      }
+      console.log("STM32 serial port initialized successfully.");
+      window.alert("STM32 serial port initialized successfully");
+      return { loaded: true };
     } else {
-      console.error("Failed to initialize serial port");
-      return redirect("/home");
+      console.error("Failed to initialize serial port: Check STM32 connection");
+      return { loaded: false };
     }
   } catch (error) {
     console.error("An error occurred:", error);
-    return redirect("/home");
+    return { loaded: false };
   }
 }
 
 export default function HMI() {
-  const [leftButton, setLeftButton] = useState("eversionL");
-  const [rightButton, setRightButton] = useState("eversionR");
+  const [loaded, setLoaded] = useState(false);
+  const [retryInit, setRetryInit] = useState(true);
+  const [mode, setMode] = useState(null);
+  const [planData, setPlanData] = useState(null);
+  const [stm32Data, setStm32Data] = useState<Stm32Data | null>(null);
+  const [currentCellIndex, setCurrentCellIndex] = useState(0);
 
-  const navigate = useNavigate();
+  useEffect(() => {
+    const initialize = async () => {
+      const result = await hmiInit();
+      setLoaded(result.loaded);
 
-  const handleNextClick = () => {
-    setRightButton("dorsiflexionU");
-    setLeftButton("dorsiflexionD");
-  };
-
-  const handleBackClick = async () => {
-    if (leftButton === "dorsiflexionD") {
-      setRightButton("eversionR");
-      setLeftButton("eversionL");
-    } else {
-      const response = await fetch("http://localhost:3001/reset-serial-port", {
-        method: "POST",
-      });
-
-      if (response.ok) {
-        navigate("/home");
+      // If initialization fails, prompt the user to retry
+      if (!result.loaded) {
+        window.confirm("Failed to initialize serial port. Retry?") && initialize();
       } else {
-        console.log("Failed to reset machineData");
-        navigate("/home");
+        setRetryInit(false);
       }
-    }
-  };
-
-  const sendDataToSupabase = async () => {
-    const { data } = await supaClient.auth.getSession();
-
-    const access_token = data.session?.access_token;
-    const refresh_token = data.session?.refresh_token;
-
-    const requestBody = {
-      access_token: access_token,
-      refresh_token: refresh_token,
     };
 
-    const response = await fetch("http://localhost:3001/push-supabase", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
-    });
-
-    if (response.ok) {
-      console.log("Data pushed to supabase");
-    } else {
-      console.error("Failed to close serial port.");
+    if (retryInit) {
+      initialize();
     }
+  }, [retryInit]);
 
-    const response2 = await fetch("http://localhost:3001/reset-serial-port", {
-      method: "POST",
-    });
+  useEffect(() => {
+    const fetchPlanData = async () => {
+      try {
+        const responseGetPlanning = await fetch("http://localhost:3001/get-plan", {
+          method: "GET",
+        });
 
-    if (response2.ok) {
-      navigate("/home");
-      console.log("Serial port deconnected and machineData reset");
-    } else {
-      console.log("Failed to reset machineData");
-    }
+        if (responseGetPlanning.ok) {
+          console.log("Plan retrieved successfully.");
+          const planData = await responseGetPlanning.json();
+          console.log("Plan data:", planData[0].plan_content.plan);
+          setPlanData(planData[0].plan_content.plan);
+          // setLoaded(true); // Mark as loaded when plan data is fetched
+        } else {
+          console.error("Failed to retrieve plan.");
+          window.alert("Failed to retrieve plan.");
+        }
+      } catch (error) {
+        console.error("An error occurred:", error);
+        window.alert("An error occurred: " + error);
+      }
+    };
+
+    fetchPlanData();
+  }, []);
+
+  useEffect(() => {
+
+    const fetchStm32Data = async () => {
+      try {
+        const responseGetStm32Data = await fetch("http://localhost:3001/get-stm32-data", {
+          method: "GET",
+        });
+
+        if (responseGetStm32Data.ok) {
+          console.log("Data retrieved successfully.");
+          const stm32Data = await responseGetStm32Data.json();
+          console.log("Stm32 data:", stm32Data.data);
+          setStm32Data(stm32Data.data);
+          // setLoaded(true); // Mark as loaded when plan data is fetched
+        } else {
+          console.error("Failed to retrieve stm32 data.");
+          window.alert("Failed to retrieve stm32 data.");
+        }
+      } catch (error) {
+        console.error("An error occurred:", error);
+        window.alert("An error occurred: " + error);
+      }
+    };
+
+    fetchStm32Data();
+
+  }, []);
+
+  const handleButtonError = (error) => {
+    setRetryInit(error);
   };
+
+  const handleNextButtonClick = () => {
+    setCurrentCellIndex(prevIndex => prevIndex + 1);
+  };
+
   return (
-    <div className="flex flex-col h-[calc(100vh-2rem)] justify-end">
-      <div className="mb-10 flex justify-center">
-        <Button
-          label={leftButton === "eversionL" ? "EversionL" : "DorsiflexionD"}
-          toSend={leftButton}
-          className="mr-2"
-        />
-        <button
-          onClick={() => sendDataToSupabase()}
-          className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2"
-        >
-          Send data
-        </button>
-        <Button
-          label={rightButton === "eversionR" ? "EversionR" : "DorsiflexionU"}
-          toSend={rightButton}
-        />
-        {leftButton === "dorsiflexionD" && (
-          <Button label="ExtensionD" toSend="extensionD" className="mr-2" />
-        )}
-        {rightButton === "dorsiflexionU" && (
-          <Button label="ExtensionU" toSend="extensionU" />
-        )}
+    <div className="plan-grid grid-cols-3 grid-rows-2 gap-4 custom-height mr-10 ml-10">
+      <div className="bg-white col-span-2 rounded-2xl">
       </div>
-      <div className="flex justify-between p-5">
-        <Button label="Back" onClick={handleBackClick} />
-        <Button label="Next" onClick={handleNextClick} />
+      <div className="bg-white rounded-2xl"></div>
+      <div className="bg-white col-span-2 flex flex-col rounded-2xl">
+        <div className="flex justify-center mt-20 mb-20">
+          {mode === "Auto" ? (
+            <Button
+              label="Start"
+              mode="Auto"
+              action="Plan"
+              className="mr-10"
+              onError={handleButtonError}
+            /> ) : (
+              <Button
+              label="Start"
+              mode="Auto"
+              action="Control"
+              content="Start"
+              className="mr-10 bg-green-500"
+              onError={handleButtonError}
+            />
+            )}
+            <Button
+              label="Stop"
+              mode="Auto"
+              action="Control"
+              content="Stop"
+              className="mr-10 bg-red-500"
+              onError={handleButtonError}
+            />
+            <Button
+              label="Next"
+              mode="Auto"
+              action="Control"
+              content="Next"
+              className=""
+              onClick={handleNextButtonClick}
+              onError={handleButtonError}
+            />
+          </div>
+          <div className="flex justify-center items-center">
+            <Button
+              label="Left"
+              mode="Auto"
+              action="Control"
+              content="Next"
+              className="mr-10 w-32 h-32"
+              onError={handleButtonError}
+            />
+            <Button
+              label="Right"
+              mode="Auto"
+              action="Control"
+              content="next"
+              className=" w-32 h-32"
+              onError={handleButtonError}
+            />
+          </div>
+          <div className="text-black bg-black">
+            {stm32Data && (
+              <div className="text-black">
+                <h2>Current Exercice: </h2>
+                <p>{stm32Data.exercise}</p>
+              </div>
+            )}
+          </div>
       </div>
+      <div className="bg-white rounded-2xl overflow-auto min-w-0"> {/* Apply rounded-2xl class here */}
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr className="divide-x divide-gray-200">
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Exercise
+              </th>
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Repetitions
+              </th>
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Sets
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {planData && planData.map((item, index) => (
+              <tr key={index} className={index === currentCellIndex ? 'bg-green-200' : (index % 2 === 0 ? 'bg-gray-50' : 'bg-white')}>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.exercise}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.repetitions}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.sets}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="bg-white rounded-2xl"></div>
+      <div className="bg-white rounded-2xl"></div>
     </div>
   );
 }

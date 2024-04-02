@@ -51,7 +51,7 @@ void ManagerHMI_Init()
         motorsData[i] = ManagerMotor_GetMotorData(i);
     }
 
-    // Get motor data (const pointer : read-only)
+    // Init buffer
     for (uint8_t i = 0; i < BUF_LENGTH; i++)
     {
         buf[i] = 0;

@@ -30,7 +30,7 @@ export async function manualInit() {
 
 export default function Manual() {
   const [loaded, setLoaded] = useState(false);
-  const [retryInit, setRetryInit] = useState(true); // New state for retry
+  const [retryInit, setRetryInit] = useState(true);
 
   useEffect(() => {
     const initialize = async () => {
@@ -56,8 +56,8 @@ export default function Manual() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-100px)] justify-center">
-      <div className="mt-32 mb-20 flex justify-center">
+    <div className="flex flex-col custom-height justify-center">
+      <div className="mt-20 mb-20 flex justify-center">
         <Button
           label="Motor1H"
           mode="Manual"
