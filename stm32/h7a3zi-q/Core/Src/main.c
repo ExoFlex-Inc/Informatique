@@ -27,7 +27,7 @@
 #include <Manager_HMI.h>
 #include <Manager_Movement.h>
 #include <Manager_Security.h>
-
+#include <Periph_Switch.h>
 
 /* USER CODE END Includes */
 
@@ -135,6 +135,9 @@ int main(void)
 	ManagerHMI_Task();
 	ManagerMovement_Task();
 	ManagerSecurity_Task();
+	PeriphSwitch_Task();
+
+
 
     /* USER CODE END WHILE */
 

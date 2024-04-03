@@ -33,6 +33,7 @@ typedef struct
     uint8_t state;
     uint8_t autoState;
     uint8_t homingState;
+
     float   motorsNextGoal[MMOT_MOTOR_NBR];
     bool    reset;
     bool    securityPass;
@@ -54,7 +55,7 @@ bool dorDownLimitHit;
 bool evLeftLimitHit;
 bool evRightLimitHit;
 
-// Left and roght pos for homing
+// Left and right pos for homing
 float leftPos;
 float rightPos;
 
@@ -205,7 +206,7 @@ void ManagerMovement_WaitingSecurity()
 {
     if (managerMovement.securityPass)
     {
-        managerMovement.state = MMOV_STATE_AUTOMATIC;
+        managerMovement.state = MMOV_STATE_HOMING;
     }
 }
 
@@ -481,6 +482,7 @@ void ManagerMovement_SetFirstPos(uint8_t exerciseIdx)
 void ManagerMovement_AutoIdle()
 {
     // Waiting for button next and or start
+	// TODO: Ajouter une variable et condition qui revoie au hmi que le plan est recu
 
     if (startButton && exercises[exerciseIdx] != 0 &&
         exerciseIdx != MAX_EXERCISES)
@@ -579,6 +581,7 @@ uint8_t ManagerMovement_GetState()
 void ManagerMovement_HomingExtension()
 {
 	//Increment until limitswitch
+
 	if (PeriphSwitch_ExtensionUp())
 	{
 		managerMovement.homingState = MMOV_HOMING_EVERSION;
@@ -702,23 +705,20 @@ void ManagerMovement_RestPos()
 
 float ManagerMovement_GetMiddlePos(float leftPos, float rightPos)
 {
-	float middlePos = 0.0;
-	if (managerMovement.homingState == MMOV_HOMING_DORSIFLEXION)
-	{
-		middlePos = -(leftPos + rightPos) / 2.0;
-	}
-	else if (managerMovement.homingState == MMOV_HOMING_EVERSION)
-	{
-		middlePos = (leftPos + rightPos) / 2.0;
-	}
+	float middlePos = (leftPos + rightPos) / 2.0;
 
 	return middlePos;
 }
 
 void ManagerMovement_SetOrigines(uint8_t motorIndex)
 {
-	ManagerMotor_SetMotorOrigine(motorIndex);
+	ManagerMotor_SetOrigineShift(motorIndex, motorsData[motorIndex]->position);
 	ManagerMotor_SetMotorGoal(motorIndex, 0.0);
+
+	for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
+	{
+		managerMovement.motorsNextGoal[i] = 0.0f;
+	}
 }
 
 /*

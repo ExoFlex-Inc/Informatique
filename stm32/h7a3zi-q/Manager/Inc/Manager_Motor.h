@@ -33,5 +33,6 @@ bool    ManagerMotor_InError();
 uint8_t ManagerMotor_GetState();
 
 void ManagerMotor_SetMotorOrigine(uint8_t motorIndex);
+void ManagerMotor_SetOrigineShift(uint8_t motorIndex, float shiftValue);
 
 #endif
