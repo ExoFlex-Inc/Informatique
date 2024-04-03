@@ -24,16 +24,16 @@ const MotorControlWidget: React.FC<MotorControlWidgetProps> = (props) => {
                 </div>
             </div>
             <div className="justify-center flex">
-                {props.button1 !== undefined && (<Button label={props.button1} toSend={props.button1} />)}
-                {props.button2 !== undefined && (<Button label={props.button2} toSend={props.button2} />)}
+                {props.button1 !== undefined && (<Button className="bg-[#0D7DF2] text-base w-28 h-14 mr-4 mt-4 ml-4" label={props.button1} toSend={props.button1} />)}
+                {props.button2 !== undefined && (<Button className="bg-[#0D7DF2] text-base w-28 h-14 mr-4 mt-4 ml-4" label={props.button2} toSend={props.button2} />)}
             </div>
             <div className="justify-center flex">
-                {props.button3 !== undefined && (<Button label={props.button3} toSend={props.button3} />)}
-                {props.button4 !== undefined && (<Button label={props.button4} toSend={props.button4} />)}
+                {props.button3 !== undefined && (<Button className="bg-[#0D7DF2] text-base w-28 h-14 mr-4 mt-4 ml-4" label={props.button3} toSend={props.button3} />)}
+                {props.button4 !== undefined && (<Button className="bg-[#0D7DF2] text-base w-28 h-14 mr-4 mt-4 ml-4" label={props.button4} toSend={props.button4} />)}
             </div>
             <div className="justify-center flex">
-                {props.button5 !== undefined && (<Button label={props.button5} toSend={props.button5} />)}
-                {props.button6 !== undefined && (<Button label={props.button6} toSend={props.button6} />)}
+                {props.button5 !== undefined && (<Button className="bg-[#0D7DF2] text-base w-28 h-14 mr-4 mt-4 ml-4" label={props.button5} toSend={props.button5} />)}
+                {props.button6 !== undefined && (<Button className="bg-[#0D7DF2] text-base w-28 h-14 mr-4 mt-4 ml-4" label={props.button6} toSend={props.button6} />)}
             </div>
         </div>
     );
