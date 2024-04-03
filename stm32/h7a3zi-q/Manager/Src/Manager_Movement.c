@@ -2,6 +2,7 @@
 #include <Manager_HMI.h>
 #include <Manager_Motor.h>
 #include <Manager_Movement.h>
+#include <Periph_Switch.h>
 #include <string.h>
 
 // Auto states
@@ -96,6 +97,7 @@ void ManagerMovement_HomingPositions();
 void ManagerMovement_HomingExtension();
 void ManagerMovement_HomingEversion();
 void ManagerMovement_HomingDorsiflexion();
+void ManagerMovement_RestPos();
 
 float ManagerMovement_GetMiddlePos(float leftPos, float rightPos);
 void ManagerMovement_SetOrigines(uint8_t motorIndex);
@@ -139,6 +141,7 @@ void ManagerMovement_Reset()
     commandSent                  = false;
     managerMovement.reset        = false;
     managerMovement.securityPass = false;
+
     managerMovement.state        = MMOV_STATE_WAITING_SECURITY;
     managerMovement.autoState    = MMOV_AUTO_STATE_IDLE;
     managerMovement.homingState    = MMOV_HOMING_EXTENSION;
@@ -201,7 +204,7 @@ void ManagerMovement_WaitingSecurity()
 {
     if (managerMovement.securityPass)
     {
-        managerMovement.state = MMOV_STATE_HOMING;
+        managerMovement.state = MMOV_STATE_AUTOMATIC;
     }
 }
 
@@ -234,7 +237,7 @@ void ManagerMovement_Homing()
 		break;
 
 	case MMOV_REST_POS:
-
+		ManagerMovement_RestPos();
 		break;
 	}
 }
@@ -306,25 +309,25 @@ bool ManagerMovement_InError()
  */
 void ManagerMovement_ManualCmdEversion(int8_t direction)
 {
-    if (managerMovement.state == MMOV_STATE_MANUAL)
-    {
-        ManagerMovement_ManualIncrement(MMOT_MOTOR_1, -1 * direction);
-        ManagerMovement_ManualIncrement(MMOT_MOTOR_2, 1 * direction);
-    }
-}
-
-void ManagerMovement_ManualCmdDorsiflexion(int8_t direction)
-{
-    if (managerMovement.state == MMOV_STATE_MANUAL)
+    if (managerMovement.state == MMOV_STATE_MANUAL || managerMovement.state == MMOV_STATE_HOMING)
     {
         ManagerMovement_ManualIncrement(MMOT_MOTOR_1, 1 * direction);
         ManagerMovement_ManualIncrement(MMOT_MOTOR_2, 1 * direction);
     }
 }
 
+void ManagerMovement_ManualCmdDorsiflexion(int8_t direction)
+{
+    if (managerMovement.state == MMOV_STATE_MANUAL || managerMovement.state == MMOV_STATE_HOMING)
+    {
+        ManagerMovement_ManualIncrement(MMOT_MOTOR_1, -1 * direction);
+        ManagerMovement_ManualIncrement(MMOT_MOTOR_2, 1 * direction);
+    }
+}
+
 void ManagerMovement_ManualCmdExtension(int8_t direction)
 {
-    if (managerMovement.state == MMOV_STATE_MANUAL)
+    if (managerMovement.state == MMOV_STATE_MANUAL || managerMovement.state == MMOV_STATE_HOMING)
     {
         ManagerMovement_ManualIncrement(MMOT_MOTOR_3, 1 * direction);
     }
@@ -367,28 +370,28 @@ void ManagerMovement_ManualIncrement(uint8_t motorIndex, int8_t factor)
 
 void ManagerMovement_AutoMovement(uint8_t mouvType, float Position)
 {
-	if (mouvType == DORSIFLEXION)  // Set goalPosition for motor 1 and 2 for
+	float deltaPos = Position - motorsData[MMOT_MOTOR_1]->position;
+
+	if (mouvType == EVERSION)  // Set goalPosition for motor 1 and 2 for
 								   // dorsiflexion
+	{
+		managerMovement.motorsNextGoal[MMOT_MOTOR_1] = Position;
+		ManagerMotor_SetMotorGoal(MMOT_MOTOR_1, managerMovement.motorsNextGoal[MMOT_MOTOR_1]);
+		ManagerMotor_SetMotorGoalState(MMOT_MOTOR_1, true);
+
+		managerMovement.motorsNextGoal[MMOT_MOTOR_2] = motorsData[MMOT_MOTOR_2]->position + deltaPos;
+		ManagerMotor_SetMotorGoal(MMOT_MOTOR_2, managerMovement.motorsNextGoal[MMOT_MOTOR_2]);
+		ManagerMotor_SetMotorGoalState(MMOT_MOTOR_2, true);
+	}
+	else if (mouvType ==
+			 DORSIFLEXION)  // Set goalPosition for motor 1 and 2 for eversion
 	{
 		managerMovement.motorsNextGoal[MMOT_MOTOR_1] = Position;
 		ManagerMotor_SetMotorGoal(
 			MMOT_MOTOR_1, managerMovement.motorsNextGoal[MMOT_MOTOR_1]);
 		ManagerMotor_SetMotorGoalState(MMOT_MOTOR_1, true);
 
-		managerMovement.motorsNextGoal[MMOT_MOTOR_2] = Position;
-		ManagerMotor_SetMotorGoal(
-			MMOT_MOTOR_2, managerMovement.motorsNextGoal[MMOT_MOTOR_2]);
-		ManagerMotor_SetMotorGoalState(MMOT_MOTOR_2, true);
-	}
-	else if (mouvType ==
-			 EVERSION)  // Set goalPosition for motor 1 and 2 for eversion
-	{
-		managerMovement.motorsNextGoal[MMOT_MOTOR_1] = -Position;
-		ManagerMotor_SetMotorGoal(
-			MMOT_MOTOR_1, managerMovement.motorsNextGoal[MMOT_MOTOR_1]);
-		ManagerMotor_SetMotorGoalState(MMOT_MOTOR_1, true);
-
-		managerMovement.motorsNextGoal[MMOT_MOTOR_2] = Position;
+		managerMovement.motorsNextGoal[MMOT_MOTOR_2] = motorsData[MMOT_MOTOR_2]->position - deltaPos;
 		ManagerMotor_SetMotorGoal(
 			MMOT_MOTOR_2, managerMovement.motorsNextGoal[MMOT_MOTOR_2]);
 		ManagerMotor_SetMotorGoalState(MMOT_MOTOR_2, true);
@@ -575,11 +578,10 @@ uint8_t ManagerMovement_GetState()
 void ManagerMovement_HomingExtension()
 {
 	//Increment until limitswitch
-	if (/*limitswitchup*/ test)
+	if (PeriphSwitch_ExtensionUp())
 	{
 		managerMovement.homingState = MMOV_HOMING_EVERSION;
-		ManagerMovement_SetOrigines(MMOT_MOTOR_3);
-		test = false;
+		//ManagerMovement_SetOrigines(MMOT_MOTOR_3);
 	}
 	else
 	{
@@ -590,16 +592,15 @@ void ManagerMovement_HomingExtension()
 void ManagerMovement_HomingEversion()
 {
 	//Increment until limitswitch
-	if (/*HAL_GPIO_ReadPin(Switch_GPIO_Port, Switch_Pin) ||*/ evLeftLimitHit)
+	if (PeriphSwitch_EversionLeft() || evLeftLimitHit)
 	{
 		if (!evLeftLimitHit)
 		{
 			leftPos = motorsData[MMOT_MOTOR_1]->position;
 			evLeftLimitHit = true;
-			test = false;
 		}
 
-		if (/*HAL_GPIO_ReadPin(Switch_GPIO_Port, Switch_Pin) ||*/ evRightLimitHit)
+		if (PeriphSwitch_EversionRight() || evRightLimitHit)
 		{
 			if (!evRightLimitHit)
 			{
@@ -618,7 +619,6 @@ void ManagerMovement_HomingEversion()
 				evLeftLimitHit = false;
 				evRightLimitHit = false;
 				commandSent = false;
-				test = false;
 
 				managerMovement.homingState = MMOV_HOMING_DORSIFLEXION;
 			}
@@ -637,16 +637,15 @@ void ManagerMovement_HomingEversion()
 void ManagerMovement_HomingDorsiflexion()
 {
 	//Increment until limitswitch
-	if (/*HAL_GPIO_ReadPin(Switch2_GPIO_Port, Switch2_Pin) ||*/ dorUpLimitHit)
+	if (PeriphSwitch_DorsiflexionUp() || dorUpLimitHit)
 	{
 		if (!dorUpLimitHit)
 		{
 			leftPos = motorsData[MMOT_MOTOR_1]->position;
-			test = false;
 			dorUpLimitHit = true;
 		}
 
-		if (/*HAL_GPIO_ReadPin(Switch2_GPIO_Port, Switch2_Pin) ||*/ dorDownLimitHit)
+		if (PeriphSwitch_DorsiflexionDown() || dorDownLimitHit)
 		{
 			if (!dorDownLimitHit)
 			{
@@ -662,33 +661,55 @@ void ManagerMovement_HomingDorsiflexion()
 			}
 			else if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) && !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2))
 			{
-				ManagerMovement_SetOrigines(MMOT_MOTOR_1);
-				ManagerMovement_SetOrigines(MMOT_MOTOR_2);
+//				ManagerMovement_SetOrigines(MMOT_MOTOR_1);
+//				ManagerMovement_SetOrigines(MMOT_MOTOR_2);
 
 				dorUpLimitHit = false;
 				dorDownLimitHit = false;
 				commandSent = false;
-
-				test = false;
 
 				managerMovement.homingState = MMOV_REST_POS;
 			}
 		}
 		else
 		{
-			ManagerMovement_ManualCmdDorsiflexion(MMOV_UP);
+			ManagerMovement_ManualCmdDorsiflexion(MMOV_DOWN);
 		}
 	}
 	else
 	{
-		ManagerMovement_ManualCmdDorsiflexion(MMOV_DOWN);
+		ManagerMovement_ManualCmdDorsiflexion(MMOV_UP);
 	}
 }
 
+void ManagerMovement_RestPos()
+{
+	if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_3) && !commandSent)
+	{
+		ManagerMovement_AutoMovement(EXTENSION, MMOV_REST_POS);
+
+		commandSent = true;
+	}
+	else if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_3))
+	{
+		commandSent = false;
+
+		managerMovement.homingState = MMOV_VERIF_PERSON_IN;
+		managerMovement.state = MMOV_STATE_MANUAL;
+	}
+}
 
 float ManagerMovement_GetMiddlePos(float leftPos, float rightPos)
 {
-	float middlePos = (leftPos + rightPos) / 2.0;
+	float middlePos = 0.0;
+	if (managerMovement.homingState == MMOV_HOMING_DORSIFLEXION)
+	{
+		middlePos = -(leftPos + rightPos) / 2.0;
+	}
+	else if (managerMovement.homingState == MMOV_HOMING_EVERSION)
+	{
+		middlePos = (leftPos + rightPos) / 2.0;
+	}
 
 	return middlePos;
 }

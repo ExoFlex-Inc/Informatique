@@ -5,10 +5,10 @@
 #define MMOT_MOTOR_2_CAN_ID 2
 #define MMOT_MOTOR_3_CAN_ID 3
 
-#define MMOT_MOVING_MAX_SPEED  2
-#define MMOT_MOVING_MAX_TORQUE 2
-#define MMOT_IDLE_MAX_SPEED    2
-#define MMOT_IDLE_MAX_TORQUE   1
+#define MMOT_MOVING_MAX_SPEED  20
+#define MMOT_MOVING_MAX_TORQUE 20
+#define MMOT_IDLE_MAX_SPEED    20
+#define MMOT_IDLE_MAX_TORQUE   10
 
 #define MMOT_MOT1_MIN_POS -10
 #define MMOT_MOT1_MAX_POS 10
@@ -149,7 +149,7 @@ void ManagerMotor_Task()
     // State machine that Init, sets to zero, reads informations and sends
     // informations to the motors
     ManagerMotor_ReceiveFromMotors();
-    ManagerMotor_VerifyMotorState();
+    //ManagerMotor_VerifyMotorState();
 
     if (HAL_GetTick() - timerMs >= TIMER)
     {

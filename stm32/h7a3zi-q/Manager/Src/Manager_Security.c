@@ -61,7 +61,7 @@ void ManagerSecurity_Task()
         break;
 
     case MS_STATE_WATCHING:
-        ManagerSecurity_Watch();
+        //ManagerSecurity_Watch();
         break;
 
     case MS_STATE_STOPPING:
@@ -108,7 +108,7 @@ void ManagerSecurity_Watch()
 
     if (!ManagerSecurity_VerifLimitSwitch())
     {
-        ManagerSecurity.state = MS_STATE_STOPPING;
+    	ManagerSecurity.state = MS_STATE_STOPPING;
         return;
     }
 
