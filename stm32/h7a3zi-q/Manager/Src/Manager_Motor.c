@@ -41,6 +41,8 @@ typedef struct
     bool     detected;
     bool     goalReady;
     uint32_t lastMsgTime;
+
+    float origineShift;
 } MotorControl;
 
 typedef struct
@@ -75,6 +77,8 @@ void ManagerMotor_CalculateNextPositions();
 void ManagerMotor_SendToMotors();
 void ManagerMotor_VerifyMotorConnection();
 void ManagerMotor_VerifyMotorState();
+
+void ManagerMoter_ApplyOrigineShift();
 
 void ManagerMotor_DisableMotors();
 void ManagerMotor_EnableMotors();
@@ -111,6 +115,7 @@ void ManagerMotor_Reset()
         motors[i].detected     = false;
         motors[i].goalReady    = false;
         motors[i].lastMsgTime  = 0;
+        motors[i].origineShift = 0.0f;
     }
 
     // Set Kp Kd
@@ -219,6 +224,7 @@ void ManagerMotor_ReceiveFromMotors()
             if (lastMsgTime < motors[i].lastMsgTime)
             {
                 PeriphMotors_ParseMotorState(&motors[i].motor, data);
+                ManagerMoter_ApplyOrigineShift();
                 motors[i].detected = true;
             }
         }
@@ -528,4 +534,17 @@ bool ManagerMotor_InError()
 uint8_t ManagerMotor_GetState()
 {
     return managerMotor.state;
+}
+
+void ManagerMoter_ApplyOrigineShift()
+{
+	for (int8_t i = 0; i < MMOT_MOTOR_NBR; i++)
+	{
+		motors[i].motor.position -= motors[i].origineShift;
+	}
+}
+
+void ManagerMotor_SetOrigineShift(uint8_t motorIndex, float shiftValue)
+{
+	motors[motorIndex].origineShift = shiftValue;
 }
