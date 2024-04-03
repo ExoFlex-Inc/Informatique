@@ -43,53 +43,55 @@ export default function Manual() {
   };
 
   const positionData = {
-    datasets: [{
-      label: 'Motor 1 position',
-      borderColor: 'rgb(255, 99, 132)',
-      borderDash: [8, 4],
-      fill: true,
-      data: []
-    },
-    {
-      label: 'Motor 2 position',
-      borderColor: 'rgb(99, 255, 132)',
-      borderDash: [8, 4],
-      fill: true,
-      data: []
-    },
-    {
-      label: 'Motor 3 position',
-      borderColor: 'rgb(99, 132, 255)',
-      borderDash: [8, 4],
-      fill: true,
-      data: []
-    },
-  ]
+    datasets: [
+      {
+        label: "Motor 1 position",
+        borderColor: "rgb(255, 99, 132)",
+        borderDash: [8, 4],
+        fill: true,
+        data: [],
+      },
+      {
+        label: "Motor 2 position",
+        borderColor: "rgb(99, 255, 132)",
+        borderDash: [8, 4],
+        fill: true,
+        data: [],
+      },
+      {
+        label: "Motor 3 position",
+        borderColor: "rgb(99, 132, 255)",
+        borderDash: [8, 4],
+        fill: true,
+        data: [],
+      },
+    ],
   };
 
   const torqueData = {
-    datasets: [{
-      label: 'Motor 1 torque',
-      borderColor: 'rgb(255, 99, 132)',
-      borderDash: [8, 4],
-      fill: true,
-      data: []
-    },
-    {
-      label: 'Motor 2 torque',
-      borderColor: 'rgb(99, 255, 132)',
-      borderDash: [8, 4],
-      fill: true,
-      data: []
-    },
-    {
-      label: 'Motor 3 torque',
-      borderColor: 'rgb(99, 132, 255)',
-      borderDash: [8, 4],
-      fill: true,
-      data: []
-    },
-  ]
+    datasets: [
+      {
+        label: "Motor 1 torque",
+        borderColor: "rgb(255, 99, 132)",
+        borderDash: [8, 4],
+        fill: true,
+        data: [],
+      },
+      {
+        label: "Motor 2 torque",
+        borderColor: "rgb(99, 255, 132)",
+        borderDash: [8, 4],
+        fill: true,
+        data: [],
+      },
+      {
+        label: "Motor 3 torque",
+        borderColor: "rgb(99, 132, 255)",
+        borderDash: [8, 4],
+        fill: true,
+        data: [],
+      },
+    ],
   };
 
   return (
@@ -104,7 +106,6 @@ export default function Manual() {
 
         <MotorControlWidget title={"Home Settings"} icon={<HomeOutlinedIcon sx={{ fontSize: '56px'}}/>} button1={"GoHome1"} button2={"GoHome2"} button3={"GoHome3"} button4={"GoHome"} button5={"SetHome"}/>
       </div>
-
     </div>
   );
 }

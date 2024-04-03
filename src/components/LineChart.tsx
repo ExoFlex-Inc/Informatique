@@ -1,11 +1,11 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { Line } from "react-chartjs-2";
 import "chartjs-adapter-luxon";
 import PauseButton from "../components/PauseButton.tsx";
 import PlayButton from "../components/PlayButton.tsx";
 // import { ChartData } from "react-chartjs-2"
 import Chart from "chart.js/auto";
-import {CategoryScale, Ticks} from 'chart.js';
+import { CategoryScale, Ticks } from "chart.js";
 import StreamingPlugin from "chartjs-plugin-streaming";
 
 Chart.register(CategoryScale);
@@ -50,7 +50,6 @@ interface ScalesOptions {
   x: XAxisOptions;
   y: YAxisOptions;
   // x: XAxisOptions;
-
 }
 
 interface ChartOptions {
@@ -64,7 +63,11 @@ interface Dataset {
   }[];
 }
 
-const LineChart: React.FC<LineChartProps> = ({ chartData, setPositionGraph, positionGraph }) => {
+const LineChart: React.FC<LineChartProps> = ({
+  chartData,
+  setPositionGraph,
+  positionGraph,
+}) => {
   const [graphPause, setGraphPause] = useState(false);
   const [chartOptions, setChartOptions] = useState<ChartOptions>({
     scales: {
@@ -136,7 +139,6 @@ const LineChart: React.FC<LineChartProps> = ({ chartData, setPositionGraph, posi
       <Line data={chartData} options={chartOptions}/>
     </div>
   );
-
-}
+};
 
 export default LineChart;
