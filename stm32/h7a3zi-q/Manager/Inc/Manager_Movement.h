@@ -17,9 +17,9 @@
 
 typedef struct
 {
-	uint8_t autoState;
-	uint8_t exCount;
-	uint8_t repsCount;
+    uint8_t autoState;
+    uint8_t exCount;
+    uint8_t repsCount;
 
 } autoPlanInfo_t;
 
@@ -28,8 +28,8 @@ void ManagerMovement_Reset();
 void ManagerMovement_Task();
 
 // Utilities
-uint8_t ManagerMovement_GetState();
-void    ManagerMovement_SetState(uint8_t state);
+uint8_t         ManagerMovement_GetState();
+void            ManagerMovement_SetState(uint8_t state);
 autoPlanInfo_t* ManagerMovement_GetPlanData();
 
 // Auto Setup

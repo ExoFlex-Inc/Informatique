@@ -154,7 +154,7 @@ void ManagerMotor_Task()
     // State machine that Init, sets to zero, reads informations and sends
     // informations to the motors
     ManagerMotor_ReceiveFromMotors();
-    //ManagerMotor_VerifyMotorState();
+    // ManagerMotor_VerifyMotorState();
 
     if (HAL_GetTick() - timerMs >= TIMER)
     {
@@ -329,7 +329,7 @@ void ManagerMotor_SetOrigines()
 
 void ManagerMotor_SetMotorOrigine(uint8_t motorIndex)
 {
-	PeriphMotors_SetZeroPosition(&motors[motorIndex].motor);
+    PeriphMotors_SetZeroPosition(&motors[motorIndex].motor);
 }
 
 void ManagerMotor_SendToMotors()
@@ -538,13 +538,13 @@ uint8_t ManagerMotor_GetState()
 
 void ManagerMoter_ApplyOrigineShift()
 {
-	for (int8_t i = 0; i < MMOT_MOTOR_NBR; i++)
-	{
-		motors[i].motor.position -= motors[i].origineShift;
-	}
+    for (int8_t i = 0; i < MMOT_MOTOR_NBR; i++)
+    {
+        motors[i].motor.position -= motors[i].origineShift;
+    }
 }
 
 void ManagerMotor_SetOrigineShift(uint8_t motorIndex, float shiftValue)
 {
-	motors[motorIndex].origineShift = shiftValue;
+    motors[motorIndex].origineShift = shiftValue;
 }

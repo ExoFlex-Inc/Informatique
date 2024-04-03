@@ -7,7 +7,7 @@
 #define PS_GPIO_DORSIFLEXION_UP   GPIOF
 #define PS_GPIO_EVERSION_RIGHT    GPIOF
 #define PS_GPIO_EXTENSION_DOWN    GPIOF
-#define PS_GPIO_LEG_RIGHT    	  GPIOD
+#define PS_GPIO_LEG_RIGHT         GPIOD
 
 #define PS_PIN_LEG_LEFT          GPIO_PIN_4  // D57
 #define PS_PIN_DORSIFLEXION_DOWN GPIO_PIN_5  // D58
@@ -16,13 +16,13 @@
 #define PS_PIN_DORSIFLEXION_UP   GPIO_PIN_8  // D61
 #define PS_PIN_EVERSION_RIGHT    GPIO_PIN_7  // D62
 #define PS_PIN_EXTENSION_DOWN    GPIO_PIN_9  // D63
-#define PS_PIN_LEG_RIGHT         GPIO_PIN_10 // D64
+#define PS_PIN_LEG_RIGHT         GPIO_PIN_10  // D64
 
 #define DEBOUNCE_THRESHOLD 5
 
 void PeriphSwitch_Task()
 {
-	PeriphSwitch_AnySwitch();
+    PeriphSwitch_AnySwitch();
 }
 
 bool PeriphSwitch_LegLeft()
@@ -36,235 +36,236 @@ bool PeriphSwitch_LegLeft()
 
 bool PeriphSwitch_LegRight()
 {
-	static uint8_t debounceCounter = 0;
-	static bool lastState = false;
-	bool currentState;
+    static uint8_t debounceCounter = 0;
+    static bool    lastState       = false;
+    bool           currentState;
 
     if (HAL_GPIO_ReadPin(PS_GPIO_LEG_RIGHT, PS_PIN_LEG_RIGHT) == GPIO_PIN_RESET)
     {
-    	currentState = true; // Switch is pressed
+        currentState = true;  // Switch is pressed
     }
     else
-	{
-		currentState = false; // Switch is not pressed
-	}
+    {
+        currentState = false;  // Switch is not pressed
+    }
 
-	// Debouncing logic
-	if (currentState != lastState)
-	{
-		debounceCounter++;
-		if (debounceCounter >= DEBOUNCE_THRESHOLD)
-		{
-			lastState = currentState;
-			debounceCounter = 0;
-		}
-	}
-	else
-	{
-		debounceCounter = 0;
-	}
+    // Debouncing logic
+    if (currentState != lastState)
+    {
+        debounceCounter++;
+        if (debounceCounter >= DEBOUNCE_THRESHOLD)
+        {
+            lastState       = currentState;
+            debounceCounter = 0;
+        }
+    }
+    else
+    {
+        debounceCounter = 0;
+    }
 
-	return lastState;
+    return lastState;
 }
 
 bool PeriphSwitch_ExtensionUp()
 {
-	static uint8_t debounceCounter = 0;
-	static bool lastState = false;
-	bool currentState;
+    static uint8_t debounceCounter = 0;
+    static bool    lastState       = false;
+    bool           currentState;
 
-	// Read current state of the switch
-	if (HAL_GPIO_ReadPin(PS_GPIO_EXTENSION_UP, PS_PIN_EXTENSION_UP) == GPIO_PIN_RESET)
-	{
-		currentState = true; // Switch is pressed
-	}
-	else
-	{
-		currentState = false; // Switch is not pressed
-	}
+    // Read current state of the switch
+    if (HAL_GPIO_ReadPin(PS_GPIO_EXTENSION_UP, PS_PIN_EXTENSION_UP) ==
+        GPIO_PIN_RESET)
+    {
+        currentState = true;  // Switch is pressed
+    }
+    else
+    {
+        currentState = false;  // Switch is not pressed
+    }
 
-	// Debouncing logic
-	if (currentState != lastState)
-	{
-		debounceCounter++;
-		if (debounceCounter >= DEBOUNCE_THRESHOLD)
-		{
-			lastState = currentState;
-			debounceCounter = 0;
-		}
-	}
-	else
-	{
-		debounceCounter = 0;
-	}
+    // Debouncing logic
+    if (currentState != lastState)
+    {
+        debounceCounter++;
+        if (debounceCounter >= DEBOUNCE_THRESHOLD)
+        {
+            lastState       = currentState;
+            debounceCounter = 0;
+        }
+    }
+    else
+    {
+        debounceCounter = 0;
+    }
 
-	return lastState;
+    return lastState;
 }
 
 bool PeriphSwitch_ExtensionDown()
 {
-	static uint8_t debounceCounter = 0;
-	static bool lastState = false;
-	bool currentState;
+    static uint8_t debounceCounter = 0;
+    static bool    lastState       = false;
+    bool           currentState;
 
     if (HAL_GPIO_ReadPin(PS_GPIO_EXTENSION_DOWN, PS_PIN_EXTENSION_DOWN) ==
         GPIO_PIN_RESET)
     {
-		currentState = true; // Switch is pressed
-	}
-	else
-	{
-		currentState = false; // Switch is not pressed
-	}
+        currentState = true;  // Switch is pressed
+    }
+    else
+    {
+        currentState = false;  // Switch is not pressed
+    }
 
-	// Debouncing logic
-	if (currentState != lastState)
-	{
-		debounceCounter++;
-		if (debounceCounter >= DEBOUNCE_THRESHOLD)
-		{
-			lastState = currentState;
-			debounceCounter = 0;
-		}
-	}
-	else
-	{
-		debounceCounter = 0;
-	}
+    // Debouncing logic
+    if (currentState != lastState)
+    {
+        debounceCounter++;
+        if (debounceCounter >= DEBOUNCE_THRESHOLD)
+        {
+            lastState       = currentState;
+            debounceCounter = 0;
+        }
+    }
+    else
+    {
+        debounceCounter = 0;
+    }
 
-	return lastState;
+    return lastState;
 }
 
 bool PeriphSwitch_DorsiflexionUp()
 {
-	static uint8_t debounceCounter = 0;
-	static bool lastState = false;
-	bool currentState;
+    static uint8_t debounceCounter = 0;
+    static bool    lastState       = false;
+    bool           currentState;
 
     if (HAL_GPIO_ReadPin(PS_GPIO_DORSIFLEXION_UP, PS_PIN_DORSIFLEXION_UP) ==
         GPIO_PIN_RESET)
     {
-		currentState = true; // Switch is pressed
-	}
-	else
-	{
-		currentState = false; // Switch is not pressed
-	}
+        currentState = true;  // Switch is pressed
+    }
+    else
+    {
+        currentState = false;  // Switch is not pressed
+    }
 
-	// Debouncing logic
-	if (currentState != lastState)
-	{
-		debounceCounter++;
-		if (debounceCounter >= DEBOUNCE_THRESHOLD)
-		{
-			lastState = currentState;
-			debounceCounter = 0;
-		}
-	}
-	else
-	{
-		debounceCounter = 0;
-	}
-	return lastState;
+    // Debouncing logic
+    if (currentState != lastState)
+    {
+        debounceCounter++;
+        if (debounceCounter >= DEBOUNCE_THRESHOLD)
+        {
+            lastState       = currentState;
+            debounceCounter = 0;
+        }
+    }
+    else
+    {
+        debounceCounter = 0;
+    }
+    return lastState;
 }
 
 bool PeriphSwitch_DorsiflexionDown()
 {
-	static uint8_t debounceCounter = 0;
-	static bool lastState = false;
-	bool currentState;
+    static uint8_t debounceCounter = 0;
+    static bool    lastState       = false;
+    bool           currentState;
 
     if (HAL_GPIO_ReadPin(PS_GPIO_DORSIFLEXION_DOWN, PS_PIN_DORSIFLEXION_DOWN) ==
         GPIO_PIN_RESET)
     {
-		currentState = true; // Switch is pressed
-	}
-	else
-	{
-		currentState = false; // Switch is not pressed
-	}
+        currentState = true;  // Switch is pressed
+    }
+    else
+    {
+        currentState = false;  // Switch is not pressed
+    }
 
-	// Debouncing logic
-	if (currentState != lastState)
-	{
-		debounceCounter++;
-		if (debounceCounter >= DEBOUNCE_THRESHOLD)
-		{
-			lastState = currentState;
-			debounceCounter = 0;
-		}
-	}
-	else
-	{
-		debounceCounter = 0;
-	}
-	return lastState;
+    // Debouncing logic
+    if (currentState != lastState)
+    {
+        debounceCounter++;
+        if (debounceCounter >= DEBOUNCE_THRESHOLD)
+        {
+            lastState       = currentState;
+            debounceCounter = 0;
+        }
+    }
+    else
+    {
+        debounceCounter = 0;
+    }
+    return lastState;
 }
 
 bool PeriphSwitch_EversionLeft()
 {
-	static uint8_t debounceCounter = 0;
-	static bool lastState = false;
-	bool currentState;
+    static uint8_t debounceCounter = 0;
+    static bool    lastState       = false;
+    bool           currentState;
 
     if (HAL_GPIO_ReadPin(PS_GPIO_EVERSION_LEFT, PS_PIN_EVERSION_LEFT) ==
         GPIO_PIN_RESET)
     {
-		currentState = true; // Switch is pressed
-	}
-	else
-	{
-		currentState = false; // Switch is not pressed
-	}
+        currentState = true;  // Switch is pressed
+    }
+    else
+    {
+        currentState = false;  // Switch is not pressed
+    }
 
-	// Debouncing logic
-	if (currentState != lastState)
-	{
-		debounceCounter++;
-		if (debounceCounter >= DEBOUNCE_THRESHOLD)
-		{
-			lastState = currentState;
-			debounceCounter = 0;
-		}
-	}
-	else
-	{
-		debounceCounter = 0;
-	}
-	return lastState;
+    // Debouncing logic
+    if (currentState != lastState)
+    {
+        debounceCounter++;
+        if (debounceCounter >= DEBOUNCE_THRESHOLD)
+        {
+            lastState       = currentState;
+            debounceCounter = 0;
+        }
+    }
+    else
+    {
+        debounceCounter = 0;
+    }
+    return lastState;
 }
 
 bool PeriphSwitch_EversionRight()
 {
-	static uint8_t debounceCounter = 0;
-	static bool lastState = false;
-	bool currentState;
+    static uint8_t debounceCounter = 0;
+    static bool    lastState       = false;
+    bool           currentState;
 
     if (HAL_GPIO_ReadPin(PS_GPIO_EVERSION_RIGHT, PS_PIN_EVERSION_RIGHT) ==
         GPIO_PIN_RESET)
     {
-		currentState = true; // Switch is pressed
-	}
-	else
-	{
-		currentState = false; // Switch is not pressed
-	}
+        currentState = true;  // Switch is pressed
+    }
+    else
+    {
+        currentState = false;  // Switch is not pressed
+    }
 
-	// Debouncing logic
-	if (currentState != lastState)
-	{
-		debounceCounter++;
-		if (debounceCounter >= DEBOUNCE_THRESHOLD)
-		{
-			lastState = currentState;
-			debounceCounter = 0;
-		}
-	}
-	else
-	{
-		debounceCounter = 0;
-	}
-	return lastState;
+    // Debouncing logic
+    if (currentState != lastState)
+    {
+        debounceCounter++;
+        if (debounceCounter >= DEBOUNCE_THRESHOLD)
+        {
+            lastState       = currentState;
+            debounceCounter = 0;
+        }
+    }
+    else
+    {
+        debounceCounter = 0;
+    }
+    return lastState;
 }
 
 bool PeriphSwitch_AnySwitch()
