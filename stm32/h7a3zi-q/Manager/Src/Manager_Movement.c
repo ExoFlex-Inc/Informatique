@@ -40,6 +40,7 @@ typedef struct
 } ManagerMovement_t;
 
 ManagerMovement_t managerMovement;
+autoPlanInfo_t autoPlanInfo;
 
 static const Motor* motorsData[MMOT_MOTOR_NBR];
 
@@ -718,4 +719,18 @@ void ManagerMovement_SetOrigines(uint8_t motorIndex)
 {
 	ManagerMotor_SetMotorOrigine(motorIndex);
 	ManagerMotor_SetMotorGoal(motorIndex, 0.0);
+}
+
+/*
+ * Utilities
+ */
+autoPlanInfo_t* ManagerMovement_GetPlanData()
+{
+	// Copy the infos
+	autoPlanInfo.autoState = managerMovement.autoState;
+	autoPlanInfo.repsCount = repsCount;
+	autoPlanInfo.exCount = exerciseIdx;
+
+	// return the struct's address
+    return &autoPlanInfo;
 }
