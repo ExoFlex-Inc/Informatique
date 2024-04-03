@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { redirect, useNavigate } from "react-router-dom";
 import { supaClient } from "../hooks/supa-client.ts";
-import Button from "../components/Button..tsx";
 import LineChart from "../components/LineChart.tsx";
+import AirlineSeatLegroomExtraIcon from '@mui/icons-material/AirlineSeatLegroomExtra';
+import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import ComputerRoundedIcon from '@mui/icons-material/ComputerRounded';
+import MotorControlWidget from "../components/MotorControlWidget.tsx";
 
 export async function manualInit(navigate) {
   try {
@@ -91,35 +94,15 @@ export default function Manual() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-32rem)] justify-between">
-      <div>
+      <div className="justify-center flex">
         <LineChart chartData={positionGraph ? positionData : torqueData} setPositionGraph={setPositionGraph} positionGraph={positionGraph} />
       </div>
-      <div>
-        <div className="mt-32 mb-4 flex justify-center">
-          <Button label="Motor1H" toSend="motor1H" className="mr-4" />
-          <Button label="Motor1AH" toSend="motor1AH" className="mr-8" />
-          <Button label="Motor2H" toSend="motor2H" className="mr-4" />
-          <Button label="Motor2AH" toSend="motor2AH" className="mr-8" />
-          <Button label="Motor3H" toSend="motor3H" className="mr-4" />
-          <Button label="Motor3AH" toSend="motor3AH" className="mr-8" />
-        </div>
+      <div className="flex justify-center">
+        <MotorControlWidget title={"Motor Control"} icon={<ComputerRoundedIcon sx={{ fontSize: '56px'}}/>} button1={"Motor1H"} button2={"Motor1AH"} button3={"Motor2H"} button4={"Motor2AH"} button5={"Motor3H"} button6={"Motor3AH"}/>
 
-        <div className="mb-4 flex justify-center">
-          <Button label="EversionL" toSend="eversionL" className="mr-4" />
-          <Button label="EversionR" toSend="eversionR" className="mr-8" />
-          <Button label="DorsiflexionU" toSend="dorsiflexionU" className="mr-4" />
-          <Button label="DorsiflexionD" toSend="dorsiflexionD" className="mr-8" />
-          <Button label="ExtensionU" toSend="extensionU" className="mr-4" />
-          <Button label="ExtensionD" toSend="extensionD" className="mr-8" />
-        </div>
+        <MotorControlWidget title={"Anatomical Movement"} icon={<AirlineSeatLegroomExtraIcon sx={{ fontSize: '56px'}}/>} button1={"EversionL"} button2={"EversionR"} button3={"DorsiflexionU"} button4={"DorsiflexionD"} button5={"ExtensionU"} button6={"ExtensionD"}/>
 
-        <div className="mb-4 flex justify-center">
-          <Button label="goHome1" toSend="goHome1" className="mr-4" />
-          <Button label="goHome2" toSend="goHome2" className="mr-4" />
-          <Button label="goHome3" toSend="goHome3" className="mr-4" />
-          <Button label="goHome" toSend="goHome" className="mr-4" />
-          <Button label="setHome" toSend="setHome" className="mr-4" />
-        </div>
+        <MotorControlWidget title={"Home Settings"} icon={<HomeOutlinedIcon sx={{ fontSize: '56px'}}/>} button1={"GoHome1"} button2={"GoHome2"} button3={"GoHome3"} button4={"GoHome"} button5={"SetHome"}/>
       </div>
 
     </div>

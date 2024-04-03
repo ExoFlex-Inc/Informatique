@@ -18,7 +18,7 @@ export default function TopBar() {
   const colorMode = useContext(ColorModeContext);
 
   return (
-    <Box className="nav-bar justify-end">
+    <Box className="nav-bar p-0 justify-end">
       <Box className="flex pb-5 pt-5">
         {session && ( // Check if session exists
           <IconButton onClick={colorMode.toggleColorMode}>

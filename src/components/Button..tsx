@@ -84,7 +84,7 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
-      className={`bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ${className}`}
+      className={`bg-[#0D7DF2] hover:bg-gray-700 text-base text-white font-bold w-28 h-14 mr-4 mt-4 ml-4 rounded-[10px] ${className}`}
       onMouseDown={handleMouseDown}
       onClick={handleClick}
     >
