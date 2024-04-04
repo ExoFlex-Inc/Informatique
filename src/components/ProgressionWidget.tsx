@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CircularProgress, {
 CircularProgressProps,
 } from '@mui/material/CircularProgress';
@@ -41,7 +41,7 @@ export default function ProgressionWidget() {
     const [stretchProgress, setStrechProgress] = useState(0);
     const [setProgress, setSetProgress] = useState(0);
   
-    React.useEffect(() => {
+    useEffect(() => {
       const timer = setInterval(() => {
         setStrechProgress((prevProgress: number) => (prevProgress >= 100 ? 0 : prevProgress + 10));
       }, 800);
@@ -50,7 +50,7 @@ export default function ProgressionWidget() {
       };
     }, []);
   
-    React.useEffect(() => {
+    useEffect(() => {
       const timer = setInterval(() => {
         setSetProgress((oldProgress) => {
           if (oldProgress === 100) {
