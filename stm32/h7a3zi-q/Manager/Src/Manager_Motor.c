@@ -115,7 +115,7 @@ void ManagerMotor_Reset()
         motors[i].detected     = false;
         motors[i].goalReady    = false;
         motors[i].lastMsgTime  = 0;
-        motors[i].originShift = 0.0f;
+        motors[i].originShift  = 0.0f;
     }
 
     // Set Kp Kd
