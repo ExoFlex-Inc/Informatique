@@ -10,6 +10,7 @@ export default function UserMenu() {
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to log out?")) {
       supaClient.auth.signOut();
+      localStorage.removeItem("plan")
       navigate("/");
     }
   };

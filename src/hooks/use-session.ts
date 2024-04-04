@@ -62,8 +62,8 @@ export function useSession(): SupabaseUserInfo {
   useEffect(() => {
     supaClient.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
-        navigate("/");
         localStorage.removeItem("lastLocation");
+        localStorage.removeItem("plan")
       } else {
         setUserInfo({ ...userInfo, session });
         supaClient.auth.onAuthStateChange((_event, session) => {
@@ -80,6 +80,8 @@ export function useSession(): SupabaseUserInfo {
         (newChannel) => {
           if (newChannel) {
             if (channel) {
+              navigate("/");
+              console.log("No session found")
               channel.unsubscribe();
             }
             setChannel(newChannel);

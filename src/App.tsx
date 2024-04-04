@@ -35,7 +35,7 @@ export const UserContext = createContext<SupabaseUserInfo>({
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
-      <Route path="/" element={<Dashboard />} />
+      <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/activity" element={<Activity />} />
       <Route path="/welcome" element={<Welcome />} loader={welcomeLoader} />
       <Route path="/manual" element={<Manual />} />

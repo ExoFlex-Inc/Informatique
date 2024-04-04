@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 
 interface ButtonProps {
   label: string;
+  icon?: React.ReactNode;
   mode?: string;
   action?: string;
   content?: string;
@@ -9,17 +10,17 @@ interface ButtonProps {
   onClick?: () => void;
   className?: string;
   disabled?: boolean;
-  onError: (error: boolean) => void;
 }
 
 const Button: React.FC<ButtonProps> = ({
   label,
+  icon,
   mode,
   action,
   content,
   className,
   disabled,
-  onError,
+  onClick
 }) => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   let message = content
@@ -39,12 +40,10 @@ const Button: React.FC<ButtonProps> = ({
       } else {
         console.error("Failed to send button click.");
         clearInterval(intervalRef.current!);
-        onError(true);
       }
     } catch (error) {
       console.error("An error occurred:", error);
       clearInterval(intervalRef.current!);
-      onError(true);
     }
   };
 
@@ -121,16 +120,26 @@ const Button: React.FC<ButtonProps> = ({
           console.error("Error retrieving plan data:", error);
         }
       }
+      else if (action === "Control") {
+        sendingRequests()
+      }
+    }
+  };
+
+  const handleClick = () => {
+    if (onClick) {
+      onClick(); // Call the onClick function received as prop
     }
   };
 
   return (
     <button
-      className={`bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ${className}`}
+      className={`bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ${className} flex justify-center items-center`}
       onMouseDown={handleMouseDown}
+      onClick={handleClick}
       disabled={disabled}
     >
-      {label}
+      {icon ? icon : label}
     </button>
   );
 };
