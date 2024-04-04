@@ -42,7 +42,7 @@ typedef struct
     bool     goalReady;
     uint32_t lastMsgTime;
 
-    float origineShift;
+    float originShift;
 } MotorControl;
 
 typedef struct
@@ -78,7 +78,7 @@ void ManagerMotor_SendToMotors();
 void ManagerMotor_VerifyMotorConnection();
 void ManagerMotor_VerifyMotorState();
 
-void ManagerMoter_ApplyOrigineShift();
+void ManagerMoter_ApplyoriginShift();
 
 void ManagerMotor_DisableMotors();
 void ManagerMotor_EnableMotors();
@@ -115,7 +115,7 @@ void ManagerMotor_Reset()
         motors[i].detected     = false;
         motors[i].goalReady    = false;
         motors[i].lastMsgTime  = 0;
-        motors[i].origineShift = 0.0f;
+        motors[i].originShift = 0.0f;
     }
 
     // Set Kp Kd
@@ -224,7 +224,7 @@ void ManagerMotor_ReceiveFromMotors()
             if (lastMsgTime < motors[i].lastMsgTime)
             {
                 PeriphMotors_ParseMotorState(&motors[i].motor, data);
-                ManagerMoter_ApplyOrigineShift();
+                ManagerMoter_ApplyoriginShift();
                 motors[i].detected = true;
             }
         }
@@ -314,9 +314,9 @@ void ManagerMotor_SetOrigines()
     }
     else if (tryCount < MAX_TRY)
     {
-        ManagerMotor_SetMotorOrigine(MMOT_MOTOR_1);
-        ManagerMotor_SetMotorOrigine(MMOT_MOTOR_2);
-        ManagerMotor_SetMotorOrigine(MMOT_MOTOR_3);
+        ManagerMotor_SetMotorOrigin(MMOT_MOTOR_1);
+        ManagerMotor_SetMotorOrigin(MMOT_MOTOR_2);
+        ManagerMotor_SetMotorOrigin(MMOT_MOTOR_3);
 
         tryCount += 1;
     }
@@ -327,7 +327,7 @@ void ManagerMotor_SetOrigines()
     }
 }
 
-void ManagerMotor_SetMotorOrigine(uint8_t motorIndex)
+void ManagerMotor_SetMotorOrigin(uint8_t motorIndex)
 {
     PeriphMotors_SetZeroPosition(&motors[motorIndex].motor);
 }
@@ -536,15 +536,15 @@ uint8_t ManagerMotor_GetState()
     return managerMotor.state;
 }
 
-void ManagerMoter_ApplyOrigineShift()
+void ManagerMoter_ApplyoriginShift()
 {
     for (int8_t i = 0; i < MMOT_MOTOR_NBR; i++)
     {
-        motors[i].motor.position -= motors[i].origineShift;
+        motors[i].motor.position -= motors[i].originShift;
     }
 }
 
-void ManagerMotor_SetOrigineShift(uint8_t motorIndex, float shiftValue)
+void ManagerMotor_SetoriginShift(uint8_t motorIndex, float shiftValue)
 {
-    motors[motorIndex].origineShift = shiftValue;
+    motors[motorIndex].originShift = shiftValue;
 }

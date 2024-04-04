@@ -61,7 +61,7 @@ void ManagerSecurity_Task()
         break;
 
     case MS_STATE_WATCHING:
-        // ManagerSecurity_Watch();
+        ManagerSecurity_Watch();
         break;
 
     case MS_STATE_STOPPING:

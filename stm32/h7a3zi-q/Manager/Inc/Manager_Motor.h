@@ -32,7 +32,7 @@ void    ManagerMotor_SetError();
 bool    ManagerMotor_InError();
 uint8_t ManagerMotor_GetState();
 
-void ManagerMotor_SetMotorOrigine(uint8_t motorIndex);
-void ManagerMotor_SetOrigineShift(uint8_t motorIndex, float shiftValue);
+void ManagerMotor_SetMotorOrigin(uint8_t motorIndex);
+void ManagerMotor_SetOriginShift(uint8_t motorIndex, float shiftValue);
 
 #endif

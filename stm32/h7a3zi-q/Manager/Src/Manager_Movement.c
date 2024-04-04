@@ -102,7 +102,7 @@ void ManagerMovement_HomingDorsiflexion();
 void ManagerMovement_RestPos();
 
 float ManagerMovement_GetMiddlePos(float leftPos, float rightPos);
-void  ManagerMovement_SetOrigines(uint8_t motorIndex);
+void  ManagerMovement_SetOrigins(uint8_t motorIndex);
 
 bool test;
 
@@ -592,7 +592,7 @@ void ManagerMovement_HomingExtension()
     if (PeriphSwitch_ExtensionUp())
     {
         managerMovement.homingState = MMOV_HOMING_EVERSION;
-        // ManagerMovement_SetOrigines(MMOT_MOTOR_3);
+        // ManagerMovement_SetOrigins(MMOT_MOTOR_3);
     }
     else
     {
@@ -679,8 +679,8 @@ void ManagerMovement_HomingDorsiflexion()
             else if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
                      !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2))
             {
-                //				ManagerMovement_SetOrigines(MMOT_MOTOR_1);
-                //				ManagerMovement_SetOrigines(MMOT_MOTOR_2);
+                //				ManagerMovement_SetOrigins(MMOT_MOTOR_1);
+                //				ManagerMovement_SetOrigins(MMOT_MOTOR_2);
 
                 dorUpLimitHit   = false;
                 dorDownLimitHit = false;
@@ -724,9 +724,9 @@ float ManagerMovement_GetMiddlePos(float leftPos, float rightPos)
     return middlePos;
 }
 
-void ManagerMovement_SetOrigines(uint8_t motorIndex)
+void ManagerMovement_SetOrigins(uint8_t motorIndex)
 {
-    ManagerMotor_SetOrigineShift(motorIndex, motorsData[motorIndex]->position);
+    ManagerMotor_SetOriginShift(motorIndex, motorsData[motorIndex]->position);
     ManagerMotor_SetMotorGoal(motorIndex, 0.0);
 
     for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
