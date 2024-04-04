@@ -382,9 +382,6 @@ void ManagerHMI_ExecuteControlCmd(char* cmd)
 		 case MMOV_AUTO_STATE_2FIRST_POS:
 			 str = "ToFirstPos";
 			 break;
-		 case MMOV_AUTO_STATE_PAUSE:
-			 str = "Pause";
-			 break;
 		 case MMOV_AUTO_STATE_STOP:
 			 str = "Pause";
 			 break;
