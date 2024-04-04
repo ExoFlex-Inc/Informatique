@@ -24,8 +24,9 @@ export default function HMI() {
 
   useEffect(() => {
     if(planData){
-      
-      console.log(planData.plan[currentCellIndex].exercise)
+
+      // console.log(planData)
+      // console.log(planData.plan[0].exercise)
       setCurrentExercice(planData.plan[currentCellIndex].exercise)
     }
 
@@ -143,7 +144,7 @@ export default function HMI() {
           <div className="mb-5">
             {stm32Data && (
               <div className="flex justify-center">
-                <h2 className="text-xl text-black">Current Exercice: {planData.plan[stm32Data.exerciseIdx]}</h2>
+                {/* <h2 className="text-xl text-black">Current Exercice: {planData.plan[stm32Data.exerciseIdx]}</h2> */}
               </div>
             )}
           </div>
