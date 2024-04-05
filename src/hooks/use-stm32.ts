@@ -3,8 +3,13 @@ import socketIOClient from "socket.io-client"
 
 const ENDPOINT = "http://localhost:3001"; // Your server endpoint
 
-const useStm32 = () => {
-  const [stm32Data, setStm32Data] = useState(null);
+interface Stm32Data {
+  positions?: number[];
+  torques?: number[];
+}
+
+const useStm32 = () : {stm32Data: Stm32Data | null; errorFromStm32: boolean} => {
+  const [stm32Data, setStm32Data] = useState<Stm32Data | null>(null);
   const [retrySerial, setRetrySerial] = useState(false);
   const [errorFromStm32, setErrorFromStm32] = useState(false);
 

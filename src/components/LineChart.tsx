@@ -1,198 +1,175 @@
-import { useState, useContext, useEffect } from "react";
-import {
-  ChartComponent,
-  SeriesCollectionDirective,
-  SeriesDirective,
-  Inject,
-  LineSeries,
-  DateTime,
-  Legend,
-  Tooltip,
-  AxisModel,
-} from "@syncfusion/ej2-react-charts";
-import { registerLicense } from "@syncfusion/ej2-base";
-import { supaClient } from "../hooks/supa-client.ts";
-import { UserContext } from "../App.tsx";
+import React, { useState, useEffect } from "react";
+import { Line } from "react-chartjs-2";
+import "chartjs-adapter-luxon";
+import PauseButton from "../components/PauseButton.tsx";
+import PlayButton from "../components/PlayButton.tsx";
+// import { ChartData } from "react-chartjs-2"
+import Chart from "chart.js/auto";
+import { CategoryScale, Ticks } from "chart.js";
+import StreamingPlugin from "chartjs-plugin-streaming";
+import useStm32 from "../hooks/use-stm32.ts";
 
-registerLicense(
-  "Ngo9BigBOggjHTQxAR8/V1NHaF5cWWdCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdgWH5fdnVTRWhYVE11XkU=",
-);
+Chart.register(CategoryScale);
+Chart.register(StreamingPlugin);
 
-interface ChartDataItem {
-  angle: number;
-  time: string;
-  created_at: string;
+interface LineChartProps {
+  chartData: {
+    datasets: {
+      label: string;
+      borderColor: string;
+      borderDash: number[];
+      fill: boolean;
+      data: number[];
+    }[];
+  };
+  setGraphDataIsPosition: React.Dispatch<React.SetStateAction<boolean>>;
+  graphDataIsPosition: boolean;
 }
 
-const LineChart = () => {
-  const [chartData, setChartData] = useState<ChartDataItem[]>([]);
-  const [startDate, setStartDate] = useState("2023-11-02");
-  const [endDate, setEndDate] = useState("2023-11-02");
-  const [timelineFormat, setTimelineFormat] = useState("MMM-d H:mm:ss"); // Default format is year
-  const [selectedData, setSelectedData] = useState("dorsiflexion");
-  const { profile } = useContext(UserContext);
+interface RealtimeOptions {
+  refresh: number;
+  duration: number;
+  delay: number;
+  pause: boolean;
+  onRefresh: (chart: Chart) => void;
+}
 
-  const handleTimelineChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setTimelineFormat(e.target.value);
+interface XAxisOptions {
+  type: 'realtime';
+  ticks: {
+    display: boolean;
   };
+  realtime: RealtimeOptions;
+}
 
-  const test = async () => {
-    if (profile) {
-      const { data, error } = await supaClient.rpc("get_angle", {
-        search_id: profile.user_id,
-        start_date: startDate,
-        end_date: endDate,
-      });
+interface YAxisOptions {
+  min: number;
+  max: number
+}
 
-      if (error) {
-        console.error("Error:", error);
-      } else {
-        console.log("Success:", data);
+interface ScalesOptions {
+  x: XAxisOptions;
+  y: YAxisOptions;
+  // x: XAxisOptions;
+}
 
-        const newData: ChartDataItem[] = [];
+interface ChartOptions {
+  scales: ScalesOptions;
+}
 
-        data.forEach((item: { angle_data: any; created_at: string }) => {
-          if (
-            item.angle_data &&
-            item.created_at &&
-            item.angle_data[selectedData]
-          ) {
-            item.angle_data[selectedData].forEach(
-              (entry: { data: number; time: string }) => {
-                newData.push({
-                  angle: entry.data,
-                  time: entry.time,
-                  created_at: item.created_at, // Include created_at with each entry
+interface Dataset {
+  data: {
+    x: number;
+    y: number | undefined;
+  }[];
+}
+
+const LineChart: React.FC<LineChartProps> = ({
+  chartData,
+  setGraphDataIsPosition,
+  graphDataIsPosition,
+}) => {
+  const [graphPause, setGraphPause] = useState(false);
+  const {stm32Data} = useStm32();
+  const [chartOptions, setChartOptions] = useState<ChartOptions>({
+    scales: {
+      x: {
+          type: 'realtime',
+          ticks: {
+            display: false,
+          },
+          realtime: {
+            refresh: 100,
+            delay: 100,
+            duration: 2000,
+            pause: false,
+            onRefresh: chart => {
+                chart.data.datasets.forEach((dataset: Dataset, index: number) => {
+                  const positionValue = stm32Data?.positions?.[index];
+                  const torqueValue = stm32Data?.positions?.[index];
+                  dataset.data.push({
+                    x: Date.now(),
+                    y: graphDataIsPosition ? positionValue : torqueValue
+                  })
                 });
-              },
-            );
-          }
-        });
-
-        console.log(newData);
-
-        setChartData(newData); // Update state with the new chart data
+            },
+          },
+      },
+      y: {
+        min: 0,
+        max: 30
       }
-    } else {
-      console.error("Profile not available");
-    }
-  };
-
-  useEffect(() => {
-    // Fetch initial data when the component mounts
-    test();
-  }, [startDate, endDate, selectedData]); // Fetch data when start or end date changes
-
-  useEffect(() => {
-    if (chartData.length > 0) {
-      let newData = [];
-      if (timelineFormat === "y-MMM") {
-        const uniqueDates = new Set();
-        newData = chartData
-          .filter((entry) => {
-            const formattedTime = new Date(`${entry.created_at} ${entry.time}`);
-            const yearMonth = formattedTime.toISOString().slice(0, 7); // Extract year and month
-            if (!uniqueDates.has(yearMonth)) {
-              uniqueDates.add(yearMonth);
-              return true;
-            }
-            return false;
-          })
-          .map((entry) => {
-            const formattedTime = new Date(`${entry.created_at} ${entry.time}`);
-            return {
-              x: formattedTime,
-              y: entry.angle,
-              angle: entry.angle,
-              time: entry.time,
-              created_at: entry.created_at,
-            };
-          });
-        console.log(newData);
-        setChartData(newData);
-      }
-    }
-  }, [timelineFormat]);
-
-  const lineCustomSeries = [
-    {
-      dataSource: chartData.map(
-        (entry: { angle: number; time: string; created_at: string }) => ({
-          x: new Date(`${entry.created_at} ${entry.time}`),
-          y: entry.angle,
-        }),
-      ),
-      type: "Line",
-      marker: { visible: true },
     },
-  ];
+  });
 
-  // Customize the labelFormat for the X-axis to display in different intervals based on the selected value
-  const LinePrimaryXAxis: AxisModel = {
-    valueType: "DateTime",
-    labelFormat: timelineFormat, // Update labelFormat based on the selected value
-  };
-  const LinePrimaryYAxis: AxisModel = {};
+  useEffect(() => {
+    setChartOptions((prevOptions) => ({
+      ...prevOptions,
+      scales: {
+        x: {
+          ...prevOptions.scales.x,
+          realtime: {
+            ...prevOptions.scales.x.realtime,
+            onRefresh: chart => {
+              chart.data.datasets.forEach((dataset: Dataset, index: number) => {
+                const positionValue = stm32Data?.positions?.[index];
+                const torqueValue = stm32Data?.torques?.[index];
+                dataset.data.push({
+                  x: Date.now(),
+                  y: graphDataIsPosition ? positionValue : torqueValue
+                })
+              });
+            },
+          },
+        },
+        y: {
+          min: 0,
+          max: 30
+        }
+      },
+    }));
+  }, [stm32Data, graphDataIsPosition]);
 
-  return (
-    <>
-      <ChartComponent
-        id="line-chart"
-        height="420px"
-        primaryXAxis={LinePrimaryXAxis}
-        primaryYAxis={LinePrimaryYAxis}
-        chartArea={{ border: { width: 0 } }}
-        tooltip={{ enable: true }}
-        background={"#fff"}
-        legendSettings={{ background: "white" }}
-      >
-        <Inject services={[LineSeries, DateTime, Legend, Tooltip]} />
-        <SeriesCollectionDirective>
-          <SeriesDirective
-            dataSource={lineCustomSeries[0].dataSource}
-            xName="x"
-            yName="y"
-            type="Line"
-            marker={{ visible: true }}
-          />
-        </SeriesCollectionDirective>
-      </ChartComponent>
+  useEffect(() => {
+    setChartOptions((prevOptions) => ({
+      ...prevOptions,
+      scales: {
+        x: {
+          ...prevOptions.scales.x,
+          realtime: {
+            ...prevOptions.scales.x.realtime,
+            pause: graphPause,
+          },
+        },
+        y: {
+          min: 0,
+          max: 30
+        }
+      },
+    }));
+  }, [graphPause]);
 
-      <div className="text-black">
-        Start Date:
-        <input
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          className="mr-8"
-        />
-        End Date:
-        <input
-          type="date"
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-        />
+  return(
+    <div className="w-[450px]">
+
+      <div className="grid grid-cols-4">
+        <div className="flex">
+          <PlayButton setGraphPause={setGraphPause} graphPause={graphPause} />
+          <PauseButton setGraphPause={setGraphPause} graphPause={graphPause} />
+        </div>
+        <div className="flex col-span-2 justify-center">
+          <div className="flex mr-4">
+            <text>Position</text>
+            <input type="checkbox" checked={graphDataIsPosition} onClick={() => {setGraphDataIsPosition(!graphDataIsPosition)}}/>
+          </div>
+          <div className="flex">
+            <text>Torque</text>
+            <input type="checkbox" checked={!graphDataIsPosition} onClick={() => {setGraphDataIsPosition(!graphDataIsPosition)}}/>
+          </div>
+        </div>
       </div>
-
-      <div className="text-black mt-8">
-        Select Data:
-        <select
-          value={selectedData}
-          onChange={(e) => setSelectedData(e.target.value)}
-        >
-          <option value="dorsiflexion">Dorsiflexion</option>
-          <option value="eversion">Eversion</option>
-          <option value="extension">Extension</option>
-        </select>
-      </div>
-      <div className="text-black mt-8">
-        Select Timeline:
-        <select value={timelineFormat} onChange={handleTimelineChange}>
-          <option value=" MMM-d H:mm:ss">Month-Day</option>
-          <option value="y-MMM">Year-Month</option>
-        </select>
-      </div>
-    </>
+      <Line data={chartData} options={chartOptions}/>
+    </div>
   );
 };
 
