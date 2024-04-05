@@ -125,7 +125,7 @@ void ManagerMotor_Reset()
     motors[MMOT_MOTOR_2].kp = 100.0f;
     motors[MMOT_MOTOR_2].kd = 5.0f;
     // AK 80-64
-    motors[MMOT_MOTOR_3].kp = 100.0f;
+    motors[MMOT_MOTOR_3].kp = 300.0f;
     motors[MMOT_MOTOR_3].kd = 5.0f;
 
     // Set max min pos
