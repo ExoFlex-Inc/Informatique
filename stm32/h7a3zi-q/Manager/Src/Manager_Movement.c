@@ -129,7 +129,7 @@ void ManagerMovement_Reset()
     managerMovement.securityPass = false;
 
     managerMovement.state       = MMOV_STATE_WAITING_SECURITY;
-    managerMovement.autoState   = MMOV_AUTO_STATE_READY;
+    managerMovement.autoState   = MMOV_AUTO_STATE_WAITING4PLAN;
     managerMovement.homingState = MMOV_HOMING_EXTENSION;
 }
 
@@ -153,25 +153,7 @@ void ManagerMovement_Task()
 
         case MMOV_STATE_AUTOMATIC:
             ManagerMovement_Automatic();
-            if (test)
-            {
-                // Ex1
-                ManagerMovement_AddExercise(0, MMOV_DORSIFLEXION, 3, 5000.0, 3000.0);
-                ManagerMovement_SetFinalPos(0, -2);
 
-                // Ex2
-                ManagerMovement_AddExercise(1, MMOV_EXTENSION, 2, 2000.0, 2000.0);
-                ManagerMovement_SetFinalPos(1, -1);
-
-                // Ex3
-                ManagerMovement_AddExercise(2, MMOV_EVERSION, 3, 5000.0, 5000.0);
-                ManagerMovement_SetFinalPos(2, 3);
-
-                // Start Exs
-                ManagerMovement_StartExercise();
-
-                test = false;
-            }
             break;
 
         case MMOV_STATE_ERROR:
@@ -368,35 +350,35 @@ void ManagerMovement_ManualIncrement(uint8_t motorIndex, int8_t factor)
 
 void ManagerMovement_AutoMovement(uint8_t mouvType, float Position)
 {
-    float deltaPos = Position - motorsData[MMOT_MOTOR_1]->position;
+    float deltaPos = Position - motorsData[MMOT_MOTOR_2]->position;
 
     if (mouvType == MMOV_EVERSION)  // Set goalPosition for motor 1 and 2 for
                                // MMOV_DORSIFLEXION
     {
-        managerMovement.motorsNextGoal[MMOT_MOTOR_1] = Position;
-        ManagerMotor_SetMotorGoal(MMOT_MOTOR_1,
-                                  managerMovement.motorsNextGoal[MMOT_MOTOR_1]);
-        ManagerMotor_SetMotorGoalState(MMOT_MOTOR_1, true);
-
-        managerMovement.motorsNextGoal[MMOT_MOTOR_2] =
-            motorsData[MMOT_MOTOR_2]->position + deltaPos;
+        managerMovement.motorsNextGoal[MMOT_MOTOR_2] = Position;
         ManagerMotor_SetMotorGoal(MMOT_MOTOR_2,
                                   managerMovement.motorsNextGoal[MMOT_MOTOR_2]);
         ManagerMotor_SetMotorGoalState(MMOT_MOTOR_2, true);
+
+        managerMovement.motorsNextGoal[MMOT_MOTOR_1] =
+            motorsData[MMOT_MOTOR_1]->position + deltaPos;
+        ManagerMotor_SetMotorGoal(MMOT_MOTOR_1,
+                                  managerMovement.motorsNextGoal[MMOT_MOTOR_1]);
+        ManagerMotor_SetMotorGoalState(MMOT_MOTOR_1, true);
     }
     else if (mouvType ==
              MMOV_DORSIFLEXION)  // Set goalPosition for motor 1 and 2 for MMOV_EVERSION
     {
-        managerMovement.motorsNextGoal[MMOT_MOTOR_1] = Position;
-        ManagerMotor_SetMotorGoal(MMOT_MOTOR_1,
-                                  managerMovement.motorsNextGoal[MMOT_MOTOR_1]);
-        ManagerMotor_SetMotorGoalState(MMOT_MOTOR_1, true);
-
-        managerMovement.motorsNextGoal[MMOT_MOTOR_2] =
-            motorsData[MMOT_MOTOR_2]->position - deltaPos;
+        managerMovement.motorsNextGoal[MMOT_MOTOR_2] = Position;
         ManagerMotor_SetMotorGoal(MMOT_MOTOR_2,
                                   managerMovement.motorsNextGoal[MMOT_MOTOR_2]);
         ManagerMotor_SetMotorGoalState(MMOT_MOTOR_2, true);
+
+        managerMovement.motorsNextGoal[MMOT_MOTOR_1] =
+            motorsData[MMOT_MOTOR_1]->position - deltaPos;
+        ManagerMotor_SetMotorGoal(MMOT_MOTOR_1,
+                                  managerMovement.motorsNextGoal[MMOT_MOTOR_1]);
+        ManagerMotor_SetMotorGoalState(MMOT_MOTOR_1, true);
     }
     else if (mouvType ==
              MMOV_EXTENSION)  // Set goalPosition for motor 3 for MMOV_EXTENSION
@@ -423,7 +405,7 @@ void ManagerMovement_AddExercise(uint8_t exerciseIdx, uint8_t exerciseType,
 bool ManagerMovement_ResetExercise()
 {
 	bool reset = false;
-	if (managerMovement.homingState == MMOV_AUTO_STATE_READY)
+	if (managerMovement.autoState == MMOV_AUTO_STATE_READY)
 	{
 		for (uint8_t i = 0; i < MAX_EXERCISES; i++)
 		{
@@ -433,7 +415,7 @@ bool ManagerMovement_ResetExercise()
 			finalPos[i]      = 0.0f;
 			pauseTime[i]     = 0.0f;
 		}
-		managerMovement.homingState = MMOV_AUTO_STATE_WAITING4PLAN;
+		managerMovement.autoState = MMOV_AUTO_STATE_WAITING4PLAN;
 		reset = true;
 	}
 	return reset;
@@ -540,11 +522,6 @@ void ManagerMovement_Auto2Goal()
     	managerMovement.autoState = MMOV_AUTO_STATE_STRETCHING;
 		exerciseTimer = HAL_GetTick();
 		commandSent   = false;
-
-		if (stopButton || !startButton)
-		{
-			managerMovement.autoState = MMOV_AUTO_STATE_STOP;
-		}
     }
 }
 
@@ -557,11 +534,6 @@ void ManagerMovement_AutoStrectching()
     {
         managerMovement.autoState = MMOV_AUTO_STATE_2FIRST_POS;
     }
-
-    if (stopButton || !startButton)
-	{
-		managerMovement.autoState = MMOV_AUTO_STATE_STOP;
-	}
 }
 
 void ManagerMovement_Auto2FirstPos()
@@ -614,13 +586,14 @@ void ManagerMovement_AutoStop()
 			 !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2) &&
 			 !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_3))
 	{
-		if(stopButton)
+		if(startButton || stopButton)
 		{
 			exerciseIdx = 0;
 			repsCount = 0;
 		}
 
 		managerMovement.autoState = MMOV_AUTO_STATE_READY;
+		commandSent = false;
 		stopButton = false;
 		startButton = false;
 	}
@@ -651,7 +624,7 @@ void ManagerMovement_HomingEversion()
     {
         if (!evLeftLimitHit)
         {
-            leftPos        = motorsData[MMOT_MOTOR_1]->position;
+            leftPos        = motorsData[MMOT_MOTOR_2]->position;
             evLeftLimitHit = true;
         }
 
@@ -659,7 +632,7 @@ void ManagerMovement_HomingEversion()
         {
             if (!evRightLimitHit)
             {
-                rightPos        = motorsData[MMOT_MOTOR_1]->position;
+                rightPos        = motorsData[MMOT_MOTOR_2]->position;
                 evRightLimitHit = true;
             }
 
@@ -699,7 +672,7 @@ void ManagerMovement_HomingDorsiflexion()
     {
         if (!dorUpLimitHit)
         {
-            leftPos       = motorsData[MMOT_MOTOR_1]->position;
+            leftPos       = motorsData[MMOT_MOTOR_2]->position;
             dorUpLimitHit = true;
         }
 
@@ -707,7 +680,7 @@ void ManagerMovement_HomingDorsiflexion()
         {
             if (!dorDownLimitHit)
             {
-                rightPos        = motorsData[MMOT_MOTOR_1]->position;
+                rightPos        = motorsData[MMOT_MOTOR_2]->position;
                 dorDownLimitHit = true;
             }
 

@@ -5,10 +5,10 @@
 #define MMOT_MOTOR_2_CAN_ID 2
 #define MMOT_MOTOR_3_CAN_ID 3
 
-#define MMOT_MOVING_MAX_SPEED  20
-#define MMOT_MOVING_MAX_TORQUE 20
-#define MMOT_IDLE_MAX_SPEED    20
-#define MMOT_IDLE_MAX_TORQUE   10
+#define MMOT_MOVING_MAX_SPEED  200
+#define MMOT_MOVING_MAX_TORQUE 200
+#define MMOT_IDLE_MAX_SPEED    200
+#define MMOT_IDLE_MAX_TORQUE   100
 
 #define MMOT_MOT1_MIN_POS -10
 #define MMOT_MOT1_MAX_POS 10
@@ -78,7 +78,7 @@ void ManagerMotor_SendToMotors();
 void ManagerMotor_VerifyMotorConnection();
 void ManagerMotor_VerifyMotorState();
 
-void ManagerMoter_ApplyoriginShift();
+void ManagerMoter_ApplyOriginShift();
 
 void ManagerMotor_DisableMotors();
 void ManagerMotor_EnableMotors();
@@ -154,7 +154,7 @@ void ManagerMotor_Task()
     // State machine that Init, sets to zero, reads informations and sends
     // informations to the motors
     ManagerMotor_ReceiveFromMotors();
-    // ManagerMotor_VerifyMotorState();
+    //ManagerMotor_VerifyMotorState();
 
     if (HAL_GetTick() - timerMs >= TIMER)
     {
@@ -224,7 +224,7 @@ void ManagerMotor_ReceiveFromMotors()
             if (lastMsgTime < motors[i].lastMsgTime)
             {
                 PeriphMotors_ParseMotorState(&motors[i].motor, data);
-                ManagerMoter_ApplyoriginShift();
+                ManagerMoter_ApplyOriginShift();
                 motors[i].detected = true;
             }
         }
@@ -536,7 +536,7 @@ uint8_t ManagerMotor_GetState()
     return managerMotor.state;
 }
 
-void ManagerMoter_ApplyoriginShift()
+void ManagerMoter_ApplyOriginShift()
 {
     for (int8_t i = 0; i < MMOT_MOTOR_NBR; i++)
     {

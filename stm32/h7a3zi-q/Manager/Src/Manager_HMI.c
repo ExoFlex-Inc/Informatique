@@ -10,20 +10,19 @@
 
 #define SECTION_LENGTH 20
 #define SECTION_NBR    30
-#define BUF_LENGTH     50
 #define M_HMI_TIMER    50
 #define M_HMI_STRING_LENGTH 20
 #define M_HMI_MODE_SECTION 0
 #define M_HMI_ACTION_SECTION 1
 #define M_HMI_CONTENT_SECTION 2
-#define M_HMI_EXERCISE_SECTION_NBR 5
+#define M_HMI_EXERCISE_SECTION_NBR 6
 #define M_HMI_CONTENT_FIRST_EXERCISE_SECTION 6
 
 
 static const Motor* motorsData[MMOT_MOTOR_NBR];
 static uint32_t     timerMs = 0;
 char                ParsedMsg[SECTION_NBR][SECTION_LENGTH];
-char                buf[BUF_LENGTH];
+char                buf[PUART_RX_BUF_SIZE];
 
 void ManagerHMI_ReceiveJSON();
 void ManagerHMI_SendJSON();
@@ -50,8 +49,7 @@ void ManagerHMI_Init()
         motorsData[i] = ManagerMotor_GetMotorData(i);
     }
 
-    // Get motor data (const pointer : read-only)
-    for (uint8_t i = 0; i < BUF_LENGTH; i++)
+    for (uint16_t i = 0; i < PUART_RX_BUF_SIZE; i++)
     {
         buf[i] = 0;
     }
@@ -124,7 +122,7 @@ void ManagerHMI_ReceiveJSON()
     uint32_t size = 0;
     PeriphUartRingBuf_ReadJson(buf, &size);
 
-    if (size > 0 && size < BUF_LENGTH)
+    if (size > 0 && size < PUART_RX_BUF_SIZE)
     {
         uint8_t sectionNbr = 0;
         ManagerHMI_ParseJson(buf, size, &sectionNbr);
@@ -189,7 +187,7 @@ void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
         {
 			if (strcmp(ParsedMsg[M_HMI_ACTION_SECTION], "Plan") == 0)
 			{
-				ManagerHMI_ExecutePlanCmd(ParsedMsg[M_HMI_CONTENT_SECTION], sectionNbr - M_HMI_CONTENT_SECTION -1);
+				ManagerHMI_ExecutePlanCmd(ParsedMsg[M_HMI_CONTENT_SECTION], sectionNbr - M_HMI_CONTENT_SECTION);
 			}
 			else if (strcmp(ParsedMsg[M_HMI_ACTION_SECTION], "Control") == 0)
 			{
@@ -277,7 +275,7 @@ void ManagerHMI_ExecutePlanCmd(char* cmd, uint8_t size)
 		if (size > M_HMI_CONTENT_FIRST_EXERCISE_SECTION)
 		{
 			//Get max torque and pos (skip for now)
-			cmd += M_HMI_CONTENT_FIRST_EXERCISE_SECTION;
+			cmd += M_HMI_CONTENT_FIRST_EXERCISE_SECTION*M_HMI_STRING_LENGTH;
 			size -= M_HMI_CONTENT_FIRST_EXERCISE_SECTION;
 
 			//Verif if exercise plan is ok
@@ -288,12 +286,23 @@ void ManagerHMI_ExecutePlanCmd(char* cmd, uint8_t size)
 				//Get exercise data
 				for (uint8_t i = 0; i < exNbr; i++)
 				{
-					char *strExercise = cmd++;
-					uint8_t rep = atoi(cmd++);
-					float rest = atof(cmd++);
-					float pos = atof(cmd++);
-					float torque = atof(cmd++);
-					float time = atof(cmd++);
+					char *strExercise = cmd;
+					cmd += M_HMI_STRING_LENGTH;
+
+					uint8_t rep = atoi(cmd);
+					cmd += M_HMI_STRING_LENGTH;
+
+					float rest = atof(cmd);
+					cmd += M_HMI_STRING_LENGTH;
+
+					float pos = atof(cmd);
+					cmd += M_HMI_STRING_LENGTH;
+
+					float torque = atof(cmd);
+					cmd += M_HMI_STRING_LENGTH;
+
+					float time = atof(cmd);
+					cmd += M_HMI_STRING_LENGTH;
 
 					uint8_t exercise;
 
@@ -330,7 +339,7 @@ void ManagerHMI_ExecuteControlCmd(char* cmd)
 	}
 	else if (strcmp(ParsedMsg[2], "Pause") == 0)
 	{
-		//ManagerMovement_PauseExercise();
+		ManagerMovement_PauseExercise();
 	}
 	else if (strcmp(ParsedMsg[2], "Stop") == 0)
 	{
