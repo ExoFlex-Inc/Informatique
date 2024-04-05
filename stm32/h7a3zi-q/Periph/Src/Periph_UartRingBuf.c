@@ -7,8 +7,6 @@
 extern UART_HandleTypeDef huart3;
 extern DMA_HandleTypeDef  hdma_usart2_rx;
 
-
-
 // Variables for UART2
 uint8_t rxBuf[PUART_RX_BUF_SIZE];
 

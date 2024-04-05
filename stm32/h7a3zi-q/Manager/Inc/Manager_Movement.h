@@ -17,12 +17,12 @@
 
 // Auto states
 #define MMOV_AUTO_STATE_WAITING4PLAN 0
-#define MMOV_AUTO_STATE_READY       1
-#define MMOV_AUTO_STATE_2GOAL      2
-#define MMOV_AUTO_STATE_STRETCHING 3
-#define MMOV_AUTO_STATE_2FIRST_POS 4
-#define MMOV_AUTO_STATE_REST      5
-#define MMOV_AUTO_STATE_STOP 6
+#define MMOV_AUTO_STATE_READY        1
+#define MMOV_AUTO_STATE_2GOAL        2
+#define MMOV_AUTO_STATE_STRETCHING   3
+#define MMOV_AUTO_STATE_2FIRST_POS   4
+#define MMOV_AUTO_STATE_REST         5
+#define MMOV_AUTO_STATE_STOP         6
 
 // Homing states
 #define MMOV_VERIF_PERSON_IN     0

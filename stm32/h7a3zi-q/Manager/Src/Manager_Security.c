@@ -182,10 +182,10 @@ bool ManagerSecurity_VerifLimitSwitch()
 
     if (managerMovementState != MMOV_STATE_HOMING)
     {
-		if (PeriphSwitch_AnySwitch())
-		{
-			ret = false;
-		}
+        if (PeriphSwitch_AnySwitch())
+        {
+            ret = false;
+        }
     }
 
     return ret;

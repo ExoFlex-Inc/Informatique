@@ -22,9 +22,9 @@
 
 void PeriphSwitch_Task()
 {
-	PeriphSwitch_AnySwitch();
-	PeriphSwitch_LegLeft();
-	PeriphSwitch_LegRight();
+    PeriphSwitch_AnySwitch();
+    PeriphSwitch_LegLeft();
+    PeriphSwitch_LegRight();
 }
 
 bool PeriphSwitch_LegLeft()

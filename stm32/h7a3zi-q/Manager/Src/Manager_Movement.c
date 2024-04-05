@@ -116,7 +116,7 @@ void ManagerMovement_Reset()
     }
 
     startButton = false;
-    stopButton = false;
+    stopButton  = false;
     nextButton  = false;
 
     exerciseIdx = 0;
@@ -216,8 +216,8 @@ void ManagerMovement_Automatic()
     switch (managerMovement.autoState)
     {
     case MMOV_AUTO_STATE_WAITING4PLAN:
-    	ManagerMovement_Waiting4Plan();
-    	break;
+        ManagerMovement_Waiting4Plan();
+        break;
 
     case MMOV_AUTO_STATE_READY:
         ManagerMovement_AutoReady();
@@ -244,9 +244,9 @@ void ManagerMovement_Automatic()
         break;
 
     case MMOV_AUTO_STATE_STOP:
-    	ManagerMovement_AutoStop();
+        ManagerMovement_AutoStop();
 
-    	break;
+        break;
     }
 }
 
@@ -353,7 +353,7 @@ void ManagerMovement_AutoMovement(uint8_t mouvType, float Position)
     float deltaPos = Position - motorsData[MMOT_MOTOR_2]->position;
 
     if (mouvType == MMOV_EVERSION)  // Set goalPosition for motor 1 and 2 for
-                               // MMOV_DORSIFLEXION
+                                    // MMOV_DORSIFLEXION
     {
         managerMovement.motorsNextGoal[MMOT_MOTOR_2] = Position;
         ManagerMotor_SetMotorGoal(MMOT_MOTOR_2,
@@ -366,8 +366,8 @@ void ManagerMovement_AutoMovement(uint8_t mouvType, float Position)
                                   managerMovement.motorsNextGoal[MMOT_MOTOR_1]);
         ManagerMotor_SetMotorGoalState(MMOT_MOTOR_1, true);
     }
-    else if (mouvType ==
-             MMOV_DORSIFLEXION)  // Set goalPosition for motor 1 and 2 for MMOV_EVERSION
+    else if (mouvType == MMOV_DORSIFLEXION)  // Set goalPosition for motor 1 and
+                                             // 2 for MMOV_EVERSION
     {
         managerMovement.motorsNextGoal[MMOT_MOTOR_2] = Position;
         ManagerMotor_SetMotorGoal(MMOT_MOTOR_2,
@@ -404,21 +404,21 @@ void ManagerMovement_AddExercise(uint8_t exerciseIdx, uint8_t exerciseType,
 
 bool ManagerMovement_ResetExercise()
 {
-	bool reset = false;
-	if (managerMovement.autoState == MMOV_AUTO_STATE_READY)
-	{
-		for (uint8_t i = 0; i < MAX_EXERCISES; i++)
-		{
-			exercises[i]     = 0;
-			repetitions[i]   = 0;
-			exercisesTime[i] = 0.0f;
-			finalPos[i]      = 0.0f;
-			pauseTime[i]     = 0.0f;
-		}
-		managerMovement.autoState = MMOV_AUTO_STATE_WAITING4PLAN;
-		reset = true;
-	}
-	return reset;
+    bool reset = false;
+    if (managerMovement.autoState == MMOV_AUTO_STATE_READY)
+    {
+        for (uint8_t i = 0; i < MAX_EXERCISES; i++)
+        {
+            exercises[i]     = 0;
+            repetitions[i]   = 0;
+            exercisesTime[i] = 0.0f;
+            finalPos[i]      = 0.0f;
+            pauseTime[i]     = 0.0f;
+        }
+        managerMovement.autoState = MMOV_AUTO_STATE_WAITING4PLAN;
+        reset                     = true;
+    }
+    return reset;
 }
 
 void ManagerMovement_SetFinalPos(uint8_t exerciseIdx, float finalPosition)
@@ -433,7 +433,7 @@ void ManagerMovement_StartExercise()
 
 void ManagerMovement_PauseExercise()
 {
-	startButton = false;
+    startButton = false;
 }
 
 void ManagerMovement_StopExercise()
@@ -467,42 +467,42 @@ void ManagerMovement_SetFirstPos(uint8_t exerciseIdx)
  */
 void ManagerMovement_Waiting4Plan()
 {
-	if (exercises[0] != 0)
-	{
-		managerMovement.autoState = MMOV_AUTO_STATE_READY;
-	}
+    if (exercises[0] != 0)
+    {
+        managerMovement.autoState = MMOV_AUTO_STATE_READY;
+    }
 }
 
 void ManagerMovement_AutoReady()
 {
     // Waiting for button next and or start
-	if (exercises[exerciseIdx] == 0 || exerciseIdx == MAX_EXERCISES)
-	{
-		managerMovement.autoState = MMOV_AUTO_STATE_STOP;
-	}
-	else
-	{
-		if (startButton)
-		{
-			if (repsCount >= repetitions[exerciseIdx])
-			{
-				exerciseIdx++;
-				repsCount = 0;
-			}
+    if (exercises[exerciseIdx] == 0 || exerciseIdx == MAX_EXERCISES)
+    {
+        managerMovement.autoState = MMOV_AUTO_STATE_STOP;
+    }
+    else
+    {
+        if (startButton)
+        {
+            if (repsCount >= repetitions[exerciseIdx])
+            {
+                exerciseIdx++;
+                repsCount = 0;
+            }
 
-			// Set the position that the exercise is starting
-			if (repsCount == 0)
-			{
-				ManagerMovement_SetFirstPos(exerciseIdx);
-			}
+            // Set the position that the exercise is starting
+            if (repsCount == 0)
+            {
+                ManagerMovement_SetFirstPos(exerciseIdx);
+            }
 
-			if (nextButton || exerciseIdx == 0 || repsCount != 0)
-			{
-				managerMovement.autoState = MMOV_AUTO_STATE_2GOAL;
-				nextButton                = false;
-			}
-		}
-	}
+            if (nextButton || exerciseIdx == 0 || repsCount != 0)
+            {
+                managerMovement.autoState = MMOV_AUTO_STATE_2GOAL;
+                nextButton                = false;
+            }
+        }
+    }
 }
 
 void ManagerMovement_Auto2Goal()
@@ -519,9 +519,9 @@ void ManagerMovement_Auto2Goal()
              !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2) &&
              !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_3))
     {
-    	managerMovement.autoState = MMOV_AUTO_STATE_STRETCHING;
-		exerciseTimer = HAL_GetTick();
-		commandSent   = false;
+        managerMovement.autoState = MMOV_AUTO_STATE_STRETCHING;
+        exerciseTimer             = HAL_GetTick();
+        commandSent               = false;
     }
 }
 
@@ -553,7 +553,7 @@ void ManagerMovement_Auto2FirstPos()
         managerMovement.autoState = MMOV_AUTO_STATE_REST;
 
         commandSent = false;
-        pauseTimer = HAL_GetTick();
+        pauseTimer  = HAL_GetTick();
     }
 }
 
@@ -566,37 +566,37 @@ void ManagerMovement_AutoRest()
     }
 
     if (stopButton || !startButton)
-	{
-		managerMovement.autoState = MMOV_AUTO_STATE_STOP;
-	}
+    {
+        managerMovement.autoState = MMOV_AUTO_STATE_STOP;
+    }
 }
 
 void ManagerMovement_AutoStop()
 {
-	//go to first pos
-	if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
-		!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2) &&
-		!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_3) && !commandSent)
-	{
-		ManagerMovement_AutoMovement(exercises[exerciseIdx],
-									 (firstPos[exerciseIdx]));
-		commandSent = true;
-	}
-	else if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
-			 !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2) &&
-			 !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_3))
-	{
-		if(startButton || stopButton)
-		{
-			exerciseIdx = 0;
-			repsCount = 0;
-		}
+    // go to first pos
+    if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
+        !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2) &&
+        !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_3) && !commandSent)
+    {
+        ManagerMovement_AutoMovement(exercises[exerciseIdx],
+                                     (firstPos[exerciseIdx]));
+        commandSent = true;
+    }
+    else if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
+             !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2) &&
+             !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_3))
+    {
+        if (startButton || stopButton)
+        {
+            exerciseIdx = 0;
+            repsCount   = 0;
+        }
 
-		managerMovement.autoState = MMOV_AUTO_STATE_READY;
-		commandSent = false;
-		stopButton = false;
-		startButton = false;
-	}
+        managerMovement.autoState = MMOV_AUTO_STATE_READY;
+        commandSent               = false;
+        stopButton                = false;
+        startButton               = false;
+    }
 }
 
 /*
@@ -640,7 +640,8 @@ void ManagerMovement_HomingEversion()
                 !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2) && !commandSent)
             {
                 ManagerMovement_AutoMovement(
-                    MMOV_EVERSION, ManagerMovement_GetMiddlePos(leftPos, rightPos));
+                    MMOV_EVERSION,
+                    ManagerMovement_GetMiddlePos(leftPos, rightPos));
 
                 commandSent = true;
             }
@@ -758,10 +759,10 @@ void ManagerMovement_SetOrigins(uint8_t motorIndex)
 autoPlanInfo_t* ManagerMovement_GetPlanData()
 {
     // Copy the infos
-    autoPlanInfo.autoState = managerMovement.autoState;
+    autoPlanInfo.autoState   = managerMovement.autoState;
     autoPlanInfo.homingState = managerMovement.homingState;
-    autoPlanInfo.repsCount = repsCount;
-    autoPlanInfo.exCount   = exerciseIdx;
+    autoPlanInfo.repsCount   = repsCount;
+    autoPlanInfo.exCount     = exerciseIdx;
 
     // return the struct's address
     return &autoPlanInfo;
