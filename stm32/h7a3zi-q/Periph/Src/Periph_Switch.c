@@ -23,6 +23,8 @@
 void PeriphSwitch_Task()
 {
     PeriphSwitch_AnySwitch();
+    PeriphSwitch_LegLeft();
+    PeriphSwitch_LegRight();
 }
 
 bool PeriphSwitch_LegLeft()
@@ -270,8 +272,7 @@ bool PeriphSwitch_EversionRight()
 
 bool PeriphSwitch_AnySwitch()
 {
-    if (PeriphSwitch_LegLeft() || PeriphSwitch_LegRight() ||
-        PeriphSwitch_ExtensionUp() || PeriphSwitch_ExtensionDown() ||
+    if (PeriphSwitch_ExtensionUp() || PeriphSwitch_ExtensionDown() ||
         PeriphSwitch_DorsiflexionUp() || PeriphSwitch_DorsiflexionDown() ||
         PeriphSwitch_EversionLeft() || PeriphSwitch_EversionRight())
     {

@@ -15,9 +15,31 @@
 #define MMOV_STATE_AUTOMATIC        5
 #define MMOV_STATE_ERROR            6
 
+// Auto states
+#define MMOV_AUTO_STATE_WAITING4PLAN 0
+#define MMOV_AUTO_STATE_READY        1
+#define MMOV_AUTO_STATE_2GOAL        2
+#define MMOV_AUTO_STATE_STRETCHING   3
+#define MMOV_AUTO_STATE_2FIRST_POS   4
+#define MMOV_AUTO_STATE_REST         5
+#define MMOV_AUTO_STATE_STOP         6
+
+// Homing states
+#define MMOV_VERIF_PERSON_IN     0
+#define MMOV_HOMING_EXTENSION    1
+#define MMOV_HOMING_EVERSION     2
+#define MMOV_HOMING_DORSIFLEXION 3
+#define MMOV_REST_POS            4
+
+// Mouvement types
+#define MMOV_DORSIFLEXION 1
+#define MMOV_EVERSION     2
+#define MMOV_EXTENSION    3
+
 typedef struct
 {
     uint8_t autoState;
+    uint8_t homingState;
     uint8_t exCount;
     uint8_t repsCount;
 
@@ -36,10 +58,11 @@ autoPlanInfo_t* ManagerMovement_GetPlanData();
 void ManagerMovement_AddExercise(uint8_t exerciseIdx, uint8_t exerciseType,
                                  uint8_t reps, float eTime, float pTime);
 void ManagerMovement_SetFinalPos(uint8_t exerciseIdx, float finalPosition);
-void ManagerMovement_ResetExercise();
+bool ManagerMovement_ResetExercise();
 
 // Auto buttons
 void ManagerMovement_StartExercise();
+void ManagerMovement_PauseExercise();
 void ManagerMovement_StopExercise();
 void ManagerMovement_NextExercise();
 

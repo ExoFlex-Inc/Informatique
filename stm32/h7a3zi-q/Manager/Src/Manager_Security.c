@@ -7,6 +7,7 @@
 
 #include <Manager_Motor.h>
 #include <Manager_Movement.h>
+#include <Periph_Switch.h>
 
 #define MS_STATE_IDLE     0
 #define MS_STATE_WATCHING 1
@@ -181,10 +182,10 @@ bool ManagerSecurity_VerifLimitSwitch()
 
     if (managerMovementState != MMOV_STATE_HOMING)
     {
-        //    	if (PeriphSwitch_AnySwitch())
-        //    	{
-        //    		ret = false;
-        //    	}
+        if (PeriphSwitch_AnySwitch())
+        {
+            ret = false;
+        }
     }
 
     return ret;
