@@ -50,7 +50,7 @@ function Layout() {
   const navigate = useNavigate();
   
   useEffect(() => {
-    if (!supabaseUserInfo) {
+    if (!supabaseUserInfo || !supabaseUserInfo.session) {
       console.log("No session  and user detectec. Signing off")
       navigate("/")
       localStorage.removeItem("lastLocation");
