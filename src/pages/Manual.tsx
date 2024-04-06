@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { redirect, useNavigate } from "react-router-dom";
-import { supaClient } from "../hooks/supa-client.ts";
 import LineChart from "../components/LineChart.tsx";
 import AirlineSeatLegroomExtraIcon from '@mui/icons-material/AirlineSeatLegroomExtra';
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import ComputerRoundedIcon from '@mui/icons-material/ComputerRounded';
 import MotorControlWidget from "../components/MotorControlWidget.tsx";
+import useStm32 from "../hooks/use-stm32.ts";
 
 export default function Manual() {
   const [graphDataIsPosition, setGraphDataIsPosition] = useState(true);
+  const { socket, errorFromStm32 } = useStm32();
 
   const positionData = {
     datasets: [
@@ -63,16 +63,16 @@ export default function Manual() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-32rem)] justify-between">
+    <div className="flex flex-col custom-height justify-between">
       <div className="justify-center flex">
-        <LineChart chartData={graphDataIsPosition ? positionData : torqueData} setGraphDataIsPosition={setGraphDataIsPosition} graphDataIsPosition={graphDataIsPosition} />
+        <LineChart chartData={graphDataIsPosition ? positionData : torqueData} setGraphDataIsPosition={setGraphDataIsPosition} graphDataIsPosition={graphDataIsPosition} socket={socket}/>
       </div>
       <div className="flex justify-center">
-        <MotorControlWidget title={"Motor Control"} icon={<ComputerRoundedIcon sx={{ fontSize: '56px'}}/>} labels={["Motor1H", "Motor1AH", "Motor2H", "Motor2AH", "Motor3H", "Motor3AH"]} mode="Manual" action="Increment" className="bg-blue-600 text-base w-28 h-14 mr-4 mt-4 ml-4" />
+        <MotorControlWidget title={"Motor Control"} icon={<ComputerRoundedIcon sx={{ fontSize: '56px'}}/>} labels={["Motor1H", "Motor1AH", "Motor2H", "Motor2AH", "Motor3H", "Motor3AH"]} mode="Manual" action="Increment" className="bg-blue-600 text-base w-28 h-14 mr-4 mt-4 ml-4" disabled={errorFromStm32} />
 
-        <MotorControlWidget title={"Anatomical Movement"} icon={<AirlineSeatLegroomExtraIcon sx={{ fontSize: '56px'}}/>} labels={["EversionL", "EversionR", "DorsiflexionU", "DorsiflexionD", "ExtensionU", "ExtensionD"]} mode="Manual" action="Increment" className="bg-blue-600 text-base w-28 h-14 mr-4 mt-4 ml-4"/>
+        <MotorControlWidget title={"Anatomical Movement"} icon={<AirlineSeatLegroomExtraIcon sx={{ fontSize: '56px'}}/>} labels={["EversionL", "EversionR", "DorsiflexionU", "DorsiflexionD", "ExtensionU", "ExtensionD"]} mode="Manual" action="Increment" className="bg-blue-600 text-base w-28 h-14 mr-4 mt-4 ml-4" disabled={errorFromStm32}/>
 
-        <MotorControlWidget title={"Home Settings"} icon={<HomeOutlinedIcon sx={{ fontSize: '56px'}}/>} labels={["GoHome1", "GoHome2", "GoHome3", "GoHome", "SetHome"]} mode="Manual" action="Homing" className="bg-blue-600 text-base w-28 h-14 mr-4 mt-4 ml-4"/>
+        <MotorControlWidget title={"Home Settings"} icon={<HomeOutlinedIcon sx={{ fontSize: '56px'}}/>} labels={["GoHome1", "GoHome2", "GoHome3", "GoHome", "SetHome"]} mode="Manual" action="Homing" className="bg-blue-600 text-base w-28 h-14 mr-4 mt-4 ml-4" disabled={errorFromStm32}/>
       </div>
     </div>
   );

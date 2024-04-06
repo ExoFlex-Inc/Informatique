@@ -8,6 +8,7 @@ import Chart from "chart.js/auto";
 import { CategoryScale, Ticks } from "chart.js";
 import StreamingPlugin from "chartjs-plugin-streaming";
 import useStm32 from "../hooks/use-stm32.ts";
+import { Socket } from 'socket.io-client';
 
 Chart.register(CategoryScale);
 Chart.register(StreamingPlugin);
@@ -24,6 +25,7 @@ interface LineChartProps {
   };
   setGraphDataIsPosition: React.Dispatch<React.SetStateAction<boolean>>;
   graphDataIsPosition: boolean;
+  socket: Socket | null;
 }
 
 interface RealtimeOptions {
@@ -68,9 +70,9 @@ const LineChart: React.FC<LineChartProps> = ({
   chartData,
   setGraphDataIsPosition,
   graphDataIsPosition,
+  socket
 }) => {
   const [graphPause, setGraphPause] = useState(false);
-  const {stm32Data} = useStm32();
   const [chartOptions, setChartOptions] = useState<ChartOptions>({
     scales: {
       x: {
@@ -84,15 +86,15 @@ const LineChart: React.FC<LineChartProps> = ({
             duration: 2000,
             pause: false,
             onRefresh: chart => {
-                chart.data.datasets.forEach((dataset: Dataset, index: number) => {
-                  const positionValue = stm32Data?.positions?.[index];
-                  const torqueValue = stm32Data?.positions?.[index];
-                  dataset.data.push({
+              chart.data.datasets.forEach((dataset: Dataset, index: number) => {
+                dataset.data.push({
                     x: Date.now(),
-                    y: graphDataIsPosition ? positionValue : torqueValue
-                  })
+                    y: chartData.datasets[index].data[0]
                 });
-            },
+            });
+
+          },
+          
           },
       },
       y: {
@@ -103,32 +105,40 @@ const LineChart: React.FC<LineChartProps> = ({
   });
 
   useEffect(() => {
-    setChartOptions((prevOptions) => ({
-      ...prevOptions,
-      scales: {
-        x: {
-          ...prevOptions.scales.x,
-          realtime: {
-            ...prevOptions.scales.x.realtime,
-            onRefresh: chart => {
-              chart.data.datasets.forEach((dataset: Dataset, index: number) => {
-                const positionValue = stm32Data?.positions?.[index];
-                const torqueValue = stm32Data?.torques?.[index];
-                dataset.data.push({
-                  x: Date.now(),
-                  y: graphDataIsPosition ? positionValue : torqueValue
-                })
-              });
+    if (!socket) return; // Ensure socket is available
+
+    // Set up event listener for "stm32Data" event
+    socket.on("stm32Data", (message) => {
+      setChartOptions(prevOptions => ({
+        ...prevOptions,
+        scales: {
+          x: {
+            ...prevOptions.scales.x,
+            realtime: {
+              ...prevOptions.scales.x.realtime,
+              onRefresh: chart => {
+                chart.data.datasets.forEach((dataset, index) => {
+                  dataset.data.push({
+                    x: Date.now(),
+                    y: message.positions[index]
+                  });
+                });
+              },
             },
           },
+          y: {
+            min: 0,
+            max: 30
+          }
         },
-        y: {
-          min: 0,
-          max: 30
-        }
-      },
-    }));
-  }, [stm32Data, graphDataIsPosition]);
+      }));
+    });
+
+    // Cleanup function to remove event listener when component unmounts
+    return () => {
+      socket.off("stm32Data");
+    };
+  }, [socket, chartData, graphDataIsPosition]);
 
   useEffect(() => {
     setChartOptions((prevOptions) => ({

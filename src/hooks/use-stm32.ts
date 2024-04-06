@@ -1,17 +1,19 @@
 import { useState, useEffect } from "react";
-import socketIOClient from "socket.io-client"
+import socketIOClient, { Socket } from "socket.io-client";
+
+// Define the type of events if needed
+interface MyEvents {
+  stm32Data: string;
+  serialPortClosed: string;
+}
 
 const ENDPOINT = "http://localhost:3001"; // Your server endpoint
 
-interface Stm32Data {
-  positions?: number[];
-  torques?: number[];
-}
-
-const useStm32 = () : {stm32Data: Stm32Data | null; errorFromStm32: boolean} => {
-  const [stm32Data, setStm32Data] = useState<Stm32Data | null>(null);
-  const [retrySerial, setRetrySerial] = useState(false);
-  const [errorFromStm32, setErrorFromStm32] = useState(false);
+const useStm32 = () => {
+  const [stm32Data, setStm32Data] = useState<string | null>(null);
+  const [retrySerial, setRetrySerial] = useState<boolean>(true);
+  const [errorFromStm32, setErrorFromStm32] = useState<boolean>(false);
+  const [socket, setSocket] = useState<Socket<MyEvents> | null>(null); // Adjusted socket state variable type
 
   const initializeSerialPort = async () => {
     try {
@@ -30,6 +32,9 @@ const useStm32 = () : {stm32Data: Stm32Data | null; errorFromStm32: boolean} => 
         const shouldRetry = window.confirm("Failed to initialize serial port. Check STM32 connection. Retry?");
         setRetrySerial(shouldRetry);
       }
+      else {
+        setRetrySerial(false);
+      }
     } catch (error) {
       console.error("An error occurred during serial port initialization:", error);
       setRetrySerial(true);
@@ -37,30 +42,31 @@ const useStm32 = () : {stm32Data: Stm32Data | null; errorFromStm32: boolean} => 
   };
 
   useEffect(() => {
-
-    initializeSerialPort();
-
+    if (retrySerial) {
+      initializeSerialPort();
+    }
   }, [retrySerial]);
 
   useEffect(() => {
-    const socket = socketIOClient(ENDPOINT);
+    const newSocket = socketIOClient(ENDPOINT) as Socket<MyEvents>; // Adjusted type assertion
+    setSocket(newSocket);
 
-    socket.on("serialPortClosed", () => {
+    newSocket.on("serialPortClosed", () => {
       setErrorFromStm32(true)
       setRetrySerial(true)
     });
 
-    socket.on("stm32Data", (message) => {
-        console.log(message)
-        setStm32Data(message)
-      });
+    newSocket.on("stm32Data", (message) => {
+      console.log(message)
+      setStm32Data(message)
+    });
 
     return () => {
-      socket.disconnect();
+      newSocket.disconnect();
     };
   }, []);
 
-  return { stm32Data, errorFromStm32 };
+  return { stm32Data, socket, errorFromStm32 };
 };
 
 export default useStm32;

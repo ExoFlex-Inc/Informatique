@@ -60,16 +60,11 @@ export function useSession(): SupabaseUserInfo {
   };
 
   useEffect(() => {
-    supaClient.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        localStorage.removeItem("lastLocation");
-        localStorage.removeItem("plan")
-      } else {
+    supaClient.auth.getSession().then(({ data: { session } }) => { 
         setUserInfo({ ...userInfo, session });
         supaClient.auth.onAuthStateChange((_event, session) => {
           setUserInfo({ session, profile: null });
         });
-      }
     });
   }, []);
   
@@ -80,8 +75,6 @@ export function useSession(): SupabaseUserInfo {
         (newChannel) => {
           if (newChannel) {
             if (channel) {
-              navigate("/");
-              console.log("No session found")
               channel.unsubscribe();
             }
             setChannel(newChannel);

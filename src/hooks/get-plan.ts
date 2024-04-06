@@ -6,7 +6,6 @@ const usePlanData = () => {
 
   useEffect(() => {
     const getPlanRequests = async () => {
-      if (get_plan) {
         try {
           const responseGetPlanning = await fetch("http://localhost:3001/get-plan", {
             method: "GET",
@@ -17,22 +16,21 @@ const usePlanData = () => {
             const responsePlanData = await responseGetPlanning.json();
             console.log("Plan data:", responsePlanData[0].plan_content);
             setPlanData(responsePlanData[0].plan_content);
-            setRetryGet(false); // Reset retry flag when fetch succeeds
+            setRetryGet(false);
           } else {
             console.error("Failed to retrieve plan.");
             window.alert("Failed to retrieve plan.");
-            setRetryGet(true); // Set retry flag to true when fetch fails
+            setRetryGet(true);
           }
         } catch (error) {
           console.error("An error occurred:", error);
           window.alert("An error occurred: " + error);
-          setRetryGet(true); // Set retry flag to true when fetch fails
+          setRetryGet(true);
         }
-      }
     };
 
     getPlanRequests();
-  }, [get_plan]); // Trigger re-fetch only when get_plan changes
+  }, [get_plan]);
 
   return { planData };
 };

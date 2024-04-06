@@ -15,17 +15,15 @@ import "./App.css";
 import Dashboard from "./pages/Dashboard.tsx";
 import { Welcome, welcomeLoader } from "./pages/Welcome.tsx";
 import HMI, { hmiInit } from "./pages/Hmi.tsx";
-import Home from "./pages/Home.tsx";
 import Activity from "./pages/Activity.tsx";
-import Manual, { manualInit } from "./pages/Manual.tsx";
+import Manual from "./pages/Manual.tsx";
 import Settings from "./pages/Settings.tsx";
-import Planning, { planInit } from "./pages/Planning.tsx";
+import Planning from "./pages/Planning.tsx";
 
 import TopBar from "./pages/global/TopBar.tsx";
 import ProSideBar from "./pages/global/Sidebar.tsx";
 
 import { SupabaseUserInfo, useSession } from "./hooks/use-session.ts";
-import Sequence from "./pages/Sequence.tsx";
 
 export const UserContext = createContext<SupabaseUserInfo>({
   session: null,
@@ -52,8 +50,12 @@ function Layout() {
   const navigate = useNavigate();
   
   useEffect(() => {
-    if (!supabaseUserInfo.session) {
-      localStorage.setItem("lastLocation", location.pathname);
+    console.log(supabaseUserInfo)
+    if (!supabaseUserInfo) {
+      console.log("No session  and user detectec. Signing off")
+      navigate("/")
+      localStorage.removeItem("lastLocation");
+      localStorage.removeItem("plan")
     }
   }, [supabaseUserInfo.session, location.pathname]);
 
@@ -67,7 +69,7 @@ function Layout() {
   return (
     <UserContext.Provider value={supabaseUserInfo}>
       <>
-        {supabaseUserInfo.session && <ProSideBar />}
+        {supabaseUserInfo.session && supabaseUserInfo.profile && <ProSideBar />}
         <main className="content">
           <TopBar />
           <Outlet />

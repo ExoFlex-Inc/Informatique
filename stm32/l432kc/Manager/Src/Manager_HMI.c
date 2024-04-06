@@ -42,13 +42,26 @@ void ManagerHMI_Task()
     }
 }
 
-void ManagerHMI_SendJSON()
-{
+// Function to generate random number within a range
+int getRandomNumber(int min, int max) {
+    return min + rand() % (max - min + 1);
+}
+
+// Function to generate random positions and torques
+void generateRandomData(int positions[], int torques[], int numMotors) {
+    for (int i = 0; i < numMotors; i++) {
+        positions[i] += getRandomNumber(-2, 2); // Change position by ±2
+        torques[i] = getRandomNumber(0, 20); // Random torque value between 0 and 20
+    }
+}
+
+// Function to send JSON message with random data over UART
+void ManagerHMI_SendJSON() {
     cJSON* root = cJSON_CreateObject();
 
     // Add mode, exercise, repetitions, sets, and errorcode to the JSON object
     cJSON_AddStringToObject(root, "mode", "Auto");
-    cJSON_AddStringToObject(root, "autoState", "Ready");
+    cJSON_AddStringToObject(root, "autoState", "WaitingForPlan");
     cJSON_AddStringToObject(root, "homingState", "");
     cJSON_AddNumberToObject(root, "exerciseIdx", 0);
     cJSON_AddNumberToObject(root, "repsCount", 1);
@@ -58,9 +71,12 @@ void ManagerHMI_SendJSON()
     int positions[] = {10, 20, 30}; // Example position values for motors 1, 2, and 3
     int torques[] = {5, 10, 15};     // Example torque values for motors 1, 2, and 3
 
+    // Generate random data for positions and torques
+    generateRandomData(positions, torques, sizeof(positions) / sizeof(positions[0]));
+
     // Add positions and torques arrays to the JSON object
-    cJSON* positionsArray = cJSON_CreateIntArray(positions, 3);
-    cJSON* torquesArray = cJSON_CreateIntArray(torques, 3);
+    cJSON* positionsArray = cJSON_CreateIntArray(positions, sizeof(positions) / sizeof(positions[0]));
+    cJSON* torquesArray = cJSON_CreateIntArray(torques, sizeof(torques) / sizeof(torques[0]));
 
     // Add positions and torques arrays to the JSON object
     cJSON_AddItemToObject(root, "positions", positionsArray);
@@ -76,7 +92,6 @@ void ManagerHMI_SendJSON()
     free(jsonMessage);
     cJSON_Delete(root);
 }
-
 
 
 

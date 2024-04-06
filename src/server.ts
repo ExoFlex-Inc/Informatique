@@ -34,16 +34,15 @@ app.use(cors());
 ..######..########.##.....##.####.##.....##.########....##.........#######..##.....##....##...
 */
 
-io.on("connection", (socket) => {
-  console.log("A client connected");
-
-  // Handle client disconnection
-  socket.on("disconnect", () => {
-    console.log("A client disconnected");
-  });
-});
 
 app.post("/initialize-serial-port", (_, res) => {
+
+  if (serialPort && serialPort.isOpen) {
+    console.log("Serial port already initialized.");
+    res.status(200).send("Serial port already initialized.");
+    return;
+  }
+
   SerialPort.list().then((ports) => {
     const scannerPort = ports.find(
       (serialPort) => serialPort.manufacturer === "STMicroelectronics",
@@ -59,6 +58,7 @@ app.post("/initialize-serial-port", (_, res) => {
 
         serialPort.on("error", (error) => {
           console.log("Serial port error:", error.message);
+          // io.emit("serialPortClosed", "Serial port error");
           // serialPort = null;
         });
         
@@ -117,6 +117,29 @@ app.post("/initialize-serial-port", (_, res) => {
 .##....##....##....##.....##.##.....##.##.......
 ..######.....##....##.....##..#######..#########
 */
+
+io.on("connection", (socket) => {
+  console.log("A client connected");
+
+  socket.on("planData", (planData) => {
+
+    if (serialPort && serialPort.isOpen) {
+      serialPort.write(planData, (err) => {
+        if (err) {
+          console.error("Error writing to serial port:", err);
+        } else {
+          console.log("Data sent to serial port:", planData);
+        }
+      });
+    }
+
+  });
+
+  // Handle client disconnection
+  socket.on("disconnect", () => {
+    console.log("A client disconnected");
+  });
+});
 
 app.post("/hmi-button-click", (req, res) => {
   const { mode, action, content } = req.body;
