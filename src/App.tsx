@@ -50,7 +50,6 @@ function Layout() {
   const navigate = useNavigate();
   
   useEffect(() => {
-    console.log(supabaseUserInfo)
     if (!supabaseUserInfo) {
       console.log("No session  and user detectec. Signing off")
       navigate("/")

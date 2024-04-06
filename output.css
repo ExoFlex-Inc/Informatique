@@ -1655,6 +1655,15 @@ svg {
   padding: 1.5rem;
 }
 
+/* LineChart Graph */
+
+.graph-container {
+  width: 90%;
+  max-width: 750px;
+  margin: 0 auto;
+}
+
+
 /* Login component styles  */
 
 .login-button {

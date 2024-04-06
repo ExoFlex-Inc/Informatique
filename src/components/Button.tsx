@@ -8,7 +8,7 @@ interface ButtonProps {
   content?: string;
   onMouseDown?: () => void;
   onClick?: () => void;
-  className?: string;
+  color?: string;
   disabled?: boolean;
 }
 
@@ -18,7 +18,7 @@ const Button: React.FC<ButtonProps> = ({
   mode,
   action,
   content,
-  className,
+  color,
   disabled,
   onClick
 }) => {
@@ -59,40 +59,31 @@ const Button: React.FC<ButtonProps> = ({
     window.removeEventListener("mouseup", handleMouseUp);
   };
 
-  const handleMouseDown = async(e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleMouseDown = async (e: React.MouseEvent<HTMLButtonElement>) => {
     if (e.button === 2) {
       handleMouseUp();
     }
-
+  
     if (e.button === 0) {
       // Start sending requests with interval for mouse down event
-      if (action === "Increment"){
+      if (action === "Increment") {
         intervalRef.current = setInterval(sendingRequests, 20);
         // Add event listener for mouseup
         const handleMouseUpWithIntervalClear = () => {
           handleMouseUp();
-          window.removeEventListener("mouseup", handleMouseUpWithIntervalClear); 
+        }
+        window.addEventListener("mouseup", handleMouseUpWithIntervalClear);
       }
-      window.removeEventListener("mouseup", handleMouseUpWithIntervalClear);  //TO DO: Check if its necessary
-
-      }
-      else if (action === "Control") {
-        sendingRequests()
+      else if (action === "Control" || "Homing") {
+        sendingRequests();
       }
     }
-  };
-
-  const handleClick = () => {
-    if (onClick) {
-      onClick(); // Call the onClick function received as prop
-    }
-  };
+  };  
 
   return (
     <button
-      className={`bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ${className} flex justify-center items-center`}
+      className={`font-bold py-2 px-4 rounded ${color} flex justify-center items-center`}
       onMouseDown={handleMouseDown}
-      onClick={handleClick}
       disabled={disabled}
     >
       {icon ? icon : label}

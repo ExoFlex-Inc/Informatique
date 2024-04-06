@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Button from "../components/Button..tsx";
+import Button from "../components/Button.tsx";
 
 import usePlanData from "../hooks/get-plan.ts";
 import useStm32 from "../hooks/use-stm32.ts";
@@ -36,7 +36,7 @@ export default function HMI() {
       });
       socket.emit("planData", message);
     }
-  }, [stm32Data]); // May cause lag, modify if too much lag
+  }, [stm32Data && stm32Data.autoState]); // May cause lag, modify if too much lag
 
   return (
     <div className="plan-grid grid-cols-2 grid-rows-2 gap-4 custom-height mr-10 ml-10">
@@ -53,7 +53,7 @@ export default function HMI() {
               action="Control"
               content="Pause"
               disabled={!stm32Data || errorFromStm32}
-              className={`bg-yellow-500 ${isTablet ? 'w-12 h-12' : 'w-16 h-16'}`}
+              color="bg-yellow-500"
             />
             ) : (
               <Button
@@ -63,7 +63,7 @@ export default function HMI() {
                 action="Control"
                 content="Start"
                 disabled={!stm32Data || errorFromStm32 || stm32Data.autoState === "WaitingForPlan"}
-                className={`bg-green-500 ${isTablet ? 'w-12 h-12' : 'w-16 h-16'}`}
+                color="bg-green-500"
               />
             )}
             <Button
@@ -73,7 +73,7 @@ export default function HMI() {
               action="Control"
               content="Stop"
               disabled={!stm32Data || errorFromStm32 || (stm32Data && stm32Data.autoState === 'Ready')}
-              className={`bg-red-500 ${isTablet ? 'w-12 h-12' : 'w-16 h-16'}`}
+              color="bg-red-500"
             />
             <Button
               label="Next"
@@ -82,7 +82,7 @@ export default function HMI() {
               action="Control"
               content="Next"
               disabled={!stm32Data || !nextButtonEnabled || errorFromStm32}
-              className={`bg-gray-500 ${isTablet ? 'w-12 h-12' : 'w-16 h-16'}`}
+              color="bg-gray-500"
             />
           </div>
           {stm32Data && stm32Data.autoState === "Dorsiflexion" && (
@@ -94,7 +94,7 @@ export default function HMI() {
                 action="Calib"
                 content="dorsiflexionU"
                 disabled={!stm32Data || errorFromStm32}
-                className={`bg-gray-500 ${isTablet ? 'w-20 h-20' : 'w-28 h-28'}`}
+                color="bg-gray-500"
               />
               <Button
                 label="DorsiflexionDown"
@@ -103,7 +103,7 @@ export default function HMI() {
                 action="Calib"
                 content="dorsiflexionD"
                 disabled={!stm32Data || errorFromStm32}
-                className={`bg-gray-500 ${isTablet ? 'w-20 h-20' : 'w-28 h-28'}`}
+                color="bg-gray-500"
               />
             </div>
           ) }
@@ -116,7 +116,7 @@ export default function HMI() {
                 action="Calib"
                 content="extensionU"
                 disabled={!stm32Data || errorFromStm32}
-                className={`bg-gray-500 ${isTablet ? 'w-20 h-20' : 'w-28 h-28'}`}
+                color="bg-gray-500"
               />
               <Button
                 label="ExtensionDown"
@@ -125,7 +125,7 @@ export default function HMI() {
                 action="Calib"
                 content="extensionD"
                 disabled={!stm32Data || errorFromStm32}
-                className={`bg-gray-500 ${isTablet ? 'w-20 h-20' : 'w-28 h-28'}`}
+                color="bg-gray-500"
               />
             </div>
           ) }
@@ -138,7 +138,7 @@ export default function HMI() {
                 action="Calib"
                 content="eversionL"
                 disabled={!stm32Data || errorFromStm32}
-                className={`bg-gray-500 ${isTablet ? 'w-20 h-20' : 'w-28 h-28'}`}
+                color="bg-gray-500"
               />
               <Button
                 label="EversionRight"
@@ -147,7 +147,7 @@ export default function HMI() {
                 action="Calib"
                 content="eversionR"
                 disabled={!stm32Data || errorFromStm32}
-                className={`bg-gray-500 ${isTablet ? 'w-20 h-20' : 'w-28 h-28'}`}
+                color="bg-gray-500"
               />
             </div>
           ) }
