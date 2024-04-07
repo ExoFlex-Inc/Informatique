@@ -18,6 +18,8 @@
 #define M_HMI_EXERCISE_SECTION_NBR           6
 #define M_HMI_CONTENT_FIRST_EXERCISE_SECTION 6
 
+#define PI 3.1415926535
+
 static const Motor* motorsData[MMOT_MOTOR_NBR];
 static uint32_t     timerMs = 0;
 char                ParsedMsg[SECTION_NBR][SECTION_LENGTH];
@@ -36,6 +38,14 @@ void ManagerHMI_ExecuteControlCmd(char* cmd);
 void ManagerHMI_GetStrMode(uint8_t index, char* str);
 void ManagerHMI_GetStrAutoState(uint8_t index, char* str);
 void ManagerHMI_GetStrHomingState(uint8_t index, char* str);
+
+/*
+ * Utilities
+ */
+float ManagerHMI_Degrees2Radians(float degrees);
+float ManagerHMI_Radians2Degrees(float radians);
+float ManagerHMI_Sec2Millis(float seconds);
+
 
 void ManagerHMI_Init()
 {
@@ -88,7 +98,7 @@ void ManagerHMI_SendJSON()
 
     for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
     {
-        positions[i] = motorsData[i]->position;
+        positions[i] = ManagerHMI_Radians2Degrees(motorsData[i]->position);
         torques[i]   = motorsData[i]->torque;
     }
 
@@ -319,8 +329,8 @@ void ManagerHMI_ExecutePlanCmd(char* cmd, uint8_t size)
                         exercise = MMOV_EXTENSION;
                     }
 
-                    ManagerMovement_AddExercise(i, exercise, rep, time, rest);
-                    ManagerMovement_SetFinalPos(i, pos);
+                    ManagerMovement_AddExercise(i, exercise, rep, ManagerHMI_Sec2Millis(time), ManagerHMI_Sec2Millis(rest));
+                    ManagerMovement_SetFinalPos(i, ManagerHMI_Degrees2Radians(pos));
                 }
             }
         }
@@ -422,4 +432,19 @@ void ManagerHMI_GetStrHomingState(uint8_t index, char* str)
         strcpy(str, "");
         break;
     }
+}
+
+float ManagerHMI_Radians2Degrees(float radians)
+{
+    return radians * (180.0 / PI);
+}
+
+float ManagerHMI_Degrees2Radians(float degrees)
+{
+    return degrees * (PI / 180.0);
+}
+
+float ManagerHMI_Sec2Millis(float seconds)
+{
+	return seconds *= 1000;
 }
