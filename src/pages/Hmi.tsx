@@ -23,20 +23,20 @@ export default function HMI() {
   const isTablet = useMediaQuery("(max-width: 768px)");
 
   useEffect(() => {
-    if (stm32Data && stm32Data.exerciseIdx !== 0 && stm32Data.autoState === "Ready") {
+    if (stm32Data && stm32Data.ExerciseIdx !== 0 && stm32Data.AutoState === "Ready") {
       setNextButtonEnabled(true);
     } else {
       setNextButtonEnabled(false);
     }
 
-    if (stm32Data && planData && socket && stm32Data.autoState === 'WaitingForPlan') {
+    if (stm32Data && planData && socket && stm32Data.AutoState === 'WaitingForPlan') {
       let message = `Limits:${planData.limits.angles.eversion};${planData.limits.angles.extension};${planData.limits.angles.dorsiflexion};${planData.limits.torque.eversion};${planData.limits.torque.extension};${planData.limits.torque.dorsiflexion}`;
       planData.plan.forEach((exercise) => {
         message += `;${exercise.exercise};${exercise.repetitions};${exercise.rest};${exercise.target_angle};${exercise.target_torque};${exercise.time}`;
       });
       socket.emit("planData", message);
     }
-  }, [stm32Data && stm32Data.autoState]); // May cause lag, modify if too much lag
+  }, [stm32Data && stm32Data.AutoState]); // May cause lag, modify if too much lag
 
   return (
     <div className="plan-grid grid-cols-2 grid-rows-2 gap-4 custom-height mr-10 ml-10">
@@ -45,7 +45,7 @@ export default function HMI() {
       <div className="bg-white rounded-2xl"></div>
       <div className="bg-white col-span-1 flex flex-col justify-around rounded-2xl mb-5">
         <div className="flex justify-between mt-5 ml-10 mr-10">
-            {stm32Data && (stm32Data.autoState !== "Ready" && stm32Data.autoState !== "WaitingForPlan") ? (
+            {stm32Data && (stm32Data.AutoState !== "Ready" && stm32Data.AutoState !== "WaitingForPlan") ? (
               <Button
               label="Pause"
               icon={<PauseIcon />}
@@ -62,7 +62,7 @@ export default function HMI() {
                 mode="Auto"
                 action="Control"
                 content="Start"
-                disabled={!stm32Data || errorFromStm32 || stm32Data.autoState === "WaitingForPlan"}
+                disabled={!stm32Data || errorFromStm32 || stm32Data.AutoState === "WaitingForPlan"}
                 color="bg-green-500"
               />
             )}
@@ -72,7 +72,7 @@ export default function HMI() {
               mode="Auto"
               action="Control"
               content="Stop"
-              disabled={!stm32Data || errorFromStm32 || (stm32Data && stm32Data.autoState === 'Ready')}
+              disabled={!stm32Data || errorFromStm32 || (stm32Data && stm32Data.AutoState === 'Ready')}
               color="bg-red-500"
             />
             <Button
@@ -85,7 +85,7 @@ export default function HMI() {
               color="bg-gray-500"
             />
           </div>
-          {stm32Data && stm32Data.autoState === "Dorsiflexion" && (
+          {stm32Data && stm32Data.AutoState === "Dorsiflexion" && (
             <div className="flex justify-between ml-10 mr-10 items-center">
               <Button
                 label="DorsiflexionUp"
@@ -107,7 +107,7 @@ export default function HMI() {
               />
             </div>
           ) }
-          {stm32Data && stm32Data.autoState === "Extension" && (
+          {stm32Data && stm32Data.AutoState === "Extension" && (
             <div className="flex justify-between ml-10 mr-10 items-center">
               <Button
                 label="ExtensionUp"
@@ -129,7 +129,7 @@ export default function HMI() {
               />
             </div>
           ) }
-          {stm32Data && stm32Data.autoState === "Eversion" && (
+          {stm32Data && stm32Data.AutoState === "Eversion" && (
             <div className="flex justify-between ml-10 mr-10 items-center">
               <Button
                 label="EversionLeft"
@@ -169,7 +169,7 @@ export default function HMI() {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {planData && stm32Data && planData.plan.map((item, index) => (
-              <tr key={index} className={index === stm32Data.exerciseIdx ? 'bg-green-200' : (index % 2 === 0 ? 'bg-gray-50' : 'bg-white')}>
+              <tr key={index} className={index === stm32Data.ExerciseIdx ? 'bg-green-200' : (index % 2 === 0 ? 'bg-gray-50' : 'bg-white')}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.exercise}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.repetitions}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.rest}</td>

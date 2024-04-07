@@ -38,6 +38,10 @@ interface XAxisOptions {
   ticks: {
     display: boolean;
   };
+  title?: {
+    display: boolean;
+    text: string;
+  }
   realtime: RealtimeOptions;
 }
 

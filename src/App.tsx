@@ -48,13 +48,18 @@ function Layout() {
   const supabaseUserInfo = useSession();
   const location = useLocation();
   const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   
   useEffect(() => {
     if (!supabaseUserInfo || !supabaseUserInfo.session) {
-      console.log("No session  and user detectec. Signing off")
+      console.log("No session detected. Signing off")
       navigate("/")
+      setIsLoggedIn(false)
       localStorage.removeItem("lastLocation");
       localStorage.removeItem("plan")
+    }
+    else{
+      setIsLoggedIn(true)
     }
   }, [supabaseUserInfo.session, location.pathname]);
 
@@ -68,7 +73,7 @@ function Layout() {
   return (
     <UserContext.Provider value={supabaseUserInfo}>
       <>
-        {supabaseUserInfo.session && supabaseUserInfo.profile && <ProSideBar />}
+        {supabaseUserInfo.session && supabaseUserInfo.profile && isLoggedIn && <ProSideBar />}
         <main className="content">
           <TopBar />
           <Outlet />
