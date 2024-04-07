@@ -105,7 +105,7 @@ void PeriphUartRingBuf_Read(char* buf, uint32_t* size)
 
 void PeriphUartRingBuf_Send(char* buf, uint32_t size)
 {
-    HAL_UART_Transmit(&huart3, (uint8_t*) buf, size, 1000);
+    HAL_UART_Transmit(&huart3, (uint8_t*) buf, size, 50);
 }
 
 void PeriphUartRingBuf_ReadJson(char* buf, uint32_t* size)

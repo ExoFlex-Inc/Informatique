@@ -77,19 +77,18 @@ void ManagerHMI_SendJSON()
     char strHomingState[M_HMI_STRING_LENGTH];
 
     ManagerHMI_GetStrMode(ManagerMovement_GetState(), strMode);
-    ManagerHMI_GetStrHomingState(pPlan->homingState, strAutoState);
-    ManagerHMI_GetStrAutoState(pPlan->autoState, strHomingState);
-    uint8_t rep          = pPlan->exCount;
-    uint8_t set          = pPlan->repsCount;
+    ManagerHMI_GetStrHomingState(pPlan->homingState, strHomingState);
+    ManagerHMI_GetStrAutoState(pPlan->autoState, strAutoState);
+    uint8_t exerciseIdx          = pPlan->exCount;
+    uint8_t repsCount          = pPlan->repsCount;
     char*   strErrorCode = "NoError";
 
-    int positions[MMOT_MOTOR_NBR];
-    int torques[MMOT_MOTOR_NBR];
+    float positions[MMOT_MOTOR_NBR];
+    float torques[MMOT_MOTOR_NBR];
 
     for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
     {
         positions[i] = motorsData[i]->position;
-        ;
         torques[i] = motorsData[i]->torque;
     }
 
@@ -97,8 +96,8 @@ void ManagerHMI_SendJSON()
     cJSON_AddStringToObject(root, "Mode", strMode);
     cJSON_AddStringToObject(root, "AutoState", strAutoState);
     cJSON_AddStringToObject(root, "HomingState", strHomingState);
-    cJSON_AddNumberToObject(root, "Repetitions", rep);
-    cJSON_AddNumberToObject(root, "Sets", set);
+    cJSON_AddNumberToObject(root, "Repetitions", repsCount);
+    cJSON_AddNumberToObject(root, "ExerciseIdx", exerciseIdx);
     cJSON_AddStringToObject(root, "ErrorCode", strErrorCode);
 
     cJSON* positionsArray = cJSON_CreateIntArray(positions, 3);
@@ -202,43 +201,43 @@ void ManagerHMI_ExecuteManualIncrement(char* cmd)
 {
     if (cmd != NULL)
     {
-        if (strcmp(cmd, "eversionR") == 0)
+        if (strcmp(cmd, "EversionR") == 0)
         {
             ManagerMovement_ManualCmdEversion(MMOV_RIGTH);
         }
-        else if (strcmp(cmd, "eversionL") == 0)
+        else if (strcmp(cmd, "EversionL") == 0)
         {
             ManagerMovement_ManualCmdEversion(MMOV_LEFT);
         }
-        else if (strcmp(cmd, "dorsiflexionU") == 0)
+        else if (strcmp(cmd, "DorsiflexionU") == 0)
         {
             ManagerMovement_ManualCmdDorsiflexion(MMOV_UP);
         }
-        else if (strcmp(cmd, "dorsiflexionD") == 0)
+        else if (strcmp(cmd, "DorsiflexionD") == 0)
         {
             ManagerMovement_ManualCmdDorsiflexion(MMOV_DOWN);
         }
-        else if (strcmp(cmd, "extensionU") == 0)
+        else if (strcmp(cmd, "ExtensionU") == 0)
         {
             ManagerMovement_ManualCmdExtension(MMOV_UP);
         }
-        else if (strcmp(cmd, "extensionD") == 0)
+        else if (strcmp(cmd, "ExtensionD") == 0)
         {
             ManagerMovement_ManualCmdExtension(MMOV_DOWN);
         }
-        else if (strcmp(cmd, "goHome1") == 0)
+        else if (strcmp(cmd, "GoHome1") == 0)
         {
             ManagerMovement_ManualCmdHome(MMOT_MOTOR_1);
         }
-        else if (strcmp(cmd, "goHome2") == 0)
+        else if (strcmp(cmd, "GoHome2") == 0)
         {
             ManagerMovement_ManualCmdHome(MMOT_MOTOR_2);
         }
-        else if (strcmp(cmd, "goHome3") == 0)
+        else if (strcmp(cmd, "GoHome3") == 0)
         {
             ManagerMovement_ManualCmdHome(MMOT_MOTOR_3);
         }
-        else if (strcmp(cmd, "goHome") == 0)
+        else if (strcmp(cmd, "GoHome") == 0)
         {
             ManagerMovement_ManualCmdHomeAll();
         }
@@ -249,19 +248,19 @@ void ManagerHMI_ExecuteManualHoming(char* cmd)
 {
     if (cmd != NULL)
     {
-        if (strcmp(cmd, "goHome1") == 0)
+        if (strcmp(cmd, "GoHome1") == 0)
         {
             ManagerMovement_ManualCmdHome(MMOT_MOTOR_1);
         }
-        else if (strcmp(cmd, "goHome2") == 0)
+        else if (strcmp(cmd, "GoHome2") == 0)
         {
             ManagerMovement_ManualCmdHome(MMOT_MOTOR_2);
         }
-        else if (strcmp(cmd, "goHome3") == 0)
+        else if (strcmp(cmd, "GoHome3") == 0)
         {
             ManagerMovement_ManualCmdHome(MMOT_MOTOR_3);
         }
-        else if (strcmp(cmd, "goHome") == 0)
+        else if (strcmp(cmd, "GoHome") == 0)
         {
             ManagerMovement_ManualCmdHomeAll();
         }
@@ -353,22 +352,22 @@ void ManagerHMI_GetStrMode(uint8_t index, char* str)
     switch (index)
     {
     case MMOV_STATE_WAITING_SECURITY:
-        str = "WaitingSecurity";
+        strcpy(str, "WaitingSecurity");
         break;
     case MMOV_STATE_HOMING:
-        str = "Homing";
+        strcpy(str, "Homing");
         break;
     case MMOV_STATE_MANUAL:
-        str = "Manual";
+        strcpy(str, "Manual");
         break;
     case MMOV_STATE_AUTOMATIC:
-        str = "Automatic";
+        strcpy(str, "Automatic");
         break;
     case MMOV_STATE_ERROR:
-        str = "Error";
+        strcpy(str, "Error");
         break;
     default:
-        str = "";
+        strcpy(str, "");
         break;
     }
 }
@@ -378,25 +377,25 @@ void ManagerHMI_GetStrAutoState(uint8_t index, char* str)
     switch (index)
     {
     case MMOV_AUTO_STATE_WAITING4PLAN:
-        str = "WaitingForPlan";
+    	strcpy(str, "WaitingForPlan");
         break;
     case MMOV_AUTO_STATE_READY:
-        str = "Ready";
+        strcpy(str, "Ready");
         break;
     case MMOV_AUTO_STATE_2GOAL:
-        str = "ToGoal";
+    	strcpy(str, "ToGoal"); //mettre plus de detail etre plus clair
         break;
     case MMOV_AUTO_STATE_STRETCHING:
-        str = "Stretching";
+    	strcpy(str, "Stretching");
         break;
-    case MMOV_AUTO_STATE_2FIRST_POS:
-        str = "ToFirstPos";
+    case MMOV_AUTO_STATE_2FIRST_POS://mettre plus de detail etre plus clair
+    	strcpy(str, "ToFirstPos");
         break;
     case MMOV_AUTO_STATE_STOP:
-        str = "Pause";
+    	strcpy(str, "Stop");
         break;
     default:
-        str = "";
+    	strcpy(str, "");
         break;
     }
 }
@@ -406,22 +405,22 @@ void ManagerHMI_GetStrHomingState(uint8_t index, char* str)
     switch (index)
     {
     case MMOV_VERIF_PERSON_IN:
-        str = "VerifIfUser";
+    	strcpy(str, "VerifIfUser");
         break;
     case MMOV_HOMING_EXTENSION:
-        str = "Extension";
+        strcpy(str, "Extension");
         break;
     case MMOV_HOMING_EVERSION:
-        str = "Eversion";
+        strcpy(str, "Eversion");
         break;
     case MMOV_HOMING_DORSIFLEXION:
-        str = "Dorsiflexion";
+        strcpy(str, "Dorsiflexion");
         break;
     case MMOV_REST_POS:
-        str = "Rest";
+        strcpy(str, "Rest");
         break;
     default:
-        str = "";
+    	strcpy(str, "");
         break;
     }
 }
