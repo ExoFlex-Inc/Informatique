@@ -1,14 +1,17 @@
 #include <Periph_UartRingBuf.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "string.h"
 
 // Define the UART1 and UART2 handles and DMA handles
-extern UART_HandleTypeDef huart3;
+extern UART_HandleTypeDef huart2;
 extern DMA_HandleTypeDef  hdma_usart2_rx;
 
+#define RX_BUF_SIZE 512
+
 // Variables for UART2
-uint8_t rxBuf[PUART_RX_BUF_SIZE];
+uint8_t rxBuf[RX_BUF_SIZE];
 
 uint16_t head, tail, peak;
 bool     foundJsonStart;
@@ -21,8 +24,8 @@ void PeriphUartRingBuf_ReadTailToPeak(char* buf, uint32_t* size);
 
 void PeriphUartRingBuf_Init()
 {
-    memset(rxBuf, '\0', PUART_RX_BUF_SIZE);
-    HAL_UARTEx_ReceiveToIdle_DMA(&huart3, rxBuf, PUART_RX_BUF_SIZE);
+    memset(rxBuf, '\0', RX_BUF_SIZE);
+    HAL_UARTEx_ReceiveToIdle_DMA(&huart2, rxBuf, RX_BUF_SIZE);
     head           = 0;
     tail           = 0;
     peak           = 0;
@@ -37,12 +40,12 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart, uint16_t Size)
 
     if (event == HAL_UART_RXEVENT_TC)
     {
-        bytesReceived = PUART_RX_BUF_SIZE - head;
+        bytesReceived = RX_BUF_SIZE - head;
     }
     else
     {
         bytesReceived =
-            PUART_RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart->hdmarx) - head;
+            RX_BUF_SIZE - __HAL_DMA_GET_COUNTER(huart->hdmarx) - head;
     }
 
     if (bytesReceived < 0)
@@ -60,7 +63,7 @@ void PeriphUartRingBuf_AdvanceHead(uint32_t bytesReceived)
     while (bytesReceived--)
     {
         head++;
-        if (head == PUART_RX_BUF_SIZE)
+        if (head == RX_BUF_SIZE)
         {
             head = 0;
         }
@@ -68,7 +71,7 @@ void PeriphUartRingBuf_AdvanceHead(uint32_t bytesReceived)
         {
             // this will discard the oldest data
             tail++;
-            if (tail == PUART_RX_BUF_SIZE)
+            if (tail == RX_BUF_SIZE)
             {
                 tail = 0;
             }
@@ -77,7 +80,7 @@ void PeriphUartRingBuf_AdvanceHead(uint32_t bytesReceived)
         {
             // this will discard the oldest data
             peak++;
-            if (peak == PUART_RX_BUF_SIZE)
+            if (peak == RX_BUF_SIZE)
             {
                 peak = 0;
             }
@@ -96,7 +99,7 @@ void PeriphUartRingBuf_Read(char* buf, uint32_t* size)
         *(buf++) = rxBuf[tail];
         tail++;
         (*size)++;
-        if (tail == PUART_RX_BUF_SIZE)
+        if (tail == RX_BUF_SIZE)
         {
             tail = 0;
         }
@@ -105,7 +108,7 @@ void PeriphUartRingBuf_Read(char* buf, uint32_t* size)
 
 void PeriphUartRingBuf_Send(char* buf, uint32_t size)
 {
-    HAL_UART_Transmit(&huart3, (uint8_t*) buf, size, 50);
+    HAL_UART_Transmit(&huart2, (uint8_t*) buf, size, 20);
 }
 
 void PeriphUartRingBuf_ReadJson(char* buf, uint32_t* size)
@@ -141,7 +144,7 @@ void PeriphUartRingBuf_GetJsonStart()
             break;
         }
         tail++;
-        if (tail == PUART_RX_BUF_SIZE)
+        if (tail == RX_BUF_SIZE)
         {
             tail = 0;
         }
@@ -156,14 +159,14 @@ void PeriphUartRingBuf_GetJsonEnd()
         {
             foundJsonEnd = true;
             peak++;
-            if (peak == PUART_RX_BUF_SIZE)
+            if (peak == RX_BUF_SIZE)
             {
                 peak = 0;
             }
             break;
         }
         peak++;
-        if (peak == PUART_RX_BUF_SIZE)
+        if (peak == RX_BUF_SIZE)
         {
             peak = 0;
         }
@@ -178,7 +181,7 @@ void PeriphUartRingBuf_ReadTailToPeak(char* buf, uint32_t* size)
         *(buf++) = rxBuf[tail];
         tail++;
         (*size)++;
-        if (tail == PUART_RX_BUF_SIZE)
+        if (tail == RX_BUF_SIZE)
         {
             tail = 0;
         }

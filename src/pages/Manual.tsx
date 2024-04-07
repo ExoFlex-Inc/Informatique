@@ -1,221 +1,85 @@
-import { useState, useEffect } from "react";
-import { redirect, useNavigate } from "react-router-dom";
-import { supaClient } from "../hooks/supa-client.ts";
-import Button from "../components/Button..tsx";
-
-export async function manualInit() {
-  try {
-    console.log("Attempting to initialize STM32 serial port...");
-
-    const responseSerialPort = await fetch(
-      "http://localhost:3001/initialize-serial-port",
-      {
-        method: "POST",
-      },
-    );
-
-    if (responseSerialPort.ok) {
-      console.log("STM32 serial port initialized successfully.");
-      window.alert("STM32 serial port initialized successfully");
-      return { loaded: true };
-    } else {
-      console.error("Failed to initialize serial port: Check STM32 connection");
-      return { loaded: false };
-    }
-  } catch (error) {
-    console.error("An error occurred:", error);
-    return { loaded: false };
-  }
-}
+import LineChart from "../components/LineChart.tsx";
+import AirlineSeatLegroomExtraIcon from "@mui/icons-material/AirlineSeatLegroomExtra";
+import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import ComputerRoundedIcon from "@mui/icons-material/ComputerRounded";
+import MotorControlWidget from "../components/MotorControlWidget.tsx";
+import useStm32 from "../hooks/use-stm32.ts";
+import { useMediaQuery } from "@mui/material";
 
 export default function Manual() {
-  const [loaded, setLoaded] = useState(false);
-  const [retryInit, setRetryInit] = useState(true); // New state for retry
+  const { socket, errorFromStm32 } = useStm32();
 
-  useEffect(() => {
-    const initialize = async () => {
-      const result = await manualInit();
-      setLoaded(result.loaded);
-
-      // If initialization fails, prompt the user to retry
-      if (!result.loaded) {
-        window.confirm("Failed to initialize serial port. Retry?") &&
-          initialize();
-      } else {
-        setRetryInit(false);
-      }
-    };
-
-    if (retryInit) {
-      initialize();
-    }
-  }, [retryInit]);
-
-  const handleButtonError = (error) => {
-    setRetryInit(error);
+  const manualData = {
+    datasets: [
+      {
+        label: "Motor 1",
+        borderColor: "rgb(255, 99, 132)",
+        borderDash: [8, 4],
+        fill: true,
+        data: [],
+      },
+      {
+        label: "Motor 2",
+        borderColor: "rgb(99, 255, 132)",
+        borderDash: [8, 4],
+        fill: true,
+        data: [],
+      },
+      {
+        label: "Motor 3",
+        borderColor: "rgb(99, 132, 255)",
+        borderDash: [8, 4],
+        fill: true,
+        data: [],
+      },
+    ],
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-100px)] justify-center">
-      <div className="mt-32 mb-20 flex justify-center">
-        <Button
-          label="Motor1H"
-          mode="Manual"
-          action="Increment"
-          content="motor1H"
-          className="mr-4"
-          onError={handleButtonError}
-          disabled={!loaded}
-        />
-        <Button
-          label="Motor1AH"
-          mode="Manual"
-          action="Increment"
-          content="motor1AH"
-          className="mr-8"
-          onError={handleButtonError}
-          disabled={!loaded}
-        />
-        <Button
-          label="Motor2H"
-          mode="Manual"
-          action="Increment"
-          content="motor2H"
-          className="mr-4"
-          onError={handleButtonError}
-          disabled={!loaded}
-        />
-        <Button
-          label="Motor2AH"
-          mode="Manual"
-          action="Increment"
-          content="motor2AH"
-          className="mr-8"
-          onError={handleButtonError}
-          disabled={!loaded}
-        />
-        <Button
-          label="Motor3H"
-          mode="Manual"
-          action="Increment"
-          content="motor3H"
-          className="mr-4"
-          onError={handleButtonError}
-          disabled={!loaded}
-        />
-        <Button
-          label="Motor3AH"
-          mode="Manual"
-          action="Increment"
-          content="motor3AH"
-          className="mr-8"
-          onError={handleButtonError}
-          disabled={!loaded}
-        />
+    <div className="flex flex-col custom-height">
+      <div className="justify-center flex mb-10">
+        <LineChart chartData={manualData} mode="Manual" socket={socket} />
       </div>
+      <div className="flex justify-center h-80">
+        <MotorControlWidget
+          title={"Motor Control"}
+          icon={<ComputerRoundedIcon sx={{ fontSize: "56px" }} />}
+          labels={[
+            "Motor1H",
+            "Motor1AH",
+            "Motor2H",
+            "Motor2AH",
+            "Motor3H",
+            "Motor3AH",
+          ]}
+          mode="Manual"
+          action="Increment"
+          disabled={errorFromStm32}
+        />
 
-      <div className="mb-20 flex justify-center">
-        <Button
-          label="EversionL"
+        <MotorControlWidget
+          title={"Anatomical Movement"}
+          icon={<AirlineSeatLegroomExtraIcon sx={{ fontSize: "56px" }} />}
+          labels={[
+            "EversionL",
+            "EversionR",
+            "DorsiflexionU",
+            "DorsiflexionD",
+            "ExtensionU",
+            "ExtensionD",
+          ]}
           mode="Manual"
           action="Increment"
-          content="eversionL"
-          className="mr-4"
-          onError={handleButtonError}
-          disabled={!loaded}
+          disabled={errorFromStm32}
         />
-        <Button
-          label="EversionR"
-          mode="Manual"
-          action="Increment"
-          content="eversionR"
-          className="mr-8"
-          onError={handleButtonError}
-          disabled={!loaded}
-        />
-        <Button
-          label="DorsiflexionU"
-          mode="Manual"
-          action="Increment"
-          content="dorsiflexionU"
-          className="mr-4"
-          onError={handleButtonError}
-          disabled={!loaded}
-        />
-        <Button
-          label="DorsiflexionD"
-          mode="Manual"
-          action="Increment"
-          content="dorsiflexionD"
-          className="mr-8"
-          onError={handleButtonError}
-          disabled={!loaded}
-        />
-        <Button
-          label="ExtensionU"
-          mode="Manual"
-          action="Increment"
-          content="extensionU"
-          className="mr-4"
-          onError={handleButtonError}
-          disabled={!loaded}
-        />
-        <Button
-          label="ExtensionD"
-          mode="Manual"
-          action="Increment"
-          content="extensionD"
-          className="mr-8"
-          onError={handleButtonError}
-          disabled={!loaded}
-        />
-      </div>
 
-      <div className="flex justify-center">
-        <Button
-          label="Home1"
+        <MotorControlWidget
+          title={"Home Settings"}
+          icon={<HomeOutlinedIcon sx={{ fontSize: "56px" }} />}
+          labels={["GoHome1", "GoHome2", "GoHome3", "GoHome", "SetHome"]}
           mode="Manual"
           action="Homing"
-          content="1"
-          className="mr-4"
-          onError={handleButtonError}
-          disabled={!loaded}
-        />
-        <Button
-          label="Home2"
-          mode="Manual"
-          action="Homing"
-          content="2"
-          className="mr-4"
-          onError={handleButtonError}
-          disabled={!loaded}
-        />
-        <Button
-          label="Home3"
-          mode="Manual"
-          action="Homing"
-          content="3"
-          className="mr-4"
-          onError={handleButtonError}
-          disabled={!loaded}
-        />
-        <Button
-          label="Home"
-          mode="Manual"
-          action="Homing"
-          content="all"
-          className="mr-4"
-          onError={handleButtonError}
-          disabled={!loaded}
-        />
-        <Button
-          label="setHome"
-          mode="Manual"
-          action="Homing"
-          content="setHome"
-          className="mr-4"
-          onError={handleButtonError}
-          disabled={!loaded}
+          disabled={errorFromStm32}
         />
       </div>
     </div>

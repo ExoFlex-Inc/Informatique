@@ -1,142 +1,201 @@
-import { useState, useRef } from "react";
-import { redirect, useNavigate } from "react-router-dom";
-import { supaClient } from "../hooks/supa-client.ts";
-import Button from "../components/Button..tsx";
+import React, { useEffect, useState } from "react";
+import Button from "../components/Button.tsx";
 
-export async function hmiInit() {
-  try {
-    console.log("Attempting to initialize serial port...");
+import usePlanData from "../hooks/get-plan.ts";
+import useStm32 from "../hooks/use-stm32.ts";
 
-    const responseSerialPort = await fetch(
-      "http://localhost:3001/initialize-serial-port",
-      {
-        method: "POST",
-      },
-    );
+import { useMediaQuery } from "@mui/material";
 
-    if (responseSerialPort.ok) {
-      console.log("Serial port initialized successfully.");
-
-      console.log("Attempting to fetch patient data...");
-
-      const responseDataFetch = await fetch(
-        "http://localhost:3001/fetch-patient-data",
-        {
-          method: "POST",
-        },
-      );
-
-      if (responseDataFetch.ok) {
-        console.log("Patient data fetched successfully.");
-        return { loaded: true };
-      } else {
-        console.error("Failed to fetch patient data");
-        return redirect("/home");
-      }
-    } else {
-      console.error("Failed to initialize serial port");
-      return redirect("/home");
-    }
-  } catch (error) {
-    console.error("An error occurred:", error);
-    return redirect("/home");
-  }
-}
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import SkipNextIcon from "@mui/icons-material/SkipNext";
+import PauseIcon from "@mui/icons-material/Pause";
+import StopIcon from "@mui/icons-material/Stop";
+import RotateLeftIcon from "@mui/icons-material/RotateLeft";
+import RotateRightIcon from "@mui/icons-material/RotateRight";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 
 export default function HMI() {
-  const [leftButton, setLeftButton] = useState("eversionL");
-  const [rightButton, setRightButton] = useState("eversionR");
+  const { planData } = usePlanData();
+  const { stm32Data, socket, errorFromStm32 } = useStm32();
 
-  const navigate = useNavigate();
+  const isTablet = useMediaQuery("(max-width: 768px)");
 
-  const handleNextClick = () => {
-    setRightButton("dorsiflexionU");
-    setLeftButton("dorsiflexionD");
-  };
-
-  const handleBackClick = async () => {
-    if (leftButton === "dorsiflexionD") {
-      setRightButton("eversionR");
-      setLeftButton("eversionL");
-    } else {
-      const response = await fetch("http://localhost:3001/reset-serial-port", {
-        method: "POST",
+  useEffect(() => {
+    if (
+      stm32Data &&
+      planData &&
+      socket &&
+      stm32Data.AutoState === "WaitingForPlan"
+    ) {
+      let message = `{Auto;Plan;${planData.limits.angles.eversion};${planData.limits.angles.extension};${planData.limits.angles.dorsiflexion};${planData.limits.torque.eversion};${planData.limits.torque.extension};${planData.limits.torque.dorsiflexion}`;
+      planData.plan.forEach((exercise) => {
+        message += `;${exercise.exercise};${exercise.repetitions};${exercise.rest};${exercise.target_angle};${exercise.target_torque};${exercise.time}`;
       });
-
-      if (response.ok) {
-        navigate("/home");
-      } else {
-        console.log("Failed to reset machineData");
-        navigate("/home");
-      }
+      message += ";}";
+      socket.emit("planData", message);
     }
-  };
+  }, [stm32Data]); // May cause lag, modify if too much lag
 
-  const sendDataToSupabase = async () => {
-    const { data } = await supaClient.auth.getSession();
-
-    const access_token = data.session?.access_token;
-    const refresh_token = data.session?.refresh_token;
-
-    const requestBody = {
-      access_token: access_token,
-      refresh_token: refresh_token,
-    };
-
-    const response = await fetch("http://localhost:3001/push-supabase", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
-    });
-
-    if (response.ok) {
-      console.log("Data pushed to supabase");
-    } else {
-      console.error("Failed to close serial port.");
-    }
-
-    const response2 = await fetch("http://localhost:3001/reset-serial-port", {
-      method: "POST",
-    });
-
-    if (response2.ok) {
-      navigate("/home");
-      console.log("Serial port deconnected and machineData reset");
-    } else {
-      console.log("Failed to reset machineData");
-    }
-  };
   return (
-    <div className="flex flex-col h-[calc(100vh-2rem)] justify-end">
-      <div className="mb-10 flex justify-center">
-        <Button
-          label={leftButton === "eversionL" ? "EversionL" : "DorsiflexionD"}
-          toSend={leftButton}
-          className="mr-2"
-        />
-        <button
-          onClick={() => sendDataToSupabase()}
-          className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2"
-        >
-          Send data
-        </button>
-        <Button
-          label={rightButton === "eversionR" ? "EversionR" : "DorsiflexionU"}
-          toSend={rightButton}
-        />
-        {leftButton === "dorsiflexionD" && (
-          <Button label="ExtensionD" toSend="extensionD" className="mr-2" />
+    <div className="plan-grid grid-cols-2 grid-rows-2 gap-4 custom-height mr-10 ml-10">
+      <div className="bg-white rounded-2xl"></div>
+      <div className="bg-white rounded-2xl"></div>
+      <div className="bg-white col-span-1 flex flex-col justify-around rounded-2xl mb-5">
+        <div className="flex justify-between mt-5 ml-10 mr-10">
+          {stm32Data &&
+          stm32Data.AutoState !== "Ready" &&
+          stm32Data.AutoState !== "WaitingForPlan" ? (
+            <Button
+              label="Pause"
+              icon={<PauseIcon />}
+              mode="Auto"
+              action="Control"
+              content="Pause"
+              disabled={!stm32Data || errorFromStm32}
+              color="bg-yellow-500"
+            />
+          ) : (
+            <Button
+              label="Start"
+              icon={<PlayArrowIcon />}
+              mode="Auto"
+              action="Control"
+              content="Start"
+              disabled={
+                !stm32Data ||
+                errorFromStm32 ||
+                stm32Data.AutoState === "WaitingForPlan"
+              }
+              color="bg-green-500"
+            />
+          )}
+          <Button
+            label="Stop"
+            icon={<StopIcon />}
+            mode="Auto"
+            action="Control"
+            content="Stop"
+            disabled={
+              !stm32Data ||
+              errorFromStm32 ||
+              (stm32Data && stm32Data.AutoState === "Ready")
+            }
+            color="bg-red-500"
+          />
+        </div>
+        {stm32Data && stm32Data.AutoState === "Dorsiflexion" && (
+          <div className="flex justify-between ml-10 mr-10 items-center">
+            <Button
+              label="DorsiflexionUp"
+              icon={<ArrowUpwardIcon />}
+              mode="Auto"
+              action="Calib"
+              content="dorsiflexionU"
+              disabled={!stm32Data || errorFromStm32}
+              color="bg-gray-500"
+            />
+            <Button
+              label="DorsiflexionDown"
+              icon={<ArrowDownwardIcon />}
+              mode="Auto"
+              action="Calib"
+              content="dorsiflexionD"
+              disabled={!stm32Data || errorFromStm32}
+              color="bg-gray-500"
+            />
+          </div>
         )}
-        {rightButton === "dorsiflexionU" && (
-          <Button label="ExtensionU" toSend="extensionU" />
+        {stm32Data && stm32Data.AutoState === "Extension" && (
+          <div className="flex justify-between ml-10 mr-10 items-center">
+            <Button
+              label="ExtensionUp"
+              icon={<ArrowUpwardIcon />}
+              mode="Auto"
+              action="Calib"
+              content="extensionU"
+              disabled={!stm32Data || errorFromStm32}
+              color="bg-gray-500"
+            />
+            <Button
+              label="ExtensionDown"
+              icon={<ArrowDownwardIcon />}
+              mode="Auto"
+              action="Calib"
+              content="extensionD"
+              disabled={!stm32Data || errorFromStm32}
+              color="bg-gray-500"
+            />
+          </div>
+        )}
+        {stm32Data && stm32Data.AutoState === "Eversion" && (
+          <div className="flex justify-between ml-10 mr-10 items-center">
+            <Button
+              label="EversionLeft"
+              icon={<RotateLeftIcon />}
+              mode="Auto"
+              action="Calib"
+              content="eversionL"
+              disabled={!stm32Data || errorFromStm32}
+              color="bg-gray-500"
+            />
+            <Button
+              label="EversionRight"
+              icon={<RotateRightIcon />}
+              mode="Auto"
+              action="Calib"
+              content="eversionR"
+              disabled={!stm32Data || errorFromStm32}
+              color="bg-gray-500"
+            />
+          </div>
         )}
       </div>
-      <div className="flex justify-between p-5">
-        <Button label="Back" onClick={handleBackClick} />
-        <Button label="Next" onClick={handleNextClick} />
+      <div className="bg-white rounded-2xl overflow-auto min-w-0 mb-5">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr className="divide-x divide-gray-200">
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Exercise
+              </th>
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Repetitions
+              </th>
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Rest (sec)
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {planData &&
+              stm32Data &&
+              planData.plan.map((item, index) => (
+                <tr
+                  key={index}
+                  className={
+                    index === stm32Data.ExerciseIdx
+                      ? "bg-green-200"
+                      : index % 2 === 0
+                        ? "bg-gray-50"
+                        : "bg-white"
+                  }
+                >
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {item.exercise}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {item.repetitions}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {item.rest}
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
       </div>
+      <div className="bg-white rounded-2xl"></div>
+      <div className="bg-white rounded-2xl"></div>
     </div>
   );
 }
