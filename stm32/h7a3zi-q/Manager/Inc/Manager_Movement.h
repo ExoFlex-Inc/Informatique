@@ -64,7 +64,6 @@ bool ManagerMovement_ResetExercise();
 void ManagerMovement_StartExercise();
 void ManagerMovement_PauseExercise();
 void ManagerMovement_StopExercise();
-void ManagerMovement_NextExercise();
 
 // Movement commands
 void ManagerMovement_ManualCmdEversion(int8_t direction);

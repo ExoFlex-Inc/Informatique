@@ -35,7 +35,7 @@ export default function Planning() {
     {
       exercise: "",
       repetitions: 0,
-      sets: 0,
+      // sets: 0,
       rest: 0,
       target_angle: 0,
       target_torque: 0,
@@ -122,7 +122,7 @@ export default function Planning() {
       {
         exercise: "",
         repetitions: 0,
-        sets: 0,
+        // sets: 0,
         rest: 0,
         target_angle: 0,
         target_torque: 0,
@@ -180,7 +180,7 @@ export default function Planning() {
       const {
         exercise: exerciseName,
         repetitions,
-        sets,
+        // sets,
         rest,
         target_angle,
         target_torque,
@@ -189,7 +189,7 @@ export default function Planning() {
       return {
         exercise: exerciseName,
         repetitions,
-        sets,
+        // sets,
         rest,
         target_angle,
         target_torque,
@@ -201,7 +201,7 @@ export default function Planning() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-100px)]">
+    <div className="flex flex-col custom-height">
       <div className="mt-4 ml-10 mr-10">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50 divide-y divide-gray-200">
@@ -233,7 +233,7 @@ export default function Planning() {
                 Dorsiflexion
               </th>
               <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                extension
+                Extension
               </th>
               <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Eversion
@@ -312,9 +312,9 @@ export default function Planning() {
               <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Repetitions
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {/* <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Sets
-              </th>
+              </th> */}
               <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Rest (sec)
               </th>
@@ -358,7 +358,7 @@ export default function Planning() {
                     className="text-black border border-gray-300 rounded px-2 py-1 w-full"
                   />
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                {/* <td className="px-6 py-4 whitespace-nowrap">
                   <input
                     type="number"
                     name="sets"
@@ -367,7 +367,7 @@ export default function Planning() {
                     onChange={(e) => handleInputChange(index, e)}
                     className="text-black border border-gray-300 rounded px-2 py-1 w-full"
                   />
-                </td>
+                </td> */}
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input
                     type="number"
@@ -435,14 +435,14 @@ export default function Planning() {
           Save Plan
         </button>
       </div>
-      <div className="mt-4 ml-10 mr-10">
+      {/* <div className="mt-4 ml-10 mr-10">
         <textarea
           value={generateJsonPlan()}
           className="text-black border border-gray-300 rounded px-2 py-1 w-full"
           rows={20}
           readOnly
         />
-      </div>
+      </div> */}
     </div>
   );
 }

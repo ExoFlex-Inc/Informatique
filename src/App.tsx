@@ -15,11 +15,10 @@ import "./App.css";
 import Dashboard from "./pages/Dashboard.tsx";
 import { Welcome, welcomeLoader } from "./pages/Welcome.tsx";
 import HMI, { hmiInit } from "./pages/Hmi.tsx";
-import Home from "./pages/Home.tsx";
 import Activity from "./pages/Activity.tsx";
-import Manual, { manualInit } from "./pages/Manual.tsx";
+import Manual from "./pages/Manual.tsx";
 import Settings from "./pages/Settings.tsx";
-import Planning, { planInit } from "./pages/Planning.tsx";
+import Planning from "./pages/Planning.tsx";
 
 import TopBar from "./pages/global/TopBar.tsx";
 import ProSideBar from "./pages/global/Sidebar.tsx";
@@ -34,12 +33,12 @@ export const UserContext = createContext<SupabaseUserInfo>({
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
-      {/* <Route path="/" element={<Dashboard />} /> */}
+      <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/activity" element={<Activity />} />
       <Route path="/welcome" element={<Welcome />} loader={welcomeLoader} />
       <Route path="/manual" element={<Manual />} />
+      <Route path="/hmi" element={<HMI />} />
       <Route path="/planning" element={<Planning />} />
-      <Route path="/hmi" element={<HMI />} loader={hmiInit} />
       <Route path="/settings" element={<Settings />} />
     </Route>,
   ),
@@ -47,27 +46,11 @@ const router = createBrowserRouter(
 
 function Layout() {
   const supabaseUserInfo = useSession();
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!supabaseUserInfo.session) {
-      // Store the current location in local storage
-      localStorage.setItem("lastLocation", location.pathname);
-    }
-  }, [supabaseUserInfo.session, location.pathname]);
-
-  useEffect(() => {
-    const lastLocation = localStorage.getItem("lastLocation");
-    if (lastLocation) {
-      navigate(lastLocation);
-    }
-  }, [navigate]);
 
   return (
     <UserContext.Provider value={supabaseUserInfo}>
       <>
-        {supabaseUserInfo.session && <ProSideBar />}
+        {supabaseUserInfo.session && supabaseUserInfo.profile && <ProSideBar />}
         <main className="content">
           <TopBar />
           <Outlet />
