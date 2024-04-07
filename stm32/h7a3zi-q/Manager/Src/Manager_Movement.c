@@ -475,23 +475,23 @@ void ManagerMovement_AutoReady()
     }
     else
     {
-		if (repsCount >= repetitions[exerciseIdx])
-		{
-			exerciseIdx++;
-			repsCount = 0;
-			startButton = false;
-		}
+        if (repsCount >= repetitions[exerciseIdx])
+        {
+            exerciseIdx++;
+            repsCount   = 0;
+            startButton = false;
+        }
 
-		// Set the position that the exercise is starting
-		if (repsCount == 0)
-		{
-			ManagerMovement_SetFirstPos(exerciseIdx);
-		}
+        // Set the position that the exercise is starting
+        if (repsCount == 0)
+        {
+            ManagerMovement_SetFirstPos(exerciseIdx);
+        }
 
-		if (startButton || repsCount != 0)
-		{
-			managerMovement.autoState = MMOV_AUTO_STATE_2GOAL;
-		}
+        if (startButton || repsCount != 0)
+        {
+            managerMovement.autoState = MMOV_AUTO_STATE_2GOAL;
+        }
     }
 }
 
@@ -519,11 +519,11 @@ void ManagerMovement_AutoStrectching()
 {
     // Keep the position until time is over
     // Serait la place ou mettre un commande en force
-	if (stopButton || !startButton)
-	{
-		managerMovement.autoState = MMOV_AUTO_STATE_STOP;
-	}
-	else if (HAL_GetTick() - exerciseTimer >= exercisesTime[exerciseIdx])
+    if (stopButton || !startButton)
+    {
+        managerMovement.autoState = MMOV_AUTO_STATE_STOP;
+    }
+    else if (HAL_GetTick() - exerciseTimer >= exercisesTime[exerciseIdx])
     {
         managerMovement.autoState = MMOV_AUTO_STATE_2FIRST_POS;
     }

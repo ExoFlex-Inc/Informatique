@@ -6,7 +6,7 @@ import PlayButton from "../components/PlayButton.tsx";
 import Chart from "chart.js/auto";
 import { CategoryScale } from "chart.js";
 import StreamingPlugin from "chartjs-plugin-streaming";
-import { Socket } from 'socket.io-client';
+import { Socket } from "socket.io-client";
 
 Chart.register(CategoryScale);
 Chart.register(StreamingPlugin);
@@ -34,20 +34,20 @@ interface RealtimeOptions {
 }
 
 interface XAxisOptions {
-  type: 'realtime';
+  type: "realtime";
   ticks: {
     display: boolean;
   };
   title?: {
     display: boolean;
     text: string;
-  }
+  };
   realtime: RealtimeOptions;
 }
 
 interface YAxisOptions {
   min: number;
-  max: number
+  max: number;
 }
 
 interface ScalesOptions {
@@ -66,69 +66,67 @@ interface Dataset {
   }[];
 }
 
-
-const LineChart: React.FC<LineChartProps> = ({
-  chartData,
-  mode,
-  socket,
-}) => {
+const LineChart: React.FC<LineChartProps> = ({ chartData, mode, socket }) => {
   const [graphPause, setGraphPause] = useState(false);
   const [graphDataIsPosition, setGraphDataIsPosition] = useState(true);
   const [chartOptions, setChartOptions] = useState<ChartOptions>({
     scales: {
       x: {
-          type: 'realtime',
-          ticks: {
-            display: false,
-          },
-          realtime: {
-            refresh: 100,
-            delay: 20,
-            duration: 2000,
-            pause: false,
-            onRefresh: chart => {
-              chart.data.datasets.forEach((dataset: Dataset, index: number) => {
-                dataset.data.push({
-                    x: Date.now(),
-                    y: 0
-                });
+        type: "realtime",
+        ticks: {
+          display: false,
+        },
+        realtime: {
+          refresh: 100,
+          delay: 20,
+          duration: 2000,
+          pause: false,
+          onRefresh: (chart) => {
+            chart.data.datasets.forEach((dataset: Dataset, index: number) => {
+              dataset.data.push({
+                x: Date.now(),
+                y: 0,
+              });
             });
           },
-          },
+        },
       },
       y: {
         min: 0,
         max: graphDataIsPosition ? 180 : 48,
-      }
+      },
     },
   });
-
 
   useEffect(() => {
     if (!socket) return; // Ensure socket is available
     // Set up event listener for "stm32Data" event
     socket.on("stm32Data", (message) => {
-      setChartOptions(prevOptions => ({
+      setChartOptions((prevOptions) => ({
         ...prevOptions,
         scales: {
           x: {
             ...prevOptions.scales.x,
             realtime: {
               ...prevOptions.scales.x.realtime,
-              onRefresh: chart => {
-                chart.data.datasets.forEach((dataset: Dataset, index: number) => {
-                  dataset.data.push({
-                    x: Date.now(),
-                    y: graphDataIsPosition ? message.Positions[index] : message.Torques[index]
-                  });
-                });
+              onRefresh: (chart) => {
+                chart.data.datasets.forEach(
+                  (dataset: Dataset, index: number) => {
+                    dataset.data.push({
+                      x: Date.now(),
+                      y: graphDataIsPosition
+                        ? message.Positions[index]
+                        : message.Torques[index],
+                    });
+                  },
+                );
               },
             },
           },
           y: {
             min: 0,
             max: graphDataIsPosition ? 180 : 48,
-          }
+          },
         },
       }));
     });
@@ -151,12 +149,11 @@ const LineChart: React.FC<LineChartProps> = ({
           },
         },
         y: {
-          ...prevOptions.scales.y
-        }
+          ...prevOptions.scales.y,
+        },
       },
     }));
   }, [graphPause]);
-
 
   return (
     <div className="graph-container">
@@ -164,7 +161,10 @@ const LineChart: React.FC<LineChartProps> = ({
         {socket && (
           <div className="flex">
             <PlayButton setGraphPause={setGraphPause} graphPause={graphPause} />
-            <PauseButton setGraphPause={setGraphPause} graphPause={graphPause} />
+            <PauseButton
+              setGraphPause={setGraphPause}
+              graphPause={graphPause}
+            />
           </div>
         )}
         {mode === "Manual" && (

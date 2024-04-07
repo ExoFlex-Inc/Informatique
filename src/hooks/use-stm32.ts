@@ -19,24 +19,30 @@ const useStm32 = () => {
     try {
       console.log("Attempting to initialize STM32 serial port...");
       setRetrySerial(false);
-      
+
       const responseSerialPort = await fetch(
         "http://localhost:3001/initialize-serial-port",
         {
           method: "POST",
         },
       );
-      
+
       if (!responseSerialPort.ok) {
-        console.error("Failed to initialize serial port: Check STM32 connection");
-        const shouldRetry = window.confirm("Failed to initialize serial port. Check STM32 connection. Retry?");
+        console.error(
+          "Failed to initialize serial port: Check STM32 connection",
+        );
+        const shouldRetry = window.confirm(
+          "Failed to initialize serial port. Check STM32 connection. Retry?",
+        );
         setRetrySerial(shouldRetry);
-      }
-      else {
+      } else {
         setRetrySerial(false);
       }
     } catch (error) {
-      console.error("An error occurred during serial port initialization:", error);
+      console.error(
+        "An error occurred during serial port initialization:",
+        error,
+      );
       setRetrySerial(true);
     }
   };
@@ -52,13 +58,13 @@ const useStm32 = () => {
     setSocket(newSocket);
 
     newSocket.on("serialPortClosed", () => {
-      setErrorFromStm32(true)
-      setRetrySerial(true)
+      setErrorFromStm32(true);
+      setRetrySerial(true);
     });
 
     newSocket.on("stm32Data", (message) => {
       // console.log(message)
-      setStm32Data(message)
+      setStm32Data(message);
     });
 
     return () => {

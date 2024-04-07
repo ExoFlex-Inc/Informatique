@@ -1663,7 +1663,6 @@ svg {
   margin: 0 auto;
 }
 
-
 /* Login component styles  */
 
 .login-button {
@@ -1838,14 +1837,20 @@ svg {
 
 .plan-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); /* Adjust minmax values as needed */
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(0, 1fr)
+  ); /* Adjust minmax values as needed */
   grid-template-rows: auto; /* Adjust as needed */
   gap: 1rem; /* Adjust gap size as needed */
 }
 
 @media screen and (max-width: 768px) {
   .grid {
-    grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); /* Adjust minmax values for smaller screens */
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(0, 1fr)
+    ); /* Adjust minmax values for smaller screens */
   }
 }
 

@@ -20,10 +20,10 @@ const Button: React.FC<ButtonProps> = ({
   content,
   color,
   disabled,
-  onClick
+  onClick,
 }) => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  let message = content
+  let message = content;
 
   const sendingRequests = async () => {
     try {
@@ -63,7 +63,7 @@ const Button: React.FC<ButtonProps> = ({
     if (e.button === 2) {
       handleMouseUp();
     }
-  
+
     if (e.button === 0) {
       // Start sending requests with interval for mouse down event
       if (action === "Increment") {
@@ -71,14 +71,13 @@ const Button: React.FC<ButtonProps> = ({
         // Add event listener for mouseup
         const handleMouseUpWithIntervalClear = () => {
           handleMouseUp();
-        }
+        };
         window.addEventListener("mouseup", handleMouseUpWithIntervalClear);
-      }
-      else if (action === "Control" || "Homing") {
+      } else if (action === "Control" || "Homing") {
         sendingRequests();
       }
     }
-  };  
+  };
 
   return (
     <button

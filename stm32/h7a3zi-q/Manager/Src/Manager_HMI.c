@@ -79,8 +79,8 @@ void ManagerHMI_SendJSON()
     ManagerHMI_GetStrMode(ManagerMovement_GetState(), strMode);
     ManagerHMI_GetStrHomingState(pPlan->homingState, strHomingState);
     ManagerHMI_GetStrAutoState(pPlan->autoState, strAutoState);
-    uint8_t exerciseIdx          = pPlan->exCount;
-    uint8_t repsCount          = pPlan->repsCount;
+    uint8_t exerciseIdx  = pPlan->exCount;
+    uint8_t repsCount    = pPlan->repsCount;
     char*   strErrorCode = "NoError";
 
     float positions[MMOT_MOTOR_NBR];
@@ -89,7 +89,7 @@ void ManagerHMI_SendJSON()
     for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
     {
         positions[i] = motorsData[i]->position;
-        torques[i] = motorsData[i]->torque;
+        torques[i]   = motorsData[i]->torque;
     }
 
     // Add mode, exercise, repetitions, sets, and errorcode to the JSON object
@@ -373,28 +373,28 @@ void ManagerHMI_GetStrAutoState(uint8_t index, char* str)
     switch (index)
     {
     case MMOV_AUTO_STATE_WAITING4PLAN:
-    	strcpy(str, "WaitingForPlan");
+        strcpy(str, "WaitingForPlan");
         break;
     case MMOV_AUTO_STATE_READY:
         strcpy(str, "Ready");
         break;
     case MMOV_AUTO_STATE_2GOAL:
-    	strcpy(str, "ToGoal"); //mettre plus de detail etre plus clair
+        strcpy(str, "ToGoal");  // mettre plus de detail etre plus clair
         break;
     case MMOV_AUTO_STATE_STRETCHING:
-    	strcpy(str, "Stretching");
+        strcpy(str, "Stretching");
         break;
-    case MMOV_AUTO_STATE_2FIRST_POS://mettre plus de detail etre plus clair
-    	strcpy(str, "ToFirstPos");
+    case MMOV_AUTO_STATE_2FIRST_POS:  // mettre plus de detail etre plus clair
+        strcpy(str, "ToFirstPos");
         break;
     case MMOV_AUTO_STATE_REST:
-    	strcpy(str, "Resting");
-    	break;
+        strcpy(str, "Resting");
+        break;
     case MMOV_AUTO_STATE_STOP:
-    	strcpy(str, "Stop");
+        strcpy(str, "Stop");
         break;
     default:
-    	strcpy(str, "");
+        strcpy(str, "");
         break;
     }
 }
@@ -404,7 +404,7 @@ void ManagerHMI_GetStrHomingState(uint8_t index, char* str)
     switch (index)
     {
     case MMOV_VERIF_PERSON_IN:
-    	strcpy(str, "VerifIfUser");
+        strcpy(str, "VerifIfUser");
         break;
     case MMOV_HOMING_EXTENSION:
         strcpy(str, "Extension");
@@ -419,7 +419,7 @@ void ManagerHMI_GetStrHomingState(uint8_t index, char* str)
         strcpy(str, "Rest");
         break;
     default:
-    	strcpy(str, "");
+        strcpy(str, "");
         break;
     }
 }

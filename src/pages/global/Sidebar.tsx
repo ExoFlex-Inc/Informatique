@@ -50,7 +50,7 @@ const ProSidebar = () => {
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected, setSelected] = useState(
-    localStorage.getItem("selected") || "Dashboard"
+    localStorage.getItem("selected") || "Dashboard",
   );
   const { profile } = useContext(UserContext);
   const isTablet = useMediaQuery("(max-width: 768px)");
@@ -62,7 +62,6 @@ const ProSidebar = () => {
   useEffect(() => {
     localStorage.setItem("selected", selected);
   }, [selected]);
-
 
   return (
     <Box
@@ -187,12 +186,12 @@ const ProSidebar = () => {
             />
             <SubMenu label="Control Page" icon={<TvIcon />}>
               <Item
-                  title="HMI"
-                  to="/hmi"
-                  icon={<NavigateNextIcon style={{ fontSize: "small" }} />}
-                  selected={selected}
-                  setSelected={setSelected}
-                />
+                title="HMI"
+                to="/hmi"
+                icon={<NavigateNextIcon style={{ fontSize: "small" }} />}
+                selected={selected}
+                setSelected={setSelected}
+              />
               <Item
                 title="Manual"
                 to="/manual"

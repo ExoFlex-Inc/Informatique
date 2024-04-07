@@ -58,22 +58,20 @@ export function useSession(): SupabaseUserInfo {
   };
 
   useEffect(() => {
-    supaClient.auth.getSession().then(({ data: { session } }) => { 
-        setUserInfo({ ...userInfo, session });
-        supaClient.auth.onAuthStateChange((_event, session) => {
-          setUserInfo({ session, profile: null });
-          if(!session){
-            localStorage.removeItem("lastLocation");
-            localStorage.removeItem("plan");
-            navigate("/");
-          }
-        });
+    supaClient.auth.getSession().then(({ data: { session } }) => {
+      setUserInfo({ ...userInfo, session });
+      supaClient.auth.onAuthStateChange((_event, session) => {
+        setUserInfo({ session, profile: null });
+        if (!session) {
+          localStorage.removeItem("lastLocation");
+          localStorage.removeItem("plan");
+          navigate("/");
+        }
+      });
     });
   }, []);
-  
 
   useEffect(() => {
-
     if (userInfo.session?.user && !userInfo.profile) {
       listenToUserProfileChanges(userInfo.session.user.id).then(
         (newChannel) => {

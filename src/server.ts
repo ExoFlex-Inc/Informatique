@@ -13,8 +13,8 @@ const httpServer = createServer(app);
 const io = new SocketIOServer(httpServer, {
   cors: {
     origin: "http://localhost:1337",
-    methods: ["GET", "POST"]
-  }
+    methods: ["GET", "POST"],
+  },
 });
 
 let serialPort: SerialPort | null = null;
@@ -22,7 +22,6 @@ let receivedDataBuffer: string = "";
 
 app.use(express.json());
 app.use(cors());
-
 
 /*
 ..######..########.########..####....###....##..........########...#######..########..########
@@ -34,9 +33,7 @@ app.use(cors());
 ..######..########.##.....##.####.##.....##.########....##.........#######..##.....##....##...
 */
 
-
 app.post("/initialize-serial-port", (_, res) => {
-
   if (serialPort && serialPort.isOpen) {
     console.log("Serial port already initialized.");
     res.status(200).send("Serial port already initialized.");
@@ -61,7 +58,7 @@ app.post("/initialize-serial-port", (_, res) => {
           // io.emit("serialPortClosed", "Serial port error");
           // serialPort = null;
         });
-        
+
         serialPort.on("close", () => {
           console.log("Serial port closed");
           io.emit("serialPortClosed", "Serial port closed");
@@ -75,27 +72,23 @@ app.post("/initialize-serial-port", (_, res) => {
 
         serialPort.on("data", (data) => {
           receivedDataBuffer += data.toString();
-      
+
           // Check if the received data forms a valid JSON
           for (let i = 0; i < receivedDataBuffer.length; i++) {
-    
-              if (receivedDataBuffer[i] === '{') {
-                receivedDataBuffer = receivedDataBuffer.slice(i); 
+            if (receivedDataBuffer[i] === "{") {
+              receivedDataBuffer = receivedDataBuffer.slice(i);
+            } else if (receivedDataBuffer[i] === "}") {
+              const jsonDataString = receivedDataBuffer.substring(0, i + 1);
+              try {
+                io.emit("stm32Data", JSON.parse(jsonDataString));
+              } catch (err) {
+                console.error("Error parsing JSON", err);
               }
-              else if (receivedDataBuffer[i] === '}') {
-                const jsonDataString = receivedDataBuffer.substring(0, i + 1);
-                try {
-                    io.emit("stm32Data", JSON.parse(jsonDataString));
-  
-                } catch (err) {
-                    console.error("Error parsing JSON", err);
-                }
-                // Reset buffer and readingJson flag
-                receivedDataBuffer = receivedDataBuffer.slice(i + 1);
-              }
+              // Reset buffer and readingJson flag
+              receivedDataBuffer = receivedDataBuffer.slice(i + 1);
+            }
           }
-      });
-
+        });
       } else {
         console.log("Serial port already initialized.");
         res.status(200).send("Serial port already initialized.");
@@ -122,7 +115,6 @@ io.on("connection", (socket) => {
   console.log("A client connected");
 
   socket.on("planData", (planData) => {
-
     if (serialPort && serialPort.isOpen) {
       serialPort.write(planData, (err) => {
         if (err) {
@@ -132,7 +124,6 @@ io.on("connection", (socket) => {
         }
       });
     }
-
   });
 
   // Handle client disconnection
@@ -158,7 +149,6 @@ app.post("/hmi-button-click", (req, res) => {
     });
   }
 });
-
 
 /*
 ..######..##.....##.########.....###....########.....###.....######..########.....######..########.########..##.....##.########.########.

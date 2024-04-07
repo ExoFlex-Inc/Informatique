@@ -46,7 +46,7 @@ const router = createBrowserRouter(
 
 function Layout() {
   const supabaseUserInfo = useSession();
-  
+
   return (
     <UserContext.Provider value={supabaseUserInfo}>
       <>
