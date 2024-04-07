@@ -37,7 +37,7 @@ export default function HMI() {
       message += ";}"
       socket.emit("planData", message);
     }
-  }, [stm32Data && stm32Data.AutoState]); // May cause lag, modify if too much lag
+  }, [stm32Data]); // May cause lag, modify if too much lag
 
   return (
     <div className="plan-grid grid-cols-2 grid-rows-2 gap-4 custom-height mr-10 ml-10">
