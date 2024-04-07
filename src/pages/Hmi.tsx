@@ -30,10 +30,11 @@ export default function HMI() {
     }
 
     if (stm32Data && planData && socket && stm32Data.AutoState === 'WaitingForPlan') {
-      let message = `Limits:${planData.limits.angles.eversion};${planData.limits.angles.extension};${planData.limits.angles.dorsiflexion};${planData.limits.torque.eversion};${planData.limits.torque.extension};${planData.limits.torque.dorsiflexion}`;
+      let message = `{Auto;Plan;${planData.limits.angles.eversion};${planData.limits.angles.extension};${planData.limits.angles.dorsiflexion};${planData.limits.torque.eversion};${planData.limits.torque.extension};${planData.limits.torque.dorsiflexion}`;
       planData.plan.forEach((exercise) => {
         message += `;${exercise.exercise};${exercise.repetitions};${exercise.rest};${exercise.target_angle};${exercise.target_torque};${exercise.time}`;
       });
+      message += ";}"
       socket.emit("planData", message);
     }
   }, [stm32Data && stm32Data.AutoState]); // May cause lag, modify if too much lag

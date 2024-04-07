@@ -333,10 +333,6 @@ void ManagerHMI_ExecuteControlCmd(char* cmd)
     {
         ManagerMovement_StartExercise();
     }
-    else if (strcmp(ParsedMsg[2], "Next") == 0)
-    {
-        ManagerMovement_NextExercise();
-    }
     else if (strcmp(ParsedMsg[2], "Pause") == 0)
     {
         ManagerMovement_PauseExercise();
