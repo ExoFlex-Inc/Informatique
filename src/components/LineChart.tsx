@@ -119,7 +119,7 @@ const LineChart: React.FC<LineChartProps> = ({
                 chart.data.datasets.forEach((dataset: Dataset, index: number) => {
                   dataset.data.push({
                     x: Date.now(),
-                    y: graphDataIsPosition ? message.positions[index] : message.torques[index]
+                    y: graphDataIsPosition ? message.Positions[index] : message.Torques[index]
                   });
                 });
               },
