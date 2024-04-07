@@ -8,8 +8,6 @@
 #ifndef INC_PERIPH_UARTRINGBUF_H_
 #define INC_PERIPH_UARTRINGBUF_H_
 
-#define PUART_RX_BUF_SIZE 512
-
 #include <stdint.h>
 
 #include "main.h"

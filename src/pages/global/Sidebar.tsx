@@ -49,13 +49,19 @@ const ProSidebar = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [selected, setSelected] = useState("Dashboard");
+  const [selected, setSelected] = useState(
+    localStorage.getItem("selected") || "Dashboard",
+  );
   const { profile } = useContext(UserContext);
   const isTablet = useMediaQuery("(max-width: 768px)");
 
   useEffect(() => {
     setIsCollapsed(isTablet);
   }, [isTablet]);
+
+  useEffect(() => {
+    localStorage.setItem("selected", selected);
+  }, [selected]);
 
   return (
     <Box
@@ -162,7 +168,7 @@ const ProSidebar = () => {
               selected={selected}
               setSelected={setSelected}
             />
-            <SubMenu label="Charts" icon={<BarChartIcon />}>
+            {/* <SubMenu label="Charts" icon={<BarChartIcon />}>
               <Item
                 title="Activity"
                 to="/activity"
@@ -170,7 +176,7 @@ const ProSidebar = () => {
                 selected={selected}
                 setSelected={setSelected}
               />
-            </SubMenu>
+            </SubMenu> */}
             <Item
               title="Planning"
               to="/planning"
@@ -180,6 +186,13 @@ const ProSidebar = () => {
             />
             <SubMenu label="Control Page" icon={<TvIcon />}>
               <Item
+                title="HMI"
+                to="/hmi"
+                icon={<NavigateNextIcon style={{ fontSize: "small" }} />}
+                selected={selected}
+                setSelected={setSelected}
+              />
+              <Item
                 title="Manual"
                 to="/manual"
                 icon={<NavigateNextIcon style={{ fontSize: "small" }} />}
@@ -187,13 +200,13 @@ const ProSidebar = () => {
                 setSelected={setSelected}
               />
             </SubMenu>
-            <Item
+            {/* <Item
               title="Settings"
               to="/settings"
               icon={<SettingsOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
-            />
+            /> */}
           </Box>
           <Box
             display="flex"
@@ -205,8 +218,8 @@ const ProSidebar = () => {
           >
             <img
               alt="logo"
-              width={isTablet ? "200px" : "400px"}
-              height={isTablet ? "200px" : "400px"}
+              width={"250px"}
+              height={"250px"}
               src={`../assets/logo.png`}
             />
           </Box>

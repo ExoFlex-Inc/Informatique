@@ -8,29 +8,20 @@
 
 #include "cJSON.h"
 
-#define SECTION_LENGTH 20
-#define SECTION_NBR    30
-#define BUF_LENGTH     50
-#define M_HMI_TIMER    50
-
-typedef struct
-{
-    char pos[M_HMI_STR_LENGTH];
-    char vel[M_HMI_STR_LENGTH];
-    char tor[M_HMI_STR_LENGTH];
-} MotorDataString_t;
-
-typedef struct
-{
-    MotorDataString_t strMotors[MMOT_MOTOR_NBR];
-} managerHMI_t;
-
-managerHMI_t managerHMI;
+#define SECTION_LENGTH                       20
+#define SECTION_NBR                          30
+#define M_HMI_TIMER                          50
+#define M_HMI_STRING_LENGTH                  20
+#define M_HMI_MODE_SECTION                   0
+#define M_HMI_ACTION_SECTION                 1
+#define M_HMI_CONTENT_SECTION                2
+#define M_HMI_EXERCISE_SECTION_NBR           6
+#define M_HMI_CONTENT_FIRST_EXERCISE_SECTION 6
 
 static const Motor* motorsData[MMOT_MOTOR_NBR];
 static uint32_t     timerMs = 0;
 char                ParsedMsg[SECTION_NBR][SECTION_LENGTH];
-char                buf[BUF_LENGTH];
+char                buf[PUART_RX_BUF_SIZE];
 
 void ManagerHMI_ReceiveJSON();
 void ManagerHMI_SendJSON();
@@ -39,6 +30,12 @@ void ManagerHMI_ParseJson(char* msg, uint8_t maxlength, uint8_t* sectionNbr);
 void ManagerHMI_ExecuteJson(uint8_t sectionNbr);
 void ManagerHMI_ExecuteManualIncrement(char* cmd);
 void ManagerHMI_ExecuteManualHoming(char* cmd);
+void ManagerHMI_ExecutePlanCmd(char* cmd, uint8_t size);
+void ManagerHMI_ExecuteControlCmd(char* cmd);
+
+void ManagerHMI_GetStrMode(uint8_t index, char* str);
+void ManagerHMI_GetStrAutoState(uint8_t index, char* str);
+void ManagerHMI_GetStrHomingState(uint8_t index, char* str);
 
 void ManagerHMI_Init()
 {
@@ -51,8 +48,7 @@ void ManagerHMI_Init()
         motorsData[i] = ManagerMotor_GetMotorData(i);
     }
 
-    // Get motor data (const pointer : read-only)
-    for (uint8_t i = 0; i < BUF_LENGTH; i++)
+    for (uint16_t i = 0; i < PUART_RX_BUF_SIZE; i++)
     {
         buf[i] = 0;
     }
@@ -73,20 +69,41 @@ void ManagerHMI_Task()
 void ManagerHMI_SendJSON()
 {
     cJSON* root = cJSON_CreateObject();
-    // Add strings to the JSON object
 
-    ManagerHMI_SetMotorDataToString();
+    autoPlanInfo_t* pPlan = ManagerMovement_GetPlanData();
 
-    char key[M_HMI_STR_LENGTH];
+    char strMode[M_HMI_STRING_LENGTH];
+    char strAutoState[M_HMI_STRING_LENGTH];
+    char strHomingState[M_HMI_STRING_LENGTH];
+
+    ManagerHMI_GetStrMode(ManagerMovement_GetState(), strMode);
+    ManagerHMI_GetStrHomingState(pPlan->homingState, strHomingState);
+    ManagerHMI_GetStrAutoState(pPlan->autoState, strAutoState);
+    uint8_t exerciseIdx  = pPlan->exCount;
+    uint8_t repsCount    = pPlan->repsCount;
+    char*   strErrorCode = "NoError";
+
+    float positions[MMOT_MOTOR_NBR];
+    float torques[MMOT_MOTOR_NBR];
+
     for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
     {
-        sprintf(key, "Motor%dPos", i + 1);
-        cJSON_AddStringToObject(root, key, managerHMI.strMotors[i].pos);
-        sprintf(key, "Motor%dVel", i + 1);
-        cJSON_AddStringToObject(root, key, managerHMI.strMotors[i].vel);
-        sprintf(key, "Motor%dTor", i + 1);
-        cJSON_AddStringToObject(root, key, managerHMI.strMotors[i].tor);
+        positions[i] = motorsData[i]->position;
+        torques[i]   = motorsData[i]->torque;
     }
+
+    // Add mode, exercise, repetitions, sets, and errorcode to the JSON object
+    cJSON_AddStringToObject(root, "Mode", strMode);
+    cJSON_AddStringToObject(root, "AutoState", strAutoState);
+    cJSON_AddStringToObject(root, "HomingState", strHomingState);
+    cJSON_AddNumberToObject(root, "Repetitions", repsCount);
+    cJSON_AddNumberToObject(root, "ExerciseIdx", exerciseIdx);
+    cJSON_AddStringToObject(root, "ErrorCode", strErrorCode);
+
+    cJSON* positionsArray = cJSON_CreateFloatArray(positions, 3);
+    cJSON* torquesArray   = cJSON_CreateFloatArray(torques, 3);
+    cJSON_AddItemToObject(root, "Positions", positionsArray);
+    cJSON_AddItemToObject(root, "Torques", torquesArray);
 
     // Print the JSON object
     char* jsonMessage = cJSON_PrintUnformatted(root);
@@ -103,21 +120,11 @@ void ManagerHMI_ReceiveJSON()
     uint32_t size = 0;
     PeriphUartRingBuf_ReadJson(buf, &size);
 
-    if (size > 0 && size < BUF_LENGTH)
+    if (size > 0 && size < PUART_RX_BUF_SIZE)
     {
         uint8_t sectionNbr = 0;
         ManagerHMI_ParseJson(buf, size, &sectionNbr);
         ManagerHMI_ExecuteJson(sectionNbr);
-    }
-}
-
-void ManagerHMI_SetMotorDataToString()
-{
-    for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
-    {
-        sprintf(managerHMI.strMotors[i].pos, "%.2f", motorsData[i]->position);
-        sprintf(managerHMI.strMotors[i].vel, "%.2f", motorsData[i]->velocity);
-        sprintf(managerHMI.strMotors[i].tor, "%.2f", motorsData[i]->torque);
     }
 }
 
@@ -167,15 +174,25 @@ void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
 {
     if (sectionNbr >= 3)
     {
-        if (strcmp(ParsedMsg[0], "Manual") == 0)
+        if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "Manual") == 0)
         {
-            if (strcmp(ParsedMsg[1], "Increment") == 0)
+            if (strcmp(ParsedMsg[M_HMI_ACTION_SECTION], "Increment") == 0)
             {
-                ManagerHMI_ExecuteManualIncrement(ParsedMsg[2]);
+                ManagerHMI_ExecuteManualIncrement(
+                    ParsedMsg[M_HMI_CONTENT_SECTION]);
             }
         }
-        else if (strcmp(ParsedMsg[0], "Auto") == 0)
+        else if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "Auto") == 0)
         {
+            if (strcmp(ParsedMsg[M_HMI_ACTION_SECTION], "Plan") == 0)
+            {
+                ManagerHMI_ExecutePlanCmd(ParsedMsg[M_HMI_CONTENT_SECTION],
+                                          sectionNbr - M_HMI_CONTENT_SECTION);
+            }
+            else if (strcmp(ParsedMsg[M_HMI_ACTION_SECTION], "Control") == 0)
+            {
+                ManagerHMI_ExecuteControlCmd(ParsedMsg[M_HMI_CONTENT_SECTION]);
+            }
         }
     }
 }
@@ -184,43 +201,43 @@ void ManagerHMI_ExecuteManualIncrement(char* cmd)
 {
     if (cmd != NULL)
     {
-        if (strcmp(cmd, "eversionR") == 0)
+        if (strcmp(cmd, "EversionR") == 0)
         {
             ManagerMovement_ManualCmdEversion(MMOV_RIGTH);
         }
-        else if (strcmp(cmd, "eversionL") == 0)
+        else if (strcmp(cmd, "EversionL") == 0)
         {
             ManagerMovement_ManualCmdEversion(MMOV_LEFT);
         }
-        else if (strcmp(cmd, "dorsiflexionU") == 0)
+        else if (strcmp(cmd, "DorsiflexionU") == 0)
         {
             ManagerMovement_ManualCmdDorsiflexion(MMOV_UP);
         }
-        else if (strcmp(cmd, "dorsiflexionD") == 0)
+        else if (strcmp(cmd, "DorsiflexionD") == 0)
         {
             ManagerMovement_ManualCmdDorsiflexion(MMOV_DOWN);
         }
-        else if (strcmp(cmd, "extensionU") == 0)
+        else if (strcmp(cmd, "ExtensionU") == 0)
         {
             ManagerMovement_ManualCmdExtension(MMOV_UP);
         }
-        else if (strcmp(cmd, "extensionD") == 0)
+        else if (strcmp(cmd, "ExtensionD") == 0)
         {
             ManagerMovement_ManualCmdExtension(MMOV_DOWN);
         }
-        else if (strcmp(cmd, "goHome1") == 0)
+        else if (strcmp(cmd, "GoHome1") == 0)
         {
             ManagerMovement_ManualCmdHome(MMOT_MOTOR_1);
         }
-        else if (strcmp(cmd, "goHome2") == 0)
+        else if (strcmp(cmd, "GoHome2") == 0)
         {
             ManagerMovement_ManualCmdHome(MMOT_MOTOR_2);
         }
-        else if (strcmp(cmd, "goHome3") == 0)
+        else if (strcmp(cmd, "GoHome3") == 0)
         {
             ManagerMovement_ManualCmdHome(MMOT_MOTOR_3);
         }
-        else if (strcmp(cmd, "goHome") == 0)
+        else if (strcmp(cmd, "GoHome") == 0)
         {
             ManagerMovement_ManualCmdHomeAll();
         }
@@ -231,21 +248,178 @@ void ManagerHMI_ExecuteManualHoming(char* cmd)
 {
     if (cmd != NULL)
     {
-        if (strcmp(cmd, "goHome1") == 0)
+        if (strcmp(cmd, "GoHome1") == 0)
         {
             ManagerMovement_ManualCmdHome(MMOT_MOTOR_1);
         }
-        else if (strcmp(cmd, "goHome2") == 0)
+        else if (strcmp(cmd, "GoHome2") == 0)
         {
             ManagerMovement_ManualCmdHome(MMOT_MOTOR_2);
         }
-        else if (strcmp(cmd, "goHome3") == 0)
+        else if (strcmp(cmd, "GoHome3") == 0)
         {
             ManagerMovement_ManualCmdHome(MMOT_MOTOR_3);
         }
-        else if (strcmp(cmd, "goHome") == 0)
+        else if (strcmp(cmd, "GoHome") == 0)
         {
             ManagerMovement_ManualCmdHomeAll();
         }
+    }
+}
+
+void ManagerHMI_ExecutePlanCmd(char* cmd, uint8_t size)
+{
+    if (true /*ManagerMovement_ResetExercise()*/)
+    {
+        // Verif if prefix of plan is present
+        if (size > M_HMI_CONTENT_FIRST_EXERCISE_SECTION)
+        {
+            // Get max torque and pos (skip for now)
+            cmd += M_HMI_CONTENT_FIRST_EXERCISE_SECTION * M_HMI_STRING_LENGTH;
+            size -= M_HMI_CONTENT_FIRST_EXERCISE_SECTION;
+
+            // Verif if exercise plan is ok
+            if (size % M_HMI_EXERCISE_SECTION_NBR == 0)
+            {
+                uint8_t exNbr = size / M_HMI_EXERCISE_SECTION_NBR;
+
+                // Get exercise data
+                for (uint8_t i = 0; i < exNbr; i++)
+                {
+                    char* strExercise = cmd;
+                    cmd += M_HMI_STRING_LENGTH;
+
+                    uint8_t rep = atoi(cmd);
+                    cmd += M_HMI_STRING_LENGTH;
+
+                    float rest = atof(cmd);
+                    cmd += M_HMI_STRING_LENGTH;
+
+                    float pos = atof(cmd);
+                    cmd += M_HMI_STRING_LENGTH;
+
+                    float torque = atof(cmd);
+                    cmd += M_HMI_STRING_LENGTH;
+
+                    float time = atof(cmd);
+                    cmd += M_HMI_STRING_LENGTH;
+
+                    uint8_t exercise;
+
+                    if (strcmp(strExercise, "Dorsiflexion") == 0)
+                    {
+                        exercise = MMOV_DORSIFLEXION;
+                    }
+                    else if (strcmp(strExercise, "Eversion") == 0)
+                    {
+                        exercise = MMOV_EVERSION;
+                    }
+                    else if (strcmp(strExercise, "Extension") == 0)
+                    {
+                        exercise = MMOV_EXTENSION;
+                    }
+
+                    ManagerMovement_AddExercise(i, exercise, rep, time, rest);
+                    ManagerMovement_SetFinalPos(i, pos);
+                }
+            }
+        }
+    }
+}
+
+void ManagerHMI_ExecuteControlCmd(char* cmd)
+{
+    if (strcmp(ParsedMsg[2], "Start") == 0)
+    {
+        ManagerMovement_StartExercise();
+    }
+    else if (strcmp(ParsedMsg[2], "Pause") == 0)
+    {
+        ManagerMovement_PauseExercise();
+    }
+    else if (strcmp(ParsedMsg[2], "Stop") == 0)
+    {
+        ManagerMovement_StopExercise();
+    }
+}
+
+void ManagerHMI_GetStrMode(uint8_t index, char* str)
+{
+    switch (index)
+    {
+    case MMOV_STATE_WAITING_SECURITY:
+        strcpy(str, "WaitingSecurity");
+        break;
+    case MMOV_STATE_HOMING:
+        strcpy(str, "Homing");
+        break;
+    case MMOV_STATE_MANUAL:
+        strcpy(str, "Manual");
+        break;
+    case MMOV_STATE_AUTOMATIC:
+        strcpy(str, "Automatic");
+        break;
+    case MMOV_STATE_ERROR:
+        strcpy(str, "Error");
+        break;
+    default:
+        strcpy(str, "");
+        break;
+    }
+}
+
+void ManagerHMI_GetStrAutoState(uint8_t index, char* str)
+{
+    switch (index)
+    {
+    case MMOV_AUTO_STATE_WAITING4PLAN:
+        strcpy(str, "WaitingForPlan");
+        break;
+    case MMOV_AUTO_STATE_READY:
+        strcpy(str, "Ready");
+        break;
+    case MMOV_AUTO_STATE_2GOAL:
+        strcpy(str, "ToGoal");  // mettre plus de detail etre plus clair
+        break;
+    case MMOV_AUTO_STATE_STRETCHING:
+        strcpy(str, "Stretching");
+        break;
+    case MMOV_AUTO_STATE_2FIRST_POS:  // mettre plus de detail etre plus clair
+        strcpy(str, "ToFirstPos");
+        break;
+    case MMOV_AUTO_STATE_REST:
+        strcpy(str, "Resting");
+        break;
+    case MMOV_AUTO_STATE_STOP:
+        strcpy(str, "Stop");
+        break;
+    default:
+        strcpy(str, "");
+        break;
+    }
+}
+
+void ManagerHMI_GetStrHomingState(uint8_t index, char* str)
+{
+    switch (index)
+    {
+    case MMOV_VERIF_PERSON_IN:
+        strcpy(str, "VerifIfUser");
+        break;
+    case MMOV_HOMING_EXTENSION:
+        strcpy(str, "Extension");
+        break;
+    case MMOV_HOMING_EVERSION:
+        strcpy(str, "Eversion");
+        break;
+    case MMOV_HOMING_DORSIFLEXION:
+        strcpy(str, "Dorsiflexion");
+        break;
+    case MMOV_REST_POS:
+        strcpy(str, "Rest");
+        break;
+    default:
+        strcpy(str, "");
+        break;
     }
 }

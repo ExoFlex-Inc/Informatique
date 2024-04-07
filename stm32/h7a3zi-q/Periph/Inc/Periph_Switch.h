@@ -10,6 +10,8 @@
 
 #include "main.h"
 
+void PeriphSwitch_Task();
+
 bool PeriphSwitch_LegLeft();
 bool PeriphSwitch_LegRight();
 bool PeriphSwitch_ExtensionUp();

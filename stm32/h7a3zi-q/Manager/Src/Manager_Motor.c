@@ -5,10 +5,10 @@
 #define MMOT_MOTOR_2_CAN_ID 2
 #define MMOT_MOTOR_3_CAN_ID 3
 
-#define MMOT_MOVING_MAX_SPEED  2
-#define MMOT_MOVING_MAX_TORQUE 2
-#define MMOT_IDLE_MAX_SPEED    2
-#define MMOT_IDLE_MAX_TORQUE   1
+#define MMOT_MOVING_MAX_SPEED  200
+#define MMOT_MOVING_MAX_TORQUE 200
+#define MMOT_IDLE_MAX_SPEED    200
+#define MMOT_IDLE_MAX_TORQUE   100
 
 #define MMOT_MOT1_MIN_POS -10
 #define MMOT_MOT1_MAX_POS 10
@@ -41,6 +41,8 @@ typedef struct
     bool     detected;
     bool     goalReady;
     uint32_t lastMsgTime;
+
+    float originShift;
 } MotorControl;
 
 typedef struct
@@ -75,6 +77,8 @@ void ManagerMotor_CalculateNextPositions();
 void ManagerMotor_SendToMotors();
 void ManagerMotor_VerifyMotorConnection();
 void ManagerMotor_VerifyMotorState();
+
+void ManagerMoter_ApplyOriginShift();
 
 void ManagerMotor_DisableMotors();
 void ManagerMotor_EnableMotors();
@@ -111,6 +115,7 @@ void ManagerMotor_Reset()
         motors[i].detected     = false;
         motors[i].goalReady    = false;
         motors[i].lastMsgTime  = 0;
+        motors[i].originShift  = 0.0f;
     }
 
     // Set Kp Kd
@@ -120,7 +125,7 @@ void ManagerMotor_Reset()
     motors[MMOT_MOTOR_2].kp = 100.0f;
     motors[MMOT_MOTOR_2].kd = 5.0f;
     // AK 80-64
-    motors[MMOT_MOTOR_3].kp = 100.0f;
+    motors[MMOT_MOTOR_3].kp = 300.0f;
     motors[MMOT_MOTOR_3].kd = 5.0f;
 
     // Set max min pos
@@ -149,7 +154,7 @@ void ManagerMotor_Task()
     // State machine that Init, sets to zero, reads informations and sends
     // informations to the motors
     ManagerMotor_ReceiveFromMotors();
-    ManagerMotor_VerifyMotorState();
+    // ManagerMotor_VerifyMotorState();
 
     if (HAL_GetTick() - timerMs >= TIMER)
     {
@@ -174,7 +179,7 @@ void ManagerMotor_Task()
         case MMOT_STATE_READY2MOVE:
             ManagerMotor_CalculateNextPositions();
             ManagerMotor_SendToMotors();
-            ManagerMotor_VerifyMotorConnection();
+            //            ManagerMotor_VerifyMotorConnection();
 
             break;
 
@@ -219,6 +224,7 @@ void ManagerMotor_ReceiveFromMotors()
             if (lastMsgTime < motors[i].lastMsgTime)
             {
                 PeriphMotors_ParseMotorState(&motors[i].motor, data);
+                ManagerMoter_ApplyOriginShift();
                 motors[i].detected = true;
             }
         }
@@ -242,7 +248,8 @@ void ManagerMotor_StartMotors()
         motors[MMOT_MOTOR_3].detected = false;
         managerMotor.setupFirstPass   = false;
     }
-    else if (motors[MMOT_MOTOR_1].detected && motors[MMOT_MOTOR_2].detected &&
+    else if (/*motors[MMOT_MOTOR_1].detected &&*/ motors[MMOT_MOTOR_2]
+                 .detected &&
              motors[MMOT_MOTOR_3].detected)
     {
         managerMotor.setupFirstPass = true;
@@ -270,7 +277,8 @@ void ManagerMotor_DisableMovement()
         motors[MMOT_MOTOR_3].detected = false;
         managerMotor.setupFirstPass   = false;
     }
-    else if (motors[MMOT_MOTOR_1].detected && motors[MMOT_MOTOR_2].detected &&
+    else if (/*motors[MMOT_MOTOR_1].detected &&*/ motors[MMOT_MOTOR_2]
+                 .detected &&
              motors[MMOT_MOTOR_3].detected)
     {
         managerMotor.setupFirstPass = true;
@@ -291,8 +299,8 @@ void ManagerMotor_DisableMovement()
 
 void ManagerMotor_SetOrigines()
 {
-    if (motors[MMOT_MOTOR_1].motor.position <= 0.001 &&
-        motors[MMOT_MOTOR_1].motor.position >= -0.001 &&
+    if (/*motors[MMOT_MOTOR_1].motor.position <= 0.001 &&
+        motors[MMOT_MOTOR_1].motor.position >= -0.001 &&*/
         motors[MMOT_MOTOR_2].motor.position <= 0.001 &&
         motors[MMOT_MOTOR_2].motor.position >= -0.001 &&
         motors[MMOT_MOTOR_3].motor.position <= 0.001 &&
@@ -308,9 +316,10 @@ void ManagerMotor_SetOrigines()
     }
     else if (tryCount < MAX_TRY)
     {
-        PeriphMotors_SetZeroPosition(&motors[MMOT_MOTOR_1].motor);
-        PeriphMotors_SetZeroPosition(&motors[MMOT_MOTOR_2].motor);
-        PeriphMotors_SetZeroPosition(&motors[MMOT_MOTOR_3].motor);
+        ManagerMotor_SetMotorOrigin(MMOT_MOTOR_1);
+        ManagerMotor_SetMotorOrigin(MMOT_MOTOR_2);
+        ManagerMotor_SetMotorOrigin(MMOT_MOTOR_3);
+
         tryCount += 1;
     }
     else
@@ -318,6 +327,11 @@ void ManagerMotor_SetOrigines()
         managerMotor.state     = MMOT_STATE_ERROR;
         managerMotor.errorCode = ERROR_SET_ORIGINES_MOTORS;
     }
+}
+
+void ManagerMotor_SetMotorOrigin(uint8_t motorIndex)
+{
+    PeriphMotors_SetZeroPosition(&motors[motorIndex].motor);
 }
 
 void ManagerMotor_SendToMotors()
@@ -522,4 +536,17 @@ bool ManagerMotor_InError()
 uint8_t ManagerMotor_GetState()
 {
     return managerMotor.state;
+}
+
+void ManagerMoter_ApplyOriginShift()
+{
+    for (int8_t i = 0; i < MMOT_MOTOR_NBR; i++)
+    {
+        motors[i].motor.position -= motors[i].originShift;
+    }
+}
+
+void ManagerMotor_SetoriginShift(uint8_t motorIndex, float shiftValue)
+{
+    motors[motorIndex].originShift = shiftValue;
 }
