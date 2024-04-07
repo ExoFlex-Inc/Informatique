@@ -18,16 +18,10 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 export default function HMI() {
   const { planData } = usePlanData();
   const { stm32Data, socket, errorFromStm32 } = useStm32();
-  const [nextButtonEnabled, setNextButtonEnabled] = useState(false);
 
   const isTablet = useMediaQuery("(max-width: 768px)");
 
   useEffect(() => {
-    if (stm32Data && stm32Data.ExerciseIdx !== 0 && stm32Data.AutoState === "Ready") {
-      setNextButtonEnabled(true);
-    } else {
-      setNextButtonEnabled(false);
-    }
 
     if (stm32Data && planData && socket && stm32Data.AutoState === 'WaitingForPlan') {
       let message = `{Auto;Plan;${planData.limits.angles.eversion};${planData.limits.angles.extension};${planData.limits.angles.dorsiflexion};${planData.limits.torque.eversion};${planData.limits.torque.extension};${planData.limits.torque.dorsiflexion}`;
@@ -75,15 +69,6 @@ export default function HMI() {
               content="Stop"
               disabled={!stm32Data || errorFromStm32 || (stm32Data && stm32Data.AutoState === 'Ready')}
               color="bg-red-500"
-            />
-            <Button
-              label="Next"
-              icon={<SkipNextIcon />}
-              mode="Auto"
-              action="Control"
-              content="Next"
-              disabled={!stm32Data || !nextButtonEnabled || errorFromStm32}
-              color="bg-gray-500"
             />
           </div>
           {stm32Data && stm32Data.AutoState === "Dorsiflexion" && (

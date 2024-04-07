@@ -79,8 +79,8 @@ void ManagerHMI_SendJSON() {
     cJSON* torquesArray = cJSON_CreateIntArray(torques, sizeof(torques) / sizeof(torques[0]));
 
     // Add positions and torques arrays to the JSON object
-    cJSON_AddItemToObject(root, "positions", positionsArray);
-    cJSON_AddItemToObject(root, "torques", torquesArray);
+    cJSON_AddItemToObject(root, "Positions", positionsArray);
+    cJSON_AddItemToObject(root, "Torques", torquesArray);
 
     // Print the JSON object
     char* jsonMessage = cJSON_PrintUnformatted(root);
