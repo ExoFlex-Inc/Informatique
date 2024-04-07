@@ -100,8 +100,8 @@ void ManagerHMI_SendJSON()
     cJSON_AddNumberToObject(root, "ExerciseIdx", exerciseIdx);
     cJSON_AddStringToObject(root, "ErrorCode", strErrorCode);
 
-    cJSON* positionsArray = cJSON_CreateIntArray(positions, 3);
-    cJSON* torquesArray   = cJSON_CreateIntArray(torques, 3);
+    cJSON* positionsArray = cJSON_CreateFloatArray(positions, 3);
+    cJSON* torquesArray   = cJSON_CreateFloatArray(torques, 3);
     cJSON_AddItemToObject(root, "Positions", positionsArray);
     cJSON_AddItemToObject(root, "Torques", torquesArray);
 
@@ -387,6 +387,9 @@ void ManagerHMI_GetStrAutoState(uint8_t index, char* str)
     case MMOV_AUTO_STATE_2FIRST_POS://mettre plus de detail etre plus clair
     	strcpy(str, "ToFirstPos");
         break;
+    case MMOV_AUTO_STATE_REST:
+    	strcpy(str, "Resting");
+    	break;
     case MMOV_AUTO_STATE_STOP:
     	strcpy(str, "Stop");
         break;
