@@ -435,14 +435,14 @@ export default function Planning() {
           Save Plan
         </button>
       </div>
-      <div className="mt-4 ml-10 mr-10">
+      {/* <div className="mt-4 ml-10 mr-10">
         <textarea
           value={generateJsonPlan()}
           className="text-black border border-gray-300 rounded px-2 py-1 w-full"
           rows={20}
           readOnly
         />
-      </div>
+      </div> */}
     </div>
   );
 }

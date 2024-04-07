@@ -82,7 +82,7 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
-      className={`font-bold py-2 px-4 rounded ${color} flex justify-center items-center`}
+      className={`font-bold m-1 py-2 px-4 rounded ${color} flex justify-center items-center`}
       onMouseDown={handleMouseDown}
       disabled={disabled}
     >

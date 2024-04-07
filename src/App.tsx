@@ -46,34 +46,11 @@ const router = createBrowserRouter(
 
 function Layout() {
   const supabaseUserInfo = useSession();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  
-  useEffect(() => {
-    if (!supabaseUserInfo || !supabaseUserInfo.session) {
-      console.log("No session detected. Signing off")
-      navigate("/")
-      setIsLoggedIn(false)
-      localStorage.removeItem("lastLocation");
-      localStorage.removeItem("plan")
-    }
-    else{
-      setIsLoggedIn(true)
-    }
-  }, [supabaseUserInfo.session, location.pathname]);
-
-  useEffect(() => {
-    const lastLocation = localStorage.getItem("lastLocation");
-    if (lastLocation) {
-      navigate(lastLocation);
-    }
-  }, [navigate]);
   
   return (
     <UserContext.Provider value={supabaseUserInfo}>
       <>
-        {supabaseUserInfo.session && supabaseUserInfo.profile && isLoggedIn && <ProSideBar />}
+        {supabaseUserInfo.session && supabaseUserInfo.profile && <ProSideBar />}
         <main className="content">
           <TopBar />
           <Outlet />

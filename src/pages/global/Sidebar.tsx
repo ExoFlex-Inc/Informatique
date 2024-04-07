@@ -49,13 +49,20 @@ const ProSidebar = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [selected, setSelected] = useState("Dashboard");
+  const [selected, setSelected] = useState(
+    localStorage.getItem("selected") || "Dashboard"
+  );
   const { profile } = useContext(UserContext);
   const isTablet = useMediaQuery("(max-width: 768px)");
 
   useEffect(() => {
     setIsCollapsed(isTablet);
   }, [isTablet]);
+
+  useEffect(() => {
+    localStorage.setItem("selected", selected);
+  }, [selected]);
+
 
   return (
     <Box

@@ -50,12 +50,10 @@ export function useSession(): SupabaseUserInfo {
       } else {
         console.error("Local server setup failed");
         setChannel(null);
-        navigate("/");
       }
     } catch (error) {
       console.error("Error during local server setup:", error);
       setChannel(null); //TODO: When server local is not connected, it still signs in the user
-      navigate("/");
     }
   };
 
@@ -64,12 +62,18 @@ export function useSession(): SupabaseUserInfo {
         setUserInfo({ ...userInfo, session });
         supaClient.auth.onAuthStateChange((_event, session) => {
           setUserInfo({ session, profile: null });
+          if(!session){
+            localStorage.removeItem("lastLocation");
+            localStorage.removeItem("plan");
+            navigate("/");
+          }
         });
     });
   }, []);
   
 
   useEffect(() => {
+
     if (userInfo.session?.user && !userInfo.profile) {
       listenToUserProfileChanges(userInfo.session.user.id).then(
         (newChannel) => {
