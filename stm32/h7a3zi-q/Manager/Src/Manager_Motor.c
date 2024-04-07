@@ -26,8 +26,8 @@
 #define TIMER   10
 #define MAX_TRY 50  // 500 ms before flagging an error
 
-#define MOTOR_STEP   0.01
-#define POSITION_TOL 0.02
+#define MOTOR_STEP   0.005
+#define POSITION_TOL 0.01
 
 #define MMOT_MAX_MSG_DELAY TIMER * 4
 
@@ -78,7 +78,7 @@ void ManagerMotor_SendToMotors();
 void ManagerMotor_VerifyMotorConnection();
 void ManagerMotor_VerifyMotorState();
 
-void ManagerMoter_ApplyOriginShift();
+void ManagerMotor_ApplyOriginShift(uint8_t motorIndex);
 
 void ManagerMotor_DisableMotors();
 void ManagerMotor_EnableMotors();
@@ -224,7 +224,7 @@ void ManagerMotor_ReceiveFromMotors()
             if (lastMsgTime < motors[i].lastMsgTime)
             {
                 PeriphMotors_ParseMotorState(&motors[i].motor, data);
-                ManagerMoter_ApplyOriginShift();
+                ManagerMotor_ApplyOriginShift(i);
                 motors[i].detected = true;
             }
         }
@@ -538,15 +538,12 @@ uint8_t ManagerMotor_GetState()
     return managerMotor.state;
 }
 
-void ManagerMoter_ApplyOriginShift()
+void ManagerMotor_ApplyOriginShift(uint8_t motorIndex)
 {
-    for (int8_t i = 0; i < MMOT_MOTOR_NBR; i++)
-    {
-        motors[i].motor.position -= motors[i].originShift;
-    }
+	motors[motorIndex].motor.position -= motors[motorIndex].originShift;
 }
 
-void ManagerMotor_SetoriginShift(uint8_t motorIndex, float shiftValue)
+void ManagerMotor_SetOriginShift(uint8_t motorIndex, float shiftValue)
 {
     motors[motorIndex].originShift = shiftValue;
 }

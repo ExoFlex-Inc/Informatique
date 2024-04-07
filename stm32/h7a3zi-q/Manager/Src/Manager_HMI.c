@@ -415,7 +415,7 @@ void ManagerHMI_GetStrHomingState(uint8_t index, char* str)
     case MMOV_HOMING_DORSIFLEXION:
         strcpy(str, "Dorsiflexion");
         break;
-    case MMOV_REST_POS:
+    case MMOV_HOMING_REST_POS:
         strcpy(str, "Rest");
         break;
     default:
