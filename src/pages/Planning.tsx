@@ -249,7 +249,7 @@ export default function Planning() {
                   name="dorsiflexion"
                   value={limits.torque.dorsiflexion}
                   onChange={handleTorqueLimitChange}
-                  className="text-black border border-gray-300 rounded px-2 py-1 w-full"
+                  className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                 />
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
@@ -258,7 +258,7 @@ export default function Planning() {
                   name="extension"
                   value={limits.torque.extension}
                   onChange={handleTorqueLimitChange}
-                  className="text-black border border-gray-300 rounded px-2 py-1 w-full"
+                  className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                 />
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
@@ -267,7 +267,7 @@ export default function Planning() {
                   name="eversion"
                   value={limits.torque.eversion}
                   onChange={handleTorqueLimitChange}
-                  className="text-black border border-gray-300 rounded px-2 py-1 w-full"
+                  className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                 />
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
@@ -276,7 +276,7 @@ export default function Planning() {
                   name="dorsiflexion"
                   value={limits.angles.dorsiflexion}
                   onChange={handleAngleLimitChange}
-                  className="text-black border border-gray-300 rounded px-2 py-1 w-full"
+                  className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                 />
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
@@ -285,7 +285,7 @@ export default function Planning() {
                   name="extension"
                   value={limits.angles.extension}
                   onChange={handleAngleLimitChange}
-                  className="text-black border border-gray-300 rounded px-2 py-1 w-full"
+                  className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                 />
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
@@ -294,7 +294,7 @@ export default function Planning() {
                   name="eversion"
                   value={limits.angles.eversion}
                   onChange={handleAngleLimitChange}
-                  className="text-black border border-gray-300 rounded px-2 py-1 w-full"
+                  className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                 />
               </td>
             </tr>
@@ -338,7 +338,7 @@ export default function Planning() {
                     name="exercise"
                     value={exercise.exercise}
                     onChange={(e) => handleInputChange(index, e)}
-                    className="text-black border border-gray-300 rounded px-2 py-1 w-full"
+                    className="text-black border border-gray-300 rounded text-center px-2 py-1 w-full"
                   >
                     <option value="">Select Exercise</option>
                     {exerciseOptions.map((option) => (
@@ -355,7 +355,7 @@ export default function Planning() {
                     placeholder="Repetitions"
                     value={exercise.repetitions}
                     onChange={(e) => handleInputChange(index, e)}
-                    className="text-black border border-gray-300 rounded px-2 py-1 w-full"
+                    className="text-black border border-gray-300 rounded text-center px-2 py-1 w-full"
                   />
                 </td>
                 {/* <td className="px-6 py-4 whitespace-nowrap">
@@ -375,7 +375,7 @@ export default function Planning() {
                     placeholder="Rest"
                     value={exercise.rest}
                     onChange={(e) => handleInputChange(index, e)}
-                    className="text-black border border-gray-300 rounded px-2 py-1 w-full"
+                    className="text-black border border-gray-300 rounded text-center px-2 py-1 w-full"
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -385,7 +385,7 @@ export default function Planning() {
                     placeholder="Angle"
                     value={exercise.target_angle}
                     onChange={(e) => handleInputChange(index, e)}
-                    className="text-black border border-gray-300 rounded px-2 py-1 w-full"
+                    className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -395,7 +395,7 @@ export default function Planning() {
                     placeholder="Torque"
                     value={exercise.target_torque}
                     onChange={(e) => handleInputChange(index, e)}
-                    className="text-black border border-gray-300 rounded px-2 py-1 w-full"
+                    className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -405,7 +405,7 @@ export default function Planning() {
                     placeholder="Time"
                     value={exercise.time}
                     onChange={(e) => handleInputChange(index, e)}
-                    className="text-black border border-gray-300 rounded px-2 py-1 w-full"
+                    className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right">

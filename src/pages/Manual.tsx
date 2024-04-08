@@ -14,22 +14,16 @@ export default function Manual() {
       {
         label: "Motor 1",
         borderColor: "rgb(255, 99, 132)",
-        borderDash: [8, 4],
-        fill: true,
         data: [],
       },
       {
         label: "Motor 2",
         borderColor: "rgb(99, 255, 132)",
-        borderDash: [8, 4],
-        fill: true,
         data: [],
       },
       {
         label: "Motor 3",
         borderColor: "rgb(99, 132, 255)",
-        borderDash: [8, 4],
-        fill: true,
         data: [],
       },
     ],
@@ -38,7 +32,7 @@ export default function Manual() {
   return (
     <div className="flex flex-col custom-height">
       <div className="justify-center flex mb-10">
-        <LineChart chartData={manualData} mode="Manual" socket={socket} />
+        <LineChart chartData={manualData} mode="Manual" type="realtime" socket={socket} />
       </div>
       <div className="flex justify-center h-80">
         <MotorControlWidget

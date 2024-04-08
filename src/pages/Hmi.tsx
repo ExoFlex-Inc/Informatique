@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, SetStateAction, Dispatch } from "react";
 import Button from "../components/Button.tsx";
 
 import usePlanData from "../hooks/get-plan.ts";
 import useStm32 from "../hooks/use-stm32.ts";
 
-import { useMediaQuery } from "@mui/material";
+import { useMediaQuery, useTheme } from "@mui/material";
 
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
@@ -14,19 +14,46 @@ import RotateLeftIcon from "@mui/icons-material/RotateLeft";
 import RotateRightIcon from "@mui/icons-material/RotateRight";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import LineChart from "../components/LineChart.tsx";
+import { tokens } from "../hooks/theme.ts";
+
+interface ChartData {
+  datasets: {
+    label: string;
+    borderColor: string;
+    data: { x: number; y: number }[];
+  }[];
+}
 
 export default function HMI() {
   const { planData } = usePlanData();
   const { stm32Data, socket, errorFromStm32 } = useStm32();
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
 
   const isTablet = useMediaQuery("(max-width: 768px)");
+
+  const [chartData, setChartData] = useState<ChartData>({
+    datasets: [
+      {
+        label: "Amplitude",
+        borderColor: `${colors.blueAccent[500]}`,
+        data: [],
+      },
+      {
+        label: "Rigidity",
+        borderColor: `${colors.greenAccent[500]}`,
+        data: [],
+      },
+    ],
+  });
 
   useEffect(() => {
     if (
       stm32Data &&
+      stm32Data.AutoState === "WaitingForPlan" &&
       planData &&
-      socket &&
-      stm32Data.AutoState === "WaitingForPlan"
+      socket
     ) {
       let message = `{Auto;Plan;${planData.limits.angles.eversion};${planData.limits.angles.extension};${planData.limits.angles.dorsiflexion};${planData.limits.torque.eversion};${planData.limits.torque.extension};${planData.limits.torque.dorsiflexion}`;
       planData.plan.forEach((exercise) => {
@@ -35,14 +62,60 @@ export default function HMI() {
       message += ";}";
       socket.emit("planData", message);
     }
-  }, [stm32Data]); // May cause lag, modify if too much lag
+  }, [stm32Data, planData, socket]);
+
+  useEffect(() => {
+    if (stm32Data && stm32Data.AutoState === "Stretching"){
+
+      if(planData && planData.plan[stm32Data.ExerciseIdx].exercise === "Dorsiflexion" || planData && planData.plan[stm32Data.ExerciseIdx].exercise === "Eversion") {
+        setChartData((prevChartData) => {
+          const newData = [...prevChartData.datasets];
+          newData[0].data.push({
+            x: stm32Data.Repetitions,
+            y: stm32Data.Positions[1],
+          });
+          newData[1].data.push({
+            x: stm32Data.Repetitions,
+            y: stm32Data.Torques[1],
+          });
+          return { ...prevChartData, datasets: newData };
+        });
+      }
+      else if(planData && planData.plan[stm32Data.ExerciseIdx].exercise === "Extension") {
+        setChartData((prevChartData) => {
+          const newData = [...prevChartData.datasets];
+          newData[0].data.push({
+            x: stm32Data.Repetitions,
+            y: stm32Data.Positions[2],
+          });
+          newData[1].data.push({
+            x: stm32Data.Repetitions,
+            y: stm32Data.Torques[2],
+          });
+          return { ...prevChartData, datasets: newData };
+        });
+      }
+    }
+  }, [stm32Data && stm32Data.AutoState]);
+
+  useEffect(() => {
+    setChartData(prevChartData => ({
+      datasets: [
+        { ...prevChartData.datasets[0], data: [] },
+        { ...prevChartData.datasets[1], data: [] }
+      ]
+    }));
+  }, [stm32Data && stm32Data.ExerciseIdx]);
+  
 
   return (
     <div className="plan-grid grid-cols-2 grid-rows-2 gap-4 custom-height mr-10 ml-10">
+      <div className="bg-white rounded-2xl flex items-center h-auto">
+        <LineChart chartData={chartData} type="line" socket={socket} />
+      </div>
       <div className="bg-white rounded-2xl"></div>
-      <div className="bg-white rounded-2xl"></div>
-      <div className="bg-white col-span-1 flex flex-col justify-around rounded-2xl mb-5">
-        <div className="flex justify-between mt-5 ml-10 mr-10">
+      <div className="bg-white flex flex-col justify-around rounded-2xl mb-5">
+        <div className="flex justify-center mt-5 ml-10 mr-10">
           {stm32Data &&
           stm32Data.AutoState !== "Ready" &&
           stm32Data.AutoState !== "WaitingForPlan" ? (
@@ -180,13 +253,13 @@ export default function HMI() {
                         : "bg-white"
                   }
                 >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
                     {item.exercise}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
                     {item.repetitions}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
                     {item.rest}
                   </td>
                 </tr>
@@ -194,8 +267,6 @@ export default function HMI() {
           </tbody>
         </table>
       </div>
-      <div className="bg-white rounded-2xl"></div>
-      <div className="bg-white rounded-2xl"></div>
     </div>
   );
 }
