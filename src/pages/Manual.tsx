@@ -32,7 +32,12 @@ export default function Manual() {
   return (
     <div className="flex flex-col custom-height">
       <div className="justify-center flex mb-10">
-        <LineChart chartData={manualData} mode="Manual" type="realtime" socket={socket} />
+        <LineChart
+          chartData={manualData}
+          mode="Manual"
+          type="realtime"
+          socket={socket}
+        />
       </div>
       <div className="flex justify-center h-80">
         <MotorControlWidget

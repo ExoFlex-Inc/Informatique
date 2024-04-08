@@ -65,11 +65,16 @@ interface Dataset {
   }[];
 }
 
-const LineChart: React.FC<LineChartProps> = ({ chartData, mode, socket, type }) => {
+const LineChart: React.FC<LineChartProps> = ({
+  chartData,
+  mode,
+  socket,
+  type,
+}) => {
   const [graphPause, setGraphPause] = useState(false);
   const [graphDataIsPosition, setGraphDataIsPosition] = useState(true);
   const [chartOptions, setChartOptions] = useState<ChartOptions>(() => {
-    if (type === 'realtime') {
+    if (type === "realtime") {
       return {
         scales: {
           x: {
@@ -83,12 +88,14 @@ const LineChart: React.FC<LineChartProps> = ({ chartData, mode, socket, type }) 
               duration: 2000,
               pause: false,
               onRefresh: (chart) => {
-                chart.data.datasets.forEach((dataset: Dataset, index: number) => {
-                  dataset.data.push({
-                    x: Date.now(),
-                    y: 0,
-                  });
-                });
+                chart.data.datasets.forEach(
+                  (dataset: Dataset, index: number) => {
+                    dataset.data.push({
+                      x: Date.now(),
+                      y: 0,
+                    });
+                  },
+                );
               },
             },
           },
@@ -98,16 +105,16 @@ const LineChart: React.FC<LineChartProps> = ({ chartData, mode, socket, type }) 
           },
         },
       };
-    } else if (type === 'line') {
+    } else if (type === "line") {
       return {
         scales: {
           x: {
-            type: 'linear',
+            type: "linear",
             min: 0,
             max: 10,
             border: {
-              color: 'red'
-            }
+              color: "red",
+            },
           },
           y: {
             min: -65,
@@ -119,13 +126,11 @@ const LineChart: React.FC<LineChartProps> = ({ chartData, mode, socket, type }) 
       return {};
     }
   });
-  
 
   useEffect(() => {
-    if(type === "realtime"){
-
+    if (type === "realtime") {
       if (!socket) return;
-  
+
       socket.on("stm32Data", (message) => {
         setChartOptions((prevOptions) => ({
           ...prevOptions,
@@ -155,12 +160,11 @@ const LineChart: React.FC<LineChartProps> = ({ chartData, mode, socket, type }) 
           },
         }));
       });
-  
+
       return () => {
         socket.off("stm32Data");
       };
     }
-
   }, [socket?.connected, graphDataIsPosition]);
 
   useEffect(() => {

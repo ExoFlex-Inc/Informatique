@@ -66,9 +66,11 @@ export default function HMI() {
   }, [stm32Data, planData, socket]);
 
   useEffect(() => {
-    if (stm32Data?.AutoState === "Stretching"){
-
-      if(planData?.plan[stm32Data.ExerciseIdx].exercise === "Dorsiflexion" || planData?.plan[stm32Data.ExerciseIdx].exercise === "Eversion") {
+    if (stm32Data?.AutoState === "Stretching") {
+      if (
+        planData?.plan[stm32Data.ExerciseIdx].exercise === "Dorsiflexion" ||
+        planData?.plan[stm32Data.ExerciseIdx].exercise === "Eversion"
+      ) {
         setChartData((prevChartData) => {
           const newData = [...prevChartData.datasets];
           newData[0].data.push({
@@ -81,8 +83,9 @@ export default function HMI() {
           });
           return { ...prevChartData, datasets: newData };
         });
-      }
-      else if(planData?.plan[stm32Data.ExerciseIdx].exercise === "Extension") {
+      } else if (
+        planData?.plan[stm32Data.ExerciseIdx].exercise === "Extension"
+      ) {
         setChartData((prevChartData) => {
           const newData = [...prevChartData.datasets];
           newData[0].data.push({
@@ -100,14 +103,13 @@ export default function HMI() {
   }, [stm32Data?.AutoState]);
 
   useEffect(() => {
-    setChartData(prevChartData => ({
+    setChartData((prevChartData) => ({
       datasets: [
         { ...prevChartData.datasets[0], data: [] },
-        { ...prevChartData.datasets[1], data: [] }
-      ]
+        { ...prevChartData.datasets[1], data: [] },
+      ],
     }));
   }, [stm32Data?.ExerciseIdx]);
-  
 
   return (
     <div className="plan-grid grid-cols-2 grid-rows-2 gap-4 custom-height mr-10 ml-10">
@@ -153,9 +155,7 @@ export default function HMI() {
             action="Control"
             content="Stop"
             disabled={
-              !stm32Data ||
-              errorFromStm32 ||
-              (stm32Data?.AutoState === "Ready")
+              !stm32Data || errorFromStm32 || stm32Data?.AutoState === "Ready"
             }
             color="bg-red-500"
           />
@@ -243,29 +243,28 @@ export default function HMI() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {
-              planData?.plan.map((item, index) => (
-                <tr
-                  key={index}
-                  className={
-                    index === stm32Data?.ExerciseIdx
-                      ? "bg-green-200"
-                      : index % 2 === 0
-                        ? "bg-gray-50"
-                        : "bg-white"
-                  }
-                >
-                  <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
-                    {item.exercise}
-                  </td>
-                  <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
-                    {item.repetitions}
-                  </td>
-                  <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
-                    {item.rest}
-                  </td>
-                </tr>
-              ))}
+            {planData?.plan.map((item, index) => (
+              <tr
+                key={index}
+                className={
+                  index === stm32Data?.ExerciseIdx
+                    ? "bg-green-200"
+                    : index % 2 === 0
+                      ? "bg-gray-50"
+                      : "bg-white"
+                }
+              >
+                <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
+                  {item.exercise}
+                </td>
+                <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
+                  {item.repetitions}
+                </td>
+                <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
+                  {item.rest}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
