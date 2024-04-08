@@ -20,8 +20,6 @@ export default function HMI() {
   const { planData } = usePlanData();
   const { stm32Data, socket, errorFromStm32 } = useStm32();
 
-  console.log(stm32Data);
-
   const isTablet = useMediaQuery("(max-width: 768px)");
 
   useEffect(() => {

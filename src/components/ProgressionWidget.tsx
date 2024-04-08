@@ -30,7 +30,7 @@ return (
         component="div"
         color="black"
         fontSize={30}
-        >{`${Math.round(props.value)}%`}</Typography>
+        >{`${Math.min(Math.round(props.value), 100)}%`}</Typography>
     </Box>
     </Box>
 );
@@ -41,61 +41,62 @@ interface Props {
     planData: any;
 }
 
-export default function ProgressionWidget( {stm32Data, planData} : Props) {
+export default function ProgressionWidget({ stm32Data, planData }: Props) {
     const [stretchProgress, setStrechProgress] = useState(0);
-    const [totalStretch, setTotalStretch] = useState(0);
+    const [totalStretch, setTotalStretch] = useState(1);
     const [repetitionProgress, setRepetitionProgress] = useState(0);
     const [totalRepetition, setTotalRepetition] = useState(0);
 
-    // useEffect(() => {
-    //   const timer = setInterval(() => {
-    //     setSetProgress((oldProgress) => {
-    //       if (oldProgress === 100) {
-    //         return 0;
-    //       }
-    //       const diff = Math.random() * 10;
-    //       return Math.min(oldProgress + diff, 100);
-    //     });
-    //   }, 500);
+    useEffect(() => {
+        if (stm32Data?.Repetitions !== undefined) {
+            setRepetitionProgress(stm32Data.Repetitions);
+        }
+        if(stm32Data?.Repetitions !== 0 && stm32Data?.Repetitions !== undefined){
+            console.log(stm32Data?.Repetitions)
 
-    //   return () => {
-    //     clearInterval(timer);
-    //   } 
-    // }, []);
+            setStrechProgress(stretchProgress + 1);
+        }
+    }, [stm32Data?.Repetitions]);
 
     useEffect(() => {
-        setStrechProgress(stretchProgress + 1);
-        setRepetitionProgress(stm32Data?.Repetitions);
-      }, [stm32Data?.Repetitions]);
-      
-    useEffect(() => {
-        setTotalRepetition(planData?.plan?.[stm32Data?.ExerciseIdx].Repetitions)
-    },[planData, stm32Data?.ExerciseIdx]);
+        if (planData && stm32Data?.ExerciseIdx !== undefined) {
+            const currentPlan = planData.plan[stm32Data.ExerciseIdx];
+            if (currentPlan && currentPlan.repetitions !== undefined) {
+                setTotalRepetition(currentPlan.repetitions);
+            }
+        }
+    }, [planData, stm32Data?.ExerciseIdx]);
 
     useEffect(() => {
-        planData?.plan.forEach((plan: any) => {
-            setTotalStretch(totalStretch + plan.Repetitions);
-        })
-    },[planData]);
+        if (planData && planData.plan) {
+            let total = 0;
+            planData.plan.forEach((plan: any) => {
+                if (plan && plan.repetitions !== undefined) {
+                    total += plan.repetitions;
+                }
+            });
+            setTotalStretch(total);
+        }
+    }, [planData]);
 
     return (
         <div className="">
             <div className="flex justify-center mb-2.5">
-            <CircularProgressWithLabel value={stretchProgress}/>
+                <CircularProgressWithLabel value={(stretchProgress/totalStretch)*100} />
             </div>
             <p className="text-black justify-center flex mb-7">
-            Stretch Progress
+                Stretch Progress
             </p>
             <p className="text-black justify-center flex mb-1 text-xl">
-            { Math.round(repetitionProgress/10) + '/10'}
+                {repetitionProgress + '/' + totalRepetition}
             </p>
             <div className="flex justify-center mb-1">
-            <Box sx={{ width: '75%' }}>
-                <LinearProgress color="success" variant="determinate" value={repetitionProgress} />
-            </Box>
+                <Box sx={{ width: '75%' }}>
+                    <LinearProgress color="success" variant="determinate" value={(repetitionProgress/totalRepetition)*100} />
+                </Box>
             </div>
             <p className="text-black justify-center flex">
-            Repetitions Progress
+                Repetitions Progress
             </p>
         </div>
     );
