@@ -74,8 +74,8 @@ export default function ProgressionWidget({ stm32Data, planData }: Props) {
 
   useEffect(() => {
     if (stm32Data?.ExerciseIdx !== undefined) {
-      if(stm32Data.ExerciseIdx === 0 && stm32Data.Repetitions === 0){
-        setStretchProgress(0)
+      if (stm32Data.ExerciseIdx === 0 && stm32Data.Repetitions === 0) {
+        setStretchProgress(0);
       }
     }
   }, [stm32Data?.ExerciseIdx, stm32Data?.Repetitions]);

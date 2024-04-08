@@ -103,7 +103,7 @@ export default function HMI() {
   }, [stm32Data?.AutoState]);
 
   useEffect(() => {
-    if(stm32Data?.Repetitions === 0){
+    if (stm32Data?.Repetitions === 0) {
       setChartData((prevChartData) => ({
         datasets: [
           { ...prevChartData.datasets[0], data: [] },

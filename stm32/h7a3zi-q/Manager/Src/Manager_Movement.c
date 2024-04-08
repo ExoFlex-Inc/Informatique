@@ -484,24 +484,24 @@ void ManagerMovement_AutoReady()
     {
         if (repsCount >= repetitions[exerciseIdx] && !buttonStartReset)
         {
-            startButton = false;
+            startButton      = false;
             buttonStartReset = true;
         }
 
         // Set the position that the exercise is starting
         if (startButton)
         {
-        	if (repsCount >= repetitions[exerciseIdx])
-			{
-        		repsCount = 0;
-				exerciseIdx++;
-			}
+            if (repsCount >= repetitions[exerciseIdx])
+            {
+                repsCount = 0;
+                exerciseIdx++;
+            }
 
-			if (repsCount == 0)
-			{
-				ManagerMovement_SetFirstPos(exerciseIdx);
-			}
-			buttonStartReset = false;
+            if (repsCount == 0)
+            {
+                ManagerMovement_SetFirstPos(exerciseIdx);
+            }
+            buttonStartReset          = false;
             managerMovement.autoState = MMOV_AUTO_STATE_2GOAL;
         }
     }
