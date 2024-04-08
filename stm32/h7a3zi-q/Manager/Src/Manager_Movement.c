@@ -5,7 +5,9 @@
 #include <Periph_Switch.h>
 #include <string.h>
 
-#define GOAL_STEP 0.03
+#define GOAL_STEP 0.015
+
+#define MMOV_REST_POS -1
 
 #define MAX_EXERCISES 5
 
@@ -35,6 +37,7 @@ bool dorUpLimitHit;
 bool dorDownLimitHit;
 bool evLeftLimitHit;
 bool evRightLimitHit;
+bool exUpLimitHit;
 
 // Left and right pos for homing
 float leftPos;
@@ -170,7 +173,7 @@ void ManagerMovement_WaitingSecurity()
 {
     if (managerMovement.securityPass)
     {
-        managerMovement.state = MMOV_STATE_AUTOMATIC;
+        managerMovement.state = MMOV_STATE_HOMING;
     }
 }
 
@@ -202,7 +205,7 @@ void ManagerMovement_Homing()
 
         break;
 
-    case MMOV_REST_POS:
+    case MMOV_HOMING_REST_POS:
         ManagerMovement_RestPos();
         break;
     }
@@ -598,10 +601,25 @@ void ManagerMovement_HomingExtension()
 {
     // Increment until limitswitch
 
-    if (PeriphSwitch_ExtensionUp())
+    if (PeriphSwitch_ExtensionUp() || exUpLimitHit)
     {
-        managerMovement.homingState = MMOV_HOMING_EVERSION;
-        // ManagerMovement_SetOrigins(MMOT_MOTOR_3);
+        if (!exUpLimitHit)
+        {
+            exUpLimitHit = true;
+        }
+
+        if (!PeriphSwitch_ExtensionUp())
+        {
+            managerMovement.homingState =
+                MMOV_HOMING_DORSIFLEXION;  // Doit aller a eversion avec les
+                                           // deux moteurs
+            exUpLimitHit = false;
+            ManagerMovement_SetOrigins(MMOT_MOTOR_3);
+        }
+        else
+        {
+            ManagerMovement_ManualCmdExtension(MMOV_DOWN);
+        }
     }
     else
     {
@@ -628,7 +646,7 @@ void ManagerMovement_HomingEversion()
                 evRightLimitHit = true;
             }
 
-            if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
+            if (/*!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&*/
                 !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2) && !commandSent)
             {
                 ManagerMovement_AutoMovement(
@@ -637,7 +655,7 @@ void ManagerMovement_HomingEversion()
 
                 commandSent = true;
             }
-            else if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
+            else if (/*!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&*/
                      !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2))
             {
                 evLeftLimitHit  = false;
@@ -677,7 +695,7 @@ void ManagerMovement_HomingDorsiflexion()
                 dorDownLimitHit = true;
             }
 
-            if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
+            if (/*!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&*/
                 !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2) && !commandSent)
             {
                 ManagerMovement_AutoMovement(
@@ -686,17 +704,17 @@ void ManagerMovement_HomingDorsiflexion()
 
                 commandSent = true;
             }
-            else if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
+            else if (/*!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&*/
                      !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2))
             {
-                //				ManagerMovement_SetOrigins(MMOT_MOTOR_1);
-                //				ManagerMovement_SetOrigins(MMOT_MOTOR_2);
+                // ManagerMovement_SetOrigins(MMOT_MOTOR_1);
+                ManagerMovement_SetOrigins(MMOT_MOTOR_2);
 
                 dorUpLimitHit   = false;
                 dorDownLimitHit = false;
                 commandSent     = false;
 
-                managerMovement.homingState = MMOV_REST_POS;
+                managerMovement.homingState = MMOV_HOMING_REST_POS;
             }
         }
         else
@@ -737,12 +755,8 @@ float ManagerMovement_GetMiddlePos(float leftPos, float rightPos)
 void ManagerMovement_SetOrigins(uint8_t motorIndex)
 {
     ManagerMotor_SetOriginShift(motorIndex, motorsData[motorIndex]->position);
-    ManagerMotor_SetMotorGoal(motorIndex, 0.0);
-
-    for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
-    {
-        managerMovement.motorsNextGoal[i] = 0.0f;
-    }
+    ManagerMotor_SetMotorGoal(motorIndex, 0.0f);
+    managerMovement.motorsNextGoal[motorIndex] = 0.0f;
 }
 
 /*

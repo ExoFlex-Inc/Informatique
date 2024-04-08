@@ -29,7 +29,7 @@
 #define MMOV_HOMING_EXTENSION    1
 #define MMOV_HOMING_EVERSION     2
 #define MMOV_HOMING_DORSIFLEXION 3
-#define MMOV_REST_POS            4
+#define MMOV_HOMING_REST_POS     4
 
 // Mouvement types
 #define MMOV_DORSIFLEXION 1
