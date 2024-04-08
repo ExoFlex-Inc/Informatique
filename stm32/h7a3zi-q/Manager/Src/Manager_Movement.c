@@ -601,28 +601,30 @@ void ManagerMovement_HomingExtension()
 {
     // Increment until limitswitch
 
-	if (PeriphSwitch_ExtensionUp() || exUpLimitHit)
-	{
-		if (!exUpLimitHit)
-		{
-			exUpLimitHit = true;
-		}
+    if (PeriphSwitch_ExtensionUp() || exUpLimitHit)
+    {
+        if (!exUpLimitHit)
+        {
+            exUpLimitHit = true;
+        }
 
-		if (!PeriphSwitch_ExtensionUp())
-		{
-			managerMovement.homingState = MMOV_HOMING_DORSIFLEXION; // Doit aller a eversion avec les deux moteurs
-			exUpLimitHit   = false;
-			ManagerMovement_SetOrigins(MMOT_MOTOR_3);
-		}
-		else
-		{
-			ManagerMovement_ManualCmdExtension(MMOV_DOWN);
-		}
-	}
-	else
-	{
-		ManagerMovement_ManualCmdExtension(MMOV_UP);
-	}
+        if (!PeriphSwitch_ExtensionUp())
+        {
+            managerMovement.homingState =
+                MMOV_HOMING_DORSIFLEXION;  // Doit aller a eversion avec les
+                                           // deux moteurs
+            exUpLimitHit = false;
+            ManagerMovement_SetOrigins(MMOT_MOTOR_3);
+        }
+        else
+        {
+            ManagerMovement_ManualCmdExtension(MMOV_DOWN);
+        }
+    }
+    else
+    {
+        ManagerMovement_ManualCmdExtension(MMOV_UP);
+    }
 }
 
 void ManagerMovement_HomingEversion()
@@ -705,8 +707,8 @@ void ManagerMovement_HomingDorsiflexion()
             else if (/*!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&*/
                      !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2))
             {
-				//ManagerMovement_SetOrigins(MMOT_MOTOR_1);
-				ManagerMovement_SetOrigins(MMOT_MOTOR_2);
+                // ManagerMovement_SetOrigins(MMOT_MOTOR_1);
+                ManagerMovement_SetOrigins(MMOT_MOTOR_2);
 
                 dorUpLimitHit   = false;
                 dorDownLimitHit = false;

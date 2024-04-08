@@ -46,7 +46,6 @@ float ManagerHMI_Degrees2Radians(float degrees);
 float ManagerHMI_Radians2Degrees(float radians);
 float ManagerHMI_Sec2Millis(float seconds);
 
-
 void ManagerHMI_Init()
 {
     cJSON_InitHooks(NULL);
@@ -329,8 +328,11 @@ void ManagerHMI_ExecutePlanCmd(char* cmd, uint8_t size)
                         exercise = MMOV_EXTENSION;
                     }
 
-                    ManagerMovement_AddExercise(i, exercise, rep, ManagerHMI_Sec2Millis(time), ManagerHMI_Sec2Millis(rest));
-                    ManagerMovement_SetFinalPos(i, ManagerHMI_Degrees2Radians(pos));
+                    ManagerMovement_AddExercise(i, exercise, rep,
+                                                ManagerHMI_Sec2Millis(time),
+                                                ManagerHMI_Sec2Millis(rest));
+                    ManagerMovement_SetFinalPos(
+                        i, ManagerHMI_Degrees2Radians(pos));
                 }
             }
         }
@@ -446,5 +448,5 @@ float ManagerHMI_Degrees2Radians(float degrees)
 
 float ManagerHMI_Sec2Millis(float seconds)
 {
-	return seconds *= 1000;
+    return seconds *= 1000;
 }

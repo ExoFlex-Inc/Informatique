@@ -540,7 +540,7 @@ uint8_t ManagerMotor_GetState()
 
 void ManagerMotor_ApplyOriginShift(uint8_t motorIndex)
 {
-	motors[motorIndex].motor.position -= motors[motorIndex].originShift;
+    motors[motorIndex].motor.position -= motors[motorIndex].originShift;
 }
 
 void ManagerMotor_SetOriginShift(uint8_t motorIndex, float shiftValue)
