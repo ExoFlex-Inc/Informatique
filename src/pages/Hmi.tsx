@@ -65,9 +65,9 @@ export default function HMI() {
   }, [stm32Data, planData, socket]);
 
   useEffect(() => {
-    if (stm32Data && stm32Data.AutoState === "Stretching"){
+    if (stm32Data?.AutoState === "Stretching"){
 
-      if(planData && planData.plan[stm32Data.ExerciseIdx].exercise === "Dorsiflexion" || planData && planData.plan[stm32Data.ExerciseIdx].exercise === "Eversion") {
+      if(planData?.plan[stm32Data.ExerciseIdx].exercise === "Dorsiflexion" || planData?.plan[stm32Data.ExerciseIdx].exercise === "Eversion") {
         setChartData((prevChartData) => {
           const newData = [...prevChartData.datasets];
           newData[0].data.push({
@@ -81,7 +81,7 @@ export default function HMI() {
           return { ...prevChartData, datasets: newData };
         });
       }
-      else if(planData && planData.plan[stm32Data.ExerciseIdx].exercise === "Extension") {
+      else if(planData?.plan[stm32Data.ExerciseIdx].exercise === "Extension") {
         setChartData((prevChartData) => {
           const newData = [...prevChartData.datasets];
           newData[0].data.push({
@@ -96,7 +96,7 @@ export default function HMI() {
         });
       }
     }
-  }, [stm32Data && stm32Data.AutoState]);
+  }, [stm32Data?.AutoState]);
 
   useEffect(() => {
     setChartData(prevChartData => ({
@@ -105,7 +105,7 @@ export default function HMI() {
         { ...prevChartData.datasets[1], data: [] }
       ]
     }));
-  }, [stm32Data && stm32Data.ExerciseIdx]);
+  }, [stm32Data?.ExerciseIdx]);
   
 
   return (
@@ -116,9 +116,9 @@ export default function HMI() {
       <div className="bg-white rounded-2xl"></div>
       <div className="bg-white flex flex-col justify-around rounded-2xl mb-5">
         <div className="flex justify-center mt-5 ml-10 mr-10">
-          {stm32Data &&
-          stm32Data.AutoState !== "Ready" &&
-          stm32Data.AutoState !== "WaitingForPlan" ? (
+          {
+          stm32Data?.AutoState !== "Ready" &&
+          stm32Data?.AutoState !== "WaitingForPlan" ? (
             <Button
               label="Pause"
               icon={<PauseIcon />}
@@ -152,12 +152,12 @@ export default function HMI() {
             disabled={
               !stm32Data ||
               errorFromStm32 ||
-              (stm32Data && stm32Data.AutoState === "Ready")
+              (stm32Data?.AutoState === "Ready")
             }
             color="bg-red-500"
           />
         </div>
-        {stm32Data && stm32Data.AutoState === "Dorsiflexion" && (
+        {stm32Data?.AutoState === "Dorsiflexion" && (
           <div className="flex justify-between ml-10 mr-10 items-center">
             <Button
               label="DorsiflexionUp"
@@ -179,7 +179,7 @@ export default function HMI() {
             />
           </div>
         )}
-        {stm32Data && stm32Data.AutoState === "Extension" && (
+        {stm32Data?.AutoState === "Extension" && (
           <div className="flex justify-between ml-10 mr-10 items-center">
             <Button
               label="ExtensionUp"
@@ -201,7 +201,7 @@ export default function HMI() {
             />
           </div>
         )}
-        {stm32Data && stm32Data.AutoState === "Eversion" && (
+        {stm32Data?.AutoState === "Eversion" && (
           <div className="flex justify-between ml-10 mr-10 items-center">
             <Button
               label="EversionLeft"
@@ -240,13 +240,12 @@ export default function HMI() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {planData &&
-              stm32Data &&
-              planData.plan.map((item, index) => (
+            {
+              planData?.plan.map((item, index) => (
                 <tr
                   key={index}
                   className={
-                    index === stm32Data.ExerciseIdx
+                    index === stm32Data?.ExerciseIdx
                       ? "bg-green-200"
                       : index % 2 === 0
                         ? "bg-gray-50"
