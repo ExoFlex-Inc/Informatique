@@ -222,7 +222,9 @@ const LineChart: React.FC<LineChartProps> = ({
           </div>
         )}
       </div>
-      <Line data={chartData} options={chartOptions} />
+      <div className="bg-white">
+        <Line data={chartData} options={chartOptions} />
+      </div>
     </div>
   );
 };
