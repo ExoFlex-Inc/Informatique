@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Button from "../components/Button.tsx";
+import ProgressionWidget from "../components/ProgressionWidget.tsx";
 
 import usePlanData from "../hooks/get-plan.ts";
 import useStm32 from "../hooks/use-stm32.ts";
@@ -18,6 +19,8 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 export default function HMI() {
   const { planData } = usePlanData();
   const { stm32Data, socket, errorFromStm32 } = useStm32();
+
+  console.log(stm32Data);
 
   const isTablet = useMediaQuery("(max-width: 768px)");
 
@@ -40,7 +43,9 @@ export default function HMI() {
   return (
     <div className="plan-grid grid-cols-2 grid-rows-2 gap-4 custom-height mr-10 ml-10">
       <div className="bg-white rounded-2xl"></div>
-      <div className="bg-white rounded-2xl"></div>
+      <div className="bg-white rounded-2xl content-evenly">
+        <ProgressionWidget stm32Data={stm32Data} planData={planData} />
+      </div>
       <div className="bg-white col-span-1 flex flex-col justify-around rounded-2xl mb-5">
         <div className="flex justify-between mt-5 ml-10 mr-10">
           {stm32Data &&
