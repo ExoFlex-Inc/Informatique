@@ -16,12 +16,11 @@ interface LineChartProps {
     datasets: {
       label: string;
       borderColor: string;
-      borderDash: number[];
-      fill: boolean;
       data: number[];
     }[];
   };
-  mode: string;
+  mode?: string;
+  type: string;
   socket: Socket | null;
 }
 
@@ -34,7 +33,7 @@ interface RealtimeOptions {
 }
 
 interface XAxisOptions {
-  type: "realtime";
+  type: string;
   ticks: {
     display: boolean;
   };
@@ -66,57 +65,34 @@ interface Dataset {
   }[];
 }
 
-const LineChart: React.FC<LineChartProps> = ({ chartData, mode, socket }) => {
+const LineChart: React.FC<LineChartProps> = ({
+  chartData,
+  mode,
+  socket,
+  type,
+}) => {
   const [graphPause, setGraphPause] = useState(false);
   const [graphDataIsPosition, setGraphDataIsPosition] = useState(true);
-  const [chartOptions, setChartOptions] = useState<ChartOptions>({
-    scales: {
-      x: {
-        type: "realtime",
-        ticks: {
-          display: false,
-        },
-        realtime: {
-          refresh: 100,
-          delay: 20,
-          duration: 2000,
-          pause: false,
-          onRefresh: (chart) => {
-            chart.data.datasets.forEach((dataset: Dataset, index: number) => {
-              dataset.data.push({
-                x: Date.now(),
-                y: 0,
-              });
-            });
-          },
-        },
-      },
-      y: {
-        min: 0,
-        max: graphDataIsPosition ? 180 : 48,
-      },
-    },
-  });
-
-  useEffect(() => {
-    if (!socket) return; // Ensure socket is available
-    // Set up event listener for "stm32Data" event
-    socket.on("stm32Data", (message) => {
-      setChartOptions((prevOptions) => ({
-        ...prevOptions,
+  const [chartOptions, setChartOptions] = useState<ChartOptions>(() => {
+    if (type === "realtime") {
+      return {
         scales: {
           x: {
-            ...prevOptions.scales.x,
+            type: type,
+            ticks: {
+              display: false,
+            },
             realtime: {
-              ...prevOptions.scales.x.realtime,
+              refresh: 100,
+              delay: 20,
+              duration: 2000,
+              pause: false,
               onRefresh: (chart) => {
                 chart.data.datasets.forEach(
                   (dataset: Dataset, index: number) => {
                     dataset.data.push({
                       x: Date.now(),
-                      y: graphDataIsPosition
-                        ? message.Positions[index]
-                        : message.Torques[index],
+                      y: 0,
                     });
                   },
                 );
@@ -128,13 +104,67 @@ const LineChart: React.FC<LineChartProps> = ({ chartData, mode, socket }) => {
             max: graphDataIsPosition ? 180 : 48,
           },
         },
-      }));
-    });
+      };
+    } else if (type === "line") {
+      return {
+        scales: {
+          x: {
+            type: "linear",
+            min: 0,
+            max: 10,
+            border: {
+              color: "red",
+            },
+          },
+          y: {
+            min: -65,
+            max: 65,
+          },
+        },
+      };
+    } else {
+      return {};
+    }
+  });
 
-    // Cleanup function to remove event listener when component unmounts
-    return () => {
-      socket.off("stm32Data");
-    };
+  useEffect(() => {
+    if (type === "realtime") {
+      if (!socket) return;
+
+      socket.on("stm32Data", (message) => {
+        setChartOptions((prevOptions) => ({
+          ...prevOptions,
+          scales: {
+            x: {
+              ...prevOptions.scales.x,
+              realtime: {
+                ...prevOptions.scales.x.realtime,
+                onRefresh: (chart) => {
+                  chart.data.datasets.forEach(
+                    (dataset: Dataset, index: number) => {
+                      dataset.data.push({
+                        x: Date.now(),
+                        y: graphDataIsPosition
+                          ? message.Positions[index]
+                          : message.Torques[index],
+                      });
+                    },
+                  );
+                },
+              },
+            },
+            y: {
+              min: graphDataIsPosition ? -65 : 0,
+              max: graphDataIsPosition ? 65 : 48,
+            },
+          },
+        }));
+      });
+
+      return () => {
+        socket.off("stm32Data");
+      };
+    }
   }, [socket?.connected, graphDataIsPosition]);
 
   useEffect(() => {
@@ -158,7 +188,7 @@ const LineChart: React.FC<LineChartProps> = ({ chartData, mode, socket }) => {
   return (
     <div className="graph-container">
       <div className="grid grid-cols-4">
-        {socket && (
+        {type === "realtime" && (
           <div className="flex">
             <PlayButton setGraphPause={setGraphPause} graphPause={graphPause} />
             <PauseButton
