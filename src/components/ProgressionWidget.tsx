@@ -47,7 +47,7 @@ interface Props {
 }
 
 export default function ProgressionWidget({ stm32Data, planData }: Props) {
-  const [stretchProgress, setStrechProgress] = useState(0);
+  const [stretchProgress, setStretchProgress] = useState(0);
   const [totalStretch, setTotalStretch] = useState(1);
   const [repetitionProgress, setRepetitionProgress] = useState(0);
   const [totalRepetition, setTotalRepetition] = useState(0);
@@ -59,7 +59,7 @@ export default function ProgressionWidget({ stm32Data, planData }: Props) {
     if (stm32Data?.Repetitions !== 0 && stm32Data?.Repetitions !== undefined) {
       console.log(stm32Data?.Repetitions);
 
-      setStrechProgress(stretchProgress + 1);
+      setStretchProgress(stretchProgress + 1);
     }
   }, [stm32Data?.Repetitions]);
 
@@ -71,6 +71,14 @@ export default function ProgressionWidget({ stm32Data, planData }: Props) {
       }
     }
   }, [planData, stm32Data?.ExerciseIdx]);
+
+  useEffect(() => {
+    if (stm32Data?.ExerciseIdx !== undefined) {
+      if(stm32Data.ExerciseIdx === 0 && stm32Data.Repetitions === 0){
+        setStretchProgress(0)
+      }
+    }
+  }, [stm32Data?.ExerciseIdx, stm32Data?.Repetitions]);
 
   useEffect(() => {
     if (planData && planData.plan) {

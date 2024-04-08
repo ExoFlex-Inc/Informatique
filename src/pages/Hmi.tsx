@@ -37,12 +37,12 @@ export default function HMI() {
   const [chartData, setChartData] = useState<ChartData>({
     datasets: [
       {
-        label: "Amplitude",
+        label: "Amplitude(°)",
         borderColor: `${colors.blueAccent[500]}`,
         data: [],
       },
       {
-        label: "Rigidity",
+        label: "Rigidity(Nm)",
         borderColor: `${colors.greenAccent[500]}`,
         data: [],
       },
@@ -103,13 +103,15 @@ export default function HMI() {
   }, [stm32Data?.AutoState]);
 
   useEffect(() => {
-    setChartData((prevChartData) => ({
-      datasets: [
-        { ...prevChartData.datasets[0], data: [] },
-        { ...prevChartData.datasets[1], data: [] },
-      ],
-    }));
-  }, [stm32Data?.ExerciseIdx]);
+    if(stm32Data?.Repetitions === 0){
+      setChartData((prevChartData) => ({
+        datasets: [
+          { ...prevChartData.datasets[0], data: [] },
+          { ...prevChartData.datasets[1], data: [] },
+        ],
+      }));
+    }
+  }, [stm32Data?.Repetitions]);
 
   return (
     <div className="plan-grid grid-cols-2 grid-rows-2 gap-4 custom-height mr-10 ml-10">

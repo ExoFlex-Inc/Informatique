@@ -39,6 +39,8 @@ bool evLeftLimitHit;
 bool evRightLimitHit;
 bool exUpLimitHit;
 
+bool buttonStartReset;
+
 // Left and right pos for homing
 float leftPos;
 float rightPos;
@@ -125,6 +127,8 @@ void ManagerMovement_Reset()
 
     test = true;
 
+    buttonStartReset = false;
+
     commandSent                  = false;
     managerMovement.reset        = false;
     managerMovement.securityPass = false;
@@ -173,7 +177,7 @@ void ManagerMovement_WaitingSecurity()
 {
     if (managerMovement.securityPass)
     {
-        managerMovement.state = MMOV_STATE_HOMING;
+        managerMovement.state = MMOV_STATE_AUTOMATIC;
     }
 }
 
@@ -478,21 +482,26 @@ void ManagerMovement_AutoReady()
     }
     else
     {
-        if (repsCount >= repetitions[exerciseIdx])
+        if (repsCount >= repetitions[exerciseIdx] && !buttonStartReset)
         {
-            exerciseIdx++;
-            repsCount   = 0;
             startButton = false;
+            buttonStartReset = true;
         }
 
         // Set the position that the exercise is starting
-        if (repsCount == 0)
+        if (startButton)
         {
-            ManagerMovement_SetFirstPos(exerciseIdx);
-        }
+        	if (repsCount >= repetitions[exerciseIdx])
+			{
+        		repsCount = 0;
+				exerciseIdx++;
+			}
 
-        if (startButton || repsCount != 0)
-        {
+			if (repsCount == 0)
+			{
+				ManagerMovement_SetFirstPos(exerciseIdx);
+			}
+			buttonStartReset = false;
             managerMovement.autoState = MMOV_AUTO_STATE_2GOAL;
         }
     }
