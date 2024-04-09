@@ -75,7 +75,7 @@ export default function Planning() {
     const { name, value } = event.target;
     let parsedValue = "";
     if (value !== "") {
-      parsedValue = name !== "exercise" ? Math.max(0, parseInt(value)) : value;
+      parsedValue = name !== "exercise" ? parseInt(value) : value;
     }
     const updatedPlan = [...plan];
     updatedPlan[index][name] = parsedValue;
@@ -103,7 +103,7 @@ export default function Planning() {
     const { name, value } = event.target;
     let parsedValue = "";
     if (value !== "") {
-      parsedValue = Math.max(0, parseInt(value));
+      parsedValue = parseInt(value);
     }
     setLimits((prevLimits) => ({
       ...prevLimits,
