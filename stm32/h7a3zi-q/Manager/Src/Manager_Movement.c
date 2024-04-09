@@ -621,7 +621,7 @@ void ManagerMovement_HomingExtension()
         {
             managerMovement.homingState =
                 MMOV_HOMING_EVERSION;  // Doit aller a eversion avec les
-                                           // deux moteurs
+                                       // deux moteurs
             exUpLimitHit = false;
             ManagerMovement_SetOrigins(MMOT_MOTOR_3);
         }

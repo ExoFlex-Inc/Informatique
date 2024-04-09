@@ -248,8 +248,7 @@ void ManagerMotor_StartMotors()
         motors[MMOT_MOTOR_3].detected = false;
         managerMotor.setupFirstPass   = false;
     }
-    else if (motors[MMOT_MOTOR_1].detected && motors[MMOT_MOTOR_2]
-                 .detected &&
+    else if (motors[MMOT_MOTOR_1].detected && motors[MMOT_MOTOR_2].detected &&
              motors[MMOT_MOTOR_3].detected)
     {
         managerMotor.setupFirstPass = true;
@@ -277,8 +276,7 @@ void ManagerMotor_DisableMovement()
         motors[MMOT_MOTOR_3].detected = false;
         managerMotor.setupFirstPass   = false;
     }
-    else if (motors[MMOT_MOTOR_1].detected && motors[MMOT_MOTOR_2]
-                 .detected &&
+    else if (motors[MMOT_MOTOR_1].detected && motors[MMOT_MOTOR_2].detected &&
              motors[MMOT_MOTOR_3].detected)
     {
         managerMotor.setupFirstPass = true;

@@ -103,7 +103,7 @@ export default function Planning() {
     const { name, value } = event.target;
     let parsedValue = "";
     if (value !== "") {
-      parsedValue =parseInt(value);
+      parsedValue = parseInt(value);
     }
     setLimits((prevLimits) => ({
       ...prevLimits,
