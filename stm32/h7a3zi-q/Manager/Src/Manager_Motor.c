@@ -154,7 +154,7 @@ void ManagerMotor_Task()
     // State machine that Init, sets to zero, reads informations and sends
     // informations to the motors
     ManagerMotor_ReceiveFromMotors();
-    // ManagerMotor_VerifyMotorState();
+    ManagerMotor_VerifyMotorState();
 
     if (HAL_GetTick() - timerMs >= TIMER)
     {
@@ -179,7 +179,7 @@ void ManagerMotor_Task()
         case MMOT_STATE_READY2MOVE:
             ManagerMotor_CalculateNextPositions();
             ManagerMotor_SendToMotors();
-            //            ManagerMotor_VerifyMotorConnection();
+            ManagerMotor_VerifyMotorConnection();
 
             break;
 
@@ -248,7 +248,7 @@ void ManagerMotor_StartMotors()
         motors[MMOT_MOTOR_3].detected = false;
         managerMotor.setupFirstPass   = false;
     }
-    else if (/*motors[MMOT_MOTOR_1].detected &&*/ motors[MMOT_MOTOR_2]
+    else if (motors[MMOT_MOTOR_1].detected && motors[MMOT_MOTOR_2]
                  .detected &&
              motors[MMOT_MOTOR_3].detected)
     {
@@ -277,7 +277,7 @@ void ManagerMotor_DisableMovement()
         motors[MMOT_MOTOR_3].detected = false;
         managerMotor.setupFirstPass   = false;
     }
-    else if (/*motors[MMOT_MOTOR_1].detected &&*/ motors[MMOT_MOTOR_2]
+    else if (motors[MMOT_MOTOR_1].detected && motors[MMOT_MOTOR_2]
                  .detected &&
              motors[MMOT_MOTOR_3].detected)
     {
@@ -299,8 +299,8 @@ void ManagerMotor_DisableMovement()
 
 void ManagerMotor_SetOrigines()
 {
-    if (/*motors[MMOT_MOTOR_1].motor.position <= 0.001 &&
-        motors[MMOT_MOTOR_1].motor.position >= -0.001 &&*/
+    if (motors[MMOT_MOTOR_1].motor.position <= 0.001 &&
+        motors[MMOT_MOTOR_1].motor.position >= -0.001 &&
         motors[MMOT_MOTOR_2].motor.position <= 0.001 &&
         motors[MMOT_MOTOR_2].motor.position >= -0.001 &&
         motors[MMOT_MOTOR_3].motor.position <= 0.001 &&
