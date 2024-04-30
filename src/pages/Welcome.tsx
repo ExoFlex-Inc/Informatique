@@ -48,7 +48,7 @@ export function Welcome() {
   const invalidPermissions = useMemo(
     () => validatePermissions(permissions),
     [permissions],
-  )
+  );
 
   return (
     <Dialog
@@ -147,7 +147,11 @@ export function Welcome() {
             <select
               required
               name="permissions"
-              className = {permissionsDirty ? "welcome-name-input" : "welcome-name-input text-gray-400"}
+              className={
+                permissionsDirty
+                  ? "welcome-name-input"
+                  : "welcome-name-input text-gray-400"
+              }
               onChange={({ target }) => {
                 setPermissions(target.value);
                 if (!permissionsDirty) {
@@ -158,10 +162,18 @@ export function Welcome() {
                 }
               }}
             >
-              <option value={""} disabled selected hidden>Permissions type</option>
-              <option value={"super admin"} className="welcome-name-input">super admin</option>
-              <option value={"admin"} className="welcome-name-input">admin</option>
-              <option value={"client"} className="welcome-name-input">client</option>
+              <option value={""} disabled selected hidden>
+                Permissions type
+              </option>
+              <option value={"super admin"} className="welcome-name-input">
+                super admin
+              </option>
+              <option value={"admin"} className="welcome-name-input">
+                admin
+              </option>
+              <option value={"client"} className="welcome-name-input">
+                client
+              </option>
             </select>
 
             <button
@@ -170,7 +182,7 @@ export function Welcome() {
               disabled={
                 invalidUserName != null ||
                 invalidLastName != null ||
-                invalidSpeciality != null || 
+                invalidSpeciality != null ||
                 invalidPermissions != null
               }
             >
