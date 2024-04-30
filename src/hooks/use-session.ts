@@ -49,11 +49,9 @@ export function useSession(): SupabaseUserInfo {
         console.log("Local server setup successful");
       } else {
         console.error("Local server setup failed");
-        setChannel(null);
       }
     } catch (error) {
       console.error("Error during local server setup:", error);
-      setChannel(null); //TODO: When server local is not connected, it still signs in the user
     }
   };
 
@@ -80,14 +78,14 @@ export function useSession(): SupabaseUserInfo {
               channel.unsubscribe();
             }
             setChannel(newChannel);
+            
+            const access_token = userInfo.session?.access_token;
+            const refresh_token = userInfo.session?.refresh_token;
+      
+            setupLocalServer(access_token, refresh_token);
           }
         },
       );
-
-      const access_token = userInfo.session?.access_token;
-      const refresh_token = userInfo.session?.refresh_token;
-
-      setupLocalServer(access_token, refresh_token);
     } else if (!userInfo.session?.user) {
       channel?.unsubscribe();
       setChannel(null);
