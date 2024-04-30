@@ -20,6 +20,11 @@ import BarChartIcon from "@mui/icons-material/BarChart";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
+import { supaClient } from "../../hooks/supa-client.ts";
+
+interface ProSidebarProps {
+  permissions: string;
+}
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
@@ -45,7 +50,7 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
   );
 };
 
-const ProSidebar = () => {
+const ProSidebar: React.FC<ProSidebarProps> = (props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -177,13 +182,15 @@ const ProSidebar = () => {
                 setSelected={setSelected}
               />
             </SubMenu> */}
-            <Item
-              title="Planning"
-              to="/planning"
-              icon={<FitnessCenterIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
+            {(props.permissions === 'super admin' || props.permissions === 'admin') && 
+              <Item
+                title="Planning"
+                to="/planning"
+                icon={<FitnessCenterIcon />}
+                selected={selected}
+                setSelected={setSelected}
+              />
+            }
             <SubMenu label="Control Page" icon={<TvIcon />}>
               <Item
                 title="HMI"
@@ -192,13 +199,15 @@ const ProSidebar = () => {
                 selected={selected}
                 setSelected={setSelected}
               />
-              <Item
+              {(props.permissions == 'super admin') && 
+                <Item
                 title="Manual"
                 to="/manual"
                 icon={<NavigateNextIcon style={{ fontSize: "small" }} />}
                 selected={selected}
                 setSelected={setSelected}
-              />
+                /> 
+              }
             </SubMenu>
             {/* <Item
               title="Settings"

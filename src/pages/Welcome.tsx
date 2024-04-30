@@ -30,6 +30,8 @@ export function Welcome() {
   const [lastNameDirty, setLastNameDirty] = useState(false);
   const [speciality, setSpeciality] = useState("");
   const [specialityDirty, setSpecialityDirty] = useState(false);
+  const [permissions, setPermissions] = useState("");
+  const [permissionsDirty, setPermissionsDirty] = useState(false);
   const [serverError, setServerError] = useState("");
   const invalidUserName = useMemo(
     () => validateInput(userName, "Name"),
@@ -43,6 +45,10 @@ export function Welcome() {
     () => validateInput(speciality, "Speciality"),
     [speciality],
   );
+  const invalidPermissions = useMemo(
+    () => validatePermissions(permissions),
+    [permissions],
+  )
 
   return (
     <Dialog
@@ -66,6 +72,7 @@ export function Welcome() {
                     username: userName,
                     lastname: lastName,
                     speciality: speciality,
+                    permissions: permissions,
                   },
                 ])
                 .then(({ error }) => {
@@ -137,13 +144,34 @@ export function Welcome() {
                 {invalidSpeciality}
               </p>
             )}
+            <select
+              required
+              name="permissions"
+              className = {permissionsDirty ? "welcome-name-input" : "welcome-name-input text-gray-400"}
+              onChange={({ target }) => {
+                setPermissions(target.value);
+                if (!permissionsDirty) {
+                  setPermissionsDirty(true);
+                }
+                if (serverError) {
+                  setServerError("");
+                }
+              }}
+            >
+              <option value={""} disabled selected hidden>Permissions type</option>
+              <option value={"super admin"} className="welcome-name-input">super admin</option>
+              <option value={"admin"} className="welcome-name-input">admin</option>
+              <option value={"client"} className="welcome-name-input">client</option>
+            </select>
+
             <button
               className="welcome-form-submit-button"
               type="submit"
               disabled={
                 invalidUserName != null ||
                 invalidLastName != null ||
-                invalidSpeciality != null
+                invalidSpeciality != null || 
+                invalidPermissions != null
               }
             >
               Submit
@@ -172,6 +200,13 @@ function validateInput(value: string, fieldName: string): string | undefined {
   }
   if (!regex.test(value)) {
     return `${fieldName} can only contain letters`;
+  }
+  return undefined;
+}
+
+function validatePermissions(permissions: string) {
+  if (permissions != "") {
+    return "You must select a permissions type"
   }
   return undefined;
 }
