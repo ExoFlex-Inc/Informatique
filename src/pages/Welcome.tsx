@@ -205,7 +205,7 @@ function validateInput(value: string, fieldName: string): string | undefined {
 }
 
 function validatePermissions(permissions: string) {
-  if (permissions != "") {
+  if (permissions == "") {
     return "You must select a permissions type"
   }
   return undefined;
