@@ -182,7 +182,8 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                 setSelected={setSelected}
               />
             </SubMenu> */}
-            {(props.permissions === 'super admin' || props.permissions === 'admin') && 
+            {(props.permissions === "super admin" ||
+              props.permissions === "admin") && (
               <Item
                 title="Planning"
                 to="/planning"
@@ -190,7 +191,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                 selected={selected}
                 setSelected={setSelected}
               />
-            }
+            )}
             <SubMenu label="Control Page" icon={<TvIcon />}>
               <Item
                 title="HMI"
@@ -199,15 +200,15 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                 selected={selected}
                 setSelected={setSelected}
               />
-              {(props.permissions == 'super admin') && 
+              {props.permissions == "super admin" && (
                 <Item
-                title="Manual"
-                to="/manual"
-                icon={<NavigateNextIcon style={{ fontSize: "small" }} />}
-                selected={selected}
-                setSelected={setSelected}
-                /> 
-              }
+                  title="Manual"
+                  to="/manual"
+                  icon={<NavigateNextIcon style={{ fontSize: "small" }} />}
+                  selected={selected}
+                  setSelected={setSelected}
+                />
+              )}
             </SubMenu>
             {/* <Item
               title="Settings"
