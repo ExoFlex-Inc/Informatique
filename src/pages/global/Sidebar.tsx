@@ -20,6 +20,7 @@ import BarChartIcon from "@mui/icons-material/BarChart";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
+import GroupIcon from '@mui/icons-material/Group';
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
@@ -181,6 +182,13 @@ const ProSidebar = () => {
               title="Planning"
               to="/planning"
               icon={<FitnessCenterIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
+            <Item
+              title="Wellness Network"
+              to="/wellness_network"
+              icon={<GroupIcon />}
               selected={selected}
               setSelected={setSelected}
             />

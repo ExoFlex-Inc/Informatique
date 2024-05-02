@@ -19,6 +19,7 @@ import Activity from "./pages/Activity.tsx";
 import Manual from "./pages/Manual.tsx";
 import Settings from "./pages/Settings.tsx";
 import Planning from "./pages/Planning.tsx";
+import WellnessNetwork from "./pages/WellnessNetwork.tsx"
 
 import TopBar from "./pages/global/TopBar.tsx";
 import ProSideBar from "./pages/global/Sidebar.tsx";
@@ -40,6 +41,7 @@ const router = createBrowserRouter(
       <Route path="/hmi" element={<HMI />} />
       <Route path="/planning" element={<Planning />} />
       <Route path="/settings" element={<Settings />} />
+      <Route path="/wellness_network" element={<WellnessNetwork />} />
     </Route>,
   ),
 );
