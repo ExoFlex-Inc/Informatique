@@ -182,8 +182,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                 setSelected={setSelected}
               />
             </SubMenu> */}
-            {(props.permissions === "dev" ||
-              props.permissions === "admin") && (
+            {(props.permissions === "dev" || props.permissions === "admin") && (
               <Item
                 title="Planning"
                 to="/planning"
