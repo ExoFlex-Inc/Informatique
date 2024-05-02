@@ -165,8 +165,8 @@ export function Welcome() {
               <option value={""} disabled selected hidden>
                 Permissions type
               </option>
-              <option value={"super admin"} className="welcome-name-input">
-                super admin
+              <option value={"dev"} className="welcome-name-input">
+                dev
               </option>
               <option value={"admin"} className="welcome-name-input">
                 admin
