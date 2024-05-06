@@ -1957,6 +1957,10 @@ svg {
   line-height: 2rem;
 }
 
+.welcome-form-submit-button:disabled {
+  background-color: rgb(156 163 175 / var(--tw-text-opacity)) !important;
+}
+
 .hover\:scale-105:hover {
   --tw-scale-x: 1.05 !important;
   --tw-scale-y: 1.05 !important;
