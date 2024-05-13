@@ -79,10 +79,10 @@ export function useSession(): SupabaseUserInfo {
               channel.unsubscribe();
             }
             setChannel(newChannel);
-            
+
             const access_token = userInfo.session?.access_token;
             const refresh_token = userInfo.session?.refresh_token;
-      
+
             setupLocalServer(access_token, refresh_token);
           }
         },
