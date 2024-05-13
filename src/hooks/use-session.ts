@@ -8,6 +8,7 @@ export interface UserProfile {
   lastname: string;
   speciality: string;
   user_id: string;
+  permissions: string;
   avatarUrl?: string;
 }
 
