@@ -50,7 +50,9 @@ function Layout() {
   return (
     <UserContext.Provider value={supabaseUserInfo}>
       <>
-        {supabaseUserInfo.session && supabaseUserInfo.profile && <ProSideBar />}
+        {supabaseUserInfo.session && supabaseUserInfo.profile && (
+          <ProSideBar permissions={supabaseUserInfo.profile.permissions} />
+        )}
         <main className="content">
           <TopBar />
           <Outlet />

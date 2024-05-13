@@ -15,7 +15,8 @@ CREATE TABLE  user_profiles (
   user_id UUID PRIMARY KEY REFERENCES auth.users (id) NOT NULL,
   username TEXT CHECK (char_length(username) > 0 AND char_length(username) <= 50 AND username !~ '\d'), 
   lastname TEXT CHECK (char_length(lastname) > 0 AND char_length(lastname) <= 50 AND lastname !~ '\d'),
-  speciality TEXT CHECK (char_length(speciality) > 0 AND char_length(speciality) <= 50 AND speciality !~ '\d')
+  speciality TEXT CHECK (char_length(speciality) > 0 AND char_length(speciality) <= 50 AND speciality !~ '\d'),
+  permissions TEXT CHECK (char_length(permissions) > 0 AND char_length(permissions) <= 50 AND permissions !~ '\d')
 );
 
 CREATE TABLE machine (
