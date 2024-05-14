@@ -150,7 +150,7 @@ export default function Planning() {
   };
 
   // Function to save plan to Supabase
-  const savePlanToSupabase = async (plan) => {
+  const savePlanToSupabase = async (plan: any) => {
     try {
       const requestBody = {
         plan: plan,

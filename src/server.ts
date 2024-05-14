@@ -206,6 +206,31 @@ app.post("/push-plan-supabase", checkSession, async (req, res) => {
   }
 });
 
+app.post("/push-users-list-supabase", checkSession, async (req, res) => {
+  try {
+    const { usersList } = req.body;
+    const {
+      data: { user },
+    } = await supaClient.auth.getUser();
+    const { data, error } = await supaClient.rpc("push_users_list", {
+      user_id: user?.id,
+      new_list: usersList,
+    });
+
+    if (error) {
+      console.error(`Error sending list:`, error);
+      res.status(500).send("Error sending list");
+      return;
+    } else {
+      console.log(`Success sending list:`, data);
+      res.status(200).send("Success sending list");
+    }
+  } catch (err) {
+    console.error("Error sending list:", err);
+    res.status(500).send("Error sending list");
+  }
+})
+
 app.get("/get-plan", checkSession, async (_, res) => {
   try {
     const {
@@ -228,6 +253,32 @@ app.get("/get-plan", checkSession, async (_, res) => {
     res.status(500).json({ error: "Error getting current plan" });
   }
 });
+
+app.get("/get-users-list", checkSession, async (_, res) => {
+  try {
+    const {
+      data: {user},
+    } = await supaClient.auth.getUser();
+
+    const {data, error} = await supaClient.rpc("get_users_list", {
+      search_id: user?.id,
+    });
+
+    if (error) {
+      console.error(`Error getting current list:`, error);
+      res.status(500).json({ error: "Error getting current list" });
+    } else {
+      console.log(`Success getting current list:`, data);
+      res.status(200).json(data);
+    }
+  } catch (err) {
+    console.error("Error getting current list:", err);
+    res.status(500).json({ error: "Error getting current list" });
+  }
+  
+})
+
+
 
 /*
 .##........#######...######.....###....##...........######..########.########..##.....##.########.########.
