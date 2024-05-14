@@ -15,7 +15,10 @@ CREATE TABLE  user_profiles (
   user_id UUID PRIMARY KEY REFERENCES auth.users (id) NOT NULL,
   username TEXT CHECK (char_length(username) > 0 AND char_length(username) <= 50 AND username !~ '\d'), 
   lastname TEXT CHECK (char_length(lastname) > 0 AND char_length(lastname) <= 50 AND lastname !~ '\d'),
-  speciality TEXT CHECK (char_length(speciality) > 0 AND char_length(speciality) <= 50 AND speciality !~ '\d')
+  speciality TEXT CHECK (char_length(speciality) > 0 AND char_length(speciality) <= 50 AND speciality !~ '\d'),
+  phone_number TEXT CHECK (char_length(phone_number) > 0 AND char_length(phone_number) <= 50 AND phone_number ~ '\d'),
+  list_of_patient JSONB,
+  email TEXT CHECK (char_length(email) > 0 AND char_length(email) <= 50)
 );
 
 CREATE TABLE machine (
@@ -113,6 +116,26 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION push_users_list(user_id UUID, new_list JSONB)
+RETURNS JSONB AS $$
+DECLARE
+  updated_list JSONB;
+BEGIN
+  IF EXISTS (SELECT 1 FROM user_profiles WHERE user_profiles.user_id = push_users_list.user_id) THEN
+    UPDATE user_profiles
+    SET list_of_patient = new_list
+    WHERE user_profiles.user_id = push_users_list.user_id
+    RETURNING new_list INTO updated_list;
+  ELSE
+    INSERT INTO user_profiles(user_id, list_of_patient)
+    VALUES (push_users_list.user_id, new_list)
+    RETURNING new_list INTO updated_list;
+  END IF;
+
+  RETURN updated_list;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE FUNCTION get_planning(search_id UUID)
 RETURNS TABLE (plan_content jsonb) AS $$
 BEGIN
@@ -125,7 +148,17 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE FUNCTION get_users_list(search_id UUID)
+RETURNS TABLE (list_of_patient jsonb) AS $$
+BEGIN
+    RAISE LOG 'Searching for list content with user_id:%', search_id;
 
+    RETURN QUERY
+    SELECT u.list_of_patient
+    FROM user_profiles u
+    WHERE u.user_id = search_id;
+END;
+$$ LANGUAGE plpgsql;
 
 /*
 .########...#######..##.......####..######..####.########..######.

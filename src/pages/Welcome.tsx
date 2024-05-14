@@ -1,4 +1,4 @@
-import { useContext, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { redirect, useNavigate } from "react-router-dom";
 import { UserContext } from "../App.tsx";
 import Dialog from "../components/Dialog.tsx";
@@ -31,6 +31,21 @@ export function Welcome() {
   const [speciality, setSpeciality] = useState("");
   const [specialityDirty, setSpecialityDirty] = useState(false);
   const [serverError, setServerError] = useState("");
+  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumberDirty, setPhoneNumberDirty] = useState(false);
+
+  useEffect(() => {
+    const retrieveUserEmail = async () => {
+      const userResponse = await supaClient.auth.getUser();
+      if(userResponse?.data?.user?.email) {
+        setEmail(userResponse.data.user.email);
+      }
+    }
+  
+    retrieveUserEmail();
+  }, [])
+
   const invalidUserName = useMemo(
     () => validateInput(userName, "Name"),
     [userName],
@@ -42,6 +57,10 @@ export function Welcome() {
   const invalidSpeciality = useMemo(
     () => validateInput(speciality, "Speciality"),
     [speciality],
+  );
+  const invalidPhoneNumber = useMemo(
+    () => validateInput(phoneNumber, "PhoneNumber"),
+    [phoneNumber],
   );
 
   return (
@@ -66,6 +85,8 @@ export function Welcome() {
                     username: userName,
                     lastname: lastName,
                     speciality: speciality,
+                    phone_number: phoneNumber,
+                    email: email,
                   },
                 ])
                 .then(({ error }) => {
@@ -137,6 +158,27 @@ export function Welcome() {
                 {invalidSpeciality}
               </p>
             )}
+
+            <input
+              name="phoneNumber"
+              placeholder="Phone Number"
+              onChange={({ target }) => {
+                setPhoneNumber(target.value);
+                if (!phoneNumberDirty) {
+                  setPhoneNumberDirty(true);
+                }
+                if (serverError) {
+                  setServerError("");
+                }
+              }}
+              className="welcome-name-input"
+            ></input>
+            {phoneNumberDirty && invalidPhoneNumber && (
+              <p className="welcome-form-error-message validation-feedback">
+                {invalidPhoneNumber}
+              </p>
+            )}
+
             <button
               className="welcome-form-submit-button"
               type="submit"
@@ -163,15 +205,19 @@ function validateInput(value: string, fieldName: string): string | undefined {
   if (!value) {
     return `${fieldName} is required`;
   }
-  const regex = /^[a-zA-ZÀ-ÿ]+$/;
+  const letterRegex = /^[a-zA-ZÀ-ÿ]+$/;
+  const numberRegex = /^[0-9]+$/;
   if (value.length < 4) {
     return `${fieldName} must be at least 4 characters long`;
   }
   if (value.length > 50) {
     return `${fieldName} must be less than 50 characters long`;
   }
-  if (!regex.test(value)) {
+  if (!letterRegex.test(value) && fieldName != "PhoneNumber") {
     return `${fieldName} can only contain letters`;
+  }
+  if (!numberRegex.test(value) && fieldName == "PhoneNumber") {
+    return `${fieldName} can only contain numbers`;
   }
   return undefined;
 }
