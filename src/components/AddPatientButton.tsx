@@ -2,20 +2,26 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import AddPatientDropDown from './AddPatientDropdown.tsx';
 import { useState } from 'react';
 
-const AddPatientButton = () => {
+interface AddPatientButtonProps {
+    setListOfPatients: React.Dispatch<React.SetStateAction<any[]>>;
+    listOfPatients: any[];
+    setListOfPatientsIsDirty: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const AddPatientButton: React.FC<AddPatientButtonProps> = ({setListOfPatients, listOfPatients, setListOfPatientsIsDirty}) => {
     const [isOpen, setIsOpen] = useState(false);
 
     function toggleDropdown() {
-        setIsOpen(!isOpen);
+        setIsOpen(true);
     }
 
     return (
-        <div className=''>
+        <div className='flex mr-10 justify-end relative'>
             <button className='bg-blue-600 p-2 mb-2 rounded-full delay-100 transition hover:bg-[#2bb673]'
             onClick={toggleDropdown}>
                 <PersonAddIcon />
             </button>
-            {isOpen && <AddPatientDropDown setIsOpen={setIsOpen} />}
+            {isOpen && <AddPatientDropDown setListOfPatientsIsDirty={setListOfPatientsIsDirty} setListOfPatients={setListOfPatients} listOfPatients={listOfPatients} setIsOpen={setIsOpen} />}
         </div>
 
     )
