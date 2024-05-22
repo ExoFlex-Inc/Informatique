@@ -1,5 +1,8 @@
 import { useRef, useEffect, useState } from "react";
 import { supaClient } from "../hooks/supa-client.ts";
+import { TextField, InputAdornment } from "@mui/material"
+import SearchIcon from '@mui/icons-material/Search';
+
 interface AddPatientDropdownProps {
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
     setListOfPatients: React.Dispatch<React.SetStateAction<any[]>>;
@@ -81,14 +84,29 @@ const AddPatientDropDown: React.FC<AddPatientDropdownProps> = ({ setIsOpen, setL
     }
 
     return (
-        <div ref={dropdownRef} className="absolute z-10 rounded-lg border-blue-600 border-4 bg-white top-12 grid grid-cols-2 gap-4 p-2">
-                <input className="text-center col-span-2 rounded-md border-2 text-black border-blue-600"
-                    type="text"
-                    value={searchedEmail}
-                    placeholder="email address"
-                    onChange={({ target }) => {
-                        searchEmail(target.value);
-                }}/>
+        <div ref={dropdownRef} className="absolute z-10 min-w-64 rounded-lg border-blue-600 border-4 bg-white top-12 grid grid-cols-2 gap-4 p-2">
+            {/* <div className=""> */}
+                <TextField
+                    onChange={({target}) => {
+                        searchEmail(target.value)
+                    }}
+                    className="col-span-2 "
+                    variant="outlined"
+                    size="small"
+                    focused
+                    placeholder="Search email"
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment className="text-black" position="start">
+                                <SearchIcon />
+                            </InputAdornment>
+                        ),
+                        classes: {
+                            input: "placeholder:text-black text-black"
+                        }
+                    }}
+                />
+            {/* </div> */}
             <ul className="col-span-2 max-h-20 rounded-md overflow-y-auto border-2 ">
                 { filteredEmails.map((email: string) => 
                     <li key={email} onClick={() => selectEmail(email)} className="text-black rounded-md p-1 cursor-pointer hover:bg-gray-300">{email}</li>
