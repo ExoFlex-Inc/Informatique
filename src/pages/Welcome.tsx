@@ -1,4 +1,5 @@
 import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { redirect, useNavigate } from "react-router-dom";
 import { UserContext } from "../App.tsx";
 import Dialog from "../components/Dialog.tsx";
@@ -33,6 +34,21 @@ export function Welcome() {
   const [permissions, setPermissions] = useState("");
   const [permissionsDirty, setPermissionsDirty] = useState(false);
   const [serverError, setServerError] = useState("");
+  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumberDirty, setPhoneNumberDirty] = useState(false);
+
+  useEffect(() => {
+    const retrieveUserEmail = async () => {
+      const userResponse = await supaClient.auth.getUser();
+      if(userResponse?.data?.user?.email) {
+        setEmail(userResponse.data.user.email);
+      }
+    }
+  
+    retrieveUserEmail();
+  }, [])
+
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [phoneNumberDirty, setPhoneNumberDirty] = useState(false);
@@ -247,12 +263,15 @@ function validateInput(value: string, fieldName: string): string | undefined {
   }
   const letterRegex = /^[a-zA-ZÀ-ÿ]+$/;
   const numberRegex = /^[0-9]+$/;
+  const letterRegex = /^[a-zA-ZÀ-ÿ]+$/;
+  const numberRegex = /^[0-9]+$/;
   if (value.length < 4) {
     return `${fieldName} must be at least 4 characters long`;
   }
   if (value.length > 50) {
     return `${fieldName} must be less than 50 characters long`;
   }
+  if (!letterRegex.test(value) && fieldName != "PhoneNumber") {
   if (!letterRegex.test(value) && fieldName != "PhoneNumber") {
     return `${fieldName} can only contain letters`;
   }
