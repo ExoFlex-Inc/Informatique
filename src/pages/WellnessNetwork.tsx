@@ -1,5 +1,6 @@
 import AddPatientButton from "../components/AddPatientButton.tsx";
 import PatientList from "../components/PatientsList.tsx";
+import PatientSearchBar from "../components/PatientSearchBar.tsx";
 import { useEffect, useState } from "react";
 
 export async function networkInit() {
@@ -31,12 +32,12 @@ export async function networkInit() {
 
 export default function WellnessNetwork() {
     const [listOfPatients, setListOfPatients] = useState<any[]>([]);
+    const [visibleListOfPatients, setVisibleListOfPatients] = useState<any[]>([]);
     const [listOfPatientsIsDirty, setListOfPatientsIsDirty] = useState(false);
 
     useEffect(() => {
         async function fetchListData() {
             const data = await networkInit();
-            console.log(data);
             if (data.loaded && data.listData[0]) {
                 setListOfPatients(data.listData[0].list_of_patient);
             }
@@ -45,13 +46,15 @@ export default function WellnessNetwork() {
     }, []);
 
     useEffect(() => {
-        if(listOfPatientsIsDirty) {
+        console.log(visibleListOfPatients);
+    }, [visibleListOfPatients])
 
+    useEffect(() => {
+
+        setVisibleListOfPatients(listOfPatients);
+        if(listOfPatientsIsDirty) {
             saveUsersToSupabase(listOfPatients);
         }
-        // return () => {
-        //     saveUsersToSupabase(listOfPatients);
-        // }
 
     },[listOfPatients])
 
@@ -81,9 +84,12 @@ export default function WellnessNetwork() {
     }
 
     return (
-        <div className="">
-            <AddPatientButton setListOfPatientsIsDirty={setListOfPatientsIsDirty} setListOfPatients={setListOfPatients} listOfPatients={listOfPatients} />
-            <PatientList setListOfPatientsIsDirty={setListOfPatientsIsDirty} setListOfPatients={setListOfPatients} listOfPatients={listOfPatients} />
+        <div>
+            <div className="flex items-center justify-between relative">
+                <PatientSearchBar listOfPatients={listOfPatients} setVisibleListOfPatients={setVisibleListOfPatients} />
+                <AddPatientButton setListOfPatientsIsDirty={setListOfPatientsIsDirty} setListOfPatients={setListOfPatients} listOfPatients={listOfPatients} />
+            </div>
+            <PatientList setListOfPatientsIsDirty={setListOfPatientsIsDirty} setListOfPatients={setListOfPatients} visibleListOfPatients={visibleListOfPatients} />
         </div>
     );
 }

@@ -11,7 +11,7 @@ CREATE EXTENSION IF NOT EXISTS ltree;
 ....##....##.....##.########..########.########..######.
 */
 
-CREATE TABLE  user_profiles (
+CREATE TABLE user_profiles (
   user_id UUID PRIMARY KEY REFERENCES auth.users (id) NOT NULL,
   username TEXT CHECK (char_length(username) > 0 AND char_length(username) <= 50 AND username !~ '\d'), 
   lastname TEXT CHECK (char_length(lastname) > 0 AND char_length(lastname) <= 50 AND lastname !~ '\d'),
