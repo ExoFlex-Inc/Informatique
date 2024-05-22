@@ -2,20 +2,20 @@ import { useEffect, useRef } from "react";
 
 interface PatientMenuDropdownProps {
     setOpenMenuIndex: React.Dispatch<React.SetStateAction<Number | null>>;
-    listOfPatients: any[];
+    visibleListOfPatients: any[];
     setListOfPatients: React.Dispatch<React.SetStateAction<any[]>>;
     index: number;
     setListOfPatientsIsDirty: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const PatientMenuDropdown: React.FC<PatientMenuDropdownProps> = ({setOpenMenuIndex, setListOfPatientsIsDirty, listOfPatients, setListOfPatients, index}) => {
+const PatientMenuDropdown: React.FC<PatientMenuDropdownProps> = ({setOpenMenuIndex, setListOfPatientsIsDirty, visibleListOfPatients, setListOfPatients, index}) => {
 
     const dropdownRef = useRef(null);
 
     const removeUser = () => {
         const newList = [
-            ...listOfPatients.slice(0, index),
-            ...listOfPatients.slice(index + 1)
+            ...visibleListOfPatients.slice(0, index),
+            ...visibleListOfPatients.slice(index + 1)
         ];
         setListOfPatientsIsDirty(true);
         setListOfPatients(newList);

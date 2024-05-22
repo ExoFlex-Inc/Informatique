@@ -3,12 +3,12 @@ import PatientMenuDropdown from './PatientMenuDropdown.tsx';
 import { useState } from 'react';
 
 interface PatientListProps {
-    listOfPatients: any[];
+    visibleListOfPatients: any[];
     setListOfPatients: React.Dispatch<React.SetStateAction<any[]>>;
     setListOfPatientsIsDirty: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const PatientList: React.FC<PatientListProps> = ({listOfPatients, setListOfPatients, setListOfPatientsIsDirty}) => {
+const PatientList: React.FC<PatientListProps> = ({visibleListOfPatients, setListOfPatients, setListOfPatientsIsDirty}) => {
 
     const [openMenuIndex, setOpenMenuIndex] = useState<Number | null>(null);
 
@@ -18,13 +18,13 @@ const PatientList: React.FC<PatientListProps> = ({listOfPatients, setListOfPatie
 
     return (
         <div className="grid grid-cols-4 shadow-md shadow-gray-500 pt-2 bg-gray-300 rounded-2xl mx-4">
-            <label className={"font-bold border-gray-400 text-black pl-2 pb-2" + (listOfPatients?.length > 0 ? " border-b-2":"")}>First Name</label>
-            <label className={"font-bold border-gray-400 text-black pl-2 pb-2" + (listOfPatients?.length ? " border-b-2":"")}>Last Name</label>
-            <label className={"font-bold border-gray-400 text-black pl-2 pb-2" + (listOfPatients?.length ? " border-b-2":"")}>Email</label>
-            <label className={"font-bold border-gray-400 text-black pl-2 pb-2" + (listOfPatients?.length ? " border-b-2":"")}>Phone Number</label>
+            <label className={"font-bold border-gray-400 text-black pl-2 pb-2" + (visibleListOfPatients?.length > 0 ? " border-b-2":"")}>First Name</label>
+            <label className={"font-bold border-gray-400 text-black pl-2 pb-2" + (visibleListOfPatients?.length ? " border-b-2":"")}>Last Name</label>
+            <label className={"font-bold border-gray-400 text-black pl-2 pb-2" + (visibleListOfPatients?.length ? " border-b-2":"")}>Email</label>
+            <label className={"font-bold border-gray-400 text-black pl-2 pb-2" + (visibleListOfPatients?.length ? " border-b-2":"")}>Phone Number</label>
 
             <ul className="divide-y rounded-bl-2xl divide-gray-400 bg-white">
-                { listOfPatients?.map((patient, index) => 
+                { visibleListOfPatients?.map((patient, index) => 
                     <li key={index} className="text-black p-2">
                         {patient.username}
                     </li> 
@@ -32,7 +32,7 @@ const PatientList: React.FC<PatientListProps> = ({listOfPatients, setListOfPatie
             </ul>
 
             <ul className="divide-y divide-gray-400 bg-white">
-                { listOfPatients?.map((patient, index) => 
+                { visibleListOfPatients?.map((patient, index) => 
                     <li key={index} className="text-black p-2">
                         {patient.lastname}
                     </li> 
@@ -40,14 +40,14 @@ const PatientList: React.FC<PatientListProps> = ({listOfPatients, setListOfPatie
             </ul>
 
             <ul className="divide-y divide-gray-400 bg-white">
-                { listOfPatients?.map((patient, index) => 
+                { visibleListOfPatients?.map((patient, index) => 
                     <li key={index} className="text-black p-2">
                         {patient.email}
                     </li> 
                 )}
             </ul>
             <ul className="divide-y divide-gray-400 rounded-br-2xl bg-white">
-                { listOfPatients?.map((patient, index) => 
+                { visibleListOfPatients?.map((patient, index) => 
                     <div className='relative'>
                         <li key={index} className="text-black flex items-center justify-between p-2">
                             <span>{patient.phone_number}</span>
@@ -57,7 +57,7 @@ const PatientList: React.FC<PatientListProps> = ({listOfPatients, setListOfPatie
                         </li>
                         { openMenuIndex === index && <PatientMenuDropdown setListOfPatients={setListOfPatients}
                             setListOfPatientsIsDirty={setListOfPatientsIsDirty}
-                            listOfPatients={listOfPatients}
+                            visibleListOfPatients={visibleListOfPatients}
                             index={index}
                             setOpenMenuIndex={setOpenMenuIndex}
                         /> }
