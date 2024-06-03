@@ -651,7 +651,6 @@
   version "1.43.1"
   resolved "https://registry.yarnpkg.com/@playwright/test/-/test-1.43.1.tgz#16728a59eb8ce0f60472f98d8886d6cab0fa3e42"
   integrity sha512-HgtQzFgNEEo4TE22K/X7sYTYNqEMMTZmFS8kTq6m8hXj+m1D8TgwgIbumHddJa9h4yl4GkKb8/bgAl2+g7eDgA==
-
   dependencies:
     playwright "1.43.1"
 
@@ -2207,6 +2206,7 @@ jackspeak@^2.3.6:
     "@isaacs/cliui" "^8.0.2"
   optionalDependencies:
     "@pkgjs/parseargs" "^0.11.0"
+
 jiti@^1.21.0:
   version "1.21.0"
   resolved "https://registry.yarnpkg.com/jiti/-/jiti-1.21.0.tgz#7c97f8fe045724e136a397f7340475244156105d"
@@ -2369,14 +2369,15 @@ minimatch@^9.0.1:
   dependencies:
     brace-expansion "^2.0.1"
 
-minipass@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.npmjs.org/minipass/-/minipass-5.0.0.tgz"
-
 "minipass@^5.0.0 || ^6.0.2 || ^7.0.0", minipass@^7.0.4:
   version "7.1.0"
   resolved "https://registry.yarnpkg.com/minipass/-/minipass-7.1.0.tgz#b545f84af94e567386770159302ca113469c80b8"
   integrity sha512-oGZRv2OT1lO2UF1zUcwdTb3wqUwI0kBGTgt/T7OdSj6M6N5m3o5uPf0AIW6lVxGGoiWUR7e2AwTE+xiwK8WQig==
+
+minipass@^7.1.0:
+  version "7.1.2"
+  resolved "https://registry.yarnpkg.com/minipass/-/minipass-7.1.2.tgz#93a9626ce5e5e66bd4db86849e7515e92340a707"
+  integrity sha512-qOOzS1cBTWYF4BH8fVePDBOO9iptMnGUEZwNc/cMWnTV2nVLZ7VoNWEPHkYczZA0pdoA7dl6e7FL659nX9S2aw==
 
 minizlib@^3.0.1:
   version "3.0.1"
@@ -2996,7 +2997,6 @@ statuses@2.0.1:
     strip-ansi "^6.0.1"
 
 string-width@^4.1.0:
-
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
   integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
@@ -3053,16 +3053,16 @@ sucrase@^3.32.0:
     mz "^2.7.0"
     pirates "^4.0.1"
     ts-interface-checker "^0.1.9"
-    
-supabase@^1.165.0:
-  version "1.165.0"
-  resolved "https://registry.yarnpkg.com/supabase/-/supabase-1.165.0.tgz#aa85e44f7b6ee2331e7fdb40e1c024edea8acb7d"
-  integrity sha512-bN1TSR6p4POxCQqb3OsO6vo2H9yKIUB2HW44SiLAV9leBIjdm4AsrJJ1hmc/YecqjtuBooAr7RXz/uGKQEQbEQ==
+
+supabase@^1.172.2:
+  version "1.172.2"
+  resolved "https://registry.yarnpkg.com/supabase/-/supabase-1.172.2.tgz#bec84a5da24a3bad57876422f3f73f109069bbe5"
+  integrity sha512-h2J6kKEikXnZyurUcCYg215qkQpINOhdWkiclHcWAuVeqXsNrfrYaf1s0qbbcdRyMtrVW48I+VdVTw71Cnn20Q==
   dependencies:
     bin-links "^4.0.3"
     https-proxy-agent "^7.0.2"
     node-fetch "^3.3.2"
-    tar "7.0.1"
+    tar "7.2.0"
 
 supports-color@^5.3.0:
   version "5.5.0"
@@ -3108,14 +3108,14 @@ tailwindcss@^3.4.3:
     resolve "^1.22.2"
     sucrase "^3.32.0"
 
-tar@7.0.1:
-  version "7.0.1"
-  resolved "https://registry.yarnpkg.com/tar/-/tar-7.0.1.tgz#8f6ccebcd91b69e9767a6fc4892799e8b0e606d5"
-  integrity sha512-IjMhdQMZFpKsHEQT3woZVxBtCQY+0wk3CVxdRkGXEgyGa0dNS/ehPvOMr2nmfC7x5Zj2N+l6yZUpmICjLGS35w==
+tar@7.2.0:
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/tar/-/tar-7.2.0.tgz#f03ae6ecd2e2bab880f2ef33450f502e761d7548"
+  integrity sha512-hctwP0Nb4AB60bj8WQgRYaMOuJYRAPMGiQUAotms5igN8ppfQM+IvjQ5HcKu1MaZh2Wy2KWVTe563Yj8dfc14w==
   dependencies:
     "@isaacs/fs-minipass" "^4.0.0"
     chownr "^3.0.0"
-    minipass "^5.0.0"
+    minipass "^7.1.0"
     minizlib "^3.0.1"
     mkdirp "^3.0.1"
     yallist "^5.0.0"
