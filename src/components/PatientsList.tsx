@@ -5,10 +5,9 @@ import { useState } from 'react';
 interface PatientListProps {
     visibleListOfPatients: any[];
     setListOfPatients: React.Dispatch<React.SetStateAction<any[]>>;
-    setListOfPatientsIsDirty: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const PatientList: React.FC<PatientListProps> = ({visibleListOfPatients, setListOfPatients, setListOfPatientsIsDirty}) => {
+const PatientList: React.FC<PatientListProps> = ({visibleListOfPatients, setListOfPatients}) => {
 
     const [openMenuIndex, setOpenMenuIndex] = useState<Number | null>(null);
 
@@ -48,15 +47,16 @@ const PatientList: React.FC<PatientListProps> = ({visibleListOfPatients, setList
             </ul>
             <ul className="divide-y divide-gray-400 rounded-br-2xl bg-white">
                 { visibleListOfPatients?.map((patient, index) => 
-                    <div className='relative'>
+                    <div key={index} className='relative'>
                         <li key={index} className="text-black flex items-center justify-between p-2">
                             <span>{patient.phone_number}</span>
                             <button onClick={() => toggleDropdown(index)} className='hover:bg-gray-300 rounded-full'>
                                 <ListIcon />
                             </button>
                         </li>
-                        { openMenuIndex === index && <PatientMenuDropdown setListOfPatients={setListOfPatients}
-                            setListOfPatientsIsDirty={setListOfPatientsIsDirty}
+                        { openMenuIndex === index && <PatientMenuDropdown
+                            clientId={patient.user_id}
+                            setListOfPatients={setListOfPatients}
                             visibleListOfPatients={visibleListOfPatients}
                             index={index}
                             setOpenMenuIndex={setOpenMenuIndex}
