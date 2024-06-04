@@ -3,12 +3,12 @@ import AddPatientDropDown from './AddPatientDropdown.tsx';
 import { useState } from 'react';
 
 interface AddPatientButtonProps {
+    adminId: undefined | string;
     setListOfPatients: React.Dispatch<React.SetStateAction<any[]>>;
     listOfPatients: any[];
-    setListOfPatientsIsDirty: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const AddPatientButton: React.FC<AddPatientButtonProps> = ({setListOfPatients, listOfPatients, setListOfPatientsIsDirty}) => {
+const AddPatientButton: React.FC<AddPatientButtonProps> = ({adminId, setListOfPatients, listOfPatients}) => {
     const [isOpen, setIsOpen] = useState(false);
 
     function toggleDropdown() {
@@ -21,7 +21,7 @@ const AddPatientButton: React.FC<AddPatientButtonProps> = ({setListOfPatients, l
             onClick={toggleDropdown}>
                 <PersonAddIcon />
             </button>
-            {isOpen && <AddPatientDropDown setListOfPatientsIsDirty={setListOfPatientsIsDirty} setListOfPatients={setListOfPatients} listOfPatients={listOfPatients} setIsOpen={setIsOpen} />}
+            {isOpen && <AddPatientDropDown adminId={adminId} setListOfPatients={setListOfPatients} listOfPatients={listOfPatients} setIsOpen={setIsOpen} />}
         </div>
 
     )
