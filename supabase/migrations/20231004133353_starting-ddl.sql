@@ -149,16 +149,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION assign_admin_to_client(admin_id UUID, client_id UUID)
-RETURNS void AS $$
-BEGIN
-  UPDATE user_profiles
-  SET admin_id = assign_admin_to_client.admin_id
-  WHERE user_id = assign_admin_to_client.client_id
-  AND permissions = 'client';
-END;
-$$ LANGUAGE plpgsql;
-
 CREATE FUNCTION get_planning(search_id UUID)
 RETURNS TABLE (plan_content jsonb) AS $$
 BEGIN
