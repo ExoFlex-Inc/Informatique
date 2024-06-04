@@ -2,20 +2,18 @@ import AddPatientButton from "../components/AddPatientButton.tsx";
 import PatientList from "../components/PatientsList.tsx";
 import PatientSearchBar from "../components/PatientSearchBar.tsx";
 import { useEffect, useState } from "react";
+import { supaClient } from "../hooks/supa-client.ts";
 
 export async function networkInit() {
-    try {
-        console.log("Getting the current list...");
 
-        const responseGetList = await fetch("http://localhost:3001/get-users-list", {
+    try {
+        const responseGetClients = await fetch("http://localhost:3001/get_clients_for_admin", {
         method: "GET",
         });
 
-        console.log(responseGetList);
-
-        if (responseGetList.ok) {
+        if (responseGetClients.ok) {
             console.log("List retrieved successfully.");
-            const listData = await responseGetList.json();
+            const listData = await responseGetClients.json();
             console.log("List data:", listData);
             return { loaded: true, listData: listData };
         } else {
@@ -23,73 +21,54 @@ export async function networkInit() {
             window.alert("Failed to retrieve list.");
             return { loaded: false, listData: null };
         }
+
     } catch (error) {
         console.error("An error occurred:", error);
         window.alert("An error occurred: " + error);
         return { loaded: false, listData: null };
     }
+
 }
 
 export default function WellnessNetwork() {
     const [listOfPatients, setListOfPatients] = useState<any[]>([]);
     const [visibleListOfPatients, setVisibleListOfPatients] = useState<any[]>([]);
-    const [listOfPatientsIsDirty, setListOfPatientsIsDirty] = useState(false);
+    const [adminId, setAdminId] = useState<undefined | string>(undefined);
+
+    async function getAdminId () {
+        try {
+            const {
+                data: { user },
+            } = await supaClient.auth.getUser();
+            setAdminId(user?.id)
+        } catch (err) {
+            console.error('Error fetching session:', err);
+        }
+    };
+
+    async function fetchListData() {
+        const data = await networkInit();
+        if (data.loaded && data.listData) {
+            setVisibleListOfPatients(data.listData);
+        }
+    }
 
     useEffect(() => {
-        async function fetchListData() {
-            const data = await networkInit();
-            if (data.loaded && data.listData[0]) {
-                setListOfPatients(data.listData[0].list_of_patient);
-            }
-          }
-          fetchListData();
+        getAdminId();
     }, []);
 
     useEffect(() => {
-        console.log(visibleListOfPatients);
-    }, [visibleListOfPatients])
-
-    useEffect(() => {
-
+        fetchListData();
         setVisibleListOfPatients(listOfPatients);
-        if(listOfPatientsIsDirty) {
-            saveUsersToSupabase(listOfPatients);
-        }
-
     },[listOfPatients])
-
-    const saveUsersToSupabase = async (usersList: any) => {
-        try {
-            const requestBody = {
-                usersList: usersList,
-            };
-
-            const response = await fetch("http://localhost:3001/push-users-list-supabase", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(requestBody),
-            });
-
-            if (response.ok) {
-                console.log("List pushed to Supabase");
-            }
-            else {
-                console.error("Failed to send list to Supabase", response);
-            }
-        } catch (error) {
-            console.error("Error saving list to Supabase:", error);
-        }
-    }
 
     return (
         <div>
             <div className="flex items-center justify-between relative">
                 <PatientSearchBar listOfPatients={listOfPatients} setVisibleListOfPatients={setVisibleListOfPatients} />
-                <AddPatientButton setListOfPatientsIsDirty={setListOfPatientsIsDirty} setListOfPatients={setListOfPatients} listOfPatients={listOfPatients} />
+                <AddPatientButton adminId={adminId} setListOfPatients={setListOfPatients} listOfPatients={listOfPatients} />
             </div>
-            <PatientList setListOfPatientsIsDirty={setListOfPatientsIsDirty} setListOfPatients={setListOfPatients} visibleListOfPatients={visibleListOfPatients} />
+            <PatientList setListOfPatients={setListOfPatients} visibleListOfPatients={visibleListOfPatients} />
         </div>
     );
 }

@@ -143,7 +143,6 @@ export default function Planning() {
       // Save plan to Supabase
       await savePlanToSupabase(planWithLimits);
       // Save plan to local storage
-      console.log("Plan and limits saved successfully.");
     } catch (error) {
       console.error("Error saving plan and limits:", error);
     }
@@ -166,8 +165,10 @@ export default function Planning() {
 
       if (response.ok) {
         console.log("Plan pushed to Supabase");
+        window.alert("Plan and limits saved successfully.");
       } else {
         console.error("Failed to send plan to Supabase");
+        window.alert("Failed to send plan to Supabase");
       }
     } catch (error) {
       console.error("Error saving plan to Supabase:", error);

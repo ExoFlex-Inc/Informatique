@@ -30,8 +30,6 @@ export function Welcome() {
   const [lastNameDirty, setLastNameDirty] = useState(false);
   const [speciality, setSpeciality] = useState("");
   const [specialityDirty, setSpecialityDirty] = useState(false);
-  const [permissions, setPermissions] = useState("");
-  const [permissionsDirty, setPermissionsDirty] = useState(false);
   const [serverError, setServerError] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -60,10 +58,7 @@ export function Welcome() {
     () => validateInput(speciality, "Speciality"),
     [speciality],
   );
-  const invalidPermissions = useMemo(
-    () => validatePermissions(permissions),
-    [permissions],
-  );
+
   const invalidPhoneNumber = useMemo(
     () => validateInput(phoneNumber, "PhoneNumber"),
     [phoneNumber],
@@ -91,9 +86,9 @@ export function Welcome() {
                     username: userName,
                     lastname: lastName,
                     speciality: speciality,
-                    permissions: permissions,
                     phone_number: phoneNumber,
                     email: email,
+                    permissions: 'client'
                   },
                 ])
                 .then(({ error }) => {
@@ -186,38 +181,6 @@ export function Welcome() {
               </p>
             )}
 
-            <select
-              required
-              name="permissions"
-              className={
-                permissionsDirty
-                  ? "welcome-name-input"
-                  : "welcome-name-input text-gray-400"
-              }
-              onChange={({ target }) => {
-                setPermissions(target.value);
-                if (!permissionsDirty) {
-                  setPermissionsDirty(true);
-                }
-                if (serverError) {
-                  setServerError("");
-                }
-              }}
-            >
-              <option value={""} disabled selected hidden>
-                Permissions type
-              </option>
-              <option value={"dev"} className="welcome-name-input">
-                dev
-              </option>
-              <option value={"admin"} className="welcome-name-input">
-                admin
-              </option>
-              <option value={"client"} className="welcome-name-input">
-                client
-              </option>
-            </select>
-
             <button
               className="welcome-form-submit-button"
               type="submit"
@@ -225,7 +188,7 @@ export function Welcome() {
                 invalidUserName != null ||
                 invalidLastName != null ||
                 invalidSpeciality != null ||
-                invalidPermissions != null
+                invalidPhoneNumber != null
               }
             >
               Submit
@@ -258,13 +221,6 @@ function validateInput(value: string, fieldName: string): string | undefined {
   }
   if (!numberRegex.test(value) && fieldName == "PhoneNumber") {
     return `${fieldName} can only contain numbers`;
-  }
-  return undefined;
-}
-
-function validatePermissions(permissions: string) {
-  if (permissions == "") {
-    return "You must select a permissions type";
   }
   return undefined;
 }

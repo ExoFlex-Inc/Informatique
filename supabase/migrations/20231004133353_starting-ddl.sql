@@ -2,6 +2,18 @@
 CREATE EXTENSION IF NOT EXISTS ltree;
 
 /*
+.#########.##....##.##.....##.##..........##
+.##........###...##.##.....##.###........###
+.##........####..##.##.....##.####......####
+.########..##.##.##.##.....##.##.##....##.##
+.##........##..####.##.....##.##..##..##..##
+.##........##...###.##.....##.##...####...##
+.########..##....##..#######..##....## ...##
+*/
+
+CREATE TYPE permissions_enum AS ENUM ('dev', 'admin', 'client');
+
+/*
 .########....###....########..##.......########..######.
 ....##......##.##...##.....##.##.......##.......##....##
 ....##.....##...##..##.....##.##.......##.......##......
@@ -13,12 +25,12 @@ CREATE EXTENSION IF NOT EXISTS ltree;
 
 CREATE TABLE user_profiles (
   user_id UUID PRIMARY KEY REFERENCES auth.users (id) NOT NULL,
+  admin_id UUID,
   username TEXT CHECK (char_length(username) > 0 AND char_length(username) <= 50 AND username !~ '\d'), 
   lastname TEXT CHECK (char_length(lastname) > 0 AND char_length(lastname) <= 50 AND lastname !~ '\d'),
-  permissions TEXT CHECK (char_length(permissions) > 0 AND char_length(permissions) <= 50 AND permissions !~ '\d'),
+  permissions permissions_enum NOT NULL,
   speciality TEXT CHECK (char_length(speciality) > 0 AND char_length(speciality) <= 50 AND speciality !~ '\d'),
   phone_number TEXT CHECK (char_length(phone_number) > 0 AND char_length(phone_number) <= 50 AND phone_number ~ '\d'),
-  list_of_patient JSONB,
   email TEXT CHECK (char_length(email) > 0 AND char_length(email) <= 50)
 );
 
@@ -117,23 +129,23 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION push_users_list(user_id UUID, new_list JSONB)
-RETURNS JSONB AS $$
-DECLARE
-  updated_list JSONB;
+CREATE OR REPLACE FUNCTION assign_admin_to_client(admin_id UUID, client_id UUID)
+RETURNS void AS $$
 BEGIN
-  IF EXISTS (SELECT 1 FROM user_profiles WHERE user_profiles.user_id = push_users_list.user_id) THEN
-    UPDATE user_profiles
-    SET list_of_patient = new_list
-    WHERE user_profiles.user_id = push_users_list.user_id
-    RETURNING new_list INTO updated_list;
-  ELSE
-    INSERT INTO user_profiles(user_id, list_of_patient)
-    VALUES (push_users_list.user_id, new_list)
-    RETURNING new_list INTO updated_list;
-  END IF;
+  UPDATE user_profiles
+  SET admin_id = assign_admin_to_client.admin_id
+  WHERE user_id = assign_admin_to_client.client_id
+  AND permissions = 'client';
+END;
+$$ LANGUAGE plpgsql;
 
-  RETURN updated_list;
+CREATE OR REPLACE FUNCTION assign_admin_to_client(admin_id UUID, client_id UUID)
+RETURNS void AS $$
+BEGIN
+  UPDATE user_profiles
+  SET admin_id = assign_admin_to_client.admin_id
+  WHERE user_id = assign_admin_to_client.client_id
+  AND permissions = 'client';
 END;
 $$ LANGUAGE plpgsql;
 
@@ -152,12 +164,19 @@ $$ LANGUAGE plpgsql;
 CREATE FUNCTION get_users_list(search_id UUID)
 RETURNS TABLE (list_of_patient jsonb) AS $$
 BEGIN
-    RAISE LOG 'Searching for list content with user_id:%', search_id;
-
     RETURN QUERY
-    SELECT u.list_of_patient
-    FROM user_profiles u
-    WHERE u.user_id = search_id;
+    SELECT 
+        c.user_id, 
+        c.username, 
+        c.lastname, 
+        c.phone_number, 
+        c.email
+    FROM 
+        user_profiles c
+    JOIN 
+        user_profiles a ON c.admin_id = a.user_id
+    WHERE 
+        a.user_id = get_clients_for_admin.admin_id AND a.permissions in ('dev','admin');
 END;
 $$ LANGUAGE plpgsql;
 
@@ -175,6 +194,7 @@ alter table user_profiles enable row level security;
 alter table machine enable row level security;
 alter table encoder enable row level security;
 alter table plans enable row level security;
+-- alter table admin_client_relationships enable row level security;
 
 CREATE POLICY "all can see" ON "public"."user_profiles"
 AS PERMISSIVE FOR SELECT
@@ -228,3 +248,21 @@ TO public
 USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
 
+CREATE POLICY "admins_and_managers_can_assign_admin"
+ON public.user_profiles
+AS PERMISSIVE FOR UPDATE
+TO public
+USING (
+    (
+        SELECT permissions
+        FROM public.user_profiles
+        WHERE user_id = auth.uid()
+    ) IN ('dev', 'admin') AND permissions = 'client'
+)
+WITH CHECK (
+    (
+        SELECT permissions
+        FROM public.user_profiles
+        WHERE user_id = auth.uid()
+    ) IN ('dev', 'admin') AND permissions = 'client'
+);

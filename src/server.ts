@@ -5,6 +5,7 @@ import { createServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
 import { supaClient } from "./hooks/supa-client.ts";
 import dotenv from "dotenv";
+import { checkPermission } from './middleware/checkPermission.tsx'
 
 dotenv.config();
 
@@ -163,14 +164,14 @@ app.post("/hmi-button-click", (req, res) => {
 // Middleware to check if session is lost
 async function checkSession(_: Request, res: Response, next: NextFunction) {
   try {
-    const { data } = await supaClient.auth.getSession();
+    const { data, error } = await supaClient.auth.getSession();
 
     const access_token = data.session?.access_token;
     const refresh_token = data.session?.refresh_token;
 
     if (!access_token || !refresh_token) {
       // Session is lost, handle it here
-      console.error("Session lost");
+      console.error("Session lost", error);
       res.status(401).json({ error: "Session lost" });
     } else {
       next();
@@ -181,7 +182,7 @@ async function checkSession(_: Request, res: Response, next: NextFunction) {
   }
 }
 
-app.post("/push-plan-supabase", checkSession, async (req, res) => {
+app.post("/push-plan-supabase", checkSession, checkPermission(['admin', 'dev']), async (req, res) => {
   try {
     const { plan } = req.body;
     const {
@@ -206,32 +207,30 @@ app.post("/push-plan-supabase", checkSession, async (req, res) => {
   }
 });
 
-app.post("/push-users-list-supabase", checkSession, async (req, res) => {
+app.post("/assign_admin_to_client", checkSession, checkPermission(['admin', 'dev']), async (req, res) => {
   try {
-    const { usersList } = req.body;
-    const {
-      data: { user },
-    } = await supaClient.auth.getUser();
-    const { data, error } = await supaClient.rpc("push_users_list", {
-      user_id: user?.id,
-      new_list: usersList,
+    const { admin_id, client_id } = req.body;
+
+    const { data, error } = await supaClient.rpc("assign_admin_to_client", {
+      admin_id,
+      client_id,
     });
 
     if (error) {
-      console.error(`Error sending list:`, error);
-      res.status(500).send("Error sending list");
+      console.error(`Error at creating relationship:`, error);
+      res.status(500).json("Error creating relationship");
       return;
     } else {
-      console.log(`Success sending list:`, data);
-      res.status(200).send("Success sending list");
+      console.log(`Success creating relationship:`, data);
+      res.status(200).json("Success creating relationship");
     }
   } catch (err) {
-    console.error("Error sending list:", err);
-    res.status(500).send("Error sending list");
+    console.error("Error creating relationship:", err);
+    res.status(500).json("Error creating relationship");
   }
 })
 
-app.get("/get-plan", checkSession, async (_, res) => {
+app.get("/get-plan", checkSession, checkPermission(['admin', 'dev']), async (_, res) => {
   try {
     const {
       data: { user },
@@ -254,31 +253,40 @@ app.get("/get-plan", checkSession, async (_, res) => {
   }
 });
 
-app.get("/get-users-list", checkSession, async (_, res) => {
+app.get("/get_clients_for_admin", checkSession, checkPermission(['admin', 'dev']), async (_, res) => {
   try {
     const {
       data: {user},
+      error: authError,
     } = await supaClient.auth.getUser();
 
-    const {data, error} = await supaClient.rpc("get_users_list", {
-      search_id: user?.id,
+    if (authError) {
+      console.error("Error getting user:", authError);
+      return res.status(500).json({ error: "Error getting user" });
+    }
+
+    if (!user?.id) {
+      console.error("User is not authenticated or user ID is missing");
+      return res.status(401).json({ error: "User is not authenticated" });
+    }
+
+    const {data, error} = await supaClient.rpc("get_clients_for_admin", {
+      admin_id: user.id,
     });
 
     if (error) {
-      console.error(`Error getting current list:`, error);
-      res.status(500).json({ error: "Error getting current list" });
-    } else {
-      console.log(`Success getting current list:`, data);
-      res.status(200).json(data);
+      console.error(`Error getting clients:`, error);
+      res.status(500).json({ error: "Error getting clients" });
     }
+
+    console.log(`Success getting clients:`, data);
+    res.status(200).json(data);
+
   } catch (err) {
-    console.error("Error getting current list:", err);
-    res.status(500).json({ error: "Error getting current list" });
+    console.error("Error getting clients:", err);
+    res.status(500).json({ error: "Error getting clients" });
   }
-  
 })
-
-
 
 /*
 .##........#######...######.....###....##...........######..########.########..##.....##.########.########.

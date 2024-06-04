@@ -9,8 +9,8 @@ interface PatientSearchBarProps {
 const PatientSearchBar: React.FC<PatientSearchBarProps> = ({listOfPatients, setVisibleListOfPatients}) => {
     
     function onInputChange(target: any) {
+
         const updatedList = listOfPatients.filter((patient) => {
-            console.log(patient)
             if(patient.email.includes(target.value)) {
                 return true;
             }
@@ -36,7 +36,6 @@ const PatientSearchBar: React.FC<PatientSearchBarProps> = ({listOfPatients, setV
                 }}
             />
         </div>
-        
     )
 }
 
