@@ -25,43 +25,47 @@ export function useSession(): SupabaseUserInfo {
   const [channel, setChannel] = useState<RealtimeChannel | null>(null);
   const navigate = useNavigate();
 
-  const setupLocalServer = useCallback(async (
-    access_token: string,
-    refresh_token: string,
-  ) => {
-    const requestBody = {
-      access_token,
-      refresh_token,
-    };
+  const setupLocalServer = useCallback(
+    async (access_token: string, refresh_token: string) => {
+      const requestBody = {
+        access_token,
+        refresh_token,
+      };
 
-    try {
-      const responseServer = await fetch(
-        "http://localhost:3001/setup-local-server",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+      try {
+        const responseServer = await fetch(
+          "http://localhost:3001/setup-local-server",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestBody),
           },
-          body: JSON.stringify(requestBody),
-        },
-      );
+        );
 
-      if (responseServer.ok) {
-        console.log("Local server setup successful");
-      } else {
-        console.error("Local server setup failed");
+        if (responseServer.ok) {
+          console.log("Local server setup successful");
+        } else {
+          console.error("Local server setup failed");
+        }
+      } catch (error) {
+        console.error("Error during local server setup:", error);
       }
-    } catch (error) {
-      console.error("Error during local server setup:", error);
-    }
-  }, []);
+    },
+    [],
+  );
 
   useEffect(() => {
     const initializeSession = async () => {
-      const { data: { session } } = await supaClient.auth.getSession();
-      setUserInfo(prevState => ({ ...prevState, session }));
+      const {
+        data: { session },
+      } = await supaClient.auth.getSession();
+      setUserInfo((prevState) => ({ ...prevState, session }));
 
-      const { data: { subscription } } = supaClient.auth.onAuthStateChange((_event, newSession) => {
+      const {
+        data: { subscription },
+      } = supaClient.auth.onAuthStateChange((_event, newSession) => {
         setUserInfo({ session: newSession, profile: null });
         if (!newSession) {
           localStorage.removeItem("lastLocation");
@@ -79,15 +83,17 @@ export function useSession(): SupabaseUserInfo {
   useEffect(() => {
     const handleUserProfile = async () => {
       if (userInfo.session?.user && !userInfo.profile) {
-        const newChannel = await listenToUserProfileChanges(userInfo.session.user.id);
+        const newChannel = await listenToUserProfileChanges(
+          userInfo.session.user.id,
+        );
         if (newChannel) {
           if (channel) {
             channel.unsubscribe();
           }
           setChannel(newChannel);
 
-          const access_token = userInfo.session?.access_token || '';
-          const refresh_token = userInfo.session?.refresh_token || '';
+          const access_token = userInfo.session?.access_token || "";
+          const refresh_token = userInfo.session?.refresh_token || "";
 
           setupLocalServer(access_token, refresh_token);
         }
@@ -102,47 +108,53 @@ export function useSession(): SupabaseUserInfo {
     handleUserProfile();
   }, [userInfo.session, userInfo.profile, channel, setupLocalServer]);
 
-  const listenToUserProfileChanges = useCallback(async (userId: string): Promise<RealtimeChannel | null> => {
-    try {
-      const { data, error } = await supaClient
-        .from("user_profiles")
-        .select("*")
-        .eq("user_id", userId);
+  const listenToUserProfileChanges = useCallback(
+    async (userId: string): Promise<RealtimeChannel | null> => {
+      try {
+        const { data, error } = await supaClient
+          .from("user_profiles")
+          .select("*")
+          .eq("user_id", userId);
 
-      if (error) {
-        console.error("Error fetching user profile:", error);
+        if (error) {
+          console.error("Error fetching user profile:", error);
+          return null;
+        }
+
+        if (!data?.length) {
+          navigate("/welcome");
+          return null;
+        }
+
+        setUserInfo((prevState) => ({ ...prevState, profile: data[0] }));
+
+        const newChannel = supaClient
+          .channel(`public:user_profiles`)
+          .on(
+            "postgres_changes",
+            {
+              event: "*",
+              schema: "public",
+              table: "user_profiles",
+              filter: `user_id=eq.${userId}`,
+            },
+            (payload) => {
+              setUserInfo((prevState) => ({
+                ...prevState,
+                profile: payload.new as UserProfile,
+              }));
+            },
+          )
+          .subscribe();
+
+        return newChannel;
+      } catch (error) {
+        console.error("Error setting up profile change listener:", error);
         return null;
       }
-
-      if (!data?.length) {
-        navigate("/welcome");
-        return null;
-      }
-
-      setUserInfo(prevState => ({ ...prevState, profile: data[0] }));
-
-      const newChannel = supaClient
-        .channel(`public:user_profiles`)
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "user_profiles",
-            filter: `user_id=eq.${userId}`,
-          },
-          (payload) => {
-            setUserInfo(prevState => ({ ...prevState, profile: payload.new as UserProfile }));
-          },
-        )
-        .subscribe();
-
-      return newChannel;
-    } catch (error) {
-      console.error("Error setting up profile change listener:", error);
-      return null;
-    }
-  }, [navigate]);
+    },
+    [navigate],
+  );
 
   return userInfo;
 }
