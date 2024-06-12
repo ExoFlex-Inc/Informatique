@@ -180,6 +180,31 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION get_clients_for_admin(admin_id UUID)
+RETURNS TABLE (
+    user_id UUID,
+    username TEXT,
+    lastname TEXT,
+    phone_number TEXT,
+    email TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        c.user_id, 
+        c.username, 
+        c.lastname, 
+        c.phone_number, 
+        c.email
+    FROM 
+        user_profiles c
+    JOIN 
+        user_profiles a ON c.admin_id = a.user_id
+    WHERE 
+        a.user_id = get_clients_for_admin.admin_id AND a.permissions in ('dev','admin');
+END;
+$$ LANGUAGE plpgsql;
+
 /*
 .########...#######..##.......####..######..####.########..######.
 .##.....##.##.....##.##........##..##....##..##..##.......##....##

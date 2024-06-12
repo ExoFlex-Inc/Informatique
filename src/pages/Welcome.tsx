@@ -46,6 +46,17 @@ export function Welcome() {
     retrieveUserEmail();
   }, [])
 
+  useEffect(() => {
+    const retrieveUserEmail = async () => {
+      const userResponse = await supaClient.auth.getUser();
+      if(userResponse?.data?.user?.email) {
+        setEmail(userResponse.data.user.email);
+      }
+    }
+  
+    retrieveUserEmail();
+  }, [])
+
   const invalidUserName = useMemo(
     () => validateInput(userName, "Name"),
     [userName],
