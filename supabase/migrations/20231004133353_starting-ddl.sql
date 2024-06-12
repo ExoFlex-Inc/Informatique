@@ -159,6 +159,36 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION push_users_list(user_id UUID, new_list JSONB)
+RETURNS JSONB AS $$
+DECLARE
+  updated_list JSONB;
+BEGIN
+  IF EXISTS (SELECT 1 FROM user_profiles WHERE user_profiles.user_id = push_users_list.user_id) THEN
+    UPDATE user_profiles
+    SET list_of_patient = new_list
+    WHERE user_profiles.user_id = push_users_list.user_id
+    RETURNING new_list INTO updated_list;
+  ELSE
+    INSERT INTO user_profiles(user_id, list_of_patient)
+    VALUES (push_users_list.user_id, new_list)
+    RETURNING new_list INTO updated_list;
+  END IF;
+
+  RETURN updated_list;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION assign_admin_to_client(admin_id UUID, client_id UUID)
+RETURNS void AS $$
+BEGIN
+  UPDATE user_profiles
+  SET admin_id = assign_admin_to_client.admin_id
+  WHERE user_id = assign_admin_to_client.client_id
+  AND permissions = 'client';
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE FUNCTION get_planning(search_id UUID)
 RETURNS TABLE (plan_content jsonb) AS $$
 BEGIN
@@ -173,6 +203,31 @@ $$ LANGUAGE plpgsql;
 
 CREATE FUNCTION get_users_list(search_id UUID)
 RETURNS TABLE (list_of_patient jsonb) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        c.user_id, 
+        c.username, 
+        c.lastname, 
+        c.phone_number, 
+        c.email
+    FROM 
+        user_profiles c
+    JOIN 
+        user_profiles a ON c.admin_id = a.user_id
+    WHERE 
+        a.user_id = get_clients_for_admin.admin_id AND a.permissions in ('dev','admin');
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_clients_for_admin(admin_id UUID)
+RETURNS TABLE (
+    user_id UUID,
+    username TEXT,
+    lastname TEXT,
+    phone_number TEXT,
+    email TEXT
+) AS $$
 BEGIN
     RETURN QUERY
     SELECT 
