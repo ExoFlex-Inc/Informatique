@@ -12,7 +12,7 @@ interface MotorControlWidgetProps {
 
 const MotorControlWidget: React.FC<MotorControlWidgetProps> = (props) => {
   return (
-    <div className="w-2/6 h-full rounded-[20px] bg-white mr-8 flex flex-col justify-between">
+    <div className="w-2/6 h-full rounded-[20px] bg-white ml-8 mr-8 flex flex-col justify-between">
       <div className="w-full h-fit bg-blue-600 rounded-[20px] justify-center content-center flex flex-col">
         <p className="justify-center flex text-xl">{props.title}</p>
         <div className="justify-center flex">{props.icon}</div>

@@ -54,6 +54,16 @@ CREATE TABLE encoder (
   created_at DATE DEFAULT CURRENT_DATE
 );
 
+CREATE TABLE exercise_data (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+  user_id uuid REFERENCES user_profiles(user_id),
+  date timestamptz NOT NULL,
+  force_avg float,
+  force_max float,
+  angle_max float,
+  repetitions_done int
+);
+
 /*
 .########.##.....##.##....##..######..########.####..#######..##....##..######.
 .##.......##.....##.###...##.##....##....##.....##..##.....##.###...##.##....##
@@ -242,6 +252,8 @@ alter table user_profiles enable row level security;
 alter table machine enable row level security;
 alter table encoder enable row level security;
 alter table plans enable row level security;
+
+alter table exercise_data enable row level security;
 -- alter table admin_client_relationships enable row level security;
 
 CREATE POLICY "all can see" ON "public"."user_profiles"
@@ -259,6 +271,22 @@ AS PERMISSIVE FOR UPDATE
 TO public
 USING (auth.uid()=user_id)
 WITH CHECK (auth.uid()=user_id);
+
+CREATE POLICY "all can see" ON "public"."exercise_data"
+AS PERMISSIVE FOR SELECT
+TO public
+USING (true);
+
+CREATE POLICY "users can insert exercise data" ON "public"."exercise_data"
+AS PERMISSIVE FOR INSERT
+TO public
+WITH CHECK (auth.uid() IS NOT NULL);
+
+CREATE POLICY "owners can update exercise data" ON "public"."exercise_data"
+AS PERMISSIVE FOR UPDATE
+TO public
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "all can see" ON "public"."machine"
 AS PERMISSIVE FOR SELECT
@@ -314,3 +342,11 @@ WITH CHECK (
         WHERE user_id = auth.uid()
     ) IN ('dev', 'admin') AND permissions = 'client'
 );
+
+CREATE POLICY "Allow logged-in users to insert their own exercise data" ON exercise_data
+  FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Allow logged-in users to select their own exercise data" ON exercise_data
+  FOR SELECT
+  USING (auth.uid() = user_id);
