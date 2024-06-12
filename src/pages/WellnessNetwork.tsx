@@ -3,6 +3,7 @@ import PatientList from "../components/PatientsList.tsx";
 import PatientSearchBar from "../components/PatientSearchBar.tsx";
 import { useEffect, useState } from "react";
 import { supaClient } from "../hooks/supa-client.ts";
+import { Patient } from "./Activity.tsx";
 
 export async function networkInit() {
 
@@ -34,6 +35,7 @@ export default function WellnessNetwork() {
     const [listOfPatients, setListOfPatients] = useState<any[]>([]);
     const [visibleListOfPatients, setVisibleListOfPatients] = useState<any[]>([]);
     const [adminId, setAdminId] = useState<undefined | string>(undefined);
+    const [selectedPatient, setSelectedPatient] = useState<Patient>();
 
     async function getAdminId () {
         try {
@@ -62,10 +64,18 @@ export default function WellnessNetwork() {
         setVisibleListOfPatients(listOfPatients);
     },[listOfPatients])
 
+    useEffect(() => {
+        if (selectedPatient) {
+            setVisibleListOfPatients([selectedPatient]);
+        } else {
+            setVisibleListOfPatients(listOfPatients);
+        }
+    },[selectedPatient])
+
     return (
         <div>
             <div className="flex items-center justify-between relative">
-                <PatientSearchBar listOfPatients={listOfPatients} setVisibleListOfPatients={setVisibleListOfPatients} />
+                <PatientSearchBar sx={{width: 500}} setVisibleListOfPatients={setVisibleListOfPatients} />
                 <AddPatientButton adminId={adminId} setListOfPatients={setListOfPatients} listOfPatients={listOfPatients} />
             </div>
             <PatientList setListOfPatients={setListOfPatients} visibleListOfPatients={visibleListOfPatients} />
