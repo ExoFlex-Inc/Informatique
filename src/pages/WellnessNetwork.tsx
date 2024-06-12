@@ -3,6 +3,7 @@ import PatientList from "../components/PatientsList.tsx";
 import PatientSearchBar from "../components/PatientSearchBar.tsx";
 import { useEffect, useState } from "react";
 import { supaClient } from "../hooks/supa-client.ts";
+import { Patient } from "./Activity.tsx";
 
 export async function networkInit() {
 
