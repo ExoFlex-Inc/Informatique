@@ -29,7 +29,7 @@ const GraphFilters: React.FC<GraphFiltersProps> = ({setGraphType, setIsGraphFilt
     }, [dropdownRef]);
 
     return (
-        <div ref={dropdownRef} className="flex w-min mt-2">
+        <div ref={dropdownRef} className="flex w-min mt-2 absolute">
             <List className="bg-gray-600 rounded-md ml-4">
                 <ListItem disablePadding>
                     <ListItemButton onClick={() => changeGraphType("Rigidity")}>
@@ -49,11 +49,6 @@ const GraphFilters: React.FC<GraphFiltersProps> = ({setGraphType, setIsGraphFilt
                 <ListItem disablePadding>
                     <ListItemButton onClick={() => changeGraphType("Total seance time")}>
                         <ListItemText className="w-max" primary="Total seance time Graph"></ListItemText>
-                    </ListItemButton>
-                </ListItem>
-                <ListItem disablePadding>
-                    <ListItemButton onClick={() => changeGraphType("Tendacy")}>
-                        <ListItemText className="w-max" primary="Tendacy and evolution Graph"></ListItemText>
                     </ListItemButton>
                 </ListItem>
                 <ListItem disablePadding>

@@ -61,7 +61,13 @@ CREATE TABLE exercise_data (
   force_avg float,
   force_max float,
   angle_max float,
-  repetitions_done int
+  angle_target float,
+  repetitions_done int,
+  repetitions_success_rate float,
+  predicted_total_time float,
+  actual_total_time float,
+  rated_pain int
+
 );
 
 /*
@@ -158,25 +164,6 @@ BEGIN
     SELECT p.plan_content
     FROM plans p
     WHERE p.user_id = search_id;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE FUNCTION get_users_list(search_id UUID)
-RETURNS TABLE (list_of_patient jsonb) AS $$
-BEGIN
-    RETURN QUERY
-    SELECT 
-        c.user_id, 
-        c.username, 
-        c.lastname, 
-        c.phone_number, 
-        c.email
-    FROM 
-        user_profiles c
-    JOIN 
-        user_profiles a ON c.admin_id = a.user_id
-    WHERE 
-        a.user_id = get_clients_for_admin.admin_id AND a.permissions in ('dev','admin');
 END;
 $$ LANGUAGE plpgsql;
 

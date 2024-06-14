@@ -7,62 +7,25 @@ import Chart from "chart.js/auto";
 import { CategoryScale } from "chart.js";
 import StreamingPlugin from "chartjs-plugin-streaming";
 import { Socket } from "socket.io-client";
+import { _DeepPartialObject } from "chart.js/types/utils";
+import { ChartData, ChartOptions as ChartJsOptions } from "chart.js";
 
 Chart.register(CategoryScale);
 Chart.register(StreamingPlugin);
 
 interface LineChartProps {
-  chartData: {
-    datasets: {
-      label: string;
-      borderColor: string;
-      data: number[];
-    }[];
-  };
+  chartData: ChartData<'line'>;
   mode?: string;
   type: string;
-  socket: Socket | null;
+  socket?: Socket | null;
+  title?: string;
 }
-
-interface RealtimeOptions {
-  refresh: number;
-  duration: number;
-  delay: number;
-  pause: boolean;
-  onRefresh: (chart: Chart) => void;
-}
-
-interface XAxisOptions {
-  type: string;
-  ticks: {
-    display: boolean;
-  };
-  title?: {
-    display: boolean;
-    text: string;
-  };
-  realtime: RealtimeOptions;
-}
-
-interface YAxisOptions {
-  min: number;
-  max: number;
-}
-
-interface ScalesOptions {
-  x: XAxisOptions;
-  y: YAxisOptions;
-}
-
-interface ChartOptions {
-  scales: ScalesOptions;
-}
-
 interface Dataset {
   data: {
     x: number;
     y: number | undefined;
   }[];
+  socket?: Socket | null;
 }
 
 const LineChart: React.FC<LineChartProps> = ({
@@ -70,10 +33,12 @@ const LineChart: React.FC<LineChartProps> = ({
   mode,
   socket,
   type,
+  title,
 }) => {
   const [graphPause, setGraphPause] = useState(false);
   const [graphDataIsPosition, setGraphDataIsPosition] = useState(true);
-  const [chartOptions, setChartOptions] = useState<ChartOptions>(() => {
+
+  const [chartOptions, setChartOptions] = useState<_DeepPartialObject<ChartJsOptions<'line'>>>(() => {
     if (type === "realtime") {
       return {
         scales: {
@@ -87,9 +52,9 @@ const LineChart: React.FC<LineChartProps> = ({
               delay: 20,
               duration: 2000,
               pause: false,
-              onRefresh: (chart) => {
+              onRefresh: (chart: any) => {
                 chart.data.datasets.forEach(
-                  (dataset: Dataset, index: number) => {
+                  (dataset: Dataset) => {
                     dataset.data.push({
                       x: Date.now(),
                       y: 0,
@@ -115,6 +80,7 @@ const LineChart: React.FC<LineChartProps> = ({
             border: {
               color: "red",
             },
+
           },
           y: {
             min: -65,
@@ -122,26 +88,49 @@ const LineChart: React.FC<LineChartProps> = ({
           },
         },
       };
+    }
+    else if (type === "activity") {
+      return {
+        scales: {
+
+          x: {
+            title: {
+              text: "Date",
+              display: true
+            },
+            type: "time",
+            
+            time: {
+              unit: 'day',
+            }
+          },
+          y: {
+            title: {
+              text: title,
+              display: true
+            },
+          }
+        },
+      };
     } else {
       return {};
     }
-  });
+});
+
 
   useEffect(() => {
-    if (type === "realtime") {
-      if (!socket) return;
-
+    if (type === "realtime" && socket) {
       socket.on("stm32Data", (message) => {
-        setChartOptions((prevOptions) => ({
+        setChartOptions((prevOptions: any) => ({
           ...prevOptions,
           scales: {
             x: {
-              ...prevOptions.scales.x,
+              ...prevOptions.scales?.x,
               realtime: {
-                ...prevOptions.scales.x.realtime,
-                onRefresh: (chart) => {
+                ...prevOptions?.scales?.x?.realtime,
+                onRefresh: (chart: any) => {
                   chart.data.datasets.forEach(
-                    (dataset: Dataset, index: number) => {
+                    (dataset: { data: { x: number; y: number | undefined }[] }, index: number) => {
                       dataset.data.push({
                         x: Date.now(),
                         y: graphDataIsPosition
@@ -168,18 +157,36 @@ const LineChart: React.FC<LineChartProps> = ({
   }, [socket?.connected, graphDataIsPosition]);
 
   useEffect(() => {
-    setChartOptions((prevOptions) => ({
+    setChartOptions((prevOptions: any) => ({
       ...prevOptions,
       scales: {
         x: {
-          ...prevOptions.scales.x,
+          ...prevOptions.scales?.x,
+        },
+        y: {
+          ...prevOptions.scales?.y,
+          title: {
+            ...prevOptions.scales?.y.title,
+            text: title,
+          }
+        }
+      }
+    }))
+  }, [title])
+
+  useEffect(() => {
+    setChartOptions((prevOptions: any) => ({
+      ...prevOptions,
+      scales: {
+        x: {
+          ...prevOptions.scales?.x,
           realtime: {
-            ...prevOptions.scales.x.realtime,
+            ...prevOptions?.scales?.x?.realtime,
             pause: graphPause,
           },
         },
         y: {
-          ...prevOptions.scales.y,
+          ...prevOptions.scales?.y,
         },
       },
     }));
@@ -191,10 +198,7 @@ const LineChart: React.FC<LineChartProps> = ({
         {type === "realtime" && (
           <div className="flex">
             <PlayButton setGraphPause={setGraphPause} graphPause={graphPause} />
-            <PauseButton
-              setGraphPause={setGraphPause}
-              graphPause={graphPause}
-            />
+            <PauseButton setGraphPause={setGraphPause} graphPause={graphPause} />
           </div>
         )}
         {mode === "Manual" && (
@@ -222,10 +226,11 @@ const LineChart: React.FC<LineChartProps> = ({
           </div>
         )}
       </div>
-      <div className="bg-white">
+      <div className="bg-white rounded-lg">
         <Line data={chartData} options={chartOptions} />
       </div>
     </div>
   );
 };
+
 export default LineChart;
