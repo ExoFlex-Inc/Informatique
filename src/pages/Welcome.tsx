@@ -38,24 +38,24 @@ export function Welcome() {
   useEffect(() => {
     const retrieveUserEmail = async () => {
       const userResponse = await supaClient.auth.getUser();
-      if(userResponse?.data?.user?.email) {
+      if (userResponse?.data?.user?.email) {
         setEmail(userResponse.data.user.email);
       }
-    }
-  
+    };
+
     retrieveUserEmail();
-  }, [])
+  }, []);
 
   useEffect(() => {
     const retrieveUserEmail = async () => {
       const userResponse = await supaClient.auth.getUser();
-      if(userResponse?.data?.user?.email) {
+      if (userResponse?.data?.user?.email) {
         setEmail(userResponse.data.user.email);
       }
-    }
-  
+    };
+
     retrieveUserEmail();
-  }, [])
+  }, []);
 
   const invalidUserName = useMemo(
     () => validateInput(userName, "Name"),
@@ -99,7 +99,7 @@ export function Welcome() {
                     speciality: speciality,
                     phone_number: phoneNumber,
                     email: email,
-                    permissions: 'client'
+                    permissions: "client",
                   },
                 ])
                 .then(({ error }) => {

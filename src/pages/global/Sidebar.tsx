@@ -19,9 +19,9 @@ import TvIcon from "@mui/icons-material/Tv";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import FeedOutlinedIcon from '@mui/icons-material/FeedOutlined';
+import FeedOutlinedIcon from "@mui/icons-material/FeedOutlined";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
-import GroupIcon from '@mui/icons-material/Group';
+import GroupIcon from "@mui/icons-material/Group";
 import { supaClient } from "../../hooks/supa-client.ts";
 
 interface ProSidebarProps {
@@ -184,7 +184,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                 setSelected={setSelected}
               />
             </SubMenu> */}
-            {(props.permissions === 'dev' || props.permissions === 'admin') && (
+            {(props.permissions === "dev" || props.permissions === "admin") && (
               <Item
                 title="Planning"
                 to="/planning"
@@ -193,7 +193,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                 setSelected={setSelected}
               />
             )}
-            {(props.permissions === 'dev' || props.permissions === 'admin') && (
+            {(props.permissions === "dev" || props.permissions === "admin") && (
               <Item
                 title="Wellness Network"
                 to="/wellness_network"
@@ -203,7 +203,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
               />
             )}
 
-            {(props.permissions === 'dev' || props.permissions === 'admin') && (
+            {(props.permissions === "dev" || props.permissions === "admin") && (
               <Item
                 title="Activity"
                 to="/activity"
@@ -212,7 +212,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                 setSelected={setSelected}
               />
             )}
-            
+
             <SubMenu label="Control Page" icon={<TvIcon />}>
               <Item
                 title="HMI"
@@ -221,7 +221,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                 selected={selected}
                 setSelected={setSelected}
               />
-              {props.permissions == 'dev' && (
+              {props.permissions == "dev" && (
                 <Item
                   title="Manual"
                   to="/manual"

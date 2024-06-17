@@ -2027,7 +2027,7 @@ svg {
 
 .rs-picker-daterange-header,
 .rs-calendar-table-cell-content {
-    color: black; /* Set the text color to black */
+  color: black; /* Set the text color to black */
 }
 
 @media (min-width: 768px) {

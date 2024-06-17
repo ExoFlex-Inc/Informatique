@@ -19,7 +19,7 @@ import Activity from "./pages/Activity.tsx";
 import Manual from "./pages/Manual.tsx";
 import Settings from "./pages/Settings.tsx";
 import Planning from "./pages/Planning.tsx";
-import WellnessNetwork from "./pages/WellnessNetwork.tsx"
+import WellnessNetwork from "./pages/WellnessNetwork.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 
 import TopBar from "./pages/global/TopBar.tsx";
@@ -30,27 +30,48 @@ import { SupabaseUserInfo, useSession } from "./hooks/use-session.ts";
 export const UserContext = createContext<SupabaseUserInfo>({
   session: null,
   profile: null,
-}); 
+});
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
-      <Route  path="/dashboard" element={<Dashboard />} />
-      <Route path="/activity" element={
-        <ProtectedRoute component={Activity} requiredPermission={['dev', 'admin']} />
-      } />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route
+        path="/activity"
+        element={
+          <ProtectedRoute
+            component={Activity}
+            requiredPermission={["dev", "admin"]}
+          />
+        }
+      />
       <Route path="/welcome" element={<Welcome />} loader={welcomeLoader} />
-      <Route path="/manual" element={
-        <ProtectedRoute component={Manual} requiredPermission={['dev']} />
-      } />
+      <Route
+        path="/manual"
+        element={
+          <ProtectedRoute component={Manual} requiredPermission={["dev"]} />
+        }
+      />
       <Route path="/hmi" element={<HMI />} />
-      <Route path="/planning" element={
-        <ProtectedRoute component={Planning} requiredPermission={['dev', 'admin']} />
-      } />
+      <Route
+        path="/planning"
+        element={
+          <ProtectedRoute
+            component={Planning}
+            requiredPermission={["dev", "admin"]}
+          />
+        }
+      />
       <Route path="/settings" element={<Settings />} />
-      <Route path="/wellness_network" element={
-        <ProtectedRoute component={WellnessNetwork} requiredPermission={['dev', 'admin']} />
-      } />
+      <Route
+        path="/wellness_network"
+        element={
+          <ProtectedRoute
+            component={WellnessNetwork}
+            requiredPermission={["dev", "admin"]}
+          />
+        }
+      />
     </Route>,
   ),
 );
