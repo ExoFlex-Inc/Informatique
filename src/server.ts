@@ -5,7 +5,7 @@ import { createServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
 import { supaClient } from "./hooks/supa-client.ts";
 import dotenv from "dotenv";
-import { checkPermission } from './middleware/checkPermission.tsx'
+import { checkPermission } from "./middleware/checkPermission.tsx";
 
 dotenv.config();
 
@@ -182,111 +182,130 @@ async function checkSession(_: Request, res: Response, next: NextFunction) {
   }
 }
 
-app.post("/push-plan-supabase", checkSession, checkPermission(['admin', 'dev']), async (req, res) => {
-  try {
-    const { plan } = req.body;
-    const {
-      data: { user },
-    } = await supaClient.auth.getUser();
-    const { data, error } = await supaClient.rpc("push_planning", {
-      user_id: user?.id,
-      new_plan: plan,
-    });
+app.post(
+  "/push-plan-supabase",
+  checkSession,
+  checkPermission(["admin", "dev"]),
+  async (req, res) => {
+    try {
+      const { plan } = req.body;
+      const {
+        data: { user },
+      } = await supaClient.auth.getUser();
+      const { data, error } = await supaClient.rpc("push_planning", {
+        user_id: user?.id,
+        new_plan: plan,
+      });
 
-    if (error) {
-      console.error(`Error sending plan:`, error);
+      if (error) {
+        console.error(`Error sending plan:`, error);
+        res.status(500).send("Error sending plan");
+        return;
+      } else {
+        console.log(`Success sending plan:`, data);
+        res.status(200).send("Success sending plan");
+      }
+    } catch (err) {
+      console.error("Error sending plan:", err);
       res.status(500).send("Error sending plan");
-      return;
-    } else {
-      console.log(`Success sending plan:`, data);
-      res.status(200).send("Success sending plan");
     }
-  } catch (err) {
-    console.error("Error sending plan:", err);
-    res.status(500).send("Error sending plan");
-  }
-});
+  },
+);
 
-app.post("/assign_admin_to_client", checkSession, checkPermission(['admin', 'dev']), async (req, res) => {
-  try {
-    const { admin_id, client_id } = req.body;
+app.post(
+  "/assign_admin_to_client",
+  checkSession,
+  checkPermission(["admin", "dev"]),
+  async (req, res) => {
+    try {
+      const { admin_id, client_id } = req.body;
 
-    const { data, error } = await supaClient.rpc("assign_admin_to_client", {
-      admin_id,
-      client_id,
-    });
+      const { data, error } = await supaClient.rpc("assign_admin_to_client", {
+        admin_id,
+        client_id,
+      });
 
-    if (error) {
-      console.error(`Error at creating relationship:`, error);
+      if (error) {
+        console.error(`Error at creating relationship:`, error);
+        res.status(500).json("Error creating relationship");
+        return;
+      } else {
+        console.log(`Success creating relationship:`, data);
+        res.status(200).json("Success creating relationship");
+      }
+    } catch (err) {
+      console.error("Error creating relationship:", err);
       res.status(500).json("Error creating relationship");
-      return;
-    } else {
-      console.log(`Success creating relationship:`, data);
-      res.status(200).json("Success creating relationship");
     }
-  } catch (err) {
-    console.error("Error creating relationship:", err);
-    res.status(500).json("Error creating relationship");
-  }
-})
+  },
+);
 
-app.get("/get-plan", checkSession, checkPermission(['admin', 'dev']), async (_, res) => {
-  try {
-    const {
-      data: { user },
-    } = await supaClient.auth.getUser();
+app.get(
+  "/get-plan",
+  checkSession,
+  checkPermission(["admin", "dev"]),
+  async (_, res) => {
+    try {
+      const {
+        data: { user },
+      } = await supaClient.auth.getUser();
 
-    const { data, error } = await supaClient.rpc("get_planning", {
-      search_id: user?.id,
-    });
+      const { data, error } = await supaClient.rpc("get_planning", {
+        search_id: user?.id,
+      });
 
-    if (error) {
-      console.error(`Error getting current plan:`, error);
+      if (error) {
+        console.error(`Error getting current plan:`, error);
+        res.status(500).json({ error: "Error getting current plan" });
+      } else {
+        console.log(`Success getting current plan:`, data);
+        res.status(200).json(data);
+      }
+    } catch (err) {
+      console.error("Error getting current plan:", err);
       res.status(500).json({ error: "Error getting current plan" });
-    } else {
-      console.log(`Success getting current plan:`, data);
+    }
+  },
+);
+
+app.get(
+  "/get_clients_for_admin",
+  checkSession,
+  checkPermission(["admin", "dev"]),
+  async (_, res) => {
+    try {
+      const {
+        data: { user },
+        error: authError,
+      } = await supaClient.auth.getUser();
+
+      if (authError) {
+        console.error("Error getting user:", authError);
+        return res.status(500).json({ error: "Error getting user" });
+      }
+
+      if (!user?.id) {
+        console.error("User is not authenticated or user ID is missing");
+        return res.status(401).json({ error: "User is not authenticated" });
+      }
+
+      const { data, error } = await supaClient.rpc("get_clients_for_admin", {
+        admin_id: user.id,
+      });
+
+      if (error) {
+        console.error(`Error getting clients:`, error);
+        res.status(500).json({ error: "Error getting clients" });
+      }
+
+      console.log(`Success getting clients:`, data);
       res.status(200).json(data);
-    }
-  } catch (err) {
-    console.error("Error getting current plan:", err);
-    res.status(500).json({ error: "Error getting current plan" });
-  }
-});
-
-app.get("/get_clients_for_admin", checkSession, checkPermission(['admin', 'dev']), async (_, res) => {
-  try {
-    const {
-      data: {user},
-      error: authError,
-    } = await supaClient.auth.getUser();
-
-    if (authError) {
-      console.error("Error getting user:", authError);
-      return res.status(500).json({ error: "Error getting user" });
-    }
-
-    if (!user?.id) {
-      console.error("User is not authenticated or user ID is missing");
-      return res.status(401).json({ error: "User is not authenticated" });
-    }
-
-    const {data, error} = await supaClient.rpc("get_clients_for_admin", {
-      admin_id: user.id,
-    });
-
-    if (error) {
-      console.error(`Error getting clients:`, error);
+    } catch (err) {
+      console.error("Error getting clients:", err);
       res.status(500).json({ error: "Error getting clients" });
     }
-
-    console.log(`Success getting clients:`, data);
-    res.status(200).json(data);
-
-  } catch (err) {
-    console.error("Error getting clients:", err);
-    res.status(500).json({ error: "Error getting clients" });
-  }
-})
+  },
+);
 
 /*
 .##........#######...######.....###....##...........######..########.########..##.....##.########.########.

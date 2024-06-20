@@ -14,7 +14,7 @@ Chart.register(CategoryScale);
 Chart.register(StreamingPlugin);
 
 interface LineChartProps {
-  chartData: ChartData<'line'>;
+  chartData: ChartData<"line">;
   mode?: string;
   type: string;
   socket?: Socket | null;
@@ -42,7 +42,9 @@ const LineChart: React.FC<LineChartProps> = ({
 
   const chartRef = useRef<Chart<'line'> | null>(null);
 
-  const [chartOptions, setChartOptions] = useState<_DeepPartialObject<ChartJsOptions<'line'>>>(() => {
+  const [chartOptions, setChartOptions] = useState<
+    _DeepPartialObject<ChartJsOptions<"line">>
+  >(() => {
     if (type === "realtime") {
       return {
         scales: {
@@ -57,14 +59,12 @@ const LineChart: React.FC<LineChartProps> = ({
               duration: 2000,
               pause: false,
               onRefresh: (chart: any) => {
-                chart.data.datasets.forEach(
-                  (dataset: Dataset) => {
-                    dataset.data.push({
-                      x: Date.now(),
-                      y: 0,
-                    });
-                  },
-                );
+                chart.data.datasets.forEach((dataset: Dataset) => {
+                  dataset.data.push({
+                    x: Date.now(),
+                    y: 0,
+                  });
+                });
               },
             },
           },
@@ -84,7 +84,6 @@ const LineChart: React.FC<LineChartProps> = ({
             border: {
               color: "red",
             },
-
           },
           y: {
             min: -65,
@@ -92,28 +91,26 @@ const LineChart: React.FC<LineChartProps> = ({
           },
         },
       };
-    }
-    else if (type === "activity") {
+    } else if (type === "activity") {
       return {
         scales: {
-
           x: {
             title: {
               text: "Date",
-              display: true
+              display: true,
             },
             type: "time",
-            
+
             time: {
-              unit: 'day',
-            }
+              unit: "day",
+            },
           },
           y: {
             title: {
               text: title,
-              display: true
+              display: true,
             },
-          }
+          },
         },
       };
     } else {
@@ -133,7 +130,10 @@ const LineChart: React.FC<LineChartProps> = ({
                 ...prevOptions?.scales?.x?.realtime,
                 onRefresh: (chart: any) => {
                   chart.data.datasets.forEach(
-                    (dataset: { data: { x: number; y: number | undefined }[] }, index: number) => {
+                    (
+                      dataset: { data: { x: number; y: number | undefined }[] },
+                      index: number,
+                    ) => {
                       dataset.data.push({
                         x: Date.now(),
                         y: graphDataIsPosition
@@ -209,7 +209,10 @@ const LineChart: React.FC<LineChartProps> = ({
         {type === "realtime" && (
           <div className="flex">
             <PlayButton setGraphPause={setGraphPause} graphPause={graphPause} />
-            <PauseButton setGraphPause={setGraphPause} graphPause={graphPause} />
+            <PauseButton
+              setGraphPause={setGraphPause}
+              graphPause={graphPause}
+            />
           </div>
         )}
         {mode === "Manual" && (
