@@ -211,7 +211,7 @@ export default function Activity() {
           <div className="mt-4 basis-full">
             <LineChart type="activity" chartData={dataset2} title={title2}/>
           </div>
-        )}
+        }
       </div>
       {selectedPatient?.length !== 0 && date &&
         <Button className="!bg-blue-600 absolute right-4 bottom-4" variant="contained">
