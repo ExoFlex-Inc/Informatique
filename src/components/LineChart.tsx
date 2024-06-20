@@ -40,7 +40,7 @@ const LineChart: React.FC<LineChartProps> = ({
   const [graphPause, setGraphPause] = useState(false);
   const [graphDataIsPosition, setGraphDataIsPosition] = useState(true);
 
-  const chartRef = useRef<Chart<'line'> | null>(null);
+  const chartRef = useRef<Chart<"line"> | null>(null);
 
   const [chartOptions, setChartOptions] = useState<
     _DeepPartialObject<ChartJsOptions<"line">>
@@ -116,7 +116,7 @@ const LineChart: React.FC<LineChartProps> = ({
     } else {
       return {};
     }
-});
+  });
 
   useEffect(() => {
     if (type === "realtime" && socket) {
@@ -171,11 +171,11 @@ const LineChart: React.FC<LineChartProps> = ({
           title: {
             ...prevOptions.scales?.y.title,
             text: title,
-          }
-        }
-      }
-    }))
-  }, [title])
+          },
+        },
+      },
+    }));
+  }, [title]);
 
   useEffect(() => {
     if (chartRef.current) {
@@ -183,7 +183,7 @@ const LineChart: React.FC<LineChartProps> = ({
       const chartImage = chartInstance.toBase64Image();
       setChartImage?.(chartImage);
     }
-  }, [chartData, chartOptions, setChartImage])
+  }, [chartData, chartOptions, setChartImage]);
 
   useEffect(() => {
     setChartOptions((prevOptions: any) => ({

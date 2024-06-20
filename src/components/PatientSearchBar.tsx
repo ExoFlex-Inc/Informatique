@@ -2,9 +2,9 @@ import { TextField, InputAdornment, Autocomplete } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useEffect, useState } from "react";
 interface PatientSearchBarProps {
-    sx?: object;
-    setSelectedPatient?: React.Dispatch<React.SetStateAction<any[]>>;
-    setVisibleListOfPatients?: React.Dispatch<React.SetStateAction<any[]>>;
+  sx?: object;
+  setSelectedPatient?: React.Dispatch<React.SetStateAction<any[]>>;
+  setVisibleListOfPatients?: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
 export async function SearchBarInit() {

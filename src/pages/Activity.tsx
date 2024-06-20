@@ -1,10 +1,10 @@
 import PatientSearchBar from "../components/PatientSearchBar.tsx";
 import { useEffect, useState } from "react";
 import LineChart from "../components/LineChart.tsx";
-import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import GraphFilters from "../components/GraphFilters.tsx";
 import { DateRangePicker } from "rsuite";
-import 'rsuite/DateRangePicker/styles/index.css';
+import "rsuite/DateRangePicker/styles/index.css";
 import { DateRange } from "rsuite/esm/DateRangePicker/types.js";
 import { supaClient } from "../hooks/supa-client.ts";
 import { ChartData } from "chart.js";
@@ -13,18 +13,18 @@ import { PDFDownloadLink } from "@react-pdf/renderer";
 import Report from "../components/Report.tsx";
 
 export interface dataStructure {
-    angle_max: number;
-    angle_target: number;
-    date: Date;
-    force_avg: number;
-    force_max: number;
-    id: string;
-    repetitions_done: number;
-    user_id: string;
-    repetitions_success_rate: number;
-    predicted_total_time: number;
-    actual_total_time: number;
-    rated_pain: number;
+  angle_max: number;
+  angle_target: number;
+  date: Date;
+  force_avg: number;
+  force_max: number;
+  id: string;
+  repetitions_done: number;
+  user_id: string;
+  repetitions_success_rate: number;
+  predicted_total_time: number;
+  actual_total_time: number;
+  rated_pain: number;
 }
 
 export default function Activity() {
@@ -33,11 +33,15 @@ export default function Activity() {
   const [graphType, setGraphType] = useState("");
   const [date, setDate] = useState<DateRange | null>();
   const [data, setData] = useState<dataStructure[]>([]);
-  const [dataset1, setDataset1] = useState<ChartData<'line'> | undefined>(undefined);
-  const [dataset2, setDataset2] = useState<ChartData<'line'> | undefined>(undefined);
-  const [chartImage1, setChartImage1] = useState<string>('');
-  const [title1, setTitle1] = useState('');
-  const [title2, setTitle2] = useState('');
+  const [dataset1, setDataset1] = useState<ChartData<"line"> | undefined>(
+    undefined,
+  );
+  const [dataset2, setDataset2] = useState<ChartData<"line"> | undefined>(
+    undefined,
+  );
+  const [chartImage1, setChartImage1] = useState<string>("");
+  const [title1, setTitle1] = useState("");
+  const [title2, setTitle2] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -74,17 +78,15 @@ export default function Activity() {
         ...args: number[[]]
       ) {
         const mappedArgs = args.map((arg: number[], index: number) => {
-          return (
-            {
-              animation: false,
-              label: labels[index],
-              data: arg,
-              fill: false,
-              borderColor: colors[index],
-              tension: 0.1 
-            }
-          )
-        })
+          return {
+            animation: false,
+            label: labels[index],
+            data: arg,
+            fill: false,
+            borderColor: colors[index],
+            tension: 0.1,
+          };
+        });
 
         if (graphType === "Number of repetitions") {
           setDataset1({
@@ -190,7 +192,10 @@ export default function Activity() {
             <FilterAltIcon />
           </button>
           <div>
-            <DateRangePicker className="ml-2" onChange={(value: any) => setDate(value)}/>
+            <DateRangePicker
+              className="ml-2"
+              onChange={(value: any) => setDate(value)}
+            />
           </div>
         </div>
         <label className="text-white text-center">{graphType}</label>
@@ -202,25 +207,42 @@ export default function Activity() {
         />
       )}
       <div className="flex justify-center">
-        {dataset1 && selectedPatient?.length !== 0 && date && graphType &&
+        {dataset1 && selectedPatient?.length !== 0 && date && graphType && (
           <div className="mt-4 basis-full">
-            <LineChart type="activity" setChartImage={setChartImage1} chartData={dataset1} title={title1}/>
+            <LineChart
+              type="activity"
+              setChartImage={setChartImage1}
+              chartData={dataset1}
+              title={title1}
+            />
           </div>
-        }
-        {dataset2 && selectedPatient?.length !== 0 && date && graphType &&
+        )}
+        {dataset2 && selectedPatient?.length !== 0 && date && graphType && (
           <div className="mt-4 basis-full">
-            <LineChart type="activity" chartData={dataset2} title={title2}/>
+            <LineChart type="activity" chartData={dataset2} title={title2} />
           </div>
-        }
+        )}
       </div>
-      {selectedPatient?.length !== 0 && date &&
-        <Button className="!bg-blue-600 absolute right-4 bottom-4" variant="contained">
-          <PDFDownloadLink document={<Report selectedPatient={selectedPatient} chartImage1={chartImage1} data={data} date={date} />}
-            fileName={`report_${selectedPatient?.[0].email}_${Date.now()}.pdf`} >
+      {selectedPatient?.length !== 0 && date && (
+        <Button
+          className="!bg-blue-600 absolute right-4 bottom-4"
+          variant="contained"
+        >
+          <PDFDownloadLink
+            document={
+              <Report
+                selectedPatient={selectedPatient}
+                chartImage1={chartImage1}
+                data={data}
+                date={date}
+              />
+            }
+            fileName={`report_${selectedPatient?.[0].email}_${Date.now()}.pdf`}
+          >
             Download Report
           </PDFDownloadLink>
         </Button>
-      }
+      )}
     </div>
   );
 }
