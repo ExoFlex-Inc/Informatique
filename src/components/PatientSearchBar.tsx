@@ -3,7 +3,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { useEffect, useState } from "react";
 interface PatientSearchBarProps {
     sx?: object;
-    setSelectedPatient?: React.Dispatch<React.SetStateAction<any[] | undefined>>;
+    setSelectedPatient?: React.Dispatch<React.SetStateAction<any[]>>;
     setVisibleListOfPatients?: React.Dispatch<React.SetStateAction<any[]>>;
 }
 

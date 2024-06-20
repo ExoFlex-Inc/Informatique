@@ -1,17 +1,18 @@
-import ChartsHeader from "../components/ChartsHeader.tsx";
 import PatientSearchBar from "../components/PatientSearchBar.tsx";
 import { useEffect, useState } from "react";
 import LineChart from "../components/LineChart.tsx";
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import GraphFilters from "../components/GraphFilters.tsx";
-import { DateRangePicker, DatePicker } from "rsuite";
+import { DateRangePicker } from "rsuite";
 import 'rsuite/DateRangePicker/styles/index.css';
 import { DateRange } from "rsuite/esm/DateRangePicker/types.js";
 import { supaClient } from "../hooks/supa-client.ts";
 import { ChartData } from "chart.js";
+import { Button } from "@mui/material";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import Report from "../components/Report.tsx";
 
-interface dataStructure {
+export interface dataStructure {
     angle_max: number;
     angle_target: number;
     date: Date;
@@ -27,13 +28,14 @@ interface dataStructure {
 }
 
 export default function Activity() {
-  const [selectedPatient, setSelectedPatient] = useState<any[]>();
+  const [selectedPatient, setSelectedPatient] = useState<any[]>([]);
   const [isGraphFilterOpen, setIsGraphFilterOpen] = useState(false);
   const [graphType, setGraphType] = useState("");
   const [date, setDate] = useState<DateRange | null>();
   const [data, setData] = useState<dataStructure[]>([]);
   const [dataset1, setDataset1] = useState<ChartData<'line'> | undefined>(undefined);
   const [dataset2, setDataset2] = useState<ChartData<'line'> | undefined>(undefined);
+  const [chartImage1, setChartImage1] = useState<string>('');
   const [title1, setTitle1] = useState('');
   const [title2, setTitle2] = useState('');
 
@@ -58,7 +60,6 @@ export default function Activity() {
 
   useEffect(() => {
     if (data.length > 0) {
-  
       const xElement = data?.map((element) => element.date);
       const colors = ['rgb(99, 255, 132)', 'rgb(255, 99, 132)', 'rgb(99, 132, 255)']
 
@@ -67,6 +68,7 @@ export default function Activity() {
         const mappedArgs = args.map((arg: number[], index: number) => {
           return (
             {
+              animation: false,
               label: labels[index],
               data: arg,
               fill: false,
@@ -148,7 +150,7 @@ export default function Activity() {
             <FilterAltIcon />
           </button>
           <div>
-            <DateRangePicker className="ml-2" onChange={(value) => setDate(value)}/>
+            <DateRangePicker className="ml-2" onChange={(value: any) => setDate(value)}/>
           </div>
         </div>
         <label className="text-white text-center">{graphType}</label>
@@ -156,16 +158,24 @@ export default function Activity() {
       {isGraphFilterOpen && <GraphFilters setGraphType={setGraphType} setIsGraphFilterOpen={setIsGraphFilterOpen} />}
       <div className="flex justify-center">
         {dataset1 && selectedPatient?.length !== 0 && date && graphType &&
-          <div className="mt-4 basis-1/2">
-            <LineChart type="activity" chartData={dataset1} title={title1}/>
+          <div className="mt-4 basis-full">
+            <LineChart type="activity" setChartImage={setChartImage1} chartData={dataset1} title={title1}/>
           </div>
         }
         {dataset2 && selectedPatient?.length !== 0 && date && graphType &&
-          <div className="mt-4 basis-1/2">
+          <div className="mt-4 basis-full">
             <LineChart type="activity" chartData={dataset2} title={title2}/>
           </div>
         }
       </div>
+      {selectedPatient?.length !== 0 && date &&
+        <Button className="!bg-blue-600 absolute right-4 bottom-4" variant="contained">
+          <PDFDownloadLink document={<Report selectedPatient={selectedPatient} chartImage1={chartImage1} data={data} date={date} />}
+            fileName={`report_${selectedPatient?.[0].email}_${Date.now()}.pdf`} >
+            Download Report
+          </PDFDownloadLink>
+        </Button>
+      }
     </div>
   );
 }

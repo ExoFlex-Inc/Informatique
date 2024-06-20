@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Line } from "react-chartjs-2";
 import "chartjs-adapter-luxon";
 import PauseButton from "../components/PauseButton.tsx";
@@ -19,6 +19,7 @@ interface LineChartProps {
   type: string;
   socket?: Socket | null;
   title?: string;
+  setChartImage?: React.Dispatch<React.SetStateAction<string>>;
 }
 interface Dataset {
   data: {
@@ -34,9 +35,12 @@ const LineChart: React.FC<LineChartProps> = ({
   socket,
   type,
   title,
+  setChartImage,
 }) => {
   const [graphPause, setGraphPause] = useState(false);
   const [graphDataIsPosition, setGraphDataIsPosition] = useState(true);
+
+  const chartRef = useRef<Chart<'line'> | null>(null);
 
   const [chartOptions, setChartOptions] = useState<_DeepPartialObject<ChartJsOptions<'line'>>>(() => {
     if (type === "realtime") {
@@ -117,7 +121,6 @@ const LineChart: React.FC<LineChartProps> = ({
     }
 });
 
-
   useEffect(() => {
     if (type === "realtime" && socket) {
       socket.on("stm32Data", (message) => {
@@ -175,6 +178,14 @@ const LineChart: React.FC<LineChartProps> = ({
   }, [title])
 
   useEffect(() => {
+    if (chartRef.current) {
+      const chartInstance = chartRef.current;
+      const chartImage = chartInstance.toBase64Image();
+      setChartImage?.(chartImage);
+    }
+  }, [chartData, chartOptions, setChartImage])
+
+  useEffect(() => {
     setChartOptions((prevOptions: any) => ({
       ...prevOptions,
       scales: {
@@ -227,7 +238,7 @@ const LineChart: React.FC<LineChartProps> = ({
         )}
       </div>
       <div className="bg-white rounded-lg">
-        <Line data={chartData} options={chartOptions} />
+        <Line ref={chartRef} data={chartData} options={chartOptions} />
       </div>
     </div>
   );
