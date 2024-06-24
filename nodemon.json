@@ -1,0 +1,7 @@
+{
+    "watch": ["src"],
+    "ext": "ts,tsx",
+    "ignore": ["dist"],
+    "exec": "npx tsx -r dotenv/config src/server.ts"
+  }
+  
