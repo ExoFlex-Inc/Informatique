@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "build:css": "tailwindcss build src/index.css -o dist/output.css",
     "server": "npx tsx -r dotenv/config src/server.ts",
-    "dev:server": "nodemon --config nodemon.json"
+    "dev:server": "nodemon --watch src --exec 'npx tsx -r dotenv/config --inspect src/server.ts'"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",

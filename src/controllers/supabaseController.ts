@@ -39,4 +39,4 @@ const getPlan = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-export { checkSession, pushPlanSupabase, getPlan };
+export { pushPlanSupabase, getPlan };

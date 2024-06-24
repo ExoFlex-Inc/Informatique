@@ -2,6 +2,6 @@
     "watch": ["src"],
     "ext": "ts,tsx",
     "ignore": ["dist"],
-    "exec": "npx tsx -r dotenv/config src/server.ts"
+    "exec": "npx tsx -r dotenv/config --inspect src/server.ts"
   }
   

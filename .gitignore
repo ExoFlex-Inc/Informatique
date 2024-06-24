@@ -1,7 +1,7 @@
 
 #Arduino
 **/.pio
-**/.vscode
+# **/.vscode
 IMC/arduino/build/
 IMC/arduino/downloadedLibraries/
 
