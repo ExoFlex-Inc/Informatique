@@ -2,11 +2,10 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { supaClient } from "../hooks/supa-client.ts";
 
-const pushPlanSupabase = asyncHandler(async (req: Request, res: Response) => {
+const postPlan = asyncHandler(async (req: Request, res: Response) => {
   const { plan } = req.body;
-  const {
-    data: { user },
-  } = await supaClient.auth.getUser();
+  const user = req.user;
+
   const { data, error } = await supaClient.rpc("push_planning", {
     user_id: user?.id,
     new_plan: plan,
@@ -22,9 +21,7 @@ const pushPlanSupabase = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const getPlan = asyncHandler(async (req: Request, res: Response) => {
-  const {
-    data: { user },
-  } = await supaClient.auth.getUser();
+  const user = req.user;
 
   const { data, error } = await supaClient.rpc("get_planning", {
     search_id: user?.id,
@@ -39,4 +36,4 @@ const getPlan = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-export { pushPlanSupabase, getPlan };
+export { postPlan, getPlan };

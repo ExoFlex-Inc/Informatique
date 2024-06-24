@@ -29,7 +29,7 @@ export function useSession(): SupabaseUserInfo {
     const requestBody = { access_token, refresh_token };
 
     try {
-      const response = await fetch("http://localhost:3001/api/local-server/setup-local-server", {
+      const response = await fetch("http://localhost:3001/api/setup-local-server", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody),

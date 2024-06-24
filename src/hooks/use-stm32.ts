@@ -21,7 +21,7 @@ const useStm32 = () => {
       setRetrySerial(false);
 
       const responseSerialPort = await fetch(
-        "http://localhost:3001/api/serialPort/initialize-serial-port",
+        "http://localhost:3001/api/initialize-serial-port",
         {
           method: "POST",
         },

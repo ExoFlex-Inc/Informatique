@@ -3,10 +3,11 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { createServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
-import serialPortRoutes from "./routes/serialPort.ts";
-import supabaseRoutes from "./routes/supabase.ts";
-import hmiRoutes from "./routes/hmi.ts";
-import localServerRoutes from "./routes/localServer.ts";
+import serialPortRoutes from "./routes/serialPortRoutes.ts";
+import planRoutes from "./routes/planRoutes.ts";
+import hmiRoutes from "./routes/hmiRoutes.ts";
+import userRoutes from "./routes/userRoutes.ts";
+import localServerRoutes from "./routes/localServerRoutes.ts";
 import { getSerialPort } from "./managers/serialPort.ts";
 
 dotenv.config();
@@ -23,10 +24,11 @@ const io = new SocketIOServer(httpServer, {
 app.use(express.json());
 app.use(cors());
 
-app.use("/api/serial-port", serialPortRoutes);
-app.use("/api/supabase", supabaseRoutes);
-app.use("/api/hmi", hmiRoutes);
-app.use("/api/local-server", localServerRoutes);
+app.use("/api", serialPortRoutes);
+app.use("/api", userRoutes);
+app.use("/api", planRoutes);
+app.use("/api", hmiRoutes);
+app.use("/api", localServerRoutes);
 
 io.on("connection", (socket) => {
   console.log("A client connected");

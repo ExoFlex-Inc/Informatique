@@ -8,7 +8,7 @@ const usePlanData = () => {
     const getPlanRequests = async () => {
       try {
         const responseGetPlanning = await fetch(
-          "http://localhost:3001/api/supabase/get-plan",
+          "http://localhost:3001/api/plan",
           {
             method: "GET",
           },
