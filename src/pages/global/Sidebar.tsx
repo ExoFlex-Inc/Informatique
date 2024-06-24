@@ -199,7 +199,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                 selected={selected}
                 setSelected={setSelected}
               />
-              {props.permissions == "dev" && (
+              {(props.permissions == "dev"|| props.permissions === "admin") && (
                 <Item
                   title="Manual"
                   to="/manual"

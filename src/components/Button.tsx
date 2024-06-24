@@ -27,7 +27,7 @@ const Button: React.FC<ButtonProps> = ({
 
   const sendingRequests = async () => {
     try {
-      const response = await fetch("http://localhost:3001/hmi-button-click", {
+      const response = await fetch("http://localhost:3001/api/hmi/hmi-button-click", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
