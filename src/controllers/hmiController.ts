@@ -8,7 +8,7 @@ const handleButtonClick = asyncHandler(async (req: Request, res: Response) => {
 
   const dataToSend = `{${mode};${action};${content};}`;
   const serialPort = getSerialPort();
-  
+
   if (serialPort && serialPort.isOpen) {
     serialPort.write(dataToSend, (err: any) => {
       if (err) {

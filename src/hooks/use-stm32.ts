@@ -7,7 +7,7 @@ interface MyEvents {
   serialPortClosed: string;
 }
 
-const ENDPOINT = "http://localhost:3001"; 
+const ENDPOINT = "http://localhost:3001";
 
 const useStm32 = () => {
   const [stm32Data, setStm32Data] = useState<string | null>(null);

@@ -13,4 +13,9 @@ const setReceivedDataBuffer = (buffer: string) => {
   receivedDataBuffer = buffer;
 };
 
-export { getSerialPort, setSerialPort, getReceivedDataBuffer, setReceivedDataBuffer };
+export {
+  getSerialPort,
+  setSerialPort,
+  getReceivedDataBuffer,
+  setReceivedDataBuffer,
+};
