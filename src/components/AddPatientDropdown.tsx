@@ -86,7 +86,7 @@ const AddPatientDropDown: React.FC<AddPatientDropdownProps> = ({
       };
 
       const response = await fetch(
-        "http://localhost:3001/assign_admin_to_client",
+        "http://localhost:3001/api/wellness_network",
         {
           method: "POST",
           headers: {

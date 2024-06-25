@@ -10,7 +10,7 @@ interface PatientSearchBarProps {
 export async function SearchBarInit() {
   try {
     const responseGetClients = await fetch(
-      "http://localhost:3001/get_clients_for_admin",
+      "http://localhost:3001/api/wellness_network",
       {
         method: "GET",
       },
