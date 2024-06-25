@@ -9,14 +9,15 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "build:css": "tailwindcss build src/index.css -o dist/output.css",
-    "server": "npx tsx -r dotenv/config src/server.ts"
+    "server": "npx tsx -r dotenv/config src/server.ts",
+    "dev:server": "nodemon --watch src --exec 'npx tsx -r dotenv/config --inspect src/server.ts'"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.15.19",
-    "@mui/x-data-grid": "^7.6.2",
     "@mui/material": "^5.15.20",
+    "@mui/x-data-grid": "^7.6.2",
     "@supabase/auth-ui-react": "^0.4.7",
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/supabase-js": "^2.43.4",
@@ -26,10 +27,12 @@
     "core-js": "^3.37.1",
     "cors": "^2.8.5",
     "express": "^4.19.2",
+    "express-async-handler": "^1.2.0",
     "formik": "^2.4.5",
     "fs": "^0.0.1-security",
     "luxon": "^3.4.4",
     "node-fetch": "^3.3.2",
+    "nodemon": "^3.1.4",
     "react": "^18.3.1",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.3.1",
@@ -39,6 +42,7 @@
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
     "supabase": "^1.176.10",
+    "ts-node": "^10.9.2",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
@@ -62,8 +66,8 @@
     "supabase": "^1.176.10",
     "tailwindcss": "^3.4.4",
     "tsx": "^4.15.6",
-    "typescript": "^5.4.5",
-    "yarn": "^1.22.22",
-    "vite": "^5.1.7"
+    "typescript": "^5.5.2",
+    "vite": "^5.1.7",
+    "yarn": "^1.22.22"
   }
 }

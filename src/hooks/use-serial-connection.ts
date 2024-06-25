@@ -8,7 +8,7 @@ const useSerialConnection = () => {
     const fetchData = async () => {
       try {
         const responseSerialPort = await fetch(
-          "http://localhost:3001/initialize-serial-port",
+          "http://localhost:3001/api/initialize-serial-port",
           {
             method: "POST",
           },

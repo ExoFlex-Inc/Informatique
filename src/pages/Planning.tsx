@@ -7,7 +7,7 @@ export async function planInit() {
   try {
     console.log("Getting the current plan...");
 
-    const responseGetPlanning = await fetch("http://localhost:3001/get-plan", {
+    const responseGetPlanning = await fetch("http://localhost:3001/api/plan", {
       method: "GET",
     });
 
@@ -156,7 +156,7 @@ export default function Planning() {
         plan: plan,
       };
 
-      const response = await fetch("http://localhost:3001/push-plan-supabase", {
+      const response = await fetch("http://localhost:3001/api/plan", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
