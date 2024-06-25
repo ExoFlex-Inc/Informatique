@@ -6,7 +6,7 @@ const postPlan = asyncHandler(async (req: Request, res: Response) => {
   const { plan } = req.body;
   const user = req.user;
 
-  const { data, error } = await supaClient.rpc("push_planning", {
+  const { data, error } = await supaClient.rpc("post_planning", {
     user_id: user?.id,
     new_plan: plan,
   });

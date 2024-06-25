@@ -7,13 +7,13 @@ interface MyEvents {
   serialPortClosed: string;
 }
 
-const ENDPOINT = "http://localhost:3001"; // Your server endpoint
+const ENDPOINT = "http://localhost:3001"; 
 
 const useStm32 = () => {
   const [stm32Data, setStm32Data] = useState<string | null>(null);
   const [retrySerial, setRetrySerial] = useState<boolean>(true);
   const [errorFromStm32, setErrorFromStm32] = useState<boolean>(false);
-  const [socket, setSocket] = useState<Socket<MyEvents> | null>(null); // Adjusted socket state variable type
+  const [socket, setSocket] = useState<Socket<MyEvents> | null>(null);
 
   const initializeSerialPort = async () => {
     try {
@@ -54,7 +54,7 @@ const useStm32 = () => {
   }, [retrySerial]);
 
   useEffect(() => {
-    const newSocket = socketIOClient(ENDPOINT) as Socket<MyEvents>; // Adjusted type assertion
+    const newSocket = socketIOClient(ENDPOINT) as Socket<MyEvents>;
     setSocket(newSocket);
 
     newSocket.on("serialPortClosed", () => {
