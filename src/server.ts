@@ -1,10 +1,14 @@
-import express, { Application, Request, Response, NextFunction } from "express";
-import { SerialPort } from "serialport";
+import express, { Application } from "express";
 import cors from "cors";
+import dotenv from "dotenv";
 import { createServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
-import { supaClient } from "./hooks/supa-client.ts";
-import dotenv from "dotenv";
+import serialPortRoutes from "./routes/serialPortRoutes.ts";
+import planRoutes from "./routes/planRoutes.ts";
+import hmiRoutes from "./routes/hmiRoutes.ts";
+import userRoutes from "./routes/userRoutes.ts";
+import localServerRoutes from "./routes/localServerRoutes.ts";
+import { getSerialPort } from "./managers/serialPort.ts";
 import { checkPermission } from "./middleware/checkPermission.tsx";
 
 dotenv.config();
@@ -18,106 +22,22 @@ const io = new SocketIOServer(httpServer, {
   },
 });
 
-let serialPort: SerialPort | null = null;
-let receivedDataBuffer: string = "";
-
 app.use(express.json());
 app.use(cors());
 
-/*
-..######..########.########..####....###....##..........########...#######..########..########
-.##....##.##.......##.....##..##....##.##...##..........##.....##.##.....##.##.....##....##...
-.##.......##.......##.....##..##...##...##..##..........##.....##.##.....##.##.....##....##...
-..######..######...########...##..##.....##.##..........########..##.....##.########.....##...
-.......##.##.......##...##....##..#########.##..........##........##.....##.##...##......##...
-.##....##.##.......##....##...##..##.....##.##..........##........##.....##.##....##.....##...
-..######..########.##.....##.####.##.....##.########....##.........#######..##.....##....##...
-*/
-
-app.post("/initialize-serial-port", (_, res) => {
-  if (serialPort && serialPort.isOpen) {
-    console.log("Serial port already initialized.");
-    res.status(200).send("Serial port already initialized.");
-    return;
-  }
-
-  SerialPort.list().then((ports) => {
-    const scannerPort = ports.find(
-      (serialPort) => serialPort.manufacturer === "STMicroelectronics",
-    );
-
-    if (scannerPort) {
-      console.log("Scanner port:", scannerPort.path);
-      if (!serialPort || !serialPort.isOpen) {
-        serialPort = new SerialPort({
-          path: scannerPort.path,
-          baudRate: 115200,
-        });
-
-        serialPort.on("error", (error) => {
-          console.log("Serial port error:", error.message);
-          // io.emit("serialPortClosed", "Serial port error");
-          // serialPort = null;
-        });
-
-        serialPort.on("close", () => {
-          console.log("Serial port closed");
-          io.emit("serialPortClosed", "Serial port closed");
-          serialPort = null;
-        });
-
-        serialPort.on("open", () => {
-          console.log("Serial port opened.");
-          res.status(200).send("Serial port initialized and ready.");
-        });
-
-        serialPort.on("data", (data) => {
-          receivedDataBuffer += data.toString();
-
-          // Check if the received data forms a valid JSON
-          for (let i = 0; i < receivedDataBuffer.length; i++) {
-            if (receivedDataBuffer[i] === "{") {
-              receivedDataBuffer = receivedDataBuffer.slice(i);
-            } else if (receivedDataBuffer[i] === "}") {
-              const jsonDataString = receivedDataBuffer.substring(0, i + 1);
-              try {
-                io.emit("stm32Data", JSON.parse(jsonDataString));
-              } catch (err) {
-                console.error("Error parsing JSON", err);
-              }
-              // Reset buffer and readingJson flag
-              receivedDataBuffer = receivedDataBuffer.slice(i + 1);
-            }
-          }
-        });
-      } else {
-        console.log("Serial port already initialized.");
-        res.status(200).send("Serial port already initialized.");
-      }
-    } else {
-      serialPort = null;
-      console.error("No scanner port found.");
-      res.status(500).send("No scanner port found.");
-    }
-  });
-});
-
-/*
-..######..########.##.....##..#######...#######.
-.##....##....##....###...###.##.....##.##.....##
-.##..........##....####.####........##........##
-..######.....##....##.###.##..#######...#######.
-.......##....##....##.....##........##.##.......
-.##....##....##....##.....##.##.....##.##.......
-..######.....##....##.....##..#######..#########
-*/
+app.use("/api", serialPortRoutes);
+app.use("/api", userRoutes);
+app.use("/api", planRoutes);
+app.use("/api", hmiRoutes);
+app.use("/api", localServerRoutes);
 
 io.on("connection", (socket) => {
   console.log("A client connected");
 
   socket.on("planData", (planData) => {
+    const serialPort = getSerialPort();
     if (serialPort && serialPort.isOpen) {
-      serialPort.write(planData, (err) => {
+      serialPort.write(planData, (err: any) => {
         if (err) {
           console.error("Error writing to serial port:", err);
         } else {
@@ -127,11 +47,12 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Handle client disconnection
   socket.on("disconnect", () => {
     console.log("A client disconnected");
   });
 });
+
+export { io };
 
 app.post("/hmi-button-click", (req, res) => {
   const { mode, action, content } = req.body;
@@ -356,12 +277,11 @@ httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-// Close the serial port when the server is closed
 process.on("SIGINT", () => {
   console.log("\n Server is shutting down...");
-  // Close the serial port when the server is closed
+  const serialPort = getSerialPort();
   if (serialPort && serialPort.isOpen) {
-    serialPort.close((err) => {
+    serialPort.close((err: any) => {
       if (err) {
         console.error("Error closing the port:", err.message);
       } else {
@@ -369,7 +289,6 @@ process.on("SIGINT", () => {
       }
     });
   }
-  // Close the server
   httpServer.close(() => {
     console.log("\n Server closed.");
     process.exit(0);

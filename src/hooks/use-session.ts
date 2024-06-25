@@ -27,24 +27,19 @@ export function useSession(): SupabaseUserInfo {
 
   const setupLocalServer = useCallback(
     async (access_token: string, refresh_token: string) => {
-      const requestBody = {
-        access_token,
-        refresh_token,
-      };
+      const requestBody = { access_token, refresh_token };
 
       try {
-        const responseServer = await fetch(
-          "http://localhost:3001/setup-local-server",
+        const response = await fetch(
+          "http://localhost:3001/api/setup-local-server",
           {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(requestBody),
           },
         );
 
-        if (responseServer.ok) {
+        if (response.ok) {
           console.log("Local server setup successful");
         } else {
           console.error("Local server setup failed");
@@ -61,7 +56,7 @@ export function useSession(): SupabaseUserInfo {
       const {
         data: { session },
       } = await supaClient.auth.getSession();
-      setUserInfo((prevState) => ({ ...prevState, session }));
+      setUserInfo((prev) => ({ ...prev, session }));
 
       const {
         data: { subscription },
@@ -94,7 +89,6 @@ export function useSession(): SupabaseUserInfo {
 
           const access_token = userInfo.session?.access_token || "";
           const refresh_token = userInfo.session?.refresh_token || "";
-
           setupLocalServer(access_token, refresh_token);
         }
       } else if (!userInfo.session?.user) {
@@ -126,7 +120,7 @@ export function useSession(): SupabaseUserInfo {
           return null;
         }
 
-        setUserInfo((prevState) => ({ ...prevState, profile: data[0] }));
+        setUserInfo((prev) => ({ ...prev, profile: data[0] }));
 
         const newChannel = supaClient
           .channel(`public:user_profiles`)
@@ -139,8 +133,8 @@ export function useSession(): SupabaseUserInfo {
               filter: `user_id=eq.${userId}`,
             },
             (payload) => {
-              setUserInfo((prevState) => ({
-                ...prevState,
+              setUserInfo((prev) => ({
+                ...prev,
                 profile: payload.new as UserProfile,
               }));
             },

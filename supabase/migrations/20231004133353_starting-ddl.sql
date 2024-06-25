@@ -125,19 +125,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION push_planning(user_id UUID, new_plan JSONB)
+CREATE OR REPLACE FUNCTION post_planning(user_id UUID, new_plan JSONB)
 RETURNS JSONB AS $$
 DECLARE
   updated_plan JSONB;
 BEGIN
-  IF EXISTS (SELECT 1 FROM plans WHERE plans.user_id = push_planning.user_id) THEN
+  IF EXISTS (SELECT 1 FROM plans WHERE plans.user_id = post_planning.user_id) THEN
     UPDATE plans
     SET plan_content = new_plan
-    WHERE plans.user_id = push_planning.user_id
+    WHERE plans.user_id = post_planning.user_id
     RETURNING new_plan INTO updated_plan;
   ELSE
     INSERT INTO plans(user_id, plan_content)
-    VALUES (push_planning.user_id, new_plan)
+    VALUES (post_planning.user_id, new_plan)
     RETURNING new_plan INTO updated_plan;
   END IF;
 
