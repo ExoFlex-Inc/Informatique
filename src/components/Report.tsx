@@ -2,9 +2,8 @@ import { Document, Page, Text, View, Image } from "@react-pdf/renderer";
 import { ReportStyle } from "../ReportStyle.tsx";
 import { DateRange } from "rsuite/esm/DateRangePicker/types.js";
 import { dataStructure } from "../pages/Activity.tsx";
-import { useEffect } from "react";
-import LineChart from "./LineChart.tsx";
-
+import { useEffect, useState } from "react";
+import { supaClient } from "../hooks/supa-client.ts";
 interface ReportProps {
   selectedPatient: any[] | undefined;
   date: DateRange | null;
@@ -18,23 +17,53 @@ const Report: React.FC<ReportProps> = ({
   data,
   chartImage1,
 }) => {
+  const [reporter, setReporter] = useState('');
+  const currentDate = new Date(Date.now());
+
   useEffect(() => {
-    console.log("data1", data);
-    // <LineChart  />
-  }, []);
+    async function getReporter () {
+
+      try {
+        const {
+          data: { user },
+        } = await supaClient.auth.getUser();
+
+        if (!user) {
+          console.error("Forbidden")
+        }
+  
+        const { data: profile, error } = await supaClient
+          .from("user_profiles")
+          .select("*")
+          .eq("user_id", user?.id);
+  
+          if (!profile || error) {
+            console.error("Forbidden")
+          } else {
+            setReporter(`${profile[0].username} ${profile[0].lastname}`)
+          }
+
+      } catch (error) {
+        console.log("Error retrieving reporter profile",error)
+      }
+
+    }
+    getReporter();
+  }, [])
+
   return (
     <Document>
       <Page size="A4" style={ReportStyle.page}>
         <View style={ReportStyle.topBar}>
           <View style={ReportStyle.logo}>
-            <Image src={"../../assets/logo.png"}></Image>
+            <Image source={"../../assets/logo.png"}></Image>
           </View>
           <View style={ReportStyle.title}>
             <Text>Report</Text>
           </View>
           <View style={ReportStyle.creationInformation}>
-            <Text>Reporter: </Text>
-            <Text>Date: </Text>
+            <Text>Reporter: {reporter}</Text>
+            <Text>Date: {currentDate.toISOString().split("T")[0]}</Text>
           </View>
         </View>
         <View style={ReportStyle.dataInfo}>
@@ -141,7 +170,7 @@ const Report: React.FC<ReportProps> = ({
           ))}
         </View>
 
-        <Image src={chartImage1}></Image>
+        <Image source={chartImage1}></Image>
       </Page>
     </Document>
   );
