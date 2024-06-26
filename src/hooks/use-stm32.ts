@@ -63,7 +63,6 @@ const useStm32 = () => {
     });
 
     newSocket.on("stm32Data", (message) => {
-      // console.log(message)
       setStm32Data(message);
     });
 

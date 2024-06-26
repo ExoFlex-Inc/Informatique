@@ -19,7 +19,9 @@ import TvIcon from "@mui/icons-material/Tv";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import FeedOutlinedIcon from "@mui/icons-material/FeedOutlined";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
+import GroupIcon from "@mui/icons-material/Group";
 import { supaClient } from "../../hooks/supa-client.ts";
 
 interface ProSidebarProps {
@@ -191,6 +193,26 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                 setSelected={setSelected}
               />
             )}
+            {(props.permissions === "dev" || props.permissions === "admin") && (
+              <Item
+                title="Wellness Network"
+                to="/wellness_network"
+                icon={<GroupIcon />}
+                selected={selected}
+                setSelected={setSelected}
+              />
+            )}
+
+            {(props.permissions === "dev" || props.permissions === "admin") && (
+              <Item
+                title="Activity"
+                to="/activity"
+                icon={<FeedOutlinedIcon />}
+                selected={selected}
+                setSelected={setSelected}
+              />
+            )}
+
             <SubMenu label="Control Page" icon={<TvIcon />}>
               <Item
                 title="HMI"
