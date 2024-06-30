@@ -685,7 +685,7 @@ void ManagerMovement_RestPos()
     if (ManagerMovement_GoToPos(MMOV_EXTENSION, MMOV_REST_POS))
     {
         managerMovement.homingState = MMOV_VERIF_PERSON_IN;
-        managerMovement.state       = MMOV_STATE_AUTOMATIC;
+        managerMovement.state       = MMOV_STATE_MANUAL;
     }
 }
 
@@ -744,3 +744,36 @@ uint8_t ManagerMovement_GetState()
     return managerMovement.state;
 }
 
+bool ManagerMovement_SetState(uint8_t newState)
+{
+	bool stateChanged = false;
+
+	if (newState != managerMovement.state)
+	{
+		if (newState == MMOV_STATE_AUTOMATIC && managerMovement.state != MMOV_STATE_HOMING)
+		{
+			managerMovement.autoState = MMOV_AUTO_STATE_WAITING4PLAN;
+			stateChanged = true;
+		}
+		else if (newState == MMOV_STATE_HOMING)
+		{
+			managerMovement.homingState = MMOV_VERIF_PERSON_IN;
+			stateChanged = true;
+		}
+		else if (newState == MMOV_STATE_MANUAL && managerMovement.state != MMOV_STATE_HOMING)
+		{
+			stateChanged = true;
+		}
+
+		if(stateChanged)
+		{
+			managerMovement.state = newState;
+		}
+	}
+	else
+	{
+		stateChanged = true;
+	}
+
+	return stateChanged;
+}

@@ -185,23 +185,37 @@ void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
     {
         if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "Manual") == 0)
         {
-            if (strcmp(ParsedMsg[M_HMI_ACTION_SECTION], "Increment") == 0)
-            {
-                ManagerHMI_ExecuteManualIncrement(
-                    ParsedMsg[M_HMI_CONTENT_SECTION]);
-            }
+        	if (ManagerMovement_SetState(MMOV_STATE_MANUAL))
+        	{
+        		if (strcmp(ParsedMsg[M_HMI_ACTION_SECTION], "Increment") == 0)
+				{
+					ManagerHMI_ExecuteManualIncrement(
+						ParsedMsg[M_HMI_CONTENT_SECTION]);
+				}
+        	}
+        	else
+        	{
+        		// Flag error: State couldn't change
+        	}
         }
         else if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "Auto") == 0)
         {
-            if (strcmp(ParsedMsg[M_HMI_ACTION_SECTION], "Plan") == 0)
-            {
-                ManagerHMI_ExecutePlanCmd(ParsedMsg[M_HMI_CONTENT_SECTION],
-                                          sectionNbr - M_HMI_CONTENT_SECTION);
-            }
-            else if (strcmp(ParsedMsg[M_HMI_ACTION_SECTION], "Control") == 0)
-            {
-                ManagerHMI_ExecuteControlCmd(ParsedMsg[M_HMI_CONTENT_SECTION]);
-            }
+        	if (ManagerMovement_SetState(MMOV_STATE_AUTOMATIC))
+        	{
+				if (strcmp(ParsedMsg[M_HMI_ACTION_SECTION], "Plan") == 0)
+				{
+					ManagerHMI_ExecutePlanCmd(ParsedMsg[M_HMI_CONTENT_SECTION],
+											  sectionNbr - M_HMI_CONTENT_SECTION);
+				}
+				else if (strcmp(ParsedMsg[M_HMI_ACTION_SECTION], "Control") == 0)
+				{
+					ManagerHMI_ExecuteControlCmd(ParsedMsg[M_HMI_CONTENT_SECTION]);
+				}
+        	}
+        	else
+        	{
+        		// Flag error: State couldn't change
+        	}
         }
     }
 }
