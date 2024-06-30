@@ -78,10 +78,6 @@ void ManagerMovement_Auto2FirstPos();
 void ManagerMovement_AutoRest();
 void ManagerMovement_AutoStop();
 
-void ManagerMovement_AutoMovement(uint8_t mouvType, float Position);
-
-void ManagerMovement_SetFirstPos(uint8_t exerciseIdx);
-
 // Homing functions
 void ManagerMovement_HomingPositions();
 void ManagerMovement_HomingExtension();
@@ -89,10 +85,12 @@ void ManagerMovement_HomingEversion();
 void ManagerMovement_HomingDorsiflexion();
 void ManagerMovement_RestPos();
 
+// General movement functions
+bool ManagerMovement_GoToPos(uint8_t exerciseId, uint8_t pos);
+void ManagerMovement_AutoMovement(uint8_t mouvType, float Position);
+void ManagerMovement_SetFirstPos(uint8_t exerciseIdx);
 float ManagerMovement_GetMiddlePos(float leftPos, float rightPos);
 void  ManagerMovement_SetOrigins(uint8_t motorIndex);
-
-bool test;
 
 void ManagerMovement_Init()
 {
@@ -108,6 +106,7 @@ void ManagerMovement_Reset()
         managerMovement.motorsNextGoal[i] = 0.0f;
     }
 
+    // Init exercises tables
     for (uint8_t i = 0; i < MAX_EXERCISES; i++)
     {
         finalPos[i] = 0.0f;
@@ -119,17 +118,17 @@ void ManagerMovement_Reset()
         pauseTime[i]     = 0.0f;
     }
 
+    // Init Auto counters and buttons
     startButton = false;
     stopButton  = false;
 
     exerciseIdx = 0;
     repsCount   = 0;
 
-    test = true;
-
+    commandSent = false;
     buttonStartReset = false;
 
-    commandSent                  = false;
+    // Init modes' states
     managerMovement.reset        = false;
     managerMovement.securityPass = false;
 
@@ -509,21 +508,10 @@ void ManagerMovement_AutoReady()
 
 void ManagerMovement_Auto2Goal()
 {
-    if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
-        !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2) &&
-        !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_3) && !commandSent)
-    {
-        ManagerMovement_AutoMovement(exercises[exerciseIdx],
-                                     finalPos[exerciseIdx]);
-        commandSent = true;
-    }
-    else if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
-             !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2) &&
-             !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_3))
+    if (ManagerMovement_GoToPos(exercises[exerciseIdx], finalPos[exerciseIdx]))
     {
         managerMovement.autoState = MMOV_AUTO_STATE_STRETCHING;
         exerciseTimer             = HAL_GetTick();
-        commandSent               = false;
     }
 }
 
@@ -543,21 +531,9 @@ void ManagerMovement_AutoStrectching()
 
 void ManagerMovement_Auto2FirstPos()
 {
-    if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
-        !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2) &&
-        !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_3) && !commandSent)
-    {
-        ManagerMovement_AutoMovement(exercises[exerciseIdx],
-                                     (firstPos[exerciseIdx]));
-        commandSent = true;
-    }
-    else if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
-             !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2) &&
-             !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_3))
-    {
+	if (ManagerMovement_GoToPos(exercises[exerciseIdx], firstPos[exerciseIdx]))
+	{
         managerMovement.autoState = MMOV_AUTO_STATE_REST;
-
-        commandSent = false;
         pauseTimer  = HAL_GetTick();
     }
 }
@@ -578,18 +554,8 @@ void ManagerMovement_AutoRest()
 void ManagerMovement_AutoStop()
 {
     // go to first pos
-    if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
-        !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2) &&
-        !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_3) && !commandSent)
-    {
-        ManagerMovement_AutoMovement(exercises[exerciseIdx],
-                                     (firstPos[exerciseIdx]));
-        commandSent = true;
-    }
-    else if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
-             !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2) &&
-             !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_3))
-    {
+	if (ManagerMovement_GoToPos(exercises[exerciseIdx], firstPos[exerciseIdx]))
+	{
         if (exercises[exerciseIdx] == 0 || stopButton)
         {
             exerciseIdx = 0;
@@ -597,7 +563,6 @@ void ManagerMovement_AutoStop()
         }
 
         managerMovement.autoState = MMOV_AUTO_STATE_READY;
-        commandSent               = false;
         stopButton                = false;
         startButton               = false;
     }
@@ -655,21 +620,10 @@ void ManagerMovement_HomingEversion()
                 evRightLimitHit = true;
             }
 
-            if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
-                !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2) && !commandSent)
-            {
-                ManagerMovement_AutoMovement(
-                    MMOV_EVERSION,
-                    ManagerMovement_GetMiddlePos(leftPos, rightPos));
-
-                commandSent = true;
-            }
-            else if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
-                     !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2))
+            if (ManagerMovement_GoToPos(MMOV_EVERSION, ManagerMovement_GetMiddlePos(leftPos, rightPos)))
             {
                 evLeftLimitHit  = false;
                 evRightLimitHit = false;
-                commandSent     = false;
 
                 managerMovement.homingState = MMOV_HOMING_DORSIFLEXION;
             }
@@ -704,24 +658,13 @@ void ManagerMovement_HomingDorsiflexion()
                 dorDownLimitHit = true;
             }
 
-            if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
-                !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2) && !commandSent)
-            {
-                ManagerMovement_AutoMovement(
-                    MMOV_DORSIFLEXION,
-                    ManagerMovement_GetMiddlePos(leftPos, rightPos));
-
-                commandSent = true;
-            }
-            else if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
-                     !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2))
-            {
+            if (ManagerMovement_GoToPos(MMOV_DORSIFLEXION, ManagerMovement_GetMiddlePos(leftPos, rightPos)))
+			{
                 // ManagerMovement_SetOrigins(MMOT_MOTOR_1);
                 ManagerMovement_SetOrigins(MMOT_MOTOR_2);
 
                 dorUpLimitHit   = false;
                 dorDownLimitHit = false;
-                commandSent     = false;
 
                 managerMovement.homingState = MMOV_HOMING_REST_POS;
             }
@@ -768,6 +711,27 @@ void ManagerMovement_SetOrigins(uint8_t motorIndex)
     managerMovement.motorsNextGoal[motorIndex] = 0.0f;
 }
 
+bool ManagerMovement_GoToPos(uint8_t exerciseId, uint8_t pos)
+{
+	bool posReached = false;
+
+	if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
+		!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2) &&
+		!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_3) && !commandSent)
+	{
+		ManagerMovement_AutoMovement(exerciseId, pos);
+		commandSent = true;
+	}
+	else if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
+			 !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2) &&
+			 !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_3))
+	{
+		posReached = true;
+		commandSent = false;
+	}
+	return posReached;
+}
+
 /*
  * Utilities
  */
@@ -787,3 +751,4 @@ uint8_t ManagerMovement_GetState()
 {
     return managerMovement.state;
 }
+
