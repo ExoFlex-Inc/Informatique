@@ -682,16 +682,8 @@ void ManagerMovement_HomingDorsiflexion()
 
 void ManagerMovement_RestPos()
 {
-    if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_3) && !commandSent)
+    if (ManagerMovement_GoToPos(MMOV_EXTENSION, MMOV_REST_POS))
     {
-        ManagerMovement_AutoMovement(MMOV_EXTENSION, MMOV_REST_POS);
-
-        commandSent = true;
-    }
-    else if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_3))
-    {
-        commandSent = false;
-
         managerMovement.homingState = MMOV_VERIF_PERSON_IN;
         managerMovement.state       = MMOV_STATE_AUTOMATIC;
     }
