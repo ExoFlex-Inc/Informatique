@@ -1,6 +1,6 @@
 import ListIcon from "@mui/icons-material/List";
 import PatientMenuDropdown from "./PatientMenuDropdown.tsx";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 interface PatientListProps {
   visibleListOfPatients: any[];
@@ -12,6 +12,13 @@ const PatientList: React.FC<PatientListProps> = ({
   setListOfPatients,
 }) => {
   const [openMenuIndex, setOpenMenuIndex] = useState<Number | null>(null);
+  const buttonRefs = useRef<HTMLButtonElement[]>([]);
+
+  const addToButtonRefs = (el: HTMLButtonElement | null, index: number) => {
+    if (el && !buttonRefs.current[index]) {
+      buttonRefs.current[index] = el;
+    }
+  }
 
   function toggleDropdown(index: Number) {
     setOpenMenuIndex(index === openMenuIndex ? null : index);
@@ -84,6 +91,7 @@ const PatientList: React.FC<PatientListProps> = ({
             >
               <span>{patient.phone_number}</span>
               <button
+                ref={(el) => addToButtonRefs(el, index)}
                 onClick={() => toggleDropdown(index)}
                 className="hover:bg-gray-300 rounded-full"
               >
@@ -92,6 +100,7 @@ const PatientList: React.FC<PatientListProps> = ({
             </li>
             {openMenuIndex === index && (
               <PatientMenuDropdown
+                buttonRef={{ current: buttonRefs.current[index]}}
                 clientId={patient.user_id}
                 setListOfPatients={setListOfPatients}
                 visibleListOfPatients={visibleListOfPatients}

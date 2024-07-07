@@ -2,31 +2,7 @@ import { useState, useEffect } from "react";
 import { tokens } from "../hooks/theme.ts";
 import { useTheme } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-
-export async function planInit() {
-  try {
-    console.log("Getting the current plan...");
-
-    const responseGetPlanning = await fetch("http://localhost:3001/api/plan", {
-      method: "GET",
-    });
-
-    if (responseGetPlanning.ok) {
-      console.log("Plan retrieved successfully.");
-      const planData = await responseGetPlanning.json();
-      console.log("Plan data:", planData);
-      return { loaded: true, planData: planData };
-    } else {
-      console.error("Failed to retrieve plan.");
-      window.alert("Failed to retrieve plan.");
-      return { loaded: false, planData: null };
-    }
-  } catch (error) {
-    console.error("An error occurred:", error);
-    window.alert("An error occurred: " + error);
-    return { loaded: false, planData: null };
-  }
-}
+import PatientSearchBar from "../components/PatientSearchBar.tsx";
 
 const exerciseOptions = ["Extension", "Dorsiflexion", "Eversion"];
 
@@ -46,16 +22,13 @@ export default function Planning() {
     torque: { dorsiflexion: 0, extension: 0, eversion: 0 },
     angles: { dorsiflexion: 0, extension: 0, eversion: 0 },
   });
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const [selectedPatient, setSelectedPatient] = useState<any[]>([]);
+  const [isDisabled, setIsDisabled] = useState(true);
+  // const theme = useTheme();
+  // const colors = tokens(theme.palette.mode);
 
   useEffect(() => {
-    const savedPlan = localStorage.getItem("plan");
-    if (savedPlan) {
-      const parsedPlan = JSON.parse(savedPlan);
-      setPlan(parsedPlan.plan);
-      setLimits(parsedPlan.limits);
-    } else {
+    if(selectedPatient.length != 0) {
       async function fetchPlanData() {
         const data = await planInit();
         if (data.loaded && data.planData[0]) {
@@ -65,11 +38,11 @@ export default function Planning() {
       }
       fetchPlanData();
     }
-  }, []);
+  }, [selectedPatient]);
 
-  const saveToLocalStorage = (data) => {
-    localStorage.setItem("plan", JSON.stringify(data));
-  };
+  useEffect(() => {
+    selectedPatient.length == 0 ? setIsDisabled(true) : setIsDisabled(false)
+  }, [selectedPatient])
 
   const handleInputChange = (index, event) => {
     const { name, value } = event.target;
@@ -80,8 +53,34 @@ export default function Planning() {
     const updatedPlan = [...plan];
     updatedPlan[index][name] = parsedValue;
     setPlan(updatedPlan);
-    saveToLocalStorage({ plan: updatedPlan, limits });
   };
+
+  async function planInit() {
+    try {
+      console.log("Getting the current plan...");
+      const responseGetPlanning = await fetch("http://localhost:3001/api/plan", {
+        method: "GET",
+        headers: {
+          'UserId': selectedPatient[0].user_id
+        }
+      });
+  
+      if (responseGetPlanning.ok) {
+        console.log("Plan retrieved successfully.");
+        const planData = await responseGetPlanning.json();
+        console.log("Plan data:", planData);
+        return { loaded: true, planData: planData };
+      } else {
+        console.error("Failed to retrieve plan.");
+        window.alert("Failed to retrieve plan.");
+        return { loaded: false, planData: null };
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
+      window.alert("An error occurred: " + error);
+      return { loaded: false, planData: null };
+    }
+  }
 
   const handleTorqueLimitChange = (event) => {
     const { name, value } = event.target;
@@ -93,10 +92,6 @@ export default function Planning() {
       ...prevLimits,
       torque: { ...prevLimits.torque, [name]: parsedValue },
     }));
-    saveToLocalStorage({
-      plan,
-      limits: { ...limits, torque: { ...limits.torque, [name]: parsedValue } },
-    });
   };
 
   const handleAngleLimitChange = (event) => {
@@ -109,10 +104,6 @@ export default function Planning() {
       ...prevLimits,
       angles: { ...prevLimits.angles, [name]: parsedValue },
     }));
-    saveToLocalStorage({
-      plan,
-      limits: { ...limits, angles: { ...limits.angles, [name]: parsedValue } },
-    });
   };
 
   // Function to handle adding a new exercise to the plan
@@ -132,7 +123,7 @@ export default function Planning() {
   };
 
   // Function to handle removing an exercise from the plan
-  const removeExercise = (index) => {
+  const removeExercise = (index: number) => {
     setPlan((prevPlan) => prevPlan.filter((_, i) => i !== index));
   };
 
@@ -153,6 +144,7 @@ export default function Planning() {
     try {
       const requestBody = {
         plan: plan,
+        selectedPatient: selectedPatient
       };
 
       const response = await fetch("http://localhost:3001/api/plan", {
@@ -203,7 +195,15 @@ export default function Planning() {
 
   return (
     <div className="flex flex-col custom-height">
-      <div className="mt-4 ml-10 mr-10">
+
+      <div className="flex justify-center">
+        <PatientSearchBar
+          sx={{ width: 500 }}
+          setSelectedPatient={setSelectedPatient}
+        />
+      </div>
+
+      <div className="mt-4 ml-10 mr-10 rounded-lg overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50 divide-y divide-gray-200">
             <tr className="bg-gray-50 divide-x divide-gray-200">
@@ -303,7 +303,7 @@ export default function Planning() {
         </table>
       </div>
 
-      <div className="mt-4 ml-10 mr-10">
+      <div className="mt-4 ml-10 mr-10 rounded-lg overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr className="divide-x divide-gray-200">
@@ -430,8 +430,11 @@ export default function Planning() {
           Add Exercise
         </button>
         <button
-          className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+          className={`text-white font-bold py-2 px-4 rounded
+            ${isDisabled ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-500 hover:bg-green-700'}`}
           onClick={savePlan}
+          
+          disabled = { isDisabled }
         >
           Save Plan
         </button>

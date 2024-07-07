@@ -16,9 +16,7 @@ import { UserContext } from "../../App.tsx";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import TvIcon from "@mui/icons-material/Tv";
-import BarChartIcon from "@mui/icons-material/BarChart";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import FeedOutlinedIcon from "@mui/icons-material/FeedOutlined";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import GroupIcon from "@mui/icons-material/Group";
@@ -59,8 +57,41 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
   const [selected, setSelected] = useState(
     localStorage.getItem("selected") || "Dashboard",
   );
+  const [avatarurl, setAvatarUrl] = useState('');
+
   const { profile } = useContext(UserContext);
   const isTablet = useMediaQuery("(max-width: 768px)");
+
+  useEffect(() => {
+    async function getAvatarUrl () {
+
+      try {
+        const {
+          data: { user },
+        } = await supaClient.auth.getUser();
+
+        if (!user) {
+          console.error("Forbidden")
+        }
+  
+        const { data: profile, error } = await supaClient
+          .from("user_profiles")
+          .select("*")
+          .eq("user_id", user?.id);
+  
+        if (!profile || error) {
+          console.error("Forbidden")
+        } else {
+          setAvatarUrl(`${profile[0].avatar_url}`);
+        }
+
+      } catch (error) {
+        console.log("Error retrieving reporter profile",error)
+      }
+
+    }
+    getAvatarUrl();
+  }, []);
 
   useEffect(() => {
     setIsCollapsed(isTablet);
@@ -170,7 +201,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
             <Item
               title="Dashboard"
-              to="/"
+              to="/dashboard"
               icon={<HomeOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}

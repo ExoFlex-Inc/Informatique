@@ -6,6 +6,7 @@ interface PatientMenuDropdownProps {
   visibleListOfPatients: any[];
   setListOfPatients: React.Dispatch<React.SetStateAction<any[]>>;
   index: number;
+  buttonRef: React.RefObject<HTMLButtonElement>;
 }
 
 const PatientMenuDropdown: React.FC<PatientMenuDropdownProps> = ({
@@ -14,8 +15,9 @@ const PatientMenuDropdown: React.FC<PatientMenuDropdownProps> = ({
   visibleListOfPatients,
   setListOfPatients,
   index,
+  buttonRef,
 }) => {
-  const dropdownRef = useRef(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   async function unlinkClientToAdmin(clientId: string) {
     try {
@@ -65,7 +67,11 @@ const PatientMenuDropdown: React.FC<PatientMenuDropdownProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: any) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (dropdownRef.current &&
+         !dropdownRef.current.contains(event.target as Node) &&
+         buttonRef.current && 
+         !buttonRef.current.contains(event.target as Node)
+      ) {
         setOpenMenuIndex(null);
       }
     };
@@ -74,7 +80,7 @@ const PatientMenuDropdown: React.FC<PatientMenuDropdownProps> = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [dropdownRef]);
+  }, [dropdownRef, buttonRef, setOpenMenuIndex]);
 
   return (
     <div

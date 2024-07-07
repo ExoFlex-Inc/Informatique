@@ -22,8 +22,8 @@ export async function SearchBarInit() {
       console.log("List data:", listData);
       return { loaded: true, listData: listData };
     } else {
-      console.error("Failed to retrieve list.");
-      window.alert("Failed to retrieve list.");
+      console.error("Failed to retrieve list. Status:", responseGetClients.status);
+      window.alert("Failed to retrieve list. Status:" + responseGetClients.status);
       return { loaded: false, listData: null };
     }
   } catch (error) {

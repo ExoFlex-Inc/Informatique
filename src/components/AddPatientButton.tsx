@@ -1,6 +1,6 @@
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import AddPatientDropDown from "./AddPatientDropdown.tsx";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 interface AddPatientButtonProps {
   adminId: undefined | string;
@@ -15,13 +15,16 @@ const AddPatientButton: React.FC<AddPatientButtonProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
+  const buttonRef = useRef(null);
+
   function toggleDropdown() {
-    setIsOpen(true);
+    setIsOpen(!isOpen);
   }
 
   return (
     <div className="flex mr-10 justify-end relative">
       <button
+        ref={buttonRef}
         className="bg-blue-600 p-2 mb-2 rounded-full delay-100 transition hover:bg-[#2bb673]"
         onClick={toggleDropdown}
       >
@@ -29,6 +32,7 @@ const AddPatientButton: React.FC<AddPatientButtonProps> = ({
       </button>
       {isOpen && (
         <AddPatientDropDown
+          buttonRef={buttonRef}
           adminId={adminId}
           setListOfPatients={setListOfPatients}
           listOfPatients={listOfPatients}

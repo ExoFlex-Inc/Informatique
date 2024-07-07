@@ -8,6 +8,7 @@ interface AddPatientDropdownProps {
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setListOfPatients: React.Dispatch<React.SetStateAction<any[]>>;
   listOfPatients: any[];
+  buttonRef: React.MutableRefObject<null>;
 }
 
 const AddPatientDropDown: React.FC<AddPatientDropdownProps> = ({
@@ -15,6 +16,7 @@ const AddPatientDropDown: React.FC<AddPatientDropdownProps> = ({
   setIsOpen,
   setListOfPatients,
   listOfPatients,
+  buttonRef
 }) => {
   const [clients, setClients] = useState<any[]>([]);
   const [filteredEmails, setFilteredEmails] = useState<string[]>([]);
@@ -48,7 +50,11 @@ const AddPatientDropDown: React.FC<AddPatientDropdownProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: any) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (dropdownRef.current &&
+        !dropdownRef.current.contains(event.target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target)
+      ) {
         setIsOpen(false);
       }
     };

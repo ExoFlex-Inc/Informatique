@@ -31,7 +31,8 @@ CREATE TABLE user_profiles (
   permissions permissions_enum NOT NULL,
   speciality TEXT CHECK (char_length(speciality) > 0 AND char_length(speciality) <= 50 AND speciality !~ '\d'),
   phone_number TEXT CHECK (char_length(phone_number) > 0 AND char_length(phone_number) <= 50 AND phone_number ~ '\d'),
-  email TEXT CHECK (char_length(email) > 0 AND char_length(email) <= 50)
+  email TEXT CHECK (char_length(email) > 0 AND char_length(email) <= 50),
+  avatar_url TEXT
 );
 
 CREATE TABLE machine (
@@ -193,6 +194,18 @@ END;
 $$ LANGUAGE plpgsql;
 
 /*
+..######..########..#######..########.....###.....#######..########
+.##....##....##....##.....##.##.....##...##.##...##.....##.##......
+.##..........##....##.....##.##.....##..##...##..##........##......
+..######.....##....##.....##.########..##.....##.##........######..
+.......##....##....##.....##.##...##...#########.##..#####.##......
+.##....##....##....##.....##.##....##..##.....##.##.....##.##......
+..######.....##.....#######..##.....##.##.....##..#######..########
+*/
+
+INSERT INTO storage.buckets(id, name, public, file_size_limit) VALUES (gen_random_uuid(), 'avatars', true, 52428800);
+
+/*
 .########...#######..##.......####..######..####.########..######.
 .##.....##.##.....##.##........##..##....##..##..##.......##....##
 .##.....##.##.....##.##........##..##........##..##.......##......
@@ -206,9 +219,29 @@ alter table user_profiles enable row level security;
 alter table machine enable row level security;
 alter table encoder enable row level security;
 alter table plans enable row level security;
-
 alter table exercise_data enable row level security;
--- alter table admin_client_relationships enable row level security;
+
+CREATE POLICY "avatars policy all can see" ON "storage"."objects"
+AS permissive FOR SELECT
+TO authenticated
+USING ((bucket_id = 'avatars'::text));
+
+
+CREATE POLICY "avatars policy can update" ON "storage"."objects"
+AS permissive FOR UPDATE 
+TO authenticated
+USING ((bucket_id = 'avatars'::text));
+
+
+CREATE POLICY "avatars policy users can delete" ON "storage"."objects"
+AS permissive FOR DELETE 
+TO authenticated
+USING ((bucket_id = 'avatars'::text));
+
+CREATE POLICY "avatars policy users can insert" ON "storage"."objects"
+AS permissive FOR INSERT
+TO authenticated
+WITH CHECK ((bucket_id = 'avatars'::text));
 
 CREATE POLICY "all can see" ON "public"."user_profiles"
 AS PERMISSIVE FOR SELECT
@@ -275,8 +308,18 @@ WITH CHECK (auth.uid() IS NOT NULL);
 CREATE POLICY "owners can update plans" ON "public"."plans"
 AS PERMISSIVE FOR UPDATE
 TO public
-USING (auth.uid() = user_id)
-WITH CHECK (auth.uid() = user_id);
+USING (EXISTS (
+  SELECT 1
+  FROM user_profiles
+  WHERE user_profiles.admin_id = auth.uid()
+  AND user_profiles.user_id = user_id
+))
+WITH CHECK (EXISTS (
+  SELECT 1
+  FROM user_profiles
+  WHERE user_profiles.admin_id = auth.uid()
+  AND user_profiles.user_id = user_id
+));
 
 CREATE POLICY "admins_and_managers_can_assign_admin"
 ON public.user_profiles

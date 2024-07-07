@@ -5,8 +5,6 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
   RouterProvider,
-  useNavigate,
-  useLocation,
 } from "react-router-dom";
 import { ColorModeContext, useMode } from "./hooks/theme.ts";
 import { CssBaseline, ThemeProvider } from "@mui/material";
@@ -14,7 +12,7 @@ import "./App.css";
 
 import Dashboard from "./pages/Dashboard.tsx";
 import { Welcome, welcomeLoader } from "./pages/Welcome.tsx";
-import HMI, { hmiInit } from "./pages/Hmi.tsx";
+import HMI from "./pages/Hmi.tsx";
 import Activity from "./pages/Activity.tsx";
 import Manual from "./pages/Manual.tsx";
 import Settings from "./pages/Settings.tsx";
@@ -26,6 +24,7 @@ import TopBar from "./pages/global/TopBar.tsx";
 import ProSideBar from "./pages/global/Sidebar.tsx";
 
 import { SupabaseUserInfo, useSession } from "./hooks/use-session.ts";
+import Profile from "./pages/Profile.tsx";
 
 export const UserContext = createContext<SupabaseUserInfo>({
   session: null,
@@ -72,6 +71,7 @@ const router = createBrowserRouter(
           />
         }
       />
+      <Route path="/profile" element={<Profile />}/>
     </Route>,
   ),
 );
