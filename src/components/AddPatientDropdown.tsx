@@ -25,7 +25,8 @@ const AddPatientDropDown: React.FC<AddPatientDropdownProps> = ({
     const fetchAllClients = async () => {
       const { data, error } = await supaClient
         .from("user_profiles")
-        .select("*");
+        .select("*")
+        .limit(50);
 
       if (error) {
         console.error("Error fetching emails:", error.message);
@@ -114,7 +115,6 @@ const AddPatientDropDown: React.FC<AddPatientDropdownProps> = ({
   }
 
   const addPatient = async () => {
-    // const userToAdd = users.find((user) => user.email.includes(searchedEmail));
     const clientToAdd = clients.find((client) =>
       client.email == searchedEmail ? true : false,
     );
