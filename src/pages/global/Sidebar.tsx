@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
 import {
   Box,
@@ -11,8 +11,6 @@ import {
 import { useNavigate } from "react-router-dom";
 import { tokens } from "../../hooks/theme.ts";
 
-import { UserContext } from "../../App.tsx";
-
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import TvIcon from "@mui/icons-material/Tv";
@@ -20,7 +18,10 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import FeedOutlinedIcon from "@mui/icons-material/FeedOutlined";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import GroupIcon from "@mui/icons-material/Group";
-import { supaClient } from "../../hooks/supa-client.ts";
+import Icon from '../../../public/assets/user.png';
+import { Avatar } from "@mui/material";
+import { useAvatarContext } from "../../context/avatarContext.tsx";
+import { useProfileContext } from "../../context/profileContext.tsx";
 
 interface ProSidebarProps {
   permissions: string;
@@ -57,41 +58,10 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
   const [selected, setSelected] = useState(
     localStorage.getItem("selected") || "Dashboard",
   );
-  const [avatarurl, setAvatarUrl] = useState('');
 
-  const { profile } = useContext(UserContext);
+  const { profile } = useProfileContext();
   const isTablet = useMediaQuery("(max-width: 768px)");
-
-  useEffect(() => {
-    async function getAvatarUrl () {
-
-      try {
-        const {
-          data: { user },
-        } = await supaClient.auth.getUser();
-
-        if (!user) {
-          console.error("Forbidden")
-        }
-  
-        const { data: profile, error } = await supaClient
-          .from("user_profiles")
-          .select("*")
-          .eq("user_id", user?.id);
-  
-        if (!profile || error) {
-          console.error("Forbidden")
-        } else {
-          setAvatarUrl(`${profile[0].avatar_url}`);
-        }
-
-      } catch (error) {
-        console.log("Error retrieving reporter profile",error)
-      }
-
-    }
-    getAvatarUrl();
-  }, []);
+  const { avatarUrl } = useAvatarContext();
 
   useEffect(() => {
     setIsCollapsed(isTablet);
@@ -170,13 +140,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
           {!isCollapsed && (
             <Box mb="25px">
               <Box display="flex" justifyContent="center" alignItems="center">
-                <img
-                  alt="profile-user"
-                  width={isTablet ? "50px" : "100px"}
-                  height={isTablet ? "50px" : "100px"}
-                  src={`../assets/user.png`}
-                  style={{ cursor: "pointer", borderRadius: "50%" }}
-                />
+                <Avatar src={avatarUrl ? avatarUrl : Icon} sx={isTablet ? { width: 50, height: 50 } : { width: 100, height: 100 }} />
               </Box>
 
               <Box textAlign="center">

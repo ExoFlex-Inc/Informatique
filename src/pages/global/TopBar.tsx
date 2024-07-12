@@ -8,14 +8,16 @@ import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import LogoutIcon from '@mui/icons-material/Logout';
+import Icon from '../../../public/assets/user.png';
 
-import { UserContext } from "../../App.tsx";
 import Login from "../../components/Login.tsx";
 import { supaClient } from "../../hooks/supa-client.ts";
 import { useNavigate } from "react-router-dom";
+import { useAvatarContext } from "../../context/avatarContext.tsx";
+import { useProfileContext } from "../../context/profileContext.tsx";
 
 export default function TopBar() {
-  const { session } = useContext(UserContext);
+  const { session } = useProfileContext();
   const theme = useTheme();
   // const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
@@ -25,6 +27,8 @@ export default function TopBar() {
   const navigate = useNavigate();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const { avatarUrl } = useAvatarContext();
 
   useEffect(() => {
     const handleClickOutside = (event: any) => {
@@ -74,7 +78,7 @@ export default function TopBar() {
         )}
         {session && (
           <IconButton className="h-14" onClick={onProfileClick}>
-            <Avatar ref={avatarRef} src="../../../public/assets/user.png" />
+            <Avatar ref={avatarRef} src={avatarUrl ? avatarUrl : Icon} />
           </IconButton>
         )}
       </Box>

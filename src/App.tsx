@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useState } from "react";
 import {
   Route,
   Outlet,
@@ -25,11 +25,10 @@ import ProSideBar from "./pages/global/Sidebar.tsx";
 
 import { SupabaseUserInfo, useSession } from "./hooks/use-session.ts";
 import Profile from "./pages/Profile.tsx";
-
-export const UserContext = createContext<SupabaseUserInfo>({
-  session: null,
-  profile: null,
-});
+import { AvatarProvider } from "./context/avatarContext.tsx";
+import { UserProvider } from "./context/profileContext.tsx";
+import { UserProfile } from "./hooks/use-session.ts";
+import { Session } from "@supabase/supabase-js";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -77,6 +76,17 @@ const router = createBrowserRouter(
 );
 
 function Layout() {
+
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  
+  const UserContext = createContext<SupabaseUserInfo>({
+    session,
+    profile,
+    setSession,
+    setProfile
+  });
+
   const supabaseUserInfo = useSession();
 
   return (
@@ -101,9 +111,13 @@ function App() {
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <div className="app">
-          <RouterProvider router={router} />
-        </div>
+          <UserProvider>
+            <AvatarProvider>
+              <div className="app">
+                <RouterProvider router={router} />
+              </div>
+            </AvatarProvider>
+          </UserProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>
   );

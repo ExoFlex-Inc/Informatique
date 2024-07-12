@@ -203,7 +203,7 @@ $$ LANGUAGE plpgsql;
 ..######.....##.....#######..##.....##.##.....##..#######..########
 */
 
-INSERT INTO storage.buckets(id, name, public, file_size_limit) VALUES (gen_random_uuid(), 'avatars', true, 52428800);
+INSERT INTO storage.buckets(id, name, public, file_size_limit) VALUES ('avatars', 'avatars', true, 52428800);
 
 /*
 .########...#######..##.......####..######..####.########..######.
@@ -223,24 +223,22 @@ alter table exercise_data enable row level security;
 
 CREATE POLICY "avatars policy all can see" ON "storage"."objects"
 AS permissive FOR SELECT
-TO authenticated
+TO public
 USING ((bucket_id = 'avatars'::text));
-
 
 CREATE POLICY "avatars policy can update" ON "storage"."objects"
 AS permissive FOR UPDATE 
-TO authenticated
+TO public
 USING ((bucket_id = 'avatars'::text));
-
 
 CREATE POLICY "avatars policy users can delete" ON "storage"."objects"
 AS permissive FOR DELETE 
-TO authenticated
+TO public
 USING ((bucket_id = 'avatars'::text));
 
 CREATE POLICY "avatars policy users can insert" ON "storage"."objects"
 AS permissive FOR INSERT
-TO authenticated
+TO public
 WITH CHECK ((bucket_id = 'avatars'::text));
 
 CREATE POLICY "all can see" ON "public"."user_profiles"
