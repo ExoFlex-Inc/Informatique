@@ -1,6 +1,6 @@
 import { List, ListItem, ListItemButton, ListItemText } from "@mui/material";
-import { useEffect, useRef } from "react";
 import React from "react";
+import useDropdown from "../hooks/use-dropdown.ts";
 
 interface GraphFiltersProps {
   setGraphType: React.Dispatch<React.SetStateAction<string>>;
@@ -11,25 +11,13 @@ const GraphFilters: React.FC<GraphFiltersProps> = ({
   setGraphType,
   setIsGraphFilterOpen,
 }) => {
-  const dropdownRef = useRef(null);
+
+  const dropdownRef = useDropdown(setIsGraphFilterOpen);
 
   function changeGraphType(type: string) {
     setGraphType(type);
     setIsGraphFilterOpen(false);
   }
-
-  useEffect(() => {
-    const handleClickOutside = (event: any) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsGraphFilterOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [dropdownRef]);
 
   return (
     <div ref={dropdownRef} className="flex w-min mt-2 absolute">
