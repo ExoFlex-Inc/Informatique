@@ -80,8 +80,9 @@ const AddPatientDropDown: React.FC<AddPatientDropdownProps> = ({
   }
 
   async function linkClientToAdmin(clientToAdd: any) {
-    const {error: updateError} = await supaClient.from("user_profiles")
-      .update({admin_id: adminId})
+    const { error: updateError } = await supaClient
+      .from("user_profiles")
+      .update({ admin_id: adminId })
       .eq("user_id", clientToAdd);
 
     if (updateError) {

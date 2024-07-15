@@ -1,7 +1,5 @@
 import express from "express";
-import {
-  getAdminClientsList,
-} from "../controllers/wellnessNetworkController.ts";
+import { getAdminClientsList } from "../controllers/wellnessNetworkController.ts";
 import { checkPermission } from "../middlewares/checkPermission.tsx";
 
 const router = express.Router();
