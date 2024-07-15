@@ -11,7 +11,6 @@ const GraphFilters: React.FC<GraphFiltersProps> = ({
   setGraphType,
   setIsGraphFilterOpen,
 }) => {
-
   const dropdownRef = useDropdown(setIsGraphFilterOpen);
 
   function changeGraphType(type: string) {

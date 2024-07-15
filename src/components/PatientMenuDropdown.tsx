@@ -15,7 +15,6 @@ const PatientMenuDropdown: React.FC<PatientMenuDropdownProps> = ({
   setListOfPatients,
   index,
 }) => {
-
   const dropdownRef = useDropdown(setOpenMenuIndex);
 
   async function unlinkClientToAdmin(clientId: string) {
