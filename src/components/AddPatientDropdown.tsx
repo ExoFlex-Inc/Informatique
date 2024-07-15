@@ -80,38 +80,16 @@ const AddPatientDropDown: React.FC<AddPatientDropdownProps> = ({
   }
 
   async function linkClientToAdmin(clientToAdd: any) {
-    try {
-      const requestBody = {
-        admin_id: adminId,
-        client_id: clientToAdd,
-      };
+    const {error: updateError} = await supaClient.from("user_profiles")
+      .update({admin_id: adminId})
+      .eq("user_id", clientToAdd);
 
-      const response = await fetch(
-        "http://localhost:3001/api/wellness_network",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestBody),
-        },
-      );
-
-      console.log("Response: ", response);
-
-      if (response.ok) {
-        const responceData = await response.json();
-        console.log("Response Data:", responceData);
-        console.log("Relationship add to Supabase");
-        return true;
-      } else {
-        console.error("Failed to add relationship to Supabase", response);
-        return false;
-      }
-    } catch (error) {
-      console.error("Error adding relationship to Supabase:", error);
+    if (updateError) {
+      console.error("Error adding relationship to Supabase:", updateError);
       return false;
     }
+
+    return true;
   }
 
   const addPatient = async () => {

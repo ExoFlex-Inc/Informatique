@@ -2,25 +2,6 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { supaClient } from "../hooks/supa-client.ts";
 
-const postAdminClientsList = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { admin_id, client_id } = req.body;
-    const { data, error } = await supaClient.rpc("assign_admin_to_client", {
-      admin_id,
-      client_id,
-    });
-
-    if (error) {
-      console.error(`Error at creating relationship:`, error);
-      res.status(500).json("Error creating relationship");
-      return;
-    } else {
-      console.log(`Success creating relationship:`, data);
-      res.status(200).json("Success creating relationship");
-    }
-  },
-);
-
 const getAdminClientsList = asyncHandler(
   async (req: Request, res: Response) => {
     const {
@@ -52,4 +33,4 @@ const getAdminClientsList = asyncHandler(
   },
 );
 
-export { postAdminClientsList, getAdminClientsList };
+export { getAdminClientsList };
