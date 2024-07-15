@@ -118,7 +118,7 @@ export function useSession(): SupabaseUserInfo {
         }
 
         if (!data?.length) {
-          navigate("/welcome");
+          navigate("/termsAndConditions");
           return null;
         }
 

@@ -15,6 +15,7 @@ import { Welcome, welcomeLoader } from "./pages/Welcome.tsx";
 import HMI from "./pages/Hmi.tsx";
 import Activity from "./pages/Activity.tsx";
 import Manual from "./pages/Manual.tsx";
+import TermsAndConditions from "./pages/TermsAndConditions.tsx";
 import Settings from "./pages/Settings.tsx";
 import Planning from "./pages/Planning.tsx";
 import WellnessNetwork from "./pages/WellnessNetwork.tsx";
@@ -43,6 +44,7 @@ const router = createBrowserRouter(
           />
         }
       />
+      <Route path="/termsAndConditions" element={<TermsAndConditions />} />
       <Route path="/welcome" element={<Welcome />} loader={welcomeLoader} />
       <Route
         path="/manual"
