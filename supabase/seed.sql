@@ -193,7 +193,7 @@ BEGIN
 
     END LOOP;
 
-    new_email := 'dev@example.com';
+    new_email := 'dev@dev.com';
     new_id := gen_random_uuid();
     base_date := NOW() - INTERVAL '1 month'; 
 
@@ -222,7 +222,7 @@ BEGIN
         'authenticated', 
         'authenticated', 
         new_email, 
-        crypt('password123', gen_salt('bf')), 
+        crypt('dev', gen_salt('bf')), 
         '2023-05-03 19:41:43.585805+00', 
         '2023-04-22 13:10:03.275387+00', 
         '2023-04-22 13:10:31.458239+00', 
