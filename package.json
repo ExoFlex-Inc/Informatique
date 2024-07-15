@@ -18,6 +18,7 @@
     "@mui/icons-material": "^5.15.19",
     "@mui/material": "^5.15.20",
     "@mui/x-data-grid": "^7.6.2",
+    "@react-pdf/renderer": "^3.4.4",
     "@supabase/auth-ui-react": "^0.4.7",
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/supabase-js": "^2.43.4",
@@ -38,6 +39,7 @@
     "react-dom": "^18.3.1",
     "react-pro-sidebar": "^1.1.0",
     "react-router-dom": "^6.23.1",
+    "rsuite": "^5.64.1",
     "serialport": "^12.0.0",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
@@ -66,7 +68,7 @@
     "supabase": "^1.176.10",
     "tailwindcss": "^3.4.4",
     "tsx": "^4.15.6",
-    "typescript": "^5.5.2",
+    "typescript": "^5.4.5",
     "vite": "^5.1.7",
     "yarn": "^1.22.22"
   }
