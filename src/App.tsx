@@ -14,6 +14,7 @@ import Dashboard from "./pages/Dashboard.tsx";
 import { Welcome, welcomeLoader } from "./pages/Welcome.tsx";
 import HMI from "./pages/Hmi.tsx";
 import Activity from "./pages/Activity.tsx";
+import Recovery from "./pages/Recovery.tsx";
 import Manual from "./pages/Manual.tsx";
 import TermsAndConditions from "./pages/TermsAndConditions.tsx";
 import Settings from "./pages/Settings.tsx";
@@ -34,6 +35,7 @@ import { Session } from "@supabase/supabase-js";
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
+      <Route path="/recovery" element={<Recovery />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route
         path="/activity"
@@ -73,7 +75,7 @@ const router = createBrowserRouter(
         }
       />
       <Route path="/profile" element={<Profile />}/>
-    </Route>,
+    </Route>
   ),
 );
 

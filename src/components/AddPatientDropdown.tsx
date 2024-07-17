@@ -27,7 +27,8 @@ const AddPatientDropDown: React.FC<AddPatientDropdownProps> = ({
     const fetchAllClients = async () => {
       const { data, error } = await supaClient
         .from("user_profiles")
-        .select("*");
+        .select("*")
+        .limit(50);
 
       if (error) {
         console.error("Error fetching emails:", error.message);
@@ -105,8 +106,8 @@ const AddPatientDropDown: React.FC<AddPatientDropdownProps> = ({
       console.log("Response: ", response);
 
       if (response.ok) {
-        const responceData = await response.json();
-        console.log("Response Data:", responceData);
+        const responseData = await response.json();
+        console.log("Response Data:", responseData);
         console.log("Relationship add to Supabase");
         return true;
       } else {
@@ -120,7 +121,6 @@ const AddPatientDropDown: React.FC<AddPatientDropdownProps> = ({
   }
 
   const addPatient = async () => {
-    // const userToAdd = users.find((user) => user.email.includes(searchedEmail));
     const clientToAdd = clients.find((client) =>
       client.email == searchedEmail ? true : false,
     );

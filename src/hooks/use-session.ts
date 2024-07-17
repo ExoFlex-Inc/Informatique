@@ -26,6 +26,14 @@ export function useSession(): SupabaseUserInfo {
   const [channel, setChannel] = useState<RealtimeChannel | null>(null);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    supaClient.auth.onAuthStateChange(async (event) => {
+      if (event == "PASSWORD_RECOVERY") {
+        navigate('/recovery');
+      }
+    })
+  }, [])
+
   const setupLocalServer = useCallback(
     async (access_token: string, refresh_token: string) => {
       const requestBody = { access_token, refresh_token };
