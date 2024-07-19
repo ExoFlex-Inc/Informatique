@@ -19,7 +19,6 @@ export async function SearchBarInit() {
     if (responseGetClients.ok) {
       console.log("List retrieved successfully.");
       const listData = await responseGetClients.json();
-      console.log("List data:", listData);
       return { loaded: true, listData: listData };
     } else {
       console.error("Failed to retrieve list. Status:", responseGetClients.status);

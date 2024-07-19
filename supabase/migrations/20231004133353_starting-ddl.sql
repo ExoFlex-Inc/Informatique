@@ -12,6 +12,7 @@ CREATE EXTENSION IF NOT EXISTS ltree;
 */
 
 CREATE TYPE permissions_enum AS ENUM ('dev', 'admin', 'client');
+CREATE TYPE client_admin_status AS ENUM ('pending', 'accepted');
 
 /*
 .########....###....########..##.......########..######.
@@ -25,7 +26,6 @@ CREATE TYPE permissions_enum AS ENUM ('dev', 'admin', 'client');
 
 CREATE TABLE user_profiles (
   user_id UUID PRIMARY KEY REFERENCES auth.users (id) NOT NULL,
-  admin_id UUID,
   username TEXT CHECK (char_length(username) > 0 AND char_length(username) <= 50 AND username !~ '\d'), 
   lastname TEXT CHECK (char_length(lastname) > 0 AND char_length(lastname) <= 50 AND lastname !~ '\d'),
   permissions permissions_enum NOT NULL,
@@ -33,6 +33,15 @@ CREATE TABLE user_profiles (
   phone_number TEXT CHECK (char_length(phone_number) > 0 AND char_length(phone_number) <= 50 AND phone_number ~ '\d'),
   email TEXT CHECK (char_length(email) > 0 AND char_length(email) <= 50),
   avatar_url TEXT
+);
+
+CREATE TABLE admin_client (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4() not null,
+  admin_id UUID,
+  client_id UUID,
+  relation_status client_admin_status NOT NULL,
+  FOREIGN KEY (admin_id) REFERENCES user_profiles(user_id),
+  FOREIGN KEY (client_id) REFERENCES user_profiles(user_id)
 );
 
 CREATE TABLE machine (
@@ -146,16 +155,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION assign_admin_to_client(admin_id UUID, client_id UUID)
-RETURNS void AS $$
-BEGIN
-  UPDATE user_profiles
-  SET admin_id = assign_admin_to_client.admin_id
-  WHERE user_id = assign_admin_to_client.client_id
-  AND permissions = 'client';
-END;
-$$ LANGUAGE plpgsql;
-
 CREATE FUNCTION get_planning(search_id UUID)
 RETURNS TABLE (plan_content jsonb) AS $$
 BEGIN
@@ -187,9 +186,9 @@ BEGIN
     FROM 
         user_profiles c
     JOIN 
-        user_profiles a ON c.admin_id = a.user_id
+        admin_client a ON c.user_id = a.client_id
     WHERE 
-        a.user_id = get_clients_for_admin.admin_id AND a.permissions in ('dev','admin');
+        a.admin_id = get_clients_for_admin.admin_id AND a.relation_status = 'accepted';
 END;
 $$ LANGUAGE plpgsql;
 
@@ -220,6 +219,7 @@ alter table machine enable row level security;
 alter table encoder enable row level security;
 alter table plans enable row level security;
 alter table exercise_data enable row level security;
+alter table admin_client enable row level security;
 
 CREATE POLICY "avatars policy all can see" ON "storage"."objects"
 AS permissive FOR SELECT
@@ -240,6 +240,27 @@ CREATE POLICY "avatars policy users can insert" ON "storage"."objects"
 AS permissive FOR INSERT
 TO public
 WITH CHECK ((bucket_id = 'avatars'::text));
+
+CREATE POLICY "all can see" ON "public"."admin_client"
+AS PERMISSIVE FOR SELECT
+TO public
+USING (true);
+
+CREATE POLICY "users can insert" ON "public"."admin_client"
+AS PERMISSIVE FOR INSERT
+TO public
+WITH CHECK (true);
+
+CREATE POLICY "owners can update" ON "public"."admin_client"
+AS PERMISSIVE FOR UPDATE
+TO public
+USING (true)
+WITH CHECK (true);
+
+CREATE POLICY "owners can delete" ON "public"."admin_client"
+AS PERMISSIVE FOR DELETE
+TO public
+USING (true);
 
 CREATE POLICY "all can see" ON "public"."user_profiles"
 AS PERMISSIVE FOR SELECT
@@ -309,18 +330,15 @@ TO public
 USING (EXISTS (
   SELECT 1
   FROM user_profiles
-  WHERE user_profiles.admin_id = auth.uid()
-  AND user_profiles.user_id = user_id
+  WHERE user_profiles.user_id = user_id
 ))
 WITH CHECK (EXISTS (
   SELECT 1
   FROM user_profiles
-  WHERE user_profiles.admin_id = auth.uid()
-  AND user_profiles.user_id = user_id
+  WHERE user_profiles.user_id = user_id
 ));
 
-CREATE POLICY "admins_and_managers_can_assign_admin"
-ON public.user_profiles
+CREATE POLICY "admins_and_managers_can_assign_admin" ON public.user_profiles
 AS PERMISSIVE FOR UPDATE
 TO public
 USING (

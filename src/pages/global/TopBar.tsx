@@ -1,14 +1,15 @@
 import { useContext, useState, useRef, useEffect } from "react";
 import { ColorModeContext, tokens } from "../../hooks/theme.ts";
 
-import { Box, IconButton, useTheme, ThemeProvider, Divider, Paper, createTheme, Avatar, ListItemText, ListItem, List, ListItemButton, ListItemIcon } from "@mui/material";
+import { Box, IconButton, useTheme, ThemeProvider, Divider, Paper, createTheme, Avatar, ListItemText, ListItem, ListItemButton, ListItemIcon } from "@mui/material";
 import People from '@mui/icons-material/People';
+import PersonIcon from '@mui/icons-material/Person';
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
-import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import LogoutIcon from '@mui/icons-material/Logout';
 import Icon from '../../../public/assets/user.png';
+import Notification from "../../components/Notification.tsx";
 
 import Login from "../../components/Login.tsx";
 import { supaClient } from "../../hooks/supa-client.ts";
@@ -25,6 +26,7 @@ export default function TopBar() {
   const menuRef = useRef(null);
   const avatarRef = useRef(null);
   const navigate = useNavigate();
+  const {profile} = useProfileContext()
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -67,9 +69,7 @@ export default function TopBar() {
           </IconButton>
         )}
         {session && ( // Check if session exists
-          <IconButton>
-            <NotificationsOutlinedIcon />
-          </IconButton>
+          <Notification />
         )}
         {session && ( // Check if session exists
           <IconButton>
@@ -100,11 +100,21 @@ export default function TopBar() {
                 <ListItem>
                   <ListItemButton onClick={() => navigate('/profile')}>
                     <ListItemIcon>
-                      <People />
+                      <PersonIcon />
                     </ListItemIcon>
                     <ListItemText primary="See Profile"/>
                   </ListItemButton>
                 </ListItem>
+                  {profile?.permissions == "client" &&
+                    <ListItem>
+                      <ListItemButton onClick={() => navigate('/professional_network')}>
+                        <ListItemIcon>
+                          <People />
+                        </ListItemIcon>
+                        <ListItemText primary="Professional Network"/>
+                      </ListItemButton>
+                    </ListItem>
+                  }
                 <Divider />
                 <ListItem>
                   <ListItemButton onClick={handleLogout}>

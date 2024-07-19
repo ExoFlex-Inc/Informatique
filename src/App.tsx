@@ -11,6 +11,7 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import "./App.css";
 
 import Dashboard from "./pages/Dashboard.tsx";
+import ProfessionalNetwork from "./pages/ProfessionalNetwork.tsx";
 import { Welcome, welcomeLoader } from "./pages/Welcome.tsx";
 import HMI from "./pages/Hmi.tsx";
 import Activity from "./pages/Activity.tsx";
@@ -75,6 +76,7 @@ const router = createBrowserRouter(
         }
       />
       <Route path="/profile" element={<Profile />}/>
+      <Route path="/professional_network" element={<ProfessionalNetwork />}/>
     </Route>
   ),
 );

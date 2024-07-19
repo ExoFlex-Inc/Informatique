@@ -1,9 +1,6 @@
-import AddPatientButton from "../components/AddPatientButton.tsx";
 import PatientList from "../components/PatientsList.tsx";
 import PatientSearchBar from "../components/PatientSearchBar.tsx";
 import { useEffect, useState } from "react";
-import { supaClient } from "../hooks/supa-client.ts";
-import { Patient } from "./Activity.tsx";
 
 export async function networkInit() {
   try {
@@ -17,7 +14,6 @@ export async function networkInit() {
     if (responseGetClients.ok) {
       console.log("List retrieved successfully.");
       const listData = await responseGetClients.json();
-      console.log("List data:", listData);
       return { loaded: true, listData: listData };
     } else {
       console.error("Failed to retrieve list.");
@@ -34,19 +30,6 @@ export async function networkInit() {
 export default function WellnessNetwork() {
   const [listOfPatients, setListOfPatients] = useState<any[]>([]);
   const [visibleListOfPatients, setVisibleListOfPatients] = useState<any[]>([]);
-  const [adminId, setAdminId] = useState<undefined | string>(undefined);
-  const [selectedPatient, setSelectedPatient] = useState<Patient>();
-
-  async function getAdminId() {
-    try {
-      const {
-        data: { user },
-      } = await supaClient.auth.getUser();
-      setAdminId(user?.id);
-    } catch (err) {
-      console.error("Error fetching session:", err);
-    }
-  }
 
   async function fetchListData() {
     const data = await networkInit();
@@ -56,21 +39,9 @@ export default function WellnessNetwork() {
   }
 
   useEffect(() => {
-    getAdminId();
-  }, []);
-
-  useEffect(() => {
     fetchListData();
     setVisibleListOfPatients(listOfPatients);
   }, [listOfPatients]);
-
-  useEffect(() => {
-    if (selectedPatient) {
-      setVisibleListOfPatients([selectedPatient]);
-    } else {
-      setVisibleListOfPatients(listOfPatients);
-    }
-  }, [selectedPatient]);
 
   return (
     <div>
@@ -78,11 +49,6 @@ export default function WellnessNetwork() {
         <PatientSearchBar
           sx={{ width: 500 }}
           setVisibleListOfPatients={setVisibleListOfPatients}
-        />
-        <AddPatientButton
-          adminId={adminId}
-          setListOfPatients={setListOfPatients}
-          listOfPatients={listOfPatients}
         />
       </div>
       <PatientList
