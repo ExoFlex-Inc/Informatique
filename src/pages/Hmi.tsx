@@ -8,7 +8,6 @@ import useStm32 from "../hooks/use-stm32.ts";
 import { useMediaQuery, useTheme } from "@mui/material";
 
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import SkipNextIcon from "@mui/icons-material/SkipNext";
 import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
 import RotateLeftIcon from "@mui/icons-material/RotateLeft";
@@ -17,6 +16,7 @@ import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import LineChart from "../components/LineChart.tsx";
 import { tokens } from "../hooks/theme.ts";
+import ExerciseOverviewWidget from "../components/ExerciseOverviewWidget.tsx";
 
 interface ChartData {
   datasets: {
@@ -229,47 +229,7 @@ export default function HMI() {
           </div>
         )}
       </div>
-      <div className="bg-white rounded-2xl overflow-auto min-w-0 mb-5">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr className="divide-x divide-gray-200">
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Exercise
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Repetitions
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Rest (sec)
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {planData?.plan.map((item, index) => (
-              <tr
-                key={index}
-                className={
-                  index === stm32Data?.ExerciseIdx
-                    ? "bg-green-200"
-                    : index % 2 === 0
-                      ? "bg-gray-50"
-                      : "bg-white"
-                }
-              >
-                <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
-                  {item.exercise}
-                </td>
-                <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
-                  {item.repetitions}
-                </td>
-                <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
-                  {item.rest}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <ExerciseOverviewWidget stm32Data={stm32Data} />
     </div>
   );
 }

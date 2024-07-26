@@ -3,6 +3,7 @@ import LineChart from "../components/LineChart.tsx";
 import { supaClient } from "../hooks/supa-client.ts";
 import { dataStructure } from "./Activity.tsx";
 import { ChartData } from "chart.js";
+import ExerciseOverviewWidget from "../components/ExerciseOverviewWidget.tsx";
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 
 export default function Dashboard() {
@@ -13,14 +14,12 @@ export default function Dashboard() {
     undefined,
   );
   const [title, setTitle] = useState("");
-  const [planData, setPlanData] = useState<any[]>([]);
 
   //UseEffect
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-
         const {
           data: { user },
         } = await supaClient.auth.getUser();
@@ -33,15 +32,6 @@ export default function Dashboard() {
   
           if(data) {
             setData(data);
-          }
-
-          const { data: plan } = await supaClient
-            .from("plans")
-            .select("*")
-            .eq("user_id", user.id)
-
-          if (plan) {
-            setPlanData(plan[0].plan_content.plan);
           }
         }
       } catch (error) {
@@ -68,13 +58,6 @@ export default function Dashboard() {
 
     }
   }, [data])
-
-  useEffect (() => {
-    console.log("planData",planData);
-    if(planData) {
-
-    }
-  }, [planData])
 
   //////////////////////////////////////////////////////////////////////////////////
 
@@ -161,42 +144,7 @@ export default function Dashboard() {
 
   return (
     <div className="grid grid-cols-2 grid-rows-2 gap-10 mx-10">
-      <div className="bg-white rounded-lg p-4 max-h-96 overflow-auto overflow-x-hidden">
-        <label style={{fontSize: 'clamp(0rem, 2.5vw, 1.5rem)'}} className="text-blue-600">Today's exercices</label>
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr className="divide-x divide-gray-200">
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Exercise
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Repetitions
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Rest (sec)
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {planData?.map((item, index) => (
-              <tr
-                key={index}
-                className= "bg-white"
-              >
-                <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
-                  {item.exercise}
-                </td>
-                <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
-                  {item.repetitions}
-                </td>
-                <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
-                  {item.rest}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <ExerciseOverviewWidget />
       <div className="bg-white rounded-lg grid grid-cols-2 grid-rows-2 items-center justify-center">
         <div className="flex justify-center">
           <label style={{fontSize: 'clamp(0rem, 2.5vw, 3.75rem)'}} className="text-orange-600 text-center">

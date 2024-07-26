@@ -1,31 +1,74 @@
-import { useState, useEffect } from "react";
-import { tokens } from "../hooks/theme.ts";
-import { useTheme } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { useState, useEffect, useRef } from "react";
+import { RadioGroup, FormControlLabel, Radio, FormControl, FormLabel } from "@mui/material";
 import PatientSearchBar from "../components/PatientSearchBar.tsx";
+import { blue } from "@mui/material/colors";
+import ExercicesLimitsTable from "../components/ExercicesLimitsTable.tsx";
+import ExercicesPlanTable from "../components/ExercicesPlanTable.tsx";
 
-const exerciseOptions = ["Extension", "Dorsiflexion", "Eversion"];
+export interface Limits {
+  torque: {
+    dorsiflexion: number,
+    extension: number,
+    eversion: number
+  },
+  angles: {
+    dorsiflexion: number,
+    extension: number,
+    eversion: number
+  }
+}
+
+export interface Set {
+  rest: number;
+  repetitions: number;
+  speed: number;
+  movement: {
+    exercise: string;
+    target_angle: number;
+    target_torque: number;
+    time: number;
+  }[];
+}
+
+export interface SetRest {
+  setRest: number;
+}
 
 export default function Planning() {
-  const [plan, setPlan] = useState([
+  const [plan, setPlan] = useState<(Set | SetRest)[]>([
     {
-      exercise: "",
-      repetitions: 0,
-      // sets: 0,
       rest: 0,
-      target_angle: 0,
-      target_torque: 0,
-      time: 0,
+      repetitions: 0,
+      speed: 0,
+      movement: [{
+        exercise: "",
+        target_angle: 0,
+        target_torque: 0,
+        time: 0
+      }]
     },
   ]);
-  const [limits, setLimits] = useState({
+  const [limitsRight, setLimitsRight] = useState<Limits>({
+    torque: { dorsiflexion: 0, extension: 0, eversion: 0 },
+    angles: { dorsiflexion: 0, extension: 0, eversion: 0 },
+  });
+
+  const [limitsLeft, setLimitsLeft] = useState<Limits>({
     torque: { dorsiflexion: 0, extension: 0, eversion: 0 },
     angles: { dorsiflexion: 0, extension: 0, eversion: 0 },
   });
   const [selectedPatient, setSelectedPatient] = useState<any[]>([]);
   const [isDisabled, setIsDisabled] = useState(true);
-  // const theme = useTheme();
-  // const colors = tokens(theme.palette.mode);
+  const [addExerciseDisable, setAddExerciseDisable] = useState(true);
+  const [side, setSide] = useState("Left");
+  const [checked, setChecked] = useState(false);
+  const checkboxRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  useEffect(() => {
+    if(plan.length < 1) {
+      setAddExerciseDisable(true);
+    }
+  },[plan])
 
   useEffect(() => {
     if(selectedPatient.length != 0) {
@@ -33,27 +76,28 @@ export default function Planning() {
         const data = await planInit();
         if (data.loaded && data.planData[0]) {
           setPlan(data.planData[0].plan_content.plan);
-          setLimits(data.planData[0].plan_content.limits);
+          setLimitsRight(data.planData[0].plan_content.limits.right);
+          setLimitsLeft(data.planData[0].plan_content.limits.left);
         }
       }
       fetchPlanData();
+      selectedPatient.length == 0 ? setIsDisabled(true) : setIsDisabled(false)
     }
   }, [selectedPatient]);
 
   useEffect(() => {
-    selectedPatient.length == 0 ? setIsDisabled(true) : setIsDisabled(false)
-  }, [selectedPatient])
-
-  const handleInputChange = (index, event) => {
-    const { name, value } = event.target;
-    let parsedValue = "";
-    if (value !== "") {
-      parsedValue = name !== "exercise" ? parseInt(value) : value;
+    const filteredCheckbox = checkboxRefs.current.filter((element) => {
+      if (element?.checked) {
+        return true;
+      }
+      return false;
+    })
+    if (filteredCheckbox.length > 0) {
+      setAddExerciseDisable(false);
+    } else {
+      setAddExerciseDisable(true);
     }
-    const updatedPlan = [...plan];
-    updatedPlan[index][name] = parsedValue;
-    setPlan(updatedPlan);
-  };
+  },[checked])
 
   async function planInit() {
     try {
@@ -81,56 +125,69 @@ export default function Planning() {
       return { loaded: false, planData: null };
     }
   }
-
-  const handleTorqueLimitChange = (event) => {
-    const { name, value } = event.target;
-    let parsedValue = "";
-    if (value !== "") {
-      parsedValue = Math.max(0, parseInt(value));
-    }
-    setLimits((prevLimits) => ({
-      ...prevLimits,
-      torque: { ...prevLimits.torque, [name]: parsedValue },
-    }));
-  };
-
-  const handleAngleLimitChange = (event) => {
-    const { name, value } = event.target;
-    let parsedValue = "";
-    if (value !== "") {
-      parsedValue = parseInt(value);
-    }
-    setLimits((prevLimits) => ({
-      ...prevLimits,
-      angles: { ...prevLimits.angles, [name]: parsedValue },
-    }));
-  };
-
   // Function to handle adding a new exercise to the plan
   const addExercise = () => {
+    const checkboxIndex = checkboxRefs.current.map((checkbox, index) => {
+      if (checkbox?.checked) {
+        return index;
+      }
+    }).filter((element) => element !== undefined);
+
+    setPlan((prevPlan) => {
+      const newPlan = [...prevPlan];
+      checkboxIndex.forEach((index) => {
+        const item = newPlan[index];
+        if (item && 'movement' in item){
+          const setItem = item as Set;
+
+          setItem.movement = [
+            ...setItem.movement,
+            {
+              exercise: "",
+              target_angle: 0,
+              target_torque: 0,
+              time: 0
+            }
+          ]
+        }
+      });
+      return newPlan;
+    })
+  };
+
+  const addSet = () => {
     setPlan((prevPlan) => [
       ...prevPlan,
       {
-        exercise: "",
-        repetitions: 0,
-        // sets: 0,
         rest: 0,
-        target_angle: 0,
-        target_torque: 0,
-        time: 0,
+        speed: 0,
+        repetitions: 0,
+        movement: [{
+          exercise: "",
+          target_angle: 0,
+          target_torque: 0,
+          time: 0
+        }]
       },
     ]);
-  };
+  }
 
-  // Function to handle removing an exercise from the plan
-  const removeExercise = (index: number) => {
-    setPlan((prevPlan) => prevPlan.filter((_, i) => i !== index));
-  };
+  const addSetRest = () => {
+    setPlan((prevPlan) => [
+      ...prevPlan,
+      {
+        setRest:0
+      }
+    ])
+  }
 
   // Function to handle saving the plan and limits
   const savePlan = async () => {
     try {
-      const planWithLimits = { plan, limits };
+      const planWithLimits = { plan, limits: {
+        right: limitsRight,
+        left: limitsLeft
+      } };
       // Save plan to Supabase
       await savePlanToSupabase(planWithLimits);
       // Save plan to local storage
@@ -138,6 +195,10 @@ export default function Planning() {
       console.error("Error saving plan and limits:", error);
     }
   };
+
+  const handleToggleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSide((event.target as HTMLInputElement).value);
+  }
 
   // Function to save plan to Supabase
   const savePlanToSupabase = async (plan: any) => {
@@ -167,264 +228,67 @@ export default function Planning() {
     }
   };
 
-  // Function to generate JSON plan
-  const generateJsonPlan = () => {
-    const allExercises = plan.map((exercise, index) => {
-      const {
-        exercise: exerciseName,
-        repetitions,
-        // sets,
-        rest,
-        target_angle,
-        target_torque,
-        time,
-      } = exercise;
-      return {
-        exercise: exerciseName,
-        repetitions,
-        // sets,
-        rest,
-        target_angle,
-        target_torque,
-        time,
-      };
-    });
-
-    return JSON.stringify({ plan: allExercises, limits }, null, 2);
-  };
-
   return (
     <div className="flex flex-col custom-height">
-
-      <div className="flex justify-center">
+      <div className="flex justify-center items-center">
+        <FormControl>
+          <FormLabel sx={{'&.Mui-focused': {color: blue[600]}}} id="demo-controlled-radio-buttons-group">Side</FormLabel>
+          <RadioGroup
+            aria-labelledby="demo-controlled-radio-buttons-group"
+            name="controlled-radio-buttons-group"
+            onChange={handleToggleChange}
+            value={side}
+          >
+            <FormControlLabel value="Left" control={<Radio sx={{'&.Mui-checked': {color: blue[600]}}}/>} label="Left" />
+            <FormControlLabel value="Right" control={<Radio sx={{'&.Mui-checked': {color: blue[600]}}}/>} label="Right" />
+          </RadioGroup>
+        </FormControl>
         <PatientSearchBar
           sx={{ width: 500 }}
           setSelectedPatient={setSelectedPatient}
         />
       </div>
+    <div className="overflow-auto">
 
-      <div className="mt-4 ml-10 mr-10 rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50 divide-y divide-gray-200">
-            <tr className="bg-gray-50 divide-x divide-gray-200">
-              <th
-                className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                colSpan={3}
-              >
-                Max Torque
-              </th>
-              <th
-                className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                colSpan={3}
-              >
-                Max Angle
-              </th>
-            </tr>
-            <tr className="bg-gray-50 divide-x divide-gray-200">
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Dorsiflexion
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Extension
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Eversion
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Dorsiflexion
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Extension
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Eversion
-              </th>
-            </tr>
-          </thead>
+      <ExercicesLimitsTable limitsLeft={limitsLeft}
+        limitsRight={limitsRight}
+        side={side}
+        setLimitsLeft={setLimitsLeft}
+        setLimitsRight={setLimitsRight}
+      />
 
-          <tbody className="bg-white divide-y divide-gray-200">
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <input
-                  type="number"
-                  name="dorsiflexion"
-                  value={limits.torque.dorsiflexion}
-                  onChange={handleTorqueLimitChange}
-                  className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
-                />
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <input
-                  type="number"
-                  name="extension"
-                  value={limits.torque.extension}
-                  onChange={handleTorqueLimitChange}
-                  className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
-                />
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <input
-                  type="number"
-                  name="eversion"
-                  value={limits.torque.eversion}
-                  onChange={handleTorqueLimitChange}
-                  className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
-                />
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <input
-                  type="number"
-                  name="dorsiflexion"
-                  value={limits.angles.dorsiflexion}
-                  onChange={handleAngleLimitChange}
-                  className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
-                />
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <input
-                  type="number"
-                  name="extension"
-                  value={limits.angles.extension}
-                  onChange={handleAngleLimitChange}
-                  className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
-                />
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <input
-                  type="number"
-                  name="eversion"
-                  value={limits.angles.eversion}
-                  onChange={handleAngleLimitChange}
-                  className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div className="mt-4 ml-10 mr-10 rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr className="divide-x divide-gray-200">
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Exercise
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Repetitions
-              </th>
-              {/* <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Sets
-              </th> */}
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Rest (sec)
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Target Angle
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Target Torque
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Time (sec)
-              </th>
-              <th className="px-6 py-3"></th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {plan.map((exercise, index) => (
-              <tr key={index}>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <select
-                    name="exercise"
-                    value={exercise.exercise}
-                    onChange={(e) => handleInputChange(index, e)}
-                    className="text-black border border-gray-300 rounded text-center px-2 py-1 w-full"
-                  >
-                    <option value="">Select Exercise</option>
-                    {exerciseOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <input
-                    type="number"
-                    name="repetitions"
-                    placeholder="Repetitions"
-                    value={exercise.repetitions}
-                    onChange={(e) => handleInputChange(index, e)}
-                    className="text-black border border-gray-300 rounded text-center px-2 py-1 w-full"
-                  />
-                </td>
-                {/* <td className="px-6 py-4 whitespace-nowrap">
-                  <input
-                    type="number"
-                    name="sets"
-                    placeholder="Sets"
-                    value={exercise.sets}
-                    onChange={(e) => handleInputChange(index, e)}
-                    className="text-black border border-gray-300 rounded px-2 py-1 w-full"
-                  />
-                </td> */}
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <input
-                    type="number"
-                    name="rest"
-                    placeholder="Rest"
-                    value={exercise.rest}
-                    onChange={(e) => handleInputChange(index, e)}
-                    className="text-black border border-gray-300 rounded text-center px-2 py-1 w-full"
-                  />
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <input
-                    type="number"
-                    name="target_angle"
-                    placeholder="Angle"
-                    value={exercise.target_angle}
-                    onChange={(e) => handleInputChange(index, e)}
-                    className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
-                  />
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <input
-                    type="number"
-                    name="target_torque"
-                    placeholder="Torque"
-                    value={exercise.target_torque}
-                    onChange={(e) => handleInputChange(index, e)}
-                    className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
-                  />
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <input
-                    type="number"
-                    name="time"
-                    placeholder="Time"
-                    value={exercise.time}
-                    onChange={(e) => handleInputChange(index, e)}
-                    className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
-                  />
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right">
-                  <button
-                    className="text-black"
-                    onClick={() => removeExercise(index)}
-                  >
-                    <DeleteIcon />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <div className="flex justify-center mt-4">
+      {plan.map((set, setIndex) => (
+        <ExercicesPlanTable key={setIndex}
+          set={set}
+          setIndex={setIndex}
+          setPlan={setPlan}
+          plan={plan}
+          checkboxRefs={checkboxRefs}
+          setChecked={setChecked}
+          checked={checked}
+        />
+      ))}
+    </div>
+      <div className="flex justify-center my-4">
         <button
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mr-4 rounded"
+          onClick={addSet}
+        >
+          Add Set
+        </button>
+
+        <button className="bg-rose-500 hover:bg-rose-700 text-white font-bold py-2 px-4 mr-4 rounded"
+          onClick={addSetRest}
+        >
+          Add Set Rest
+        </button>
+
+        <button
+          disabled={addExerciseDisable}
+          className={addExerciseDisable ?
+            'bg-gray-500 text-white font-bold py-2 px-4 mr-4 rounded cursor-not-allowed' :
+            'bg-cyan-500 hover:bg-cyan-700 text-white font-bold py-2 px-4 mr-4 rounded'
+          }
           onClick={addExercise}
         >
           Add Exercise
@@ -439,14 +303,6 @@ export default function Planning() {
           Save Plan
         </button>
       </div>
-      {/* <div className="mt-4 ml-10 mr-10">
-        <textarea
-          value={generateJsonPlan()}
-          className="text-black border border-gray-300 rounded px-2 py-1 w-full"
-          rows={20}
-          readOnly
-        />
-      </div> */}
     </div>
   );
 }

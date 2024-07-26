@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from "react";
-import CircularProgress, {
-  CircularProgressProps,
-} from "@mui/material/CircularProgress";
-
-import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
-import LinearProgress from "@mui/material/LinearProgress";
+import {Box, CircularProgress, CircularProgressProps, Typography, LinearProgress} from "@mui/material";
 
 function CircularProgressWithLabel(
   props: CircularProgressProps & { value: number },
@@ -57,8 +51,6 @@ export default function ProgressionWidget({ stm32Data, planData }: Props) {
       setRepetitionProgress(stm32Data.Repetitions);
     }
     if (stm32Data?.Repetitions !== 0 && stm32Data?.Repetitions !== undefined) {
-      console.log(stm32Data?.Repetitions);
-
       setStretchProgress(stretchProgress + 1);
     }
   }, [stm32Data?.Repetitions]);
