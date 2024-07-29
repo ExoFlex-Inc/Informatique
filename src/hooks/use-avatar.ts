@@ -9,93 +9,94 @@ interface AvatarInfo {
 
 export function useAvatar(): AvatarInfo {
 
-    const [avatarFile, setAvatarFile] = useState('');
-    const {avatarUrl, setAvatarUrl} = useAvatarContext();
-    const [profileUser, setProfileUser] = useState<User | null>(null);
+  const [avatarFile, setAvatarFile] = useState('');
+  const {avatarUrl, setAvatarUrl} = useAvatarContext();
+  const [profileUser, setProfileUser] = useState<User | null>(null);
 
-    useEffect(() => {
-        async function fetchUserProfile () {
-    
-          try {
-            const {
-              data: { user },
-            } = await supaClient.auth.getUser();
-    
-            if (!user) {
-              console.error("Forbidden")
-            }
+  useEffect(() => {
+      async function fetchUserProfile () {
   
-            setProfileUser(user)
-      
-            const { data: profile, error } = await supaClient
-              .from("user_profiles")
-              .select("*")
-              .eq("user_id", user?.id);
-      
-            if (!profile || error) {
-                throw new Error("Profile not found");
-            }
-
-            setAvatarFile(`${profile[0].avatar_url}`);
-          } catch (error) {
-            console.log("Error retrieving user profile:",error)
+        try {
+          const {
+            data: { user },
+          } = await supaClient.auth.getUser();
+  
+          if (!user) {
+            console.error("Forbidden")
           }
+
+          setProfileUser(user)
     
-        }
-        fetchUserProfile();
-    }, []);
-
-    useEffect(() => {
-        if(avatarFile) {
-            downloadImage(avatarFile); 
-        }
-    }, [avatarFile])
-
-    const downloadImage = async (path: string) => {
-      try {
-          const { data, error } = await supaClient.storage.from('avatars').download(path)
-          if (error) {
-            throw error
+          const { data: profile, error } = await supaClient
+            .from("user_profiles")
+            .select("*")
+            .eq("user_id", user?.id);
+    
+          if (!profile || error) {
+              throw new Error("Profile not found");
           }
+
+          setAvatarFile(`${profile[0].avatar_url}`);
+        } catch (error) {
+          console.log("Error retrieving user profile:",error)
+        }
+  
+      }
+      fetchUserProfile();
+  }, []);
+
+  useEffect(() => {
+      if(avatarFile) {
+          downloadImage(avatarFile); 
+      }
+  }, [avatarFile])
+
+  const downloadImage = async (path: string) => {
+    try {
+        const { data, error } = await supaClient.storage.from('avatars').download(path)
+        if (error) {
+          throw error
+        } else {
           const url = URL.createObjectURL(data)
           setAvatarUrl(url)
-        } catch (error: any) {
-          console.error('Error downloading image: ', error.message)
         }
-    }
-
-    const deleteOldImage = async () => {
-      if(avatarFile) {
-        const { error: uploadError } = await supaClient.storage.from('avatars').remove([avatarFile])
-        if (uploadError) {
-          throw uploadError
-        }
+      } catch (error: any) {
+        console.error('Error downloading image: ', error.message)
       }
-    }
+  }
 
-    const uploadImage = async (event: any) => {
-
-      deleteOldImage();
-      const file = event.target.files[0]
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Math.random()}.${fileExt}`
-      const filePath = `${fileName}`
-
-      const { error: uploadError } = await supaClient.storage.from('avatars').upload(filePath, file)
-
+  const deleteOldImage = async () => {
+    if(avatarFile) {
+      const { error: uploadError } = await supaClient.storage.from('avatars').remove([avatarFile])
       if (uploadError) {
-          throw uploadError
+        throw uploadError
       }
+    }
+  }
 
-      const { error: updateError } = await supaClient.from('user_profiles')
-      .update({avatar_url: filePath})
-      .eq("user_id", profileUser?.id);
-      
-      if(updateError) {
-          throw updateError;
-      }
-      setAvatarFile(filePath);
+  const uploadImage = async (event: any) => {
+
+    deleteOldImage();
+    const file = event.target.files[0]
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${Math.random()}.${fileExt}`
+    const filePath = `${fileName}`
+
+    const { error: uploadError } = await supaClient.storage.from('avatars').upload(filePath, file)
+
+    if (uploadError) {
+        throw uploadError
     }
 
-    return {uploadImage};
+    const { error: updateError } = await supaClient.from('user_profiles')
+    .update({avatar_url: filePath})
+    .eq("user_id", profileUser?.id);
+    
+    if(updateError) {
+        throw updateError;
+    }
+    setAvatarFile(filePath);
+  }
+
+  return {uploadImage};
 }

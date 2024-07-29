@@ -1,7 +1,7 @@
 import { Limits } from "../pages/Planning.tsx";
 
 
-interface ExercicesLimitsTableProps {
+interface ExercisesLimitsTableProps {
     side: string;
     limitsLeft: Limits;
     limitsRight: Limits;
@@ -9,7 +9,7 @@ interface ExercicesLimitsTableProps {
     setLimitsRight: React.Dispatch<React.SetStateAction<Limits>>;
 }
 
-const ExercicesLimitsTable: React.FC<ExercicesLimitsTableProps> = ({side,
+const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({side,
     limitsLeft,
     limitsRight,
     setLimitsLeft,
@@ -189,4 +189,4 @@ const ExercicesLimitsTable: React.FC<ExercicesLimitsTableProps> = ({side,
     )
 }
 
-export default ExercicesLimitsTable;
+export default ExercisesLimitsTable;

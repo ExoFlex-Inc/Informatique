@@ -155,7 +155,7 @@ export default function Dashboard() {
           <LocalFireDepartmentIcon className="text-orange-600" sx={{ fontSize: 'clamp(50px, 9vw, 200px)'}}/>
         </div>
         <div className="justify-center flex col-span-2">
-          <label style={{fontSize: 'clamp(0rem, 2.5vw, 1.875rem)'}} className="text-orange-600 text-center">Exercice yourself everyday to expand your streak !</label>
+          <label style={{fontSize: 'clamp(0rem, 2.5vw, 1.875rem)'}} className="text-orange-600 text-center">Exercise yourself everyday to expand your streak !</label>
         </div>
       </div>
       <div className="col-span-2">

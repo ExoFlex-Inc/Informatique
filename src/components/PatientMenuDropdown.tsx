@@ -1,4 +1,6 @@
 import { useEffect, useRef } from "react";
+import { useProfileContext } from "../context/profileContext.tsx";
+import { supaClient } from "../hooks/supa-client.ts";
 
 interface PatientMenuDropdownProps {
   clientId: string;
@@ -19,31 +21,23 @@ const PatientMenuDropdown: React.FC<PatientMenuDropdownProps> = ({
 }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const {profile} = useProfileContext();
+
   async function unlinkClientToAdmin(clientId: string) {
     try {
-      const requestBody = {
-        admin_id: null,
-        client_id: clientId,
-      };
 
-      const response = await fetch(
-        "http://localhost:3001/api/wellness_network",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestBody),
-        },
-      );
+      const {error} = await supaClient
+        .from('admin_client')
+        .delete()
+        .eq("admin_id", profile?.user_id)
+        .eq("client_id", clientId)
 
-      if (response.ok) {
-        const responseData = await response.json();
-        console.log("Response Data:", responseData);
+
+      if (!error) {
         console.log("Relationship remove from Supabase");
         return true;
       } else {
-        console.error("Failed to remove relationship from Supabase", response);
+        console.error("Failed to remove relationship from Supabase", error);
         return false;
       }
     } catch (error) {

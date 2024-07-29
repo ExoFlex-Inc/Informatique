@@ -18,7 +18,7 @@ const ExerciseOverviewWidget: React.FC<ExerciseOverviewWidgetProps> = ({stm32Dat
                     .select("*")
                     .eq("user_id", profile.user_id)
         
-                if (plan) {
+                if (plan && plan?.length > 0) {
                     setPlanData(plan[0].plan_content.plan);
                 }
             }
@@ -28,7 +28,7 @@ const ExerciseOverviewWidget: React.FC<ExerciseOverviewWidgetProps> = ({stm32Dat
 
     return (
         <div className="bg-white rounded-lg p-4 max-h-96 overflow-auto overflow-x-hidden">
-            <label style={{fontSize: 'clamp(0rem, 2.5vw, 1.5rem)'}} className="text-blue-600">Today's exercices</label>
+            <label style={{fontSize: 'clamp(0rem, 2.5vw, 1.5rem)'}} className="text-blue-600">Today's exercises</label>
             <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                     <tr className="divide-x divide-gray-200">
@@ -44,7 +44,7 @@ const ExerciseOverviewWidget: React.FC<ExerciseOverviewWidgetProps> = ({stm32Dat
                     </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                    {planData.map((item, index) => (
+                    {planData && planData.map((item, index) => (
                         ("movement" in item && 
                             <tr
                                 key={index}

@@ -52,7 +52,7 @@ const router = createBrowserRouter(
       <Route
         path="/manual"
         element={
-          <ProtectedRoute component={Manual} requiredPermission={["dev"]} />
+          <ProtectedRoute component={Manual} requiredPermission={["dev", "admin"]} />
         }
       />
       <Route path="/hmi" element={<HMI />} />

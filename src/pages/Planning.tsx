@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { RadioGroup, FormControlLabel, Radio, FormControl, FormLabel } from "@mui/material";
 import PatientSearchBar from "../components/PatientSearchBar.tsx";
 import { blue } from "@mui/material/colors";
-import ExercicesLimitsTable from "../components/ExercicesLimitsTable.tsx";
-import ExercicesPlanTable from "../components/ExercicesPlanTable.tsx";
+import ExercisesLimitsTable from "../components/ExercisesLimitsTable.tsx";
+import ExercisesPlanTable from "../components/ExercisesPlanTable.tsx";
 
 export interface Limits {
   torque: {
@@ -250,7 +250,7 @@ export default function Planning() {
       </div>
     <div className="overflow-auto">
 
-      <ExercicesLimitsTable limitsLeft={limitsLeft}
+      <ExercisesLimitsTable limitsLeft={limitsLeft}
         limitsRight={limitsRight}
         side={side}
         setLimitsLeft={setLimitsLeft}
@@ -258,7 +258,7 @@ export default function Planning() {
       />
 
       {plan.map((set, setIndex) => (
-        <ExercicesPlanTable key={setIndex}
+        <ExercisesPlanTable key={setIndex}
           set={set}
           setIndex={setIndex}
           setPlan={setPlan}

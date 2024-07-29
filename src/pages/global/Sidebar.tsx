@@ -27,16 +27,15 @@ interface ProSidebarProps {
   permissions: string;
 }
 
-const Item = ({ title, to, icon, selected, setSelected }) => {
+const Item = ({ title, to, icon, selected }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
 
   const handleClick = () => {
-    setSelected(title);
+    localStorage.setItem("selected", title);
     navigate(to);
   };
-
   return (
     <MenuItem
       active={selected === title}
@@ -55,7 +54,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [selected, setSelected] = useState(
+  const [selected] = useState(
     localStorage.getItem("selected") || "Dashboard",
   );
 
@@ -66,10 +65,6 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
   useEffect(() => {
     setIsCollapsed(isTablet);
   }, [isTablet]);
-
-  useEffect(() => {
-    localStorage.setItem("selected", selected);
-  }, [selected]);
 
   return (
     <Box
@@ -168,7 +163,6 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
               to="/dashboard"
               icon={<HomeOutlinedIcon />}
               selected={selected}
-              setSelected={setSelected}
             />
             {(props.permissions === "dev" || props.permissions === "admin") && (
               <Item
@@ -176,7 +170,6 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                 to="/planning"
                 icon={<FitnessCenterIcon />}
                 selected={selected}
-                setSelected={setSelected}
               />
             )}
             {(props.permissions === "dev" || props.permissions === "admin") && (
@@ -185,7 +178,6 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                 to="/wellness_network"
                 icon={<GroupIcon />}
                 selected={selected}
-                setSelected={setSelected}
               />
             )}
 
@@ -195,7 +187,6 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                 to="/activity"
                 icon={<FeedOutlinedIcon />}
                 selected={selected}
-                setSelected={setSelected}
               />
             )}
 
@@ -205,7 +196,6 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                 to="/hmi"
                 icon={<NavigateNextIcon style={{ fontSize: "small" }} />}
                 selected={selected}
-                setSelected={setSelected}
               />
               {(props.permissions == "dev" ||
                 props.permissions === "admin") && (
@@ -214,17 +204,9 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                   to="/manual"
                   icon={<NavigateNextIcon style={{ fontSize: "small" }} />}
                   selected={selected}
-                  setSelected={setSelected}
                 />
               )}
             </SubMenu>
-            {/* <Item
-              title="Settings"
-              to="/settings"
-              icon={<SettingsOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            /> */}
           </Box>
           <Box
             display="flex"

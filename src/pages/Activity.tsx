@@ -281,7 +281,7 @@ export default function Activity() {
           >
             <Paper sx={{width: '25vw', padding: '10px'}}>
               <Typography className="text-gray-500" variant="h4">
-                Missing exercice days:
+                Missing exercise days:
               </Typography>
               {missingDates.map((element, index) => 
                 <Typography key={index} variant="body1" className="text-gray-500">

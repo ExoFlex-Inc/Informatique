@@ -1,7 +1,7 @@
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Set, SetRest } from "../pages/Planning.tsx";
 
-interface ExercicesPlanTableProps {
+interface ExercisesPlanTableProps {
     set: Set | SetRest;
     setIndex: number;
     setPlan: React.Dispatch<React.SetStateAction<(Set | SetRest)[]>>;
@@ -11,7 +11,7 @@ interface ExercicesPlanTableProps {
     checked: boolean;
 }
 
-const ExercicesPlanTable: React.FC<ExercicesPlanTableProps> = ({
+const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
     set,
     setIndex,
     setPlan,
@@ -225,4 +225,4 @@ const ExercicesPlanTable: React.FC<ExercicesPlanTableProps> = ({
     )
 }
 
-export default ExercicesPlanTable;
+export default ExercisesPlanTable;
