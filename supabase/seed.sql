@@ -1,4 +1,3 @@
--- Insert a new user into auth.users and auth.identities tables
 DO $$
 DECLARE
     i INTEGER;
@@ -63,7 +62,6 @@ BEGIN
             ''
         );
 
-        -- Insert into user_profiles
         INSERT INTO user_profiles (
             user_id, 
             username, 
@@ -73,7 +71,7 @@ BEGIN
             email
         ) 
         VALUES (
-            new_id, -- Ensuring the same UUID is used
+            new_id,
             'User', 
             'Lastname', 
             'Client', 
@@ -173,7 +171,6 @@ BEGIN
             ''
         );
 
-        -- Insert into user_profiles
         INSERT INTO user_profiles (
             user_id, 
             username, 
@@ -183,7 +180,7 @@ BEGIN
             email
         ) 
         VALUES (
-            new_id, -- Ensuring the same UUID is used
+            new_id,
             'Admin', 
             'Lastname', 
             'Physiotherapist', 
@@ -236,7 +233,6 @@ BEGIN
         ''
     );
 
-    -- Insert into user_profiles
     INSERT INTO user_profiles (
         user_id, 
         username, 
@@ -246,7 +242,7 @@ BEGIN
         email
     ) 
     VALUES (
-        new_id, -- Ensuring the same UUID is used
+        new_id,
         'Dev',
         'Lastname',
         'Developper',
