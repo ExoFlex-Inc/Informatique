@@ -170,15 +170,6 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
               selected={selected}
               setSelected={setSelected}
             />
-            {/* <SubMenu label="Charts" icon={<BarChartIcon />}>
-              <Item
-                title="Activity"
-                to="/activity"
-                icon={<NavigateNextIcon style={{ fontSize: "small" }} />}
-                selected={selected}
-                setSelected={setSelected}
-              />
-            </SubMenu> */}
             {(props.permissions === "dev" || props.permissions === "admin") && (
               <Item
                 title="Planning"
