@@ -1,5 +1,8 @@
 import { useEffect, useRef } from "react";
 import { supaClient } from "../hooks/supa-client.ts";
+
+import useDropdown from "../hooks/use-dropdown.ts";
+
 interface PatientMenuDropdownProps {
   clientId: string;
   setOpenMenuIndex: React.Dispatch<React.SetStateAction<Number | null>>;
@@ -15,7 +18,7 @@ const PatientMenuDropdown: React.FC<PatientMenuDropdownProps> = ({
   setListOfPatients,
   index,
 }) => {
-  const dropdownRef = useRef(null);
+  const dropdownRef = useDropdown(setOpenMenuIndex);
 
   async function unlinkClientToAdmin(clientId: string) {
     const { error: updateError } = await supaClient
@@ -43,19 +46,6 @@ const PatientMenuDropdown: React.FC<PatientMenuDropdownProps> = ({
       setOpenMenuIndex(null);
     }
   };
-
-  useEffect(() => {
-    const handleClickOutside = (event: any) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setOpenMenuIndex(null);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [dropdownRef]);
 
   return (
     <div

@@ -1,7 +1,8 @@
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { supaClient } from "../hooks/supa-client.ts";
 import { TextField, InputAdornment } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import useDropdown from "../hooks/use-dropdown.ts";
 
 interface AddPatientDropdownProps {
   adminId: undefined | string;
@@ -19,7 +20,8 @@ const AddPatientDropDown: React.FC<AddPatientDropdownProps> = ({
   const [clients, setClients] = useState<any[]>([]);
   const [filteredEmails, setFilteredEmails] = useState<string[]>([]);
   const [searchedEmail, setSearchedEmail] = useState("");
-  const dropdownRef = useRef(null);
+
+  const dropdownRef = useDropdown(setIsOpen);
 
   useEffect(() => {
     const fetchAllClients = async () => {
@@ -46,19 +48,6 @@ const AddPatientDropDown: React.FC<AddPatientDropdownProps> = ({
 
     fetchAllClients();
   }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event: any) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [dropdownRef]);
 
   function closeDropdown() {
     setIsOpen(false);
