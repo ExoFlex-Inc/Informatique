@@ -1,4 +1,3 @@
--- Insert a new user into auth.users and auth.identities tables
 DO $$
 DECLARE
     i INTEGER;
@@ -63,7 +62,6 @@ BEGIN
             ''
         );
 
-        -- Insert into user_profiles
         INSERT INTO user_profiles (
             user_id, 
             username, 
@@ -73,7 +71,7 @@ BEGIN
             email
         ) 
         VALUES (
-            new_id, -- Ensuring the same UUID is used
+            new_id,
             'User', 
             'Lastname', 
             'Client', 
@@ -128,4 +126,128 @@ BEGIN
         END LOOP;
 
     END LOOP;
+
+    FOR i IN 1..10 LOOP
+        new_email := 'admin' || i || '@example.com';
+        new_id := gen_random_uuid();
+        base_date := NOW() - INTERVAL '1 month'; 
+
+        INSERT INTO auth.users (
+            instance_id, 
+            id, 
+            aud, 
+            role, 
+            email, 
+            encrypted_password, 
+            email_confirmed_at, 
+            recovery_sent_at, 
+            last_sign_in_at, 
+            raw_app_meta_data, 
+            raw_user_meta_data, 
+            created_at, 
+            updated_at,
+            confirmation_token, 
+            email_change, 
+            email_change_token_new, 
+            recovery_token
+        )
+        VALUES (
+            '00000000-0000-0000-0000-000000000000', 
+            new_id, 
+            'authenticated', 
+            'authenticated', 
+            new_email, 
+            crypt('password123', gen_salt('bf')), 
+            '2023-05-03 19:41:43.585805+00', 
+            '2023-04-22 13:10:03.275387+00', 
+            '2023-04-22 13:10:31.458239+00', 
+            '{"provider":"email","providers":["email"]}', 
+            '{}', 
+            NOW(), 
+            NOW(),
+            '', 
+            '', 
+            '', 
+            ''
+        );
+
+        INSERT INTO user_profiles (
+            user_id, 
+            username, 
+            lastname, 
+            speciality, 
+            permissions,
+            email
+        ) 
+        VALUES (
+            new_id,
+            'Admin', 
+            'Lastname', 
+            'Physiotherapist', 
+            'admin',
+            new_email
+        );
+
+    END LOOP;
+
+    new_email := 'dev@dev.com';
+    new_id := gen_random_uuid();
+    base_date := NOW() - INTERVAL '1 month'; 
+
+    INSERT INTO auth.users (
+        instance_id, 
+        id, 
+        aud, 
+        role, 
+        email, 
+        encrypted_password, 
+        email_confirmed_at, 
+        recovery_sent_at, 
+        last_sign_in_at, 
+        raw_app_meta_data, 
+        raw_user_meta_data, 
+        created_at, 
+        updated_at,
+        confirmation_token, 
+        email_change, 
+        email_change_token_new, 
+        recovery_token
+    )
+    VALUES (
+        '00000000-0000-0000-0000-000000000000', 
+        new_id, 
+        'authenticated', 
+        'authenticated', 
+        new_email, 
+        crypt('dev', gen_salt('bf')), 
+        '2023-05-03 19:41:43.585805+00', 
+        '2023-04-22 13:10:03.275387+00', 
+        '2023-04-22 13:10:31.458239+00', 
+        '{"provider":"email","providers":["email"]}', 
+        '{}', 
+        NOW(), 
+        NOW(),
+        '', 
+        '', 
+        '', 
+        ''
+    );
+
+    INSERT INTO user_profiles (
+        user_id, 
+        username, 
+        lastname, 
+        speciality, 
+        permissions,
+        email
+    ) 
+    VALUES (
+        new_id,
+        'Dev',
+        'Lastname',
+        'Developper',
+        'dev',
+        new_email
+    );
+
 END $$;
