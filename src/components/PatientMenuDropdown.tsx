@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import useDropdown from "../hooks/use-dropdown.ts";
 
 interface PatientMenuDropdownProps {
   clientId: string;
@@ -15,7 +15,7 @@ const PatientMenuDropdown: React.FC<PatientMenuDropdownProps> = ({
   setListOfPatients,
   index,
 }) => {
-  const dropdownRef = useRef(null);
+  const dropdownRef = useDropdown(setOpenMenuIndex);
 
   async function unlinkClientToAdmin(clientId: string) {
     try {
@@ -62,19 +62,6 @@ const PatientMenuDropdown: React.FC<PatientMenuDropdownProps> = ({
       setOpenMenuIndex(null);
     }
   };
-
-  useEffect(() => {
-    const handleClickOutside = (event: any) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setOpenMenuIndex(null);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [dropdownRef]);
 
   return (
     <div
