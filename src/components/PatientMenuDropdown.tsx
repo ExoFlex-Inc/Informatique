@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
+import { removeRelation } from "../controllers/relationsController.ts";
 import { useProfileContext } from "../context/profileContext.tsx";
-import { supaClient } from "../hooks/supa-client.ts";
 
 interface PatientMenuDropdownProps {
   clientId: string;
@@ -20,34 +20,10 @@ const PatientMenuDropdown: React.FC<PatientMenuDropdownProps> = ({
   buttonRef,
 }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
-
   const {profile} = useProfileContext();
-
-  async function unlinkClientToAdmin(clientId: string) {
-    try {
-
-      const {error} = await supaClient
-        .from('admin_client')
-        .delete()
-        .eq("admin_id", profile?.user_id)
-        .eq("client_id", clientId)
-
-
-      if (!error) {
-        console.log("Relationship remove from Supabase");
-        return true;
-      } else {
-        console.error("Failed to remove relationship from Supabase", error);
-        return false;
-      }
-    } catch (error) {
-      console.error("Error removing relationship from Supabase:", error);
-      return false;
-    }
-  }
-
+  
   const removeUser = async () => {
-    const unlinkSuccessful = await unlinkClientToAdmin(clientId);
+    const unlinkSuccessful = await removeRelation(clientId, profile);
 
     if (unlinkSuccessful) {
       const newList = [

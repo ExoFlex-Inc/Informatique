@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import {
   Route,
   Outlet,
@@ -32,6 +32,7 @@ import { AvatarProvider } from "./context/avatarContext.tsx";
 import { UserProvider } from "./context/profileContext.tsx";
 import { UserProfile } from "./hooks/use-session.ts";
 import { Session } from "@supabase/supabase-js";
+import { useAvatar } from "./hooks/use-avatar.ts";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -94,6 +95,14 @@ function Layout() {
   });
 
   const supabaseUserInfo = useSession();
+  const {downloadImage} = useAvatar()
+
+  useEffect(() => {
+    console.log("profile", supabaseUserInfo.profile);
+    if(supabaseUserInfo.profile) {
+      downloadImage(supabaseUserInfo.profile.avatar_url);
+    }
+  }, [supabaseUserInfo.profile])
 
   return (
     <UserContext.Provider value={supabaseUserInfo}>

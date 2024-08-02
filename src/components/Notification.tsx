@@ -2,14 +2,15 @@ import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined
 import { useEffect, useState, useRef } from "react";
 import { useProfileContext } from "../context/profileContext.tsx";
 import { supaClient } from "../hooks/supa-client.ts";
+import { refuseRequest, acceptRequest, fetchNotifications } from "../controllers/relationsController.ts";
 import { List, ListItem, createTheme, Grid, Badge, Paper, Button, IconButton, ThemeProvider, Box, ListItemText, Avatar, ListItemAvatar, Typography } from "@mui/material";
 
 const Notification = () => {
     const [isNotifications, setIsNotifications] = useState(false);
     const [clients, setClients] = useState<any[]>([]);
     const [isOpen, setIsOpen] = useState(false);
-    const [avatars, setAvatars] = useState<string []>([]);
-    const [relation, setRelation] = useState<any[]>([])
+    const [avatars, setAvatars] = useState<(string | null | undefined) []>([]);
+    const [relations, setRelations] = useState<any[]>([])
     const dropdownRef = useRef(null);
     const buttonRef = useRef(null);
 
@@ -17,33 +18,26 @@ const Notification = () => {
     const {profile} = useProfileContext();
 
     useEffect(() => {
-        async function fetchNotifications () {
-            if (profile) {
-                const { data, error } = await supaClient
-                    .from("admin_client")
-                    .select()
-                    .eq("admin_id", profile?.user_id)
-                    .eq("relation_status", "pending")
-                    .limit(10)
-    
-                if (error) {
-                    console.error("Error fetching notifications:", error.message);
-                } else {
-                    if (data.length > 0) {
-                        setIsNotifications(true);
-                        const clients = await Promise.all(data.map((element) => fetchClient(element.client_id))) 
-                        setClients(clients);
-                        setRelation(data);
-                    }
+        async function fetchAdminNotifications () {
+            const notificationData = await fetchNotifications(profile);
+            if (notificationData) {
+                if (notificationData.length > 0) {
+                    setIsNotifications(true);
+                    const clients = await Promise.all(notificationData.map((element: any) => fetchClient(element.client_id))) 
+                    setClients(clients);
+                    setRelations(notificationData);
                 }
             }
         }
-        fetchNotifications();
+        fetchAdminNotifications();
     }, [])
 
     useEffect(() => {
         const paths = clients.map((client) => client.avatar_url)
         downloadImage(paths)
+        if (clients.length == 0) {
+            setIsNotifications(false);
+        }
     },[clients])
 
     useEffect(() => {
@@ -63,21 +57,24 @@ const Notification = () => {
         };
       }, [dropdownRef, buttonRef, setIsOpen]);
 
-    const downloadImage = (paths: string[]) => {
-        paths.forEach(async (path) => {
+    const downloadImage = async (paths: string[]) => {
+        const images = await Promise.all(paths.map(async (path) => {
             if(path){
                 try {
                     const { data, error } = await supaClient.storage.from('avatars').download(path)
                     if (error) {
-                        throw error
+                        throw error;
                     }
                     const url = URL.createObjectURL(data)
-                    setAvatars([...avatars, url])
+                    return url;
                 } catch (error: any) {
                     console.error('Error downloading image: ', error.message)
                 }
+            } else {
+                return null;
             }
-        })
+        }))
+        setAvatars(images);
     }
 
     async function fetchClient (clientId: string) {
@@ -94,44 +91,37 @@ const Notification = () => {
         }
     }
 
-    async function acceptRequest (relation: any) {
-        const {error} = await supaClient
-            .from("admin_client")
-            .update({relation_status: "accepted"})
-            .eq("id", relation.id)
-        if (error) {
-            console.error("Failed to update the relation", error);
-        } else {
-            const newClients = clients.filter((client) => {
-                if (client.user_id == relation.client_id) {
-                    return false;
-                } else {
-                    return true;
-                }
-            })
-            setClients(newClients);
-            setIsNotifications(false);
+    async function acceptClientRequest (relation: any) {
+        const requestAccepted = await acceptRequest(relation);
+        if(requestAccepted) {
+            filteringNotifications(relation);
         }
     }
 
-    async function refuseRequest (relation: any) {
-        const {error} = await supaClient
-            .from("admin_client")
-            .delete()
-            .eq("id", relation.id)
-        if (error) {
-            console.error("Failed to delete the relation", error);
-        } else {
-            const newClients = clients.filter((client) => {
-                if (client.user_id == relation.client_id) {
-                    return false;
-                } else {
-                    return true;
-                }
-            })
-            setClients(newClients);
-            setIsNotifications(false);
+    async function refuseClientRequest (relation: any) {
+        const isRequestRefuse = await refuseRequest(relation);
+        if (isRequestRefuse) {
+            filteringNotifications(relation);
         }
+    }
+
+    function filteringNotifications (relation: any) {
+        const newClients = clients.filter((client) => {
+            if (client.user_id == relation.client_id) {
+                return false;
+            } else {
+                return true;
+            }
+        })
+        const newRelation = relations.filter((element) => {
+            if (relation.id === element.id) {
+                return false;
+            } else {
+                return true;
+            }
+        })
+        setRelations(newRelation);
+        setClients(newClients);
     }
 
     return (
@@ -179,8 +169,8 @@ const Notification = () => {
                                                     />
                                                 </Grid>
                                                 <Grid className="" item xs={12}>
-                                                    <Button onClick={() => acceptRequest(relation[index])} color="success">Accept</Button>
-                                                    <Button onClick={() => refuseRequest(relation[index])} color="error">Refuse</Button>
+                                                    <Button onClick={() => acceptClientRequest(relations[index])} color="success">Accept</Button>
+                                                    <Button onClick={() => refuseClientRequest(relations[index])} color="error">Refuse</Button>
                                                 </Grid>
                                             </Grid>
                                         </ListItem>

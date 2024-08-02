@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { supaClient } from "../hooks/supa-client.ts";
 import SendIcon from '@mui/icons-material/Send';
 import { useProfileContext } from "../context/profileContext.tsx";
-
+import { fetchRelation, sendRequest } from "../controllers/relationsController.ts";
 
 const ProfessionalNetwork = () => {
     const [admins, setAdmins] = useState<any[]>([]);
@@ -36,7 +36,7 @@ const ProfessionalNetwork = () => {
 
     useEffect(() => {
         if(admins){
-            fetchRelation();
+            fetch();
         }
     }, [admins])
 
@@ -48,36 +48,22 @@ const ProfessionalNetwork = () => {
         }
     },[selectedAdmin])
 
-    const fetchRelation = async () => {
-        if (profile) {
-            const { data, error } = await supaClient
-                .from("admin_client")
-                .select()
-                .eq("client_id", profile?.user_id)
-            if (error) {
-                console.error("Error fetching client ID:", error.message);
-            } else {
-                if(data) {
-                    const searchBarAdmins = admins.filter((admin) => !data.some((element) => admin.user_id === element.admin_id));
-                    const tableAdmins = admins.filter((admin) => data.some((element) => admin.user_id === element.admin_id));
-                    setVisibleAdmins(searchBarAdmins);
-                    setTableAdmins(tableAdmins);
-                    setRelations(data);        
-                }
-            }
+    const fetch = async () => {
+        const fetchData = await fetchRelation(profile)
+        if(fetchData) {
+            const searchBarAdmins = admins.filter((admin) => !fetchData.some((element) => admin.user_id === element.admin_id));
+            const tableAdmins = admins.filter((admin) => fetchData.some((element) => admin.user_id === element.admin_id));
+            setVisibleAdmins(searchBarAdmins);
+            setTableAdmins(tableAdmins);
+            setRelations(fetchData);        
         }
     }
 
-    const sendRequest = async () => {
-        const {error} = await supaClient
-            .from("admin_client")
-            .insert({admin_id: selectedAdmin.user_id, client_id: profile?.user_id, relation_status: 'pending'})
-        if (error) {
-            throw error;
-        }
+    const sendRequestToAdmin = async () => {
+        sendRequest(selectedAdmin, profile)
         setValues(null);
         setButtonDisable(true);
-        fetchRelation();
+        fetch();
     }
 
     return (
@@ -119,7 +105,7 @@ const ProfessionalNetwork = () => {
                     disabled={buttonDisable}
                     color="info"
                     endIcon={<SendIcon />}
-                    onClick={sendRequest}
+                    onClick={sendRequestToAdmin}
                 >
                     Send request
                 </Button>

@@ -22,7 +22,6 @@ export interface SupabaseUserInfo {
 
 export function useSession(): SupabaseUserInfo {
   const { session, profile, setSession, setProfile} = useProfileContext();
-
   const [channel, setChannel] = useState<RealtimeChannel | null>(null);
   const navigate = useNavigate();
 

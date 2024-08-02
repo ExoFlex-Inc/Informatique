@@ -5,6 +5,7 @@ import { useAvatarContext } from "../context/avatarContext.tsx";
 
 interface AvatarInfo {
     uploadImage: (event: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+    downloadImage: (path: string | undefined) => Promise<void>
 }
 
 export function useAvatar(): AvatarInfo {
@@ -35,8 +36,10 @@ export function useAvatar(): AvatarInfo {
           if (!profile || error) {
               throw new Error("Profile not found");
           }
-
-          setAvatarFile(`${profile[0].avatar_url}`);
+          
+          if(avatarFile) {
+            setAvatarFile(`${profile[0].avatar_url}`);
+          }
         } catch (error) {
           console.log("Error retrieving user profile:",error)
         }
@@ -46,13 +49,14 @@ export function useAvatar(): AvatarInfo {
   }, []);
 
   useEffect(() => {
-      if(avatarFile) {
-          downloadImage(avatarFile); 
-      }
+    if(avatarFile) {
+      downloadImage(avatarFile); 
+    }
   }, [avatarFile])
 
-  const downloadImage = async (path: string) => {
+  const downloadImage = async (path: string | undefined) => {
     try {
+      if(path) {
         const { data, error } = await supaClient.storage.from('avatars').download(path)
         if (error) {
           throw error
@@ -60,6 +64,9 @@ export function useAvatar(): AvatarInfo {
           const url = URL.createObjectURL(data)
           setAvatarUrl(url)
         }
+      } else {
+        setAvatarUrl(null);
+      }
       } catch (error: any) {
         console.error('Error downloading image: ', error.message)
       }
@@ -98,5 +105,5 @@ export function useAvatar(): AvatarInfo {
     setAvatarFile(filePath);
   }
 
-  return {uploadImage};
+  return {uploadImage, downloadImage};
 }
