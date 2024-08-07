@@ -18,7 +18,7 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import FeedOutlinedIcon from "@mui/icons-material/FeedOutlined";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import GroupIcon from "@mui/icons-material/Group";
-import Icon from '../../../public/assets/user.png';
+import Icon from "../../../public/assets/user.png";
 import { Avatar } from "@mui/material";
 import { useAvatarContext } from "../../context/avatarContext.tsx";
 import { useProfileContext } from "../../context/profileContext.tsx";
@@ -54,9 +54,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [selected] = useState(
-    localStorage.getItem("selected") || "Dashboard",
-  );
+  const [selected] = useState(localStorage.getItem("selected") || "Dashboard");
 
   const { profile } = useProfileContext();
   const isTablet = useMediaQuery("(max-width: 768px)");
@@ -135,7 +133,14 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
           {!isCollapsed && (
             <Box mb="25px">
               <Box display="flex" justifyContent="center" alignItems="center">
-                <Avatar src={avatarUrl ? avatarUrl : Icon} sx={isTablet ? { width: 50, height: 50 } : { width: 100, height: 100 }} />
+                <Avatar
+                  src={avatarUrl ? avatarUrl : Icon}
+                  sx={
+                    isTablet
+                      ? { width: 50, height: 50 }
+                      : { width: 100, height: 100 }
+                  }
+                />
               </Box>
 
               <Box textAlign="center">
@@ -158,7 +163,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
           )}
 
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
-            {(props.permissions === "client") && (
+            {props.permissions === "client" && (
               <Item
                 title="Dashboard"
                 to="/dashboard"

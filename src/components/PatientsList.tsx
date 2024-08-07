@@ -18,7 +18,7 @@ const PatientList: React.FC<PatientListProps> = ({
     if (el && !buttonRefs.current[index]) {
       buttonRefs.current[index] = el;
     }
-  }
+  };
 
   function toggleDropdown(index: Number) {
     setOpenMenuIndex(index === openMenuIndex ? null : index);
@@ -100,7 +100,7 @@ const PatientList: React.FC<PatientListProps> = ({
             </li>
             {openMenuIndex === index && (
               <PatientMenuDropdown
-                buttonRef={{ current: buttonRefs.current[index]}}
+                buttonRef={{ current: buttonRefs.current[index] }}
                 clientId={patient.user_id}
                 setListOfPatients={setListOfPatients}
                 visibleListOfPatients={visibleListOfPatients}

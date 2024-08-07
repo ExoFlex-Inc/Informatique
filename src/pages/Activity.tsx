@@ -8,7 +8,14 @@ import "rsuite/DateRangePicker/styles/index.css";
 import { DateRange } from "rsuite/esm/DateRangePicker/types.js";
 import { supaClient } from "../hooks/supa-client.ts";
 import { ChartData } from "chart.js";
-import { Button, Box, ThemeProvider, createTheme, Paper, Typography } from "@mui/material";
+import {
+  Button,
+  Box,
+  ThemeProvider,
+  createTheme,
+  Paper,
+  Typography,
+} from "@mui/material";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import Report from "../components/Report.tsx";
 
@@ -182,21 +189,19 @@ export default function Activity() {
       getMissingDates(data);
       getAverageAmplitude(data);
     }
-  }, [data])
+  }, [data]);
 
-  function getAverageAmplitude (data: dataStructure[]) {
-    const amplitudes: number[] = data.map((element) => element.angle_max)
-    let amplitudeSum: number = 0; 
+  function getAverageAmplitude(data: dataStructure[]) {
+    const amplitudes: number[] = data.map((element) => element.angle_max);
+    let amplitudeSum: number = 0;
 
     amplitudes.forEach((element) => {
       amplitudeSum = element + amplitudeSum;
-    })
-    setAverageAmplitude((amplitudeSum/amplitudes.length).toFixed(2));
-    
+    });
+    setAverageAmplitude((amplitudeSum / amplitudes.length).toFixed(2));
   }
 
-  function getMissingDates (data: dataStructure[]) {
-
+  function getMissingDates(data: dataStructure[]) {
     const oneDay = 24 * 60 * 60 * 1000;
     const missingDates: string[] = [];
 
@@ -210,12 +215,11 @@ export default function Activity() {
       const diffInDays = (nextDate.getTime() - currentDate.getTime()) / oneDay;
 
       for (let j = 1; j < diffInDays; j++) {
-          const missingDate = new Date(currentDate.getTime() + j * oneDay);
-          missingDates.push(missingDate.toISOString().split('T')[0]);
+        const missingDate = new Date(currentDate.getTime() + j * oneDay);
+        missingDates.push(missingDate.toISOString().split("T")[0]);
       }
     }
     setMissingDates(missingDates);
-
   }
 
   return (
@@ -264,42 +268,48 @@ export default function Activity() {
           <div className="mt-4 basis-full">
             <LineChart type="activity" chartData={dataset2} title={title2} />
           </div>
-          
         )}
       </div>
 
-      {selectedPatient.length !== 0 && date && graphType && 
-        <Box justifyContent="center" sx={{ display: 'flex', margin: '15px', gap: '15px' }}>
+      {selectedPatient.length !== 0 && date && graphType && (
+        <Box
+          justifyContent="center"
+          sx={{ display: "flex", margin: "15px", gap: "15px" }}
+        >
           <ThemeProvider
             theme={createTheme({
-                palette: {
-                mode: 'light',
-                primary: { main: 'rgb(102, 157, 246)' },
-                background: { paper: 'rgb(235, 235, 235)' },
-                },
+              palette: {
+                mode: "light",
+                primary: { main: "rgb(102, 157, 246)" },
+                background: { paper: "rgb(235, 235, 235)" },
+              },
             })}
           >
-            <Paper sx={{width: '25vw', padding: '10px'}}>
+            <Paper sx={{ width: "25vw", padding: "10px" }}>
               <Typography className="text-gray-500" variant="h4">
                 Missing exercise days:
               </Typography>
-              {missingDates.map((element, index) => 
-                <Typography key={index} variant="body1" className="text-gray-500">
+              {missingDates.map((element, index) => (
+                <Typography
+                  key={index}
+                  variant="body1"
+                  className="text-gray-500"
+                >
                   {element}
                 </Typography>
-              )}
+              ))}
             </Paper>
           </ThemeProvider>
           <ThemeProvider
             theme={createTheme({
-                palette: {
-                mode: 'light',
-                primary: { main: 'rgb(102, 157, 246)' },
-                background: { paper: 'rgb(235, 235, 235)' },
-                },
+              palette: {
+                mode: "light",
+                primary: { main: "rgb(102, 157, 246)" },
+                background: { paper: "rgb(235, 235, 235)" },
+              },
             })}
           >
-            <Paper sx={{width: '25vw', padding: '10px'}}>
+            <Paper sx={{ width: "25vw", padding: "10px" }}>
               <Typography className="text-gray-500" variant="h4">
                 Maximum amplitude average in dates selection:
               </Typography>
@@ -309,7 +319,7 @@ export default function Activity() {
             </Paper>
           </ThemeProvider>
         </Box>
-      }
+      )}
       {selectedPatient?.length !== 0 && date && graphType && (
         <Button
           className="!bg-blue-600 absolute right-4 bottom-4"

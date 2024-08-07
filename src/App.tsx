@@ -61,7 +61,10 @@ const router = createBrowserRouter(
       <Route
         path="/manual"
         element={
-          <ProtectedRoute component={Manual} requiredPermission={["dev", "admin"]} />
+          <ProtectedRoute
+            component={Manual}
+            requiredPermission={["dev", "admin"]}
+          />
         }
       />
       <Route path="/hmi" element={<HMI />} />
@@ -84,32 +87,31 @@ const router = createBrowserRouter(
           />
         }
       />
-      <Route path="/profile" element={<Profile />}/>
-      <Route path="/professional_network" element={<ProfessionalNetwork />}/>
-    </Route>
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/professional_network" element={<ProfessionalNetwork />} />
+    </Route>,
   ),
 );
 
 function Layout() {
-
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  
+
   const UserContext = createContext<SupabaseUserInfo>({
     session,
     profile,
     setSession,
-    setProfile
+    setProfile,
   });
 
   const supabaseUserInfo = useSession();
-  const {downloadImage} = useAvatar()
+  const { downloadImage } = useAvatar();
 
   useEffect(() => {
-    if(supabaseUserInfo.profile) {
+    if (supabaseUserInfo.profile) {
       downloadImage(supabaseUserInfo.profile.avatar_url);
     }
-  }, [supabaseUserInfo.profile])
+  }, [supabaseUserInfo.profile]);
 
   return (
     <UserContext.Provider value={supabaseUserInfo}>
@@ -133,13 +135,13 @@ function App() {
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-          <UserProvider>
-            <AvatarProvider>
-              <div className="app">
-                <RouterProvider router={router} />
-              </div>
-            </AvatarProvider>
-          </UserProvider>
+        <UserProvider>
+          <AvatarProvider>
+            <div className="app">
+              <RouterProvider router={router} />
+            </div>
+          </AvatarProvider>
+        </UserProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>
   );

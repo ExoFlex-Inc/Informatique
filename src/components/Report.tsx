@@ -17,39 +17,36 @@ const Report: React.FC<ReportProps> = ({
   data,
   chartImage1,
 }) => {
-  const [reporter, setReporter] = useState('');
+  const [reporter, setReporter] = useState("");
   const currentDate = new Date(Date.now());
 
   useEffect(() => {
-    async function getReporter () {
-
+    async function getReporter() {
       try {
         const {
           data: { user },
         } = await supaClient.auth.getUser();
 
         if (!user) {
-          console.error("Forbidden")
+          console.error("Forbidden");
         }
-  
+
         const { data: profile, error } = await supaClient
           .from("user_profiles")
           .select("*")
           .eq("user_id", user?.id);
-  
-          if (!profile || error) {
-            console.error("Forbidden")
-          } else {
-            setReporter(`${profile[0].username} ${profile[0].lastname}`)
-          }
 
+        if (!profile || error) {
+          console.error("Forbidden");
+        } else {
+          setReporter(`${profile[0].username} ${profile[0].lastname}`);
+        }
       } catch (error) {
-        console.log("Error retrieving reporter profile",error)
+        console.log("Error retrieving reporter profile", error);
       }
-
     }
     getReporter();
-  }, [])
+  }, []);
 
   return (
     <Document>

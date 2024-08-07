@@ -1,5 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { RadioGroup, FormControlLabel, Radio, FormControl, FormLabel } from "@mui/material";
+import {
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  FormControl,
+  FormLabel,
+} from "@mui/material";
 import PatientSearchBar from "../components/PatientSearchBar.tsx";
 import { blue } from "@mui/material/colors";
 import ExercisesLimitsTable from "../components/ExercisesLimitsTable.tsx";
@@ -7,15 +13,15 @@ import ExercisesPlanTable from "../components/ExercisesPlanTable.tsx";
 
 export interface Limits {
   torque: {
-    dorsiflexion: number,
-    extension: number,
-    eversion: number
-  },
+    dorsiflexion: number;
+    extension: number;
+    eversion: number;
+  };
   angles: {
-    dorsiflexion: number,
-    extension: number,
-    eversion: number
-  }
+    dorsiflexion: number;
+    extension: number;
+    eversion: number;
+  };
 }
 
 export interface Set {
@@ -40,12 +46,14 @@ export default function Planning() {
       rest: 0,
       repetitions: 0,
       speed: 0,
-      movement: [{
-        exercise: "",
-        target_angle: 0,
-        target_torque: 0,
-        time: 0
-      }]
+      movement: [
+        {
+          exercise: "",
+          target_angle: 0,
+          target_torque: 0,
+          time: 0,
+        },
+      ],
     },
   ]);
   const [limitsRight, setLimitsRight] = useState<Limits>({
@@ -65,13 +73,13 @@ export default function Planning() {
   const checkboxRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
-    if(plan.length < 1) {
+    if (plan.length < 1) {
       setAddExerciseDisable(true);
     }
-  },[plan])
+  }, [plan]);
 
   useEffect(() => {
-    if(selectedPatient.length != 0) {
+    if (selectedPatient.length != 0) {
       async function fetchPlanData() {
         const data = await planInit();
         if (data.loaded && data.planData[0]) {
@@ -81,7 +89,7 @@ export default function Planning() {
         }
       }
       fetchPlanData();
-      selectedPatient.length == 0 ? setIsDisabled(true) : setIsDisabled(false)
+      selectedPatient.length == 0 ? setIsDisabled(true) : setIsDisabled(false);
     }
   }, [selectedPatient]);
 
@@ -91,25 +99,28 @@ export default function Planning() {
         return true;
       }
       return false;
-    })
+    });
     if (filteredCheckbox.length > 0) {
       setAddExerciseDisable(false);
     } else {
       setAddExerciseDisable(true);
     }
-  },[checked])
+  }, [checked]);
 
   async function planInit() {
     try {
       if (selectedPatient) {
         console.log("Getting the current plan...");
-        const responseGetPlanning = await fetch("http://localhost:3001/api/plan", {
-          method: "GET",
-          headers: {
-            'UserId': selectedPatient[0].user_id
-          }
-        });
-    
+        const responseGetPlanning = await fetch(
+          "http://localhost:3001/api/plan",
+          {
+            method: "GET",
+            headers: {
+              UserId: selectedPatient[0].user_id,
+            },
+          },
+        );
+
         if (responseGetPlanning.ok) {
           console.log("Plan retrieved successfully.");
           const planData = await responseGetPlanning.json();
@@ -128,17 +139,19 @@ export default function Planning() {
   }
 
   const addExercise = () => {
-    const checkboxIndex = checkboxRefs.current.map((checkbox, index) => {
-      if (checkbox?.checked) {
-        return index;
-      }
-    }).filter((element) => element !== undefined);
+    const checkboxIndex = checkboxRefs.current
+      .map((checkbox, index) => {
+        if (checkbox?.checked) {
+          return index;
+        }
+      })
+      .filter((element) => element !== undefined);
 
     setPlan((prevPlan) => {
       const newPlan = [...prevPlan];
       checkboxIndex.forEach((index) => {
         const item = newPlan[index];
-        if (item && 'movement' in item){
+        if (item && "movement" in item) {
           const setItem = item as Set;
 
           setItem.movement = [
@@ -147,13 +160,13 @@ export default function Planning() {
               exercise: "",
               target_angle: 0,
               target_torque: 0,
-              time: 0
-            }
-          ]
+              time: 0,
+            },
+          ];
         }
       });
       return newPlan;
-    })
+    });
   };
 
   const addSet = () => {
@@ -163,32 +176,37 @@ export default function Planning() {
         rest: 0,
         speed: 0,
         repetitions: 0,
-        movement: [{
-          exercise: "",
-          target_angle: 0,
-          target_torque: 0,
-          time: 0
-        }]
+        movement: [
+          {
+            exercise: "",
+            target_angle: 0,
+            target_torque: 0,
+            time: 0,
+          },
+        ],
       },
     ]);
-  }
+  };
 
   const addSetRest = () => {
     setPlan((prevPlan) => [
       ...prevPlan,
       {
-        setRest:0
-      }
-    ])
-  }
+        setRest: 0,
+      },
+    ]);
+  };
 
   // Function to handle saving the plan and limits
   const savePlan = async () => {
     try {
-      const planWithLimits = { plan, limits: {
-        right: limitsRight,
-        left: limitsLeft
-      } };
+      const planWithLimits = {
+        plan,
+        limits: {
+          right: limitsRight,
+          left: limitsLeft,
+        },
+      };
       // Save plan to Supabase
       await savePlanToSupabase(planWithLimits);
       // Save plan to local storage
@@ -199,14 +217,14 @@ export default function Planning() {
 
   const handleToggleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSide((event.target as HTMLInputElement).value);
-  }
+  };
 
   // Function to save plan to Supabase
   const savePlanToSupabase = async (plan: any) => {
     try {
       const requestBody = {
         plan: plan,
-        selectedPatient: selectedPatient
+        selectedPatient: selectedPatient,
       };
 
       const response = await fetch("http://localhost:3001/api/plan", {
@@ -233,15 +251,28 @@ export default function Planning() {
     <div className="flex flex-col custom-height">
       <div className="flex justify-center items-center">
         <FormControl>
-          <FormLabel sx={{'&.Mui-focused': {color: blue[600]}}} id="demo-controlled-radio-buttons-group">Side</FormLabel>
+          <FormLabel
+            sx={{ "&.Mui-focused": { color: blue[600] } }}
+            id="demo-controlled-radio-buttons-group"
+          >
+            Side
+          </FormLabel>
           <RadioGroup
             aria-labelledby="demo-controlled-radio-buttons-group"
             name="controlled-radio-buttons-group"
             onChange={handleToggleChange}
             value={side}
           >
-            <FormControlLabel value="Left" control={<Radio sx={{'&.Mui-checked': {color: blue[600]}}}/>} label="Left" />
-            <FormControlLabel value="Right" control={<Radio sx={{'&.Mui-checked': {color: blue[600]}}}/>} label="Right" />
+            <FormControlLabel
+              value="Left"
+              control={<Radio sx={{ "&.Mui-checked": { color: blue[600] } }} />}
+              label="Left"
+            />
+            <FormControlLabel
+              value="Right"
+              control={<Radio sx={{ "&.Mui-checked": { color: blue[600] } }} />}
+              label="Right"
+            />
           </RadioGroup>
         </FormControl>
         <PatientSearchBar
@@ -249,30 +280,31 @@ export default function Planning() {
           setSelectedPatient={setSelectedPatient}
         />
       </div>
-    <div className="overflow-auto">
-
-      <ExercisesLimitsTable limitsLeft={limitsLeft}
-        limitsRight={limitsRight}
-        side={side}
-        setLimitsLeft={setLimitsLeft}
-        setLimitsRight={setLimitsRight}
-        plan={plan}
-      />
-
-      {plan.map((set, setIndex) => (
-        <ExercisesPlanTable key={setIndex}
-          set={set}
-          setIndex={setIndex}
-          setPlan={setPlan}
-          plan={plan}
-          checkboxRefs={checkboxRefs}
-          setChecked={setChecked}
-          checked={checked}
+      <div className="overflow-auto">
+        <ExercisesLimitsTable
           limitsLeft={limitsLeft}
           limitsRight={limitsRight}
+          side={side}
+          setLimitsLeft={setLimitsLeft}
+          setLimitsRight={setLimitsRight}
+          plan={plan}
         />
-      ))}
-    </div>
+
+        {plan.map((set, setIndex) => (
+          <ExercisesPlanTable
+            key={setIndex}
+            set={set}
+            setIndex={setIndex}
+            setPlan={setPlan}
+            plan={plan}
+            checkboxRefs={checkboxRefs}
+            setChecked={setChecked}
+            checked={checked}
+            limitsLeft={limitsLeft}
+            limitsRight={limitsRight}
+          />
+        ))}
+      </div>
       <div className="flex justify-center my-4">
         <button
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mr-4 rounded"
@@ -281,7 +313,8 @@ export default function Planning() {
           Add Set
         </button>
 
-        <button className="bg-rose-500 hover:bg-rose-700 text-white font-bold py-2 px-4 mr-4 rounded"
+        <button
+          className="bg-rose-500 hover:bg-rose-700 text-white font-bold py-2 px-4 mr-4 rounded"
           onClick={addSetRest}
         >
           Add Set Rest
@@ -289,9 +322,10 @@ export default function Planning() {
 
         <button
           disabled={addExerciseDisable}
-          className={addExerciseDisable ?
-            'bg-gray-500 text-white font-bold py-2 px-4 mr-4 rounded cursor-not-allowed' :
-            'bg-cyan-500 hover:bg-cyan-700 text-white font-bold py-2 px-4 mr-4 rounded'
+          className={
+            addExerciseDisable
+              ? "bg-gray-500 text-white font-bold py-2 px-4 mr-4 rounded cursor-not-allowed"
+              : "bg-cyan-500 hover:bg-cyan-700 text-white font-bold py-2 px-4 mr-4 rounded"
           }
           onClick={addExercise}
         >
@@ -299,10 +333,9 @@ export default function Planning() {
         </button>
         <button
           className={`text-white font-bold py-2 px-4 rounded
-            ${isDisabled ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-500 hover:bg-green-700'}`}
+            ${isDisabled ? "bg-gray-500 cursor-not-allowed" : "bg-green-500 hover:bg-green-700"}`}
           onClick={savePlan}
-          
-          disabled = { isDisabled }
+          disabled={isDisabled}
         >
           Save Plan
         </button>

@@ -20,8 +20,8 @@ const PatientMenuDropdown: React.FC<PatientMenuDropdownProps> = ({
   buttonRef,
 }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const {profile} = useProfileContext();
-  
+  const { profile } = useProfileContext();
+
   const removeUser = async () => {
     const unlinkSuccessful = await removeRelation(clientId, profile);
 
@@ -37,10 +37,11 @@ const PatientMenuDropdown: React.FC<PatientMenuDropdownProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: any) => {
-      if (dropdownRef.current &&
-         !dropdownRef.current.contains(event.target as Node) &&
-         buttonRef.current && 
-         !buttonRef.current.contains(event.target as Node)
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node)
       ) {
         setOpenMenuIndex(null);
       }

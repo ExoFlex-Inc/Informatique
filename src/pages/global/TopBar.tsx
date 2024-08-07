@@ -1,14 +1,27 @@
 import { useContext, useState, useRef, useEffect } from "react";
 import { ColorModeContext, tokens } from "../../hooks/theme.ts";
 
-import { Box, IconButton, useTheme, ThemeProvider, Divider, Paper, createTheme, Avatar, ListItemText, ListItem, ListItemButton, ListItemIcon } from "@mui/material";
-import People from '@mui/icons-material/People';
-import PersonIcon from '@mui/icons-material/Person';
+import {
+  Box,
+  IconButton,
+  useTheme,
+  ThemeProvider,
+  Divider,
+  Paper,
+  createTheme,
+  Avatar,
+  ListItemText,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+} from "@mui/material";
+import People from "@mui/icons-material/People";
+import PersonIcon from "@mui/icons-material/Person";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import LogoutIcon from '@mui/icons-material/Logout';
-import Icon from '../../../public/assets/user.png';
+import LogoutIcon from "@mui/icons-material/Logout";
+import Icon from "../../../public/assets/user.png";
 import Notification from "../../components/Notification.tsx";
 
 import Login from "../../components/Login.tsx";
@@ -26,7 +39,7 @@ export default function TopBar() {
   const menuRef = useRef(null);
   const avatarRef = useRef(null);
   const navigate = useNavigate();
-  const {profile} = useProfileContext()
+  const { profile } = useProfileContext();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -34,7 +47,12 @@ export default function TopBar() {
 
   useEffect(() => {
     const handleClickOutside = (event: any) => {
-      if (menuRef.current && !menuRef.current.contains(event.target) && avatarRef.current && !avatarRef.current.contains(event.target)) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target) &&
+        avatarRef.current &&
+        !avatarRef.current.contains(event.target)
+      ) {
         setIsMenuOpen(false);
       }
     };
@@ -83,53 +101,63 @@ export default function TopBar() {
         )}
       </Box>
 
-      {session && session.user ? 
-      (
+      {session && session.user ? (
         isMenuOpen && (
-          <Box ref={menuRef} sx={{ display: 'flex', position: 'absolute', zIndex: 20, top: '5rem' }}>
+          <Box
+            ref={menuRef}
+            sx={{
+              display: "flex",
+              position: "absolute",
+              zIndex: 20,
+              top: "5rem",
+            }}
+          >
             <ThemeProvider
               theme={createTheme({
                 palette: {
-                  mode: 'light',
-                  primary: { main: 'rgb(102, 157, 246)' },
-                  background: { paper: 'rgb(235, 235, 235)' },
+                  mode: "light",
+                  primary: { main: "rgb(102, 157, 246)" },
+                  background: { paper: "rgb(235, 235, 235)" },
                 },
               })}
             >
               <Paper>
                 <ListItem>
-                  <ListItemButton onClick={() => navigate('/profile')}>
+                  <ListItemButton onClick={() => navigate("/profile")}>
                     <ListItemIcon>
                       <PersonIcon />
                     </ListItemIcon>
-                    <ListItemText primary="See Profile"/>
+                    <ListItemText primary="See Profile" />
                   </ListItemButton>
                 </ListItem>
-                  {profile?.permissions == "client" &&
-                    <ListItem>
-                      <ListItemButton onClick={() => navigate('/professional_network')}>
-                        <ListItemIcon>
-                          <People />
-                        </ListItemIcon>
-                        <ListItemText primary="Professional Network"/>
-                      </ListItemButton>
-                    </ListItem>
-                  }
+                {profile?.permissions == "client" && (
+                  <ListItem>
+                    <ListItemButton
+                      onClick={() => navigate("/professional_network")}
+                    >
+                      <ListItemIcon>
+                        <People />
+                      </ListItemIcon>
+                      <ListItemText primary="Professional Network" />
+                    </ListItemButton>
+                  </ListItem>
+                )}
                 <Divider />
                 <ListItem>
                   <ListItemButton onClick={handleLogout}>
                     <ListItemIcon>
                       <LogoutIcon />
                     </ListItemIcon>
-                    <ListItemText primary="Logout"/>
+                    <ListItemText primary="Logout" />
                   </ListItemButton>
                 </ListItem>
               </Paper>
             </ThemeProvider>
           </Box>
         )
-      ) : <Login />}
-
+      ) : (
+        <Login />
+      )}
     </Box>
   );
 }

@@ -21,7 +21,7 @@ const postPlan = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const getPlan = asyncHandler(async (req: Request, res: Response) => {
-  const userId = req.headers['userid'];
+  const userId = req.headers["userid"];
 
   const { data, error } = await supaClient.rpc("get_planning", {
     search_id: userId,

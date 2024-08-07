@@ -21,17 +21,17 @@ export interface SupabaseUserInfo {
 }
 
 export function useSession(): SupabaseUserInfo {
-  const { session, profile, setSession, setProfile} = useProfileContext();
+  const { session, profile, setSession, setProfile } = useProfileContext();
   const [channel, setChannel] = useState<RealtimeChannel | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     supaClient.auth.onAuthStateChange(async (event) => {
       if (event == "PASSWORD_RECOVERY") {
-        navigate('/recovery');
+        navigate("/recovery");
       }
-    })
-  }, [])
+    });
+  }, []);
 
   const setupLocalServer = useCallback(
     async (access_token: string, refresh_token: string) => {
@@ -64,7 +64,7 @@ export function useSession(): SupabaseUserInfo {
       const {
         data: { session },
       } = await supaClient.auth.getSession();
-      setSession(session)
+      setSession(session);
 
       const {
         data: { subscription },
@@ -87,9 +87,7 @@ export function useSession(): SupabaseUserInfo {
   useEffect(() => {
     const handleUserProfile = async () => {
       if (session?.user && !profile) {
-        const newChannel = await listenToUserProfileChanges(
-          session.user.id,
-        );
+        const newChannel = await listenToUserProfileChanges(session.user.id);
         if (newChannel) {
           if (channel) {
             channel.unsubscribe();
@@ -156,5 +154,5 @@ export function useSession(): SupabaseUserInfo {
     [navigate],
   );
 
-  return {session, profile, setSession, setProfile};
+  return { session, profile, setSession, setProfile };
 }
