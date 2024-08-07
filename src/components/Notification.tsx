@@ -163,7 +163,7 @@ const Notification = () => {
                                                         primary="Connection request"
                                                         secondary={
                                                             <Typography className="text-black">
-                                                                {client.username} {client.lastname} want to connect with you
+                                                                {client.username} {client.lastname} sends a connection request
                                                             </Typography>
                                                         }
                                                     />

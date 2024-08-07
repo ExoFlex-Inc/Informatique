@@ -101,23 +101,24 @@ export default function Planning() {
 
   async function planInit() {
     try {
-      console.log("Getting the current plan...");
-      const responseGetPlanning = await fetch("http://localhost:3001/api/plan", {
-        method: "GET",
-        headers: {
-          'UserId': selectedPatient[0].user_id
+      if (selectedPatient) {
+        console.log("Getting the current plan...");
+        const responseGetPlanning = await fetch("http://localhost:3001/api/plan", {
+          method: "GET",
+          headers: {
+            'UserId': selectedPatient[0].user_id
+          }
+        });
+    
+        if (responseGetPlanning.ok) {
+          console.log("Plan retrieved successfully.");
+          const planData = await responseGetPlanning.json();
+          return { loaded: true, planData: planData };
+        } else {
+          console.error("Failed to retrieve plan.");
+          window.alert("Failed to retrieve plan.");
+          return { loaded: false, planData: null };
         }
-      });
-  
-      if (responseGetPlanning.ok) {
-        console.log("Plan retrieved successfully.");
-        const planData = await responseGetPlanning.json();
-        console.log("Plan data:", planData);
-        return { loaded: true, planData: planData };
-      } else {
-        console.error("Failed to retrieve plan.");
-        window.alert("Failed to retrieve plan.");
-        return { loaded: false, planData: null };
       }
     } catch (error) {
       console.error("An error occurred:", error);
@@ -125,7 +126,7 @@ export default function Planning() {
       return { loaded: false, planData: null };
     }
   }
-  // Function to handle adding a new exercise to the plan
+
   const addExercise = () => {
     const checkboxIndex = checkboxRefs.current.map((checkbox, index) => {
       if (checkbox?.checked) {
@@ -255,6 +256,7 @@ export default function Planning() {
         side={side}
         setLimitsLeft={setLimitsLeft}
         setLimitsRight={setLimitsRight}
+        plan={plan}
       />
 
       {plan.map((set, setIndex) => (
@@ -266,6 +268,8 @@ export default function Planning() {
           checkboxRefs={checkboxRefs}
           setChecked={setChecked}
           checked={checked}
+          limitsLeft={limitsLeft}
+          limitsRight={limitsRight}
         />
       ))}
     </div>

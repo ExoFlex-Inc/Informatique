@@ -301,7 +301,7 @@ export default function Activity() {
           >
             <Paper sx={{width: '25vw', padding: '10px'}}>
               <Typography className="text-gray-500" variant="h4">
-                Maximal amplitude average in dates selection:
+                Maximum amplitude average in dates selection:
               </Typography>
               <Typography className="text-gray-500" variant="body1">
                 {averageAmplitude} degrees

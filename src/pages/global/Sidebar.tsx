@@ -158,12 +158,14 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
           )}
 
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
-            <Item
-              title="Dashboard"
-              to="/dashboard"
-              icon={<HomeOutlinedIcon />}
-              selected={selected}
-            />
+            {(props.permissions === "client") && (
+              <Item
+                title="Dashboard"
+                to="/dashboard"
+                icon={<HomeOutlinedIcon />}
+                selected={selected}
+              />
+            )}
             {(props.permissions === "dev" || props.permissions === "admin") && (
               <Item
                 title="Planning"
@@ -212,8 +214,6 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
             display="flex"
             justifyContent="center"
             alignItems="center"
-            position="absolute"
-            bottom="0"
             width="100%"
           >
             <img

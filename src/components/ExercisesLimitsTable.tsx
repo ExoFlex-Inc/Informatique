@@ -1,5 +1,6 @@
+import { useEffect } from "react";
 import { Limits } from "../pages/Planning.tsx";
-
+import { Set, SetRest } from "../pages/Planning.tsx";
 
 interface ExercisesLimitsTableProps {
     side: string;
@@ -7,33 +8,48 @@ interface ExercisesLimitsTableProps {
     limitsRight: Limits;
     setLimitsLeft: React.Dispatch<React.SetStateAction<Limits>>;
     setLimitsRight: React.Dispatch<React.SetStateAction<Limits>>;
+    plan: (Set | SetRest)[];
 }
 
-const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({side,
+const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
+    side,
     limitsLeft,
     limitsRight,
     setLimitsLeft,
-    setLimitsRight
+    setLimitsRight,
+    plan
 }) => {
 
-    const handleTorqueLimitChange = (event, side: string) => {
+    const saveToLocalStorage = (data: any) => {
+      localStorage.setItem("plan", JSON.stringify(data));
+    }
+
+    const handleTorqueLimitChange = (event: any, side: string) => {
         const { name, value } = event.target;
         let parsedValue = value !== "" ? Math.min(65, Math.max(0, parseInt(value))) : 0;
 
         if (side === "Right") {
             setLimitsRight((prevLimits) => ({
             ...prevLimits,
-            torque: { ...prevLimits.torque, [name]: parsedValue },
+            torque: { ...prevLimits?.torque, [name]: parsedValue },
             }));
+            saveToLocalStorage({
+              plan,
+              limits: { left: limitsLeft, right: { ...limitsRight, torque: { ...limitsRight?.torque, [name]: parsedValue}}},
+            });
         } else {
             setLimitsLeft((prevLimits) => ({
             ...prevLimits,
-            torque: { ...prevLimits.torque, [name]: parsedValue },
+            torque: { ...prevLimits?.torque, [name]: parsedValue },
             }));
+            saveToLocalStorage({
+              plan,
+              limits: { left: { ...limitsLeft, torque: { ...limitsLeft?.torque, [name]: parsedValue } }, right: limitsRight },
+            });
         }
     };
 
-    const handleAngleLimitChange = (event, side: string) => {
+    const handleAngleLimitChange = (event: any, side: string) => {
         const { name, value } = event.target;
         let parsedValue = value !== "" ? Math.min(90, Math.max(0, parseInt(value))) : 0;
 
@@ -42,11 +58,19 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({side,
             ...prevLimits,
             angles: { ...prevLimits.angles, [name]: parsedValue },
             }));
+            saveToLocalStorage({
+              plan,
+              limits: { left: limitsLeft, right: { ...limitsRight, angles: { ...limitsRight.angles, [name]: parsedValue } } },
+            });
         } else {
             setLimitsLeft((prevLimits) => ({
             ...prevLimits,
             angles: { ...prevLimits.angles, [name]: parsedValue },
             }));
+            saveToLocalStorage({
+              plan,
+              limits: { left: { ...limitsLeft, angles: { ...limitsLeft.angles, [name]: parsedValue } }, right: limitsRight },
+            });
         }
     };
 

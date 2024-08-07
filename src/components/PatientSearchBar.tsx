@@ -93,9 +93,6 @@ const PatientSearchBar: React.FC<PatientSearchBarProps> = ({
         renderInput={(params) => (
           <TextField
             {...params}
-            onChange={({ target }) => {
-              onInputChange(target);
-            }}
             variant="outlined"
             size="small"
             sx={sx}

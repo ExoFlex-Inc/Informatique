@@ -38,7 +38,15 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
       <Route path="/recovery" element={<Recovery />} />
-      <Route path="/dashboard" element={<Dashboard />} />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute
+            component={Dashboard}
+            requiredPermission={["client"]}
+          />
+        }
+      />
       <Route
         path="/activity"
         element={
@@ -98,7 +106,6 @@ function Layout() {
   const {downloadImage} = useAvatar()
 
   useEffect(() => {
-    console.log("profile", supabaseUserInfo.profile);
     if(supabaseUserInfo.profile) {
       downloadImage(supabaseUserInfo.profile.avatar_url);
     }

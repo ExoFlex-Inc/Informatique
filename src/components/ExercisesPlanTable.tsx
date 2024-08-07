@@ -1,5 +1,5 @@
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Set, SetRest } from "../pages/Planning.tsx";
+import { Limits, Set, SetRest } from "../pages/Planning.tsx";
 
 interface ExercisesPlanTableProps {
     set: Set | SetRest;
@@ -9,6 +9,8 @@ interface ExercisesPlanTableProps {
     checkboxRefs: React.MutableRefObject<(HTMLInputElement | null)[]>;
     setChecked: React.Dispatch<React.SetStateAction<boolean>>;
     checked: boolean;
+    limitsRight: Limits;
+    limitsLeft: Limits;
 }
 
 const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
@@ -19,6 +21,8 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
     checkboxRefs,
     setChecked,
     checked,
+    limitsRight,
+    limitsLeft
 }) => {
 
     const exerciseOptions = ["Right Extension Knee", "Right Dorsiflexion Ankle", "Right Eversion Ankle",
@@ -30,7 +34,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
         setPlan((prevPlan) => prevPlan.filter((_, i) => i !== index));
     };
 
-    const handleInputChange = (setIndex: number, event, exerciseIndex?: number) => {
+    const handleInputChange = (setIndex: number, event: any, exerciseIndex?: number) => {
         const { name, value } = event.target;
         let parsedValue = value !== "" ? (name !== "exercise" ? parseInt(value) : value) : (name !== "exercise" ? 0 : "");
 
@@ -45,7 +49,15 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
             updatedPlan[setIndex][name] = parsedValue;
         }
         setPlan(updatedPlan);
+        saveToLocalStorage({ plan: updatedPlan, limits: {
+          left: limitsLeft,
+          right: limitsRight
+        } });
     };
+
+    const saveToLocalStorage = (data: any) => {
+      localStorage.setItem("plan", JSON.stringify(data));
+    }
 
     return (
       <div className="mt-4 ml-10 mr-10 rounded-lg overflow-hidden">
