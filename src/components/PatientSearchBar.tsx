@@ -19,11 +19,15 @@ export async function SearchBarInit() {
     if (responseGetClients.ok) {
       console.log("List retrieved successfully.");
       const listData = await responseGetClients.json();
-      console.log("List data:", listData);
       return { loaded: true, listData: listData };
     } else {
-      console.error("Failed to retrieve list.");
-      window.alert("Failed to retrieve list.");
+      console.error(
+        "Failed to retrieve list. Status:",
+        responseGetClients.status,
+      );
+      window.alert(
+        "Failed to retrieve list. Status:" + responseGetClients.status,
+      );
       return { loaded: false, listData: null };
     }
   } catch (error) {
@@ -94,9 +98,6 @@ const PatientSearchBar: React.FC<PatientSearchBarProps> = ({
         renderInput={(params) => (
           <TextField
             {...params}
-            onChange={({ target }) => {
-              onInputChange(target);
-            }}
             variant="outlined"
             size="small"
             sx={sx}

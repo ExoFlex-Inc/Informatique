@@ -53,7 +53,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <div>Loading...</div>;
   }
 
-  return hasPermission ? <Component /> : <Navigate to="/dashboard" />;
+  return hasPermission ? <Component /> : <Navigate to="/" />;
 };
 
 export default ProtectedRoute;

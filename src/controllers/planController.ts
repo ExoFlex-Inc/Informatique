@@ -4,10 +4,10 @@ import { supaClient } from "../hooks/supa-client.ts";
 
 const postPlan = asyncHandler(async (req: Request, res: Response) => {
   const { plan } = req.body;
-  const user = req.user;
+  const { selectedPatient } = req.body;
 
   const { data, error } = await supaClient.rpc("post_planning", {
-    user_id: user?.id,
+    user_id: selectedPatient.user_id,
     new_plan: plan,
   });
 
@@ -21,10 +21,10 @@ const postPlan = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const getPlan = asyncHandler(async (req: Request, res: Response) => {
-  const user = req.user;
+  const userId = req.headers["userid"];
 
   const { data, error } = await supaClient.rpc("get_planning", {
-    search_id: user?.id,
+    search_id: userId,
   });
 
   if (error) {

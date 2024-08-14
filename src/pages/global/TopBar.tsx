@@ -1,25 +1,82 @@
-import { useContext } from "react";
-import { Box, IconButton, useTheme } from "@mui/material";
+import { useContext, useState, useRef, useEffect } from "react";
 import { ColorModeContext, tokens } from "../../hooks/theme.ts";
 
+import {
+  Box,
+  IconButton,
+  useTheme,
+  ThemeProvider,
+  Divider,
+  Paper,
+  createTheme,
+  Avatar,
+  ListItemText,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+} from "@mui/material";
+import People from "@mui/icons-material/People";
+import PersonIcon from "@mui/icons-material/Person";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
-import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import LogoutIcon from "@mui/icons-material/Logout";
+import Icon from "../../../public/assets/user.png";
+import Notification from "../../components/Notification.tsx";
 
-import { UserContext } from "../../App.tsx";
 import Login from "../../components/Login.tsx";
-import UserMenu from "../../components/UserMenu.tsx";
+import { supaClient } from "../../hooks/supa-client.ts";
+import { useNavigate } from "react-router-dom";
+import { useAvatarContext } from "../../context/avatarContext.tsx";
+import { useProfileContext } from "../../context/profileContext.tsx";
 
 export default function TopBar() {
-  const { session } = useContext(UserContext);
+  const { session } = useProfileContext();
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  // const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
 
+  const menuRef = useRef(null);
+  const avatarRef = useRef(null);
+  const navigate = useNavigate();
+  const { profile } = useProfileContext();
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const { avatarUrl } = useAvatarContext();
+
+  useEffect(() => {
+    const handleClickOutside = (event: any) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target) &&
+        avatarRef.current &&
+        !avatarRef.current.contains(event.target)
+      ) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuRef]);
+
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to log out?")) {
+      supaClient.auth.signOut();
+      setIsMenuOpen(false);
+    }
+  };
+
+  const onProfileClick = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
   return (
-    <Box className="nav-bar justify-end">
-      <Box className="flex pb-5 pt-5">
+    <Box className="nav-bar relative justify-end">
+      <Box className="flex items-center">
         {session && ( // Check if session exists
           <IconButton onClick={colorMode.toggleColorMode}>
             {theme.palette.mode === "dark" ? (
@@ -30,23 +87,77 @@ export default function TopBar() {
           </IconButton>
         )}
         {session && ( // Check if session exists
-          <IconButton>
-            <NotificationsOutlinedIcon />
-          </IconButton>
+          <Notification />
         )}
         {session && ( // Check if session exists
           <IconButton>
             <SettingsOutlinedIcon />
           </IconButton>
         )}
+        {session && (
+          <IconButton className="h-14" onClick={onProfileClick}>
+            <Avatar ref={avatarRef} src={avatarUrl ? avatarUrl : Icon} />
+          </IconButton>
+        )}
       </Box>
-      <Box className="flex">
-        <ul className="nav-right-list">
-          <li className="nav-auth-item">
-            {session && session.user ? <UserMenu /> : <Login />}
-          </li>
-        </ul>
-      </Box>
+
+      {session && session.user ? (
+        isMenuOpen && (
+          <Box
+            ref={menuRef}
+            sx={{
+              display: "flex",
+              position: "absolute",
+              zIndex: 20,
+              top: "5rem",
+            }}
+          >
+            <ThemeProvider
+              theme={createTheme({
+                palette: {
+                  mode: "light",
+                  primary: { main: "rgb(102, 157, 246)" },
+                  background: { paper: "rgb(235, 235, 235)" },
+                },
+              })}
+            >
+              <Paper>
+                <ListItem>
+                  <ListItemButton onClick={() => navigate("/profile")}>
+                    <ListItemIcon>
+                      <PersonIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="See Profile" />
+                  </ListItemButton>
+                </ListItem>
+                {profile?.permissions == "client" && (
+                  <ListItem>
+                    <ListItemButton
+                      onClick={() => navigate("/professional_network")}
+                    >
+                      <ListItemIcon>
+                        <People />
+                      </ListItemIcon>
+                      <ListItemText primary="Professional Network" />
+                    </ListItemButton>
+                  </ListItem>
+                )}
+                <Divider />
+                <ListItem>
+                  <ListItemButton onClick={handleLogout}>
+                    <ListItemIcon>
+                      <LogoutIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Logout" />
+                  </ListItemButton>
+                </ListItem>
+              </Paper>
+            </ThemeProvider>
+          </Box>
+        )
+      ) : (
+        <Login />
+      )}
     </Box>
   );
 }
