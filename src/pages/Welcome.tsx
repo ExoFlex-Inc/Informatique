@@ -1,8 +1,8 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { redirect, useNavigate } from "react-router-dom";
-import { UserContext } from "../App.tsx";
 import Dialog from "../components/Dialog.tsx";
 import { supaClient } from "../hooks/supa-client.ts";
+import { useProfileContext } from "../context/profileContext.tsx";
 
 export async function welcomeLoader() {
   const {
@@ -22,7 +22,7 @@ export async function welcomeLoader() {
   return { loaded: true };
 }
 export function Welcome() {
-  const user = useContext(UserContext);
+  const user = useProfileContext();
   const navigate = useNavigate();
   const [userName, setUserName] = useState("");
   const [userNameDirty, setUserNameDirty] = useState(false);

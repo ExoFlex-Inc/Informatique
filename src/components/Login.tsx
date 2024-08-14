@@ -1,15 +1,15 @@
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
-import { useContext, useEffect, useState } from "react";
-import { UserContext } from "../App.tsx";
+import { useEffect, useState } from "react";
 import Dialog from "./Dialog.tsx";
 import { supaClient } from "../hooks/supa-client.ts";
 import { useTheme } from "@emotion/react";
+import { useProfileContext } from "../context/profileContext.tsx";
 
 export default function Login() {
   const [showModal, setShowModal] = useState(false);
   const [authMode, setAuthMode] = useState<"sign_in" | "sign_up">("sign_in");
-  const { session } = useContext(UserContext);
+  const { session } = useProfileContext();
   const { palette } = useTheme();
 
   useEffect(() => {
