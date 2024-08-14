@@ -40,13 +40,11 @@ const fetchRelation = async (profile: UserProfile | null) => {
   }
 };
 const sendRequest = async (selectedAdmin: any, profile: UserProfile | null) => {
-  const { error } = await supaClient
-    .from("admin_client")
-    .insert({
-      admin_id: selectedAdmin.user_id,
-      client_id: profile?.user_id,
-      relation_status: "pending",
-    });
+  const { error } = await supaClient.from("admin_client").insert({
+    admin_id: selectedAdmin.user_id,
+    client_id: profile?.user_id,
+    relation_status: "pending",
+  });
   if (error) {
     throw error;
   }
