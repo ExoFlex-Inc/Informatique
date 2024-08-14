@@ -5,6 +5,7 @@ import { createServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
 import serialPortRoutes from "./routes/serialPortRoutes.ts";
 import planRoutes from "./routes/planRoutes.ts";
+import wellnessNetworkRoutes from "./routes/wellnessNetworkRoutes.ts";
 import hmiRoutes from "./routes/hmiRoutes.ts";
 import userRoutes from "./routes/userRoutes.ts";
 import localServerRoutes from "./routes/localServerRoutes.ts";
