@@ -10,7 +10,9 @@ interface ProfileContextValue {
   setProfile: (profile: UserProfile | null) => void;
 }
 
-const ProfileContext = createContext<ProfileContextValue | undefined>(undefined);
+const ProfileContext = createContext<ProfileContextValue | undefined>(
+  undefined,
+);
 
 export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSessionState] = useState<Session | null>(null);
@@ -33,7 +35,9 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <ProfileContext.Provider value={{ session, profile, setSession, setProfile }}>
+    <ProfileContext.Provider
+      value={{ session, profile, setSession, setProfile }}
+    >
       {children}
     </ProfileContext.Provider>
   );

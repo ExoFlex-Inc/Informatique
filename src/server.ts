@@ -37,13 +37,11 @@ app.use(
     resave: false,
     saveUninitialized: true,
     cookie: { secure: process.env.NODE_ENV === "production" }, // Use secure cookies in production
-  })
+  }),
 );
-
 
 app.use(passport.initialize());
 app.use(passport.session());
-
 
 app.use("/api", authentificationRoutes);
 app.use("/api", serialPortRoutes);

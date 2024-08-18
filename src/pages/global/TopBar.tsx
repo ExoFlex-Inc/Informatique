@@ -66,24 +66,24 @@ export default function TopBar() {
     event.preventDefault();
     if (window.confirm("Are you sure you want to log out?")) {
       try {
-        const response = await fetch('http://localhost:3001/api/logout', {
-          method: 'POST',
+        const response = await fetch("http://localhost:3001/api/logout", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         });
         const data = await response.json();
         if (response.ok) {
           setIsMenuOpen(false);
-  
-          window.location.href = '/';
+
+          window.location.href = "/";
         } else {
-          console.error('Logout error:', data.error);
-          alert('Logout failed: ' + data.error);
+          console.error("Logout error:", data.error);
+          alert("Logout failed: " + data.error);
         }
       } catch (error) {
-        console.error('Logout failed:', error);
-        alert('An error occurred during logout. Please try again.');
+        console.error("Logout failed:", error);
+        alert("An error occurred during logout. Please try again.");
       }
     }
   };

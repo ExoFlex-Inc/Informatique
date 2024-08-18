@@ -110,7 +110,7 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <ProfileProvider>
-          <AvatarProvider>   
+          <AvatarProvider>
             <div className="app">
               <RouterProvider router={router} />
             </div>

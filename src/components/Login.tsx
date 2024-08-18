@@ -8,64 +8,66 @@ export default function Login() {
   const [authMode, setAuthMode] = useState<"sign_in" | "sign_up">("sign_in");
   const { setSession, setProfile } = useProfileContext();
   const { palette } = useTheme();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [speciality, setSpeciality] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [speciality, setSpeciality] = useState("");
 
   async function handleLogin(event) {
     event.preventDefault();
-    const response = await fetch('http://localhost:3001/api/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            email: email,
-            password: password
-        })
+    const response = await fetch("http://localhost:3001/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: email,
+        password: password,
+      }),
     });
     const data = await response.json();
     if (response.ok) {
-        console.log('Login successful:', data);
-        setSession(data.supabaseUser.session);
-        setProfile(data.supabaseUser.user.user_metadata);  
-        setShowModal(false); 
+      console.log("Login successful:", data);
+      setSession(data.supabaseUser.session);
+      setProfile(data.supabaseUser.user.user_metadata);
+      setShowModal(false);
     } else {
-        console.error('Login error:', data.error);
-        alert('Login failed: ' + data.error);
+      console.error("Login error:", data.error);
+      alert("Login failed: " + data.error);
     }
-}
-
-async function handleSignUp(event) {
-  event.preventDefault();
-  console.log('Attempting signup...');
-  const response = await fetch('http://localhost:3001/api/signup', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      email: email,
-      password: password,
-      first_name: firstName,
-      last_name: lastName,
-      speciality: speciality,
-      permissions: 'client',
-    }),
-  });
-  console.log('Received response:', response);
-  const data = await response.json();
-  if (response.ok) {
-    console.log('Signup successful:', data);
-    setShowModal(false);
-    alert('Sign-up successful! Please check your email to verify your account.');
-  } else {
-    console.error('Signup error:', data.error);
-    alert('Signup failed: ' + data.error);
   }
-}
+
+  async function handleSignUp(event) {
+    event.preventDefault();
+    console.log("Attempting signup...");
+    const response = await fetch("http://localhost:3001/api/signup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: email,
+        password: password,
+        first_name: firstName,
+        last_name: lastName,
+        speciality: speciality,
+        permissions: "client",
+      }),
+    });
+    console.log("Received response:", response);
+    const data = await response.json();
+    if (response.ok) {
+      console.log("Signup successful:", data);
+      setShowModal(false);
+      alert(
+        "Sign-up successful! Please check your email to verify your account.",
+      );
+    } else {
+      console.error("Signup error:", data.error);
+      alert("Signup failed: " + data.error);
+    }
+  }
 
   const renderForm = () => {
     return (

@@ -38,7 +38,10 @@
   "compounds": [
     {
       "name": "Launch Full Stack",
-      "configurations": ["Launch Server with Debugger", "Launch Vite Dev Server with Debugger"]
+      "configurations": [
+        "Launch Server with Debugger",
+        "Launch Vite Dev Server with Debugger"
+      ]
     }
   ]
 }

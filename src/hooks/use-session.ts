@@ -35,7 +35,6 @@ export function useSession(): SupabaseUserInfo {
 
   useEffect(() => {
     const initializeSession = async () => {
-
       const {
         data: { subscription },
       } = supaClient.auth.onAuthStateChange((_event, newSession) => {
