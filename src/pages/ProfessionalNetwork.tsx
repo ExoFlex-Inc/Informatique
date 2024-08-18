@@ -160,7 +160,7 @@ const ProfessionalNetwork = () => {
                 {tableAdmins.map((admin) => (
                   <TableRow key={admin.user_id}>
                     <TableCell>
-                      {admin.username} {admin.lastname}
+                      {admin.first_name} {admin.last_name}
                     </TableCell>
                     <TableCell>
                       {

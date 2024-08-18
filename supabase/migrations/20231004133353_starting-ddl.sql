@@ -26,13 +26,14 @@ CREATE TYPE client_admin_status AS ENUM ('pending', 'accepted');
 
 CREATE TABLE user_profiles (
   user_id UUID PRIMARY KEY REFERENCES auth.users (id) NOT NULL,
-  username TEXT CHECK (char_length(username) > 0 AND char_length(username) <= 50 AND username !~ '\d'), 
-  lastname TEXT CHECK (char_length(lastname) > 0 AND char_length(lastname) <= 50 AND lastname !~ '\d'),
+  first_name TEXT CHECK (char_length(first_name) > 0 AND char_length(first_name) <= 50 AND first_name !~ '\d'), 
+  last_name TEXT CHECK (char_length(last_name) > 0 AND char_length(last_name) <= 50 AND last_name !~ '\d'),
   permissions permissions_enum NOT NULL,
   speciality TEXT CHECK (char_length(speciality) > 0 AND char_length(speciality) <= 50 AND speciality !~ '\d'),
   phone_number TEXT CHECK (char_length(phone_number) > 0 AND char_length(phone_number) <= 50 AND phone_number ~ '\d'),
   email TEXT CHECK (char_length(email) > 0 AND char_length(email) <= 50),
-  avatar_url TEXT
+  avatar_url TEXT,
+  password TEXT CHECK (char_length(password) > 0)
 );
 
 CREATE TABLE admin_client (
@@ -170,8 +171,8 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION get_clients_for_admin(admin_id UUID)
 RETURNS TABLE (
     user_id UUID,
-    username TEXT,
-    lastname TEXT,
+    first_name TEXT,
+    last_name TEXT,
     phone_number TEXT,
     email TEXT
 ) AS $$
@@ -179,8 +180,8 @@ BEGIN
     RETURN QUERY
     SELECT 
         c.user_id, 
-        c.username, 
-        c.lastname, 
+        c.first_name, 
+        c.last_name, 
         c.phone_number, 
         c.email
     FROM 
@@ -214,7 +215,7 @@ INSERT INTO storage.buckets(id, name, public, file_size_limit) VALUES ('avatars'
 .##.........#######..########.####..######..####.########..######.
 */
 
-alter table user_profiles enable row level security;
+alter table user_profiles disable row level security;
 alter table machine enable row level security;
 alter table encoder enable row level security;
 alter table plans enable row level security;

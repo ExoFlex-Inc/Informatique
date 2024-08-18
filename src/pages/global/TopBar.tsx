@@ -25,7 +25,6 @@ import Icon from "../../../public/assets/user.png";
 import Notification from "../../components/Notification.tsx";
 
 import Login from "../../components/Login.tsx";
-import { supaClient } from "../../hooks/supa-client.ts";
 import { useNavigate } from "react-router-dom";
 import { useAvatarContext } from "../../context/avatarContext.tsx";
 import { useProfileContext } from "../../context/profileContext.tsx";
@@ -63,10 +62,29 @@ export default function TopBar() {
     };
   }, [menuRef]);
 
-  const handleLogout = () => {
+  const handleLogout = async (event) => {
+    event.preventDefault();
     if (window.confirm("Are you sure you want to log out?")) {
-      supaClient.auth.signOut();
-      setIsMenuOpen(false);
+      try {
+        const response = await fetch('http://localhost:3001/api/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setIsMenuOpen(false);
+  
+          window.location.href = '/';
+        } else {
+          console.error('Logout error:', data.error);
+          alert('Logout failed: ' + data.error);
+        }
+      } catch (error) {
+        console.error('Logout failed:', error);
+        alert('An error occurred during logout. Please try again.');
+      }
     }
   };
 

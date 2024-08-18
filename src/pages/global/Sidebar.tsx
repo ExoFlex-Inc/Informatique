@@ -150,7 +150,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                   fontWeight="bold"
                   sx={{ m: "10px 0 0 0" }}
                 >
-                  {profile?.username || "Client"}
+                  {profile?.first_name || "Client"}
                 </Typography>
                 <Typography
                   variant={isTablet ? "h6" : "h5"}

@@ -1,26 +1,48 @@
 import { createContext, useContext, ReactNode, useState } from "react";
 import { Session } from "@supabase/supabase-js";
-import { UserProfile, SupabaseUserInfo } from "../hooks/use-session.ts";
+import { UserProfile } from "../hooks/use-session";
+import { supaClient } from "../hooks/supa-client";
 
-const UserContext = createContext<SupabaseUserInfo | undefined>(undefined);
+interface ProfileContextValue {
+  session: Session | null;
+  profile: UserProfile | null;
+  setSession: (session: Session | null) => Promise<void>;
+  setProfile: (profile: UserProfile | null) => void;
+}
 
-export const UserProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
-  const [session, setSession] = useState<Session | null>(null);
+const ProfileContext = createContext<ProfileContextValue | undefined>(undefined);
+
+export const ProfileProvider = ({ children }: { children: ReactNode }) => {
+  const [session, setSessionState] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
+  const setSession = async (session: Session | null) => {
+    if (session) {
+      const { error } = await supaClient.auth.setSession({
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+      });
+
+      if (error) {
+        console.error("Error setting session:", error);
+        return;
+      }
+    }
+
+    setSessionState(session);
+  };
+
   return (
-    <UserContext.Provider value={{ session, profile, setSession, setProfile }}>
+    <ProfileContext.Provider value={{ session, profile, setSession, setProfile }}>
       {children}
-    </UserContext.Provider>
+    </ProfileContext.Provider>
   );
 };
 
 export const useProfileContext = () => {
-  const context = useContext(UserContext);
+  const context = useContext(ProfileContext);
   if (!context) {
-    throw new Error("useProfileContext must be used within an UserProvider");
+    throw new Error("useProfileContext must be used within a ProfileProvider");
   }
   return context;
 };

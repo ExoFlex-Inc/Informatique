@@ -16,7 +16,7 @@ export async function welcomeLoader() {
     .select("*")
     .eq("user_id", user?.id)
     .single();
-  if (data?.username && data) {
+  if (data?.first_name && data) {
     return redirect("/");
   }
   return { loaded: true };
@@ -24,8 +24,8 @@ export async function welcomeLoader() {
 export function Welcome() {
   const user = useProfileContext();
   const navigate = useNavigate();
-  const [userName, setUserName] = useState("");
-  const [userNameDirty, setUserNameDirty] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [firstNameDirty, setFirstNameDirty] = useState(false);
   const [lastName, setLastName] = useState("");
   const [lastNameDirty, setLastNameDirty] = useState(false);
   const [speciality, setSpeciality] = useState("");
@@ -57,9 +57,9 @@ export function Welcome() {
     retrieveUserEmail();
   }, []);
 
-  const invalidUserName = useMemo(
-    () => validateInput(userName, "Name"),
-    [userName],
+  const invalidFirstName = useMemo(
+    () => validateInput(firstName, "Name"),
+    [firstName],
   );
   const invalidLastName = useMemo(
     () => validateInput(lastName, "Lastname"),
@@ -94,7 +94,7 @@ export function Welcome() {
                 .insert([
                   {
                     user_id: user.session?.user.id || "",
-                    username: userName,
+                    username: firstName,
                     lastname: lastName,
                     speciality: speciality,
                     phone_number: phoneNumber,
@@ -115,12 +115,12 @@ export function Welcome() {
             }}
           >
             <input
-              name="username"
+              name="first_name"
               placeholder="Name"
               onChange={({ target }) => {
-                setUserName(target.value);
-                if (!userNameDirty) {
-                  setUserNameDirty(true);
+                setFirstName(target.value);
+                if (!firstNameDirty) {
+                  setFirstNameDirty(true);
                 }
                 if (serverError) {
                   setServerError("");
@@ -128,13 +128,13 @@ export function Welcome() {
               }}
               className="welcome-name-input"
             ></input>
-            {userNameDirty && invalidUserName && (
+            {firstNameDirty && invalidFirstName && (
               <p className="welcome-form-error-message validation-feedback">
-                {invalidUserName}
+                {invalidFirstName}
               </p>
             )}
             <input
-              name="lastname"
+              name="last_name"
               placeholder="Lastname"
               onChange={({ target }) => {
                 setLastName(target.value);

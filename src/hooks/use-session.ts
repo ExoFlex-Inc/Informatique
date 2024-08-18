@@ -5,8 +5,8 @@ import { supaClient } from "./supa-client.ts";
 import { useProfileContext } from "../context/profileContext.tsx";
 
 export interface UserProfile {
-  username: string;
-  lastname: string;
+  first_name: string;
+  last_name: string;
   speciality: string;
   user_id: string;
   permissions: string;
@@ -33,38 +33,8 @@ export function useSession(): SupabaseUserInfo {
     });
   }, []);
 
-  const setupLocalServer = useCallback(
-    async (access_token: string, refresh_token: string) => {
-      const requestBody = { access_token, refresh_token };
-
-      try {
-        const response = await fetch(
-          "http://localhost:3001/api/setup-local-server",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(requestBody),
-          },
-        );
-
-        if (response.ok) {
-          console.log("Local server setup successful");
-        } else {
-          console.error("Local server setup failed");
-        }
-      } catch (error) {
-        console.error("Error during local server setup:", error);
-      }
-    },
-    [],
-  );
-
   useEffect(() => {
     const initializeSession = async () => {
-      const {
-        data: { session },
-      } = await supaClient.auth.getSession();
-      setSession(session);
 
       const {
         data: { subscription },
@@ -93,10 +63,6 @@ export function useSession(): SupabaseUserInfo {
             channel.unsubscribe();
           }
           setChannel(newChannel);
-
-          const access_token = session?.access_token || "";
-          const refresh_token = session?.refresh_token || "";
-          setupLocalServer(access_token, refresh_token);
         }
       } else if (!session?.user) {
         if (channel) {
@@ -107,7 +73,7 @@ export function useSession(): SupabaseUserInfo {
     };
 
     handleUserProfile();
-  }, [session, profile, channel, setupLocalServer]);
+  }, [session, profile, channel]);
 
   const listenToUserProfileChanges = useCallback(
     async (userId: string): Promise<RealtimeChannel | null> => {
@@ -121,13 +87,6 @@ export function useSession(): SupabaseUserInfo {
           console.error("Error fetching user profile:", error);
           return null;
         }
-
-        if (!data?.length) {
-          navigate("/termsAndConditions");
-          return null;
-        }
-
-        setProfile(data[0]);
 
         const newChannel = supaClient
           .channel(`public:user_profiles`)

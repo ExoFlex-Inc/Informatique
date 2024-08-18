@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useState } from "react";
 import {
   Route,
   Outlet,
@@ -6,37 +6,32 @@ import {
   createRoutesFromElements,
   RouterProvider,
 } from "react-router-dom";
-import { ColorModeContext, useMode } from "./hooks/theme.ts";
+import { ColorModeContext, useMode } from "./hooks/theme";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import "./App.css";
 
-import Dashboard from "./pages/Dashboard.tsx";
-import ProfessionalNetwork from "./pages/ProfessionalNetwork.tsx";
-import { Welcome, welcomeLoader } from "./pages/Welcome.tsx";
-import HMI from "./pages/Hmi.tsx";
-import Activity from "./pages/Activity.tsx";
-import Recovery from "./pages/Recovery.tsx";
-import Manual from "./pages/Manual.tsx";
-import TermsAndConditions from "./pages/TermsAndConditions.tsx";
-import Settings from "./pages/Settings.tsx";
-import Planning from "./pages/Planning.tsx";
-import WellnessNetwork from "./pages/WellnessNetwork.tsx";
-import ProtectedRoute from "./components/ProtectedRoute.tsx";
+import Dashboard from "./pages/Dashboard";
+import ProfessionalNetwork from "./pages/ProfessionalNetwork";
+import { Welcome, welcomeLoader } from "./pages/Welcome";
+import HMI from "./pages/Hmi";
+import Activity from "./pages/Activity";
+import Recovery from "./pages/Recovery";
+import Manual from "./pages/Manual";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import Settings from "./pages/Settings";
+import Planning from "./pages/Planning";
+import WellnessNetwork from "./pages/WellnessNetwork";
+import TopBar from "./pages/global/TopBar";
+import ProSideBar from "./pages/global/Sidebar";
+import Profile from "./pages/Profile";
 
-import TopBar from "./pages/global/TopBar.tsx";
-import ProSideBar from "./pages/global/Sidebar.tsx";
-
-import { SupabaseUserInfo, useSession } from "./hooks/use-session.ts";
-import Profile from "./pages/Profile.tsx";
-import { AvatarProvider } from "./context/avatarContext.tsx";
-import { UserProvider } from "./context/profileContext.tsx";
-import { UserProfile } from "./hooks/use-session.ts";
-import { Session } from "@supabase/supabase-js";
-import { useAvatar } from "./hooks/use-avatar.ts";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { ProfileProvider, useProfileContext } from "./context/profileContext";
+import { AvatarProvider } from "./context/avatarContext";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path="/" element={<Layout />}>
+    <Route path="/" element={<AppLayout />}>
       <Route path="/recovery" element={<Recovery />} />
       <Route
         path="/dashboard"
@@ -93,38 +88,17 @@ const router = createBrowserRouter(
   ),
 );
 
-function Layout() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-
-  const UserContext = createContext<SupabaseUserInfo>({
-    session,
-    profile,
-    setSession,
-    setProfile,
-  });
-
-  const supabaseUserInfo = useSession();
-  const { downloadImage } = useAvatar();
-
-  useEffect(() => {
-    if (supabaseUserInfo.profile) {
-      downloadImage(supabaseUserInfo.profile.avatar_url);
-    }
-  }, [supabaseUserInfo.profile]);
+function AppLayout() {
+  const { session, profile } = useProfileContext();
 
   return (
-    <UserContext.Provider value={supabaseUserInfo}>
-      <>
-        {supabaseUserInfo.session && supabaseUserInfo.profile && (
-          <ProSideBar permissions={supabaseUserInfo.profile.permissions} />
-        )}
-        <main className="content">
-          <TopBar />
-          <Outlet />
-        </main>
-      </>
-    </UserContext.Provider>
+    <>
+      {session && profile && <ProSideBar permissions={profile.permissions} />}
+      <main className="content">
+        <TopBar />
+        <Outlet />
+      </main>
+    </>
   );
 }
 
@@ -135,13 +109,13 @@ function App() {
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <UserProvider>
-          <AvatarProvider>
+        <ProfileProvider>
+          <AvatarProvider>   
             <div className="app">
               <RouterProvider router={router} />
             </div>
           </AvatarProvider>
-        </UserProvider>
+        </ProfileProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>
   );

@@ -41,8 +41,8 @@ function Profile() {
   }
 
   const shownInformation: any = {
-    username: "first name",
-    lastname: "last name",
+    first_name: "first name",
+    last_name: "last name",
     speciality: "speciality",
     phone_number: "phone number",
   };

@@ -48,7 +48,7 @@ BEGIN
             'authenticated', 
             'authenticated', 
             new_email, 
-            crypt('password123', gen_salt('bf')), 
+            crypt('exoflex', gen_salt('bf')),
             '2023-05-03 19:41:43.585805+00', 
             '2023-04-22 13:10:03.275387+00', 
             '2023-04-22 13:10:31.458239+00', 
@@ -64,11 +64,12 @@ BEGIN
 
         INSERT INTO user_profiles (
             user_id, 
-            username, 
-            lastname, 
+            first_name, 
+            last_name, 
             speciality, 
             permissions,
-            email
+            email,
+            password
         ) 
         VALUES (
             new_id,
@@ -76,14 +77,15 @@ BEGIN
             'Lastname', 
             'Client', 
             'client',
-            new_email
+            new_email,
+            crypt('exoflex', gen_salt('bf'))
         );
 
         FOR j IN 1..50 LOOP
             exercise_id := gen_random_uuid();
 
             new_date := base_date + INTERVAL '1 day';
-            base_date:= new_date;
+            base_date := new_date;
 
             random_force_avg := round((random() * 100)::numeric, 2);
             random_force_max := round((random() * 150)::numeric, 2);
@@ -157,7 +159,7 @@ BEGIN
             'authenticated', 
             'authenticated', 
             new_email, 
-            crypt('password123', gen_salt('bf')), 
+            crypt('exoflex', gen_salt('bf')),
             '2023-05-03 19:41:43.585805+00', 
             '2023-04-22 13:10:03.275387+00', 
             '2023-04-22 13:10:31.458239+00', 
@@ -173,11 +175,12 @@ BEGIN
 
         INSERT INTO user_profiles (
             user_id, 
-            username, 
-            lastname, 
+            first_name, 
+            last_name, 
             speciality, 
             permissions,
-            email
+            email,
+            password
         ) 
         VALUES (
             new_id,
@@ -185,7 +188,8 @@ BEGIN
             'Lastname', 
             'Physiotherapist', 
             'admin',
-            new_email
+            new_email,
+            crypt('exoflex', gen_salt('bf'))
         );
 
     END LOOP;
@@ -219,7 +223,7 @@ BEGIN
         'authenticated', 
         'authenticated', 
         new_email, 
-        crypt('dev', gen_salt('bf')), 
+        crypt('exoflex', gen_salt('bf')),
         '2023-05-03 19:41:43.585805+00', 
         '2023-04-22 13:10:03.275387+00', 
         '2023-04-22 13:10:31.458239+00', 
@@ -235,19 +239,21 @@ BEGIN
 
     INSERT INTO user_profiles (
         user_id, 
-        username, 
-        lastname, 
+        first_name, 
+        last_name, 
         speciality, 
         permissions,
-        email
+        email,
+        password
     ) 
     VALUES (
         new_id,
         'Dev',
         'Lastname',
-        'Developper',
+        'Developer',
         'dev',
-        new_email
+        new_email,
+        crypt('exoflex', gen_salt('bf'))
     );
 
 END $$;
