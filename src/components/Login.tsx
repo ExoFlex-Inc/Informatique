@@ -19,11 +19,12 @@ export default function Login() {
   async function handleLogin(event: React.FormEvent) {
     event.preventDefault();
     try {
-      const response = await fetch("http://localhost:3001/api/login", {
+      const response = await fetch("http://localhost:3001/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           email,
           password,
@@ -55,7 +56,7 @@ export default function Login() {
   async function handleSignUp(event) {
     event.preventDefault();
     console.log("Attempting signup...");
-    const response = await fetch("http://localhost:3001/api/signup", {
+    const response = await fetch("http://localhost:3001/auth/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
