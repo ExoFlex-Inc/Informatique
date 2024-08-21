@@ -1,40 +1,58 @@
 import { useState } from "react";
 import Dialog from "./Dialog.tsx";
 import { useTheme } from "@emotion/react";
-import { useProfileContext } from "../context/profileContext.tsx";
+import { useSupabaseSession } from "../hooks/use-session.ts";
+import { useUserProfile } from "../hooks/use-profile.ts";
+
 
 export default function Login() {
   const [showModal, setShowModal] = useState(false);
   const [authMode, setAuthMode] = useState<"sign_in" | "sign_up">("sign_in");
-  const { setSession, setProfile } = useProfileContext();
   const { palette } = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [speciality, setSpeciality] = useState("");
+  const { setSession } = useSupabaseSession();
+  const { setUserProfile } = useUserProfile();
 
-  async function handleLogin(event) {
+
+  async function handleLogin(event: React.FormEvent) {
     event.preventDefault();
-    const response = await fetch("http://localhost:3001/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: email,
-        password: password,
-      }),
-    });
-    const data = await response.json();
-    if (response.ok) {
-      console.log("Login successful:", data);
-      setSession(data.supabaseUser.session);
-      setProfile(data.supabaseUser.user.user_metadata);
+    try {
+      const response = await fetch("http://localhost:3001/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.error || "Login failed");
+      }
+  
+      setSession(data.session.access_token, data.session.refresh_token); //TODO Add Loading page while this and user profile loads
+
+      setUserProfile(
+        {
+        user_id: data.user.id,
+        first_name: data.user.user_metadata.first_name,
+        last_name: data.user.user_metadata.last_name,
+        speciality: data.user.user_metadata.speciality,
+        permissions: data.user.user_metadata.permissions,
+      }
+    );
+  
       setShowModal(false);
-    } else {
-      console.error("Login error:", data.error);
-      alert("Login failed: " + data.error);
+    } catch (error: any) {
+      console.error("Login error:", error.message);
+      alert(`Login failed: ${error.message}`);
     }
   }
 

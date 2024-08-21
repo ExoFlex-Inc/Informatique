@@ -22,15 +22,17 @@ import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
 import Icon from "../../../public/assets/user.png";
-import Notification from "../../components/Notification.tsx";
 
 import Login from "../../components/Login.tsx";
 import { useNavigate } from "react-router-dom";
 import { useAvatarContext } from "../../context/avatarContext.tsx";
-import { useProfileContext } from "../../context/profileContext.tsx";
+import { useSupabaseSession } from "../../hooks/use-session.ts";
+import { useUserProfile } from "../../hooks/use-profile.ts";
+import { supaClient } from "../../hooks/supa-client.ts";
 
 export default function TopBar() {
-  const { session } = useProfileContext();
+  const { session } = useSupabaseSession();
+  const { profile } = useUserProfile();
   const theme = useTheme();
   // const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
@@ -38,7 +40,6 @@ export default function TopBar() {
   const menuRef = useRef(null);
   const avatarRef = useRef(null);
   const navigate = useNavigate();
-  const { profile } = useProfileContext();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -64,26 +65,22 @@ export default function TopBar() {
 
   const handleLogout = async (event) => {
     event.preventDefault();
+  
     if (window.confirm("Are you sure you want to log out?")) {
       try {
-        const response = await fetch("http://localhost:3001/api/logout", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        const data = await response.json();
-        if (response.ok) {
-          setIsMenuOpen(false);
-
-          window.location.href = "/";
-        } else {
-          console.error("Logout error:", data.error);
-          alert("Logout failed: " + data.error);
+        setIsMenuOpen(false);
+  
+        const { error } = await supaClient.auth.signOut();
+  
+        if (error) {
+          throw error;
         }
+  
+        window.location.href = "/";
       } catch (error) {
-        console.error("Logout failed:", error);
-        alert("An error occurred during logout. Please try again.");
+        console.error("Error logging out:", error.message);
+  
+        alert("An error occurred while logging out. Please try again.");
       }
     }
   };
@@ -95,7 +92,7 @@ export default function TopBar() {
   return (
     <Box className="nav-bar relative justify-end">
       <Box className="flex items-center">
-        {session && ( // Check if session exists
+        {session && (
           <IconButton onClick={colorMode.toggleColorMode}>
             {theme.palette.mode === "dark" ? (
               <DarkModeOutlinedIcon />
@@ -104,10 +101,10 @@ export default function TopBar() {
             )}
           </IconButton>
         )}
-        {session && ( // Check if session exists
+        {/* {session && ( // Check if session exists
           <Notification />
-        )}
-        {session && ( // Check if session exists
+        )} */}
+        {session && (
           <IconButton>
             <SettingsOutlinedIcon />
           </IconButton>

@@ -21,7 +21,7 @@ import GroupIcon from "@mui/icons-material/Group";
 import Icon from "../../../public/assets/user.png";
 import { Avatar } from "@mui/material";
 import { useAvatarContext } from "../../context/avatarContext.tsx";
-import { useProfileContext } from "../../context/profileContext.tsx";
+import { useUserProfile } from "../../hooks/use-profile.ts";
 
 interface ProSidebarProps {
   permissions: string;
@@ -56,7 +56,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected] = useState(localStorage.getItem("selected") || "Dashboard");
 
-  const { profile } = useProfileContext();
+  const { profile } = useUserProfile();
   const isTablet = useMediaQuery("(max-width: 768px)");
   const { avatarUrl } = useAvatarContext();
 

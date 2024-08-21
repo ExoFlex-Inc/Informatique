@@ -23,8 +23,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import { supaClient } from "../hooks/supa-client.ts";
-import { UserProfile } from "../hooks/use-session.ts";
-import { useProfileContext } from "../context/profileContext.tsx";
+import { useUserProfile } from "../hooks/use-profile.ts";
+import { useQueryClient } from "@tanstack/react-query";
 
 function Profile() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -32,19 +32,20 @@ function Profile() {
   const { avatarUrl } = useAvatarContext();
   const [FieldError, setFieldError] = useState(false);
   const [fieldInput, setFieldInput] = useState("");
-  const [refreshProfile, setRefreshProfile] = useState(false);
   const [editIndex, setEditIndex] = useState<Number | null>(null);
 
-  const { profile, setProfile } = useProfileContext();
+  const queryClient = useQueryClient();
+  const { profile, updateProfile } = useUserProfile();
+
   function toggleEdit(index: Number) {
     setEditIndex(index === editIndex ? null : index);
   }
 
   const shownInformation: any = {
-    first_name: "first name",
-    last_name: "last name",
-    speciality: "speciality",
-    phone_number: "phone number",
+    first_name: "First Name",
+    last_name: "Last Name",
+    speciality: "Speciality",
+    phone_number: "Phone Number",
   };
 
   const StyledBadge = styled(Badge)<BadgeProps>(() => ({
@@ -62,34 +63,22 @@ function Profile() {
 
   const handleButtonClick = () => {
     if (fileInputRef.current) {
-      fileInputRef.current?.click();
+      fileInputRef.current.click();
     }
   };
 
   const onInputSubmit = async (key: string) => {
     if (fieldInput.length === 0) {
       setFieldError(true);
+      return;
     }
-    if (fieldInput.length !== 0) {
-      //Saving the modifications to supabase
-      const { error: updateError } = await supaClient
-        .from("user_profiles")
-        .update({ [key]: fieldInput })
-        .eq("user_id", profile?.user_id);
 
-      if (updateError) {
-        throw updateError;
-      }
-
-      if (profile) {
-        setProfile({
-          ...profile,
-          [key]: fieldInput,
-        });
-      }
-
+    try {
+      updateProfile({ ...profile, [key]: fieldInput });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    } finally {
       setEditIndex(null);
-      setRefreshProfile(!refreshProfile);
       setFieldInput("");
       setFieldError(false);
     }
@@ -148,16 +137,20 @@ function Profile() {
                             error={FieldError ? true : false}
                             label={shownInformation[key]}
                             size="small"
-                            onKeyDown={(event) =>
-                              event.key === "Enter" && onInputSubmit(key)
-                            }
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter") {
+                                event.preventDefault();
+                                onInputSubmit(key);
+                              }
+                            }}
                             onChange={(event) =>
                               setFieldInput(event.target.value)
                             }
+                            defaultValue={profile[key as keyof typeof profile]}
                           />
                         ) : (
                           <ListItemText
-                            primary={`${profile[key as keyof UserProfile]}`}
+                            primary={`${profile[key as keyof typeof profile]}`}
                           />
                         )}
                       </Grid>

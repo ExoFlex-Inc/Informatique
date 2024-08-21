@@ -118,7 +118,7 @@ router.post(
           return res.status(401).json({ error: error.message });
         }
 
-        return res.status(200).json({ supabaseUser });
+        return res.status(200).json({ session:supabaseUser.session, user: supabaseUser.user });
       } catch (err) {
         return res.status(500).json({ error: err.message });
       }
@@ -128,11 +128,11 @@ router.post(
 
 router.post("/logout", async (req, res) => {
   try {
-    const { error } = await supaClient.auth.signOut();
+    // const { error } = await supaClient.auth.signOut();
 
-    if (error) {
-      return res.status(500).json({ error: error.message });
-    }
+    // if (error) {
+    //   return res.status(500).json({ error: error.message });
+    // }
 
     return res.status(200).json({ logout: true });
   } catch (err) {

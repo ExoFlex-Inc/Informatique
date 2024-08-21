@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { redirect, useNavigate } from "react-router-dom";
 import Dialog from "../components/Dialog.tsx";
 import { supaClient } from "../hooks/supa-client.ts";
-import { useProfileContext } from "../context/profileContext.tsx";
+import { useUserProfile } from "../hooks/use-profile.ts";
 
 export async function welcomeLoader() {
   const {
@@ -22,7 +22,7 @@ export async function welcomeLoader() {
   return { loaded: true };
 }
 export function Welcome() {
-  const user = useProfileContext();
+  const {profile} = useUserProfile();
   const navigate = useNavigate();
   const [firstName, setFirstName] = useState("");
   const [firstNameDirty, setFirstNameDirty] = useState(false);
@@ -93,7 +93,7 @@ export function Welcome() {
                 .from("user_profiles")
                 .insert([
                   {
-                    user_id: user.session?.user.id || "",
+                    user_id: profile.session?.user.id || "",
                     username: firstName,
                     lastname: lastName,
                     speciality: speciality,
@@ -196,7 +196,7 @@ export function Welcome() {
               className="welcome-form-submit-button"
               type="submit"
               disabled={
-                invalidUserName != null ||
+                invalidFirstName != null ||
                 invalidLastName != null ||
                 invalidSpeciality != null ||
                 invalidPhoneNumber != null

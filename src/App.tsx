@@ -1,3 +1,4 @@
+import React from "react";
 import { createContext, useState } from "react";
 import {
   Route,
@@ -24,72 +25,51 @@ import WellnessNetwork from "./pages/WellnessNetwork";
 import TopBar from "./pages/global/TopBar";
 import ProSideBar from "./pages/global/Sidebar";
 import Profile from "./pages/Profile";
+import Forbidden from "./pages/Forbidden.tsx";
 
-import ProtectedRoute from "./components/ProtectedRoute";
-import { ProfileProvider, useProfileContext } from "./context/profileContext";
+import PrivateRoutes from "./components/PrivateRoutes";
+
 import { AvatarProvider } from "./context/avatarContext";
+
+import useVisibilityChange from "./hooks/use-visibility-change.ts";
+
+import { useSupabaseSession } from "./hooks/use-session.ts";
+import { useUserProfile } from "./hooks/use-profile.ts";
+
+
+// Import necessary modules from React Query
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<AppLayout />}>
       <Route path="/recovery" element={<Recovery />} />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute
-            component={Dashboard}
-            requiredPermission={["client"]}
-          />
-        }
-      />
-      <Route
-        path="/activity"
-        element={
-          <ProtectedRoute
-            component={Activity}
-            requiredPermission={["dev", "admin"]}
-          />
-        }
-      />
+      
+      <Route element={<PrivateRoutes requiredPermissions={["dev", "client"]} />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Route>
+
+      <Route element={<PrivateRoutes requiredPermissions={["dev", "admin"]} />}>
+        <Route path="/activity" element={<Activity />} />
+        <Route path="/manual" element={<Manual />} />
+        <Route path="/planning" element={<Planning />} />
+        <Route path="/wellness_network" element={<WellnessNetwork />} />
+      </Route>
+
       <Route path="/termsAndConditions" element={<TermsAndConditions />} />
       <Route path="/welcome" element={<Welcome />} loader={welcomeLoader} />
-      <Route
-        path="/manual"
-        element={
-          <ProtectedRoute
-            component={Manual}
-            requiredPermission={["dev", "admin"]}
-          />
-        }
-      />
       <Route path="/hmi" element={<HMI />} />
-      <Route
-        path="/planning"
-        element={
-          <ProtectedRoute
-            component={Planning}
-            requiredPermission={["dev", "admin"]}
-          />
-        }
-      />
       <Route path="/settings" element={<Settings />} />
-      <Route
-        path="/wellness_network"
-        element={
-          <ProtectedRoute
-            component={WellnessNetwork}
-            requiredPermission={["dev", "admin"]}
-          />
-        }
-      />
       <Route path="/profile" element={<Profile />} />
       <Route path="/professional_network" element={<ProfessionalNetwork />} />
-    </Route>,
+      <Route path="/forbidden" element={<Forbidden />} />
+    </Route>
   ),
 );
 
 function AppLayout() {
-  const { session, profile } = useProfileContext();
+  const { session } = useSupabaseSession();
+  const { profile } = useUserProfile();
 
   return (
     <>
@@ -105,17 +85,21 @@ function AppLayout() {
 function App() {
   const [theme, colorMode] = useMode();
 
+  useVisibilityChange();
+
+  const queryClient = new QueryClient();
+
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <ProfileProvider>
-          <AvatarProvider>
-            <div className="app">
-              <RouterProvider router={router} />
-            </div>
-          </AvatarProvider>
-        </ProfileProvider>
+        <QueryClientProvider client={queryClient}>
+            <AvatarProvider>
+              <div className="app">
+                <RouterProvider router={router} />
+              </div>
+            </AvatarProvider>
+        </QueryClientProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>
   );

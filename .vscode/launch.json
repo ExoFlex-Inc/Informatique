@@ -12,35 +12,20 @@
       "internalConsoleOptions": "neverOpen"
     },
     {
-      "type": "node",
-      "request": "attach",
-      "name": "Attach Debugger to Server",
-      "processId": "${command:PickProcess}",
-      "skipFiles": ["<node_internals>/**"]
-    },
-    {
       "type": "chrome",
       "request": "launch",
       "name": "Launch Chrome against localhost",
       "url": "http://localhost:1337",
-      "webRoot": "${workspaceFolder}/app"
+      "webRoot": "${workspaceFolder}/src",
+      // "preLaunchTask": "npm: dev"
     },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Launch Vite Dev Server with Debugger",
-      "program": "${workspaceFolder}/node_modules/vite/bin/vite.js",
-      "skipFiles": ["<node_internals>/**"],
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen"
-    }
   ],
   "compounds": [
     {
       "name": "Launch Full Stack",
       "configurations": [
         "Launch Server with Debugger",
-        "Launch Vite Dev Server with Debugger"
+        "Launch Chrome against localhost"
       ]
     }
   ]
