@@ -65,21 +65,21 @@ export default function TopBar() {
 
   const handleLogout = async (event) => {
     event.preventDefault();
-  
+
     if (window.confirm("Are you sure you want to log out?")) {
       try {
         setIsMenuOpen(false);
-  
+
         const { error } = await supaClient.auth.signOut();
-  
+
         if (error) {
           throw error;
         }
-  
+
         window.location.href = "/";
       } catch (error) {
         console.error("Error logging out:", error.message);
-  
+
         alert("An error occurred while logging out. Please try again.");
       }
     }

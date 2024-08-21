@@ -4,7 +4,11 @@ import { supaClient } from "./supa-client.ts";
 export function useSupabaseSession() {
   const queryClient = useQueryClient();
 
-  const { data: session, isLoading, error  } = useQuery({
+  const {
+    data: session,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["session"],
     queryFn: async () => {
       const { data, error } = await supaClient.auth.getSession();
@@ -19,7 +23,13 @@ export function useSupabaseSession() {
   });
 
   const setSessionMutation = useMutation({
-    mutationFn: async ({ accessToken, refreshToken }: { accessToken: string; refreshToken: string }) => {
+    mutationFn: async ({
+      accessToken,
+      refreshToken,
+    }: {
+      accessToken: string;
+      refreshToken: string;
+    }) => {
       const { data, error } = await supaClient.auth.setSession({
         access_token: accessToken,
         refresh_token: refreshToken,

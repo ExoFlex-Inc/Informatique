@@ -4,7 +4,6 @@ import { useTheme } from "@emotion/react";
 import { useSupabaseSession } from "../hooks/use-session.ts";
 import { useUserProfile } from "../hooks/use-profile.ts";
 
-
 export default function Login() {
   const [showModal, setShowModal] = useState(false);
   const [authMode, setAuthMode] = useState<"sign_in" | "sign_up">("sign_in");
@@ -16,7 +15,6 @@ export default function Login() {
   const [speciality, setSpeciality] = useState("");
   const { setSession } = useSupabaseSession();
   const { setUserProfile } = useUserProfile();
-
 
   async function handleLogin(event: React.FormEvent) {
     event.preventDefault();
@@ -32,23 +30,21 @@ export default function Login() {
         }),
       });
       const data = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(data.error || "Login failed");
       }
-  
+
       setSession(data.session.access_token, data.session.refresh_token); //TODO Add Loading page while this and user profile loads
 
-      setUserProfile(
-        {
+      setUserProfile({
         user_id: data.user.id,
         first_name: data.user.user_metadata.first_name,
         last_name: data.user.user_metadata.last_name,
         speciality: data.user.user_metadata.speciality,
         permissions: data.user.user_metadata.permissions,
-      }
-    );
-  
+      });
+
       setShowModal(false);
     } catch (error: any) {
       console.error("Login error:", error.message);

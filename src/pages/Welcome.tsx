@@ -22,7 +22,7 @@ export async function welcomeLoader() {
   return { loaded: true };
 }
 export function Welcome() {
-  const {profile} = useUserProfile();
+  const { profile } = useUserProfile();
   const navigate = useNavigate();
   const [firstName, setFirstName] = useState("");
   const [firstNameDirty, setFirstNameDirty] = useState(false);

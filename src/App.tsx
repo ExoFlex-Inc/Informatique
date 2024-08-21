@@ -36,7 +36,6 @@ import useVisibilityChange from "./hooks/use-visibility-change.ts";
 import { useSupabaseSession } from "./hooks/use-session.ts";
 import { useUserProfile } from "./hooks/use-profile.ts";
 
-
 // Import necessary modules from React Query
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -44,8 +43,10 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<AppLayout />}>
       <Route path="/recovery" element={<Recovery />} />
-      
-      <Route element={<PrivateRoutes requiredPermissions={["dev", "client"]} />}>
+
+      <Route
+        element={<PrivateRoutes requiredPermissions={["dev", "client"]} />}
+      >
         <Route path="/dashboard" element={<Dashboard />} />
       </Route>
 
@@ -63,7 +64,7 @@ const router = createBrowserRouter(
       <Route path="/profile" element={<Profile />} />
       <Route path="/professional_network" element={<ProfessionalNetwork />} />
       <Route path="/forbidden" element={<Forbidden />} />
-    </Route>
+    </Route>,
   ),
 );
 
@@ -94,11 +95,11 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <QueryClientProvider client={queryClient}>
-            <AvatarProvider>
-              <div className="app">
-                <RouterProvider router={router} />
-              </div>
-            </AvatarProvider>
+          <AvatarProvider>
+            <div className="app">
+              <RouterProvider router={router} />
+            </div>
+          </AvatarProvider>
         </QueryClientProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>

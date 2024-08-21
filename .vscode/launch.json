@@ -16,9 +16,9 @@
       "request": "launch",
       "name": "Launch Chrome against localhost",
       "url": "http://localhost:1337",
-      "webRoot": "${workspaceFolder}/src",
+      "webRoot": "${workspaceFolder}/src"
       // "preLaunchTask": "npm: dev"
-    },
+    }
   ],
   "compounds": [
     {

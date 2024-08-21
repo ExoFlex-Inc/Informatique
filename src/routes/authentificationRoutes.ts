@@ -118,7 +118,9 @@ router.post(
           return res.status(401).json({ error: error.message });
         }
 
-        return res.status(200).json({ session:supabaseUser.session, user: supabaseUser.user });
+        return res
+          .status(200)
+          .json({ session: supabaseUser.session, user: supabaseUser.user });
       } catch (err) {
         return res.status(500).json({ error: err.message });
       }
