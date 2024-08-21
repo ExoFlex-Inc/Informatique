@@ -22,7 +22,9 @@ export const signup = async (req: Request, res: Response) => {
       .single();
 
     if (existingUser) {
-      return res.status(400).json({ error: "User with this email already exists." });
+      return res
+        .status(400)
+        .json({ error: "User with this email already exists." });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -101,7 +103,9 @@ export const login = async (req: Request, res: Response, next: Function) => {
         return res.status(401).json({ error: error.message });
       }
 
-      return res.status(200).json({ session: supabaseUser.session, user: supabaseUser.user });
+      return res
+        .status(200)
+        .json({ session: supabaseUser.session, user: supabaseUser.user });
     } catch (err) {
       return res.status(500).json({ error: err.message });
     }

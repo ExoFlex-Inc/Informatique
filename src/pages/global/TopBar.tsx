@@ -65,24 +65,24 @@ export default function TopBar() {
 
   const handleLogout = async (event) => {
     event.preventDefault();
-  
+
     if (window.confirm("Are you sure you want to log out?")) {
       try {
         setIsMenuOpen(false);
-  
+
         const response = await fetch("http://localhost:3001/auth/logout", {
           method: "POST",
           credentials: "include",
         });
-  
+
         if (!response.ok) {
           throw new Error("Failed to log out");
         }
-  
+
         window.location.href = "/";
       } catch (error) {
         console.error("Error logging out:", error.message);
-  
+
         alert("An error occurred while logging out. Please try again.");
       }
     }

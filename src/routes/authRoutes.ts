@@ -18,7 +18,7 @@ router.post(
       .isLength({ min: 6 })
       .withMessage("Password must be at least 6 characters long"),
   ],
-  signup
+  signup,
 );
 
 router.post(
@@ -27,7 +27,7 @@ router.post(
     check("email").isEmail().withMessage("Enter a valid email address"),
     check("password").exists().withMessage("Password is required"),
   ],
-  login
+  login,
 );
 
 router.post("/logout", logout);
