@@ -19,7 +19,7 @@ DECLARE
     random_rated_pain INT;
 BEGIN
     FOR i IN 1..50 LOOP
-        new_email := 'user' || i || '@example.com';
+        new_email := 'user' || i || '@exoflex.com';
         new_id := gen_random_uuid();
         base_date := NOW() - INTERVAL '1 month'; 
 
@@ -130,7 +130,7 @@ BEGIN
     END LOOP;
 
     FOR i IN 1..10 LOOP
-        new_email := 'admin' || i || '@example.com';
+        new_email := 'admin' || i || '@exoflex.com';
         new_id := gen_random_uuid();
         base_date := NOW() - INTERVAL '1 month'; 
 
@@ -194,7 +194,7 @@ BEGIN
 
     END LOOP;
 
-    new_email := 'dev@dev.com';
+    new_email := 'dev@exoflex.com';
     new_id := gen_random_uuid();
     base_date := NOW() - INTERVAL '1 month'; 
 
