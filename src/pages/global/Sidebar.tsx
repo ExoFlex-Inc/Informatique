@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
 import {
   Box,
@@ -11,31 +11,31 @@ import {
 import { useNavigate } from "react-router-dom";
 import { tokens } from "../../hooks/theme.ts";
 
-import { UserContext } from "../../App.tsx";
-
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import TvIcon from "@mui/icons-material/Tv";
-import BarChartIcon from "@mui/icons-material/BarChart";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import FeedOutlinedIcon from "@mui/icons-material/FeedOutlined";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
-import { supaClient } from "../../hooks/supa-client.ts";
+import GroupIcon from "@mui/icons-material/Group";
+import Icon from "../../../public/assets/user.png";
+import { Avatar } from "@mui/material";
+import { useAvatarContext } from "../../context/avatarContext.tsx";
+import { useProfileContext } from "../../context/profileContext.tsx";
 
 interface ProSidebarProps {
   permissions: string;
 }
 
-const Item = ({ title, to, icon, selected, setSelected }) => {
+const Item = ({ title, to, icon, selected }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
 
   const handleClick = () => {
-    setSelected(title);
+    localStorage.setItem("selected", title);
     navigate(to);
   };
-
   return (
     <MenuItem
       active={selected === title}
@@ -54,19 +54,15 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [selected, setSelected] = useState(
-    localStorage.getItem("selected") || "Dashboard",
-  );
-  const { profile } = useContext(UserContext);
+  const [selected] = useState(localStorage.getItem("selected") || "Dashboard");
+
+  const { profile } = useProfileContext();
   const isTablet = useMediaQuery("(max-width: 768px)");
+  const { avatarUrl } = useAvatarContext();
 
   useEffect(() => {
     setIsCollapsed(isTablet);
   }, [isTablet]);
-
-  useEffect(() => {
-    localStorage.setItem("selected", selected);
-  }, [selected]);
 
   return (
     <Box
@@ -137,12 +133,13 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
           {!isCollapsed && (
             <Box mb="25px">
               <Box display="flex" justifyContent="center" alignItems="center">
-                <img
-                  alt="profile-user"
-                  width={isTablet ? "50px" : "100px"}
-                  height={isTablet ? "50px" : "100px"}
-                  src={`../assets/user.png`}
-                  style={{ cursor: "pointer", borderRadius: "50%" }}
+                <Avatar
+                  src={avatarUrl ? avatarUrl : Icon}
+                  sx={
+                    isTablet
+                      ? { width: 50, height: 50 }
+                      : { width: 100, height: 100 }
+                  }
                 />
               </Box>
 
@@ -166,38 +163,46 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
           )}
 
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
-            <Item
-              title="Dashboard"
-              to="/"
-              icon={<HomeOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            {/* <SubMenu label="Charts" icon={<BarChartIcon />}>
+            {props.permissions === "client" && (
               <Item
-                title="Activity"
-                to="/activity"
-                icon={<NavigateNextIcon style={{ fontSize: "small" }} />}
+                title="Dashboard"
+                to="/dashboard"
+                icon={<HomeOutlinedIcon />}
                 selected={selected}
-                setSelected={setSelected}
               />
-            </SubMenu> */}
+            )}
             {(props.permissions === "dev" || props.permissions === "admin") && (
               <Item
                 title="Planning"
                 to="/planning"
                 icon={<FitnessCenterIcon />}
                 selected={selected}
-                setSelected={setSelected}
               />
             )}
+            {(props.permissions === "dev" || props.permissions === "admin") && (
+              <Item
+                title="Wellness Network"
+                to="/wellness_network"
+                icon={<GroupIcon />}
+                selected={selected}
+              />
+            )}
+
+            {(props.permissions === "dev" || props.permissions === "admin") && (
+              <Item
+                title="Activity"
+                to="/activity"
+                icon={<FeedOutlinedIcon />}
+                selected={selected}
+              />
+            )}
+
             <SubMenu label="Control Page" icon={<TvIcon />}>
               <Item
                 title="HMI"
                 to="/hmi"
                 icon={<NavigateNextIcon style={{ fontSize: "small" }} />}
                 selected={selected}
-                setSelected={setSelected}
               />
               {(props.permissions == "dev" ||
                 props.permissions === "admin") && (
@@ -206,24 +211,14 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                   to="/manual"
                   icon={<NavigateNextIcon style={{ fontSize: "small" }} />}
                   selected={selected}
-                  setSelected={setSelected}
                 />
               )}
             </SubMenu>
-            {/* <Item
-              title="Settings"
-              to="/settings"
-              icon={<SettingsOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            /> */}
           </Box>
           <Box
             display="flex"
             justifyContent="center"
             alignItems="center"
-            position="absolute"
-            bottom="0"
             width="100%"
           >
             <img

@@ -2,6 +2,19 @@
 CREATE EXTENSION IF NOT EXISTS ltree;
 
 /*
+.#########.##....##.##.....##.##..........##
+.##........###...##.##.....##.###........###
+.##........####..##.##.....##.####......####
+.########..##.##.##.##.....##.##.##....##.##
+.##........##..####.##.....##.##..##..##..##
+.##........##...###.##.....##.##...####...##
+.########..##....##..#######..##....## ...##
+*/
+
+CREATE TYPE permissions_enum AS ENUM ('dev', 'admin', 'client');
+CREATE TYPE client_admin_status AS ENUM ('pending', 'accepted');
+
+/*
 .########....###....########..##.......########..######.
 ....##......##.##...##.....##.##.......##.......##....##
 ....##.....##...##..##.....##.##.......##.......##......
@@ -11,12 +24,24 @@ CREATE EXTENSION IF NOT EXISTS ltree;
 ....##....##.....##.########..########.########..######.
 */
 
-CREATE TABLE  user_profiles (
+CREATE TABLE user_profiles (
   user_id UUID PRIMARY KEY REFERENCES auth.users (id) NOT NULL,
   username TEXT CHECK (char_length(username) > 0 AND char_length(username) <= 50 AND username !~ '\d'), 
   lastname TEXT CHECK (char_length(lastname) > 0 AND char_length(lastname) <= 50 AND lastname !~ '\d'),
+  permissions permissions_enum NOT NULL,
   speciality TEXT CHECK (char_length(speciality) > 0 AND char_length(speciality) <= 50 AND speciality !~ '\d'),
-  permissions TEXT CHECK (char_length(permissions) > 0 AND char_length(permissions) <= 50 AND permissions !~ '\d')
+  phone_number TEXT CHECK (char_length(phone_number) > 0 AND char_length(phone_number) <= 50 AND phone_number ~ '\d'),
+  email TEXT CHECK (char_length(email) > 0 AND char_length(email) <= 50),
+  avatar_url TEXT
+);
+
+CREATE TABLE admin_client (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4() not null,
+  admin_id UUID,
+  client_id UUID,
+  relation_status client_admin_status NOT NULL,
+  FOREIGN KEY (admin_id) REFERENCES user_profiles(user_id),
+  FOREIGN KEY (client_id) REFERENCES user_profiles(user_id)
 );
 
 CREATE TABLE machine (
@@ -37,6 +62,22 @@ CREATE TABLE encoder (
   user_id uuid references auth.users(id) not null,
   angle_data JSONB,
   created_at DATE DEFAULT CURRENT_DATE
+);
+
+CREATE TABLE exercise_data (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+  user_id uuid REFERENCES user_profiles(user_id),
+  date timestamptz NOT NULL,
+  force_avg float,
+  force_max float,
+  angle_max float,
+  angle_target float,
+  repetitions_done int,
+  repetitions_success_rate float,
+  predicted_total_time float,
+  actual_total_time float,
+  rated_pain int
+
 );
 
 /*
@@ -126,7 +167,42 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION get_clients_for_admin(admin_id UUID)
+RETURNS TABLE (
+    user_id UUID,
+    username TEXT,
+    lastname TEXT,
+    phone_number TEXT,
+    email TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        c.user_id, 
+        c.username, 
+        c.lastname, 
+        c.phone_number, 
+        c.email
+    FROM 
+        user_profiles c
+    JOIN 
+        admin_client a ON c.user_id = a.client_id
+    WHERE 
+        a.admin_id = get_clients_for_admin.admin_id AND a.relation_status = 'accepted';
+END;
+$$ LANGUAGE plpgsql;
 
+/*
+..######..########..#######..########.....###.....#######..########
+.##....##....##....##.....##.##.....##...##.##...##.....##.##......
+.##..........##....##.....##.##.....##..##...##..##........##......
+..######.....##....##.....##.########..##.....##.##........######..
+.......##....##....##.....##.##...##...#########.##..#####.##......
+.##....##....##....##.....##.##....##..##.....##.##.....##.##......
+..######.....##.....#######..##.....##.##.....##..#######..########
+*/
+
+INSERT INTO storage.buckets(id, name, public, file_size_limit) VALUES ('avatars', 'avatars', true, 52428800);
 
 /*
 .########...#######..##.......####..######..####.########..######.
@@ -142,6 +218,49 @@ alter table user_profiles enable row level security;
 alter table machine enable row level security;
 alter table encoder enable row level security;
 alter table plans enable row level security;
+alter table exercise_data enable row level security;
+alter table admin_client enable row level security;
+
+CREATE POLICY "avatars policy all can see" ON "storage"."objects"
+AS permissive FOR SELECT
+TO public
+USING ((bucket_id = 'avatars'::text));
+
+CREATE POLICY "avatars policy can update" ON "storage"."objects"
+AS permissive FOR UPDATE 
+TO public
+USING ((bucket_id = 'avatars'::text));
+
+CREATE POLICY "avatars policy users can delete" ON "storage"."objects"
+AS permissive FOR DELETE 
+TO public
+USING ((bucket_id = 'avatars'::text));
+
+CREATE POLICY "avatars policy users can insert" ON "storage"."objects"
+AS permissive FOR INSERT
+TO public
+WITH CHECK ((bucket_id = 'avatars'::text));
+
+CREATE POLICY "all can see" ON "public"."admin_client"
+AS PERMISSIVE FOR SELECT
+TO public
+USING (true);
+
+CREATE POLICY "users can insert" ON "public"."admin_client"
+AS PERMISSIVE FOR INSERT
+TO public
+WITH CHECK (true);
+
+CREATE POLICY "owners can update" ON "public"."admin_client"
+AS PERMISSIVE FOR UPDATE
+TO public
+USING (true)
+WITH CHECK (true);
+
+CREATE POLICY "owners can delete" ON "public"."admin_client"
+AS PERMISSIVE FOR DELETE
+TO public
+USING (true);
 
 CREATE POLICY "all can see" ON "public"."user_profiles"
 AS PERMISSIVE FOR SELECT
@@ -158,6 +277,22 @@ AS PERMISSIVE FOR UPDATE
 TO public
 USING (auth.uid()=user_id)
 WITH CHECK (auth.uid()=user_id);
+
+CREATE POLICY "all can see" ON "public"."exercise_data"
+AS PERMISSIVE FOR SELECT
+TO public
+USING (true);
+
+CREATE POLICY "users can insert exercise data" ON "public"."exercise_data"
+AS PERMISSIVE FOR INSERT
+TO public
+WITH CHECK (auth.uid() IS NOT NULL);
+
+CREATE POLICY "owners can update exercise data" ON "public"."exercise_data"
+AS PERMISSIVE FOR UPDATE
+TO public
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "all can see" ON "public"."machine"
 AS PERMISSIVE FOR SELECT
@@ -192,6 +327,39 @@ WITH CHECK (auth.uid() IS NOT NULL);
 CREATE POLICY "owners can update plans" ON "public"."plans"
 AS PERMISSIVE FOR UPDATE
 TO public
-USING (auth.uid() = user_id)
-WITH CHECK (auth.uid() = user_id);
+USING (EXISTS (
+  SELECT 1
+  FROM user_profiles
+  WHERE user_profiles.user_id = user_id
+))
+WITH CHECK (EXISTS (
+  SELECT 1
+  FROM user_profiles
+  WHERE user_profiles.user_id = user_id
+));
 
+CREATE POLICY "admins_and_managers_can_assign_admin" ON public.user_profiles
+AS PERMISSIVE FOR UPDATE
+TO public
+USING (
+    (
+        SELECT permissions
+        FROM public.user_profiles
+        WHERE user_id = auth.uid()
+    ) IN ('dev', 'admin') AND permissions = 'client'
+)
+WITH CHECK (
+    (
+        SELECT permissions
+        FROM public.user_profiles
+        WHERE user_id = auth.uid()
+    ) IN ('dev', 'admin') AND permissions = 'client'
+);
+
+CREATE POLICY "Allow logged-in users to insert their own exercise data" ON exercise_data
+  FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Allow logged-in users to select their own exercise data" ON exercise_data
+  FOR SELECT
+  USING (auth.uid() = user_id);

@@ -2,6 +2,7 @@ import { RealtimeChannel, Session } from "@supabase/supabase-js";
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supaClient } from "./supa-client.ts";
+import { useProfileContext } from "../context/profileContext.tsx";
 
 export interface UserProfile {
   username: string;
@@ -9,21 +10,28 @@ export interface UserProfile {
   speciality: string;
   user_id: string;
   permissions: string;
-  avatarUrl?: string;
+  avatar_url?: string;
 }
 
 export interface SupabaseUserInfo {
   session: Session | null;
   profile: UserProfile | null;
+  setSession: (session: Session | null) => void;
+  setProfile: (profile: UserProfile | null) => void;
 }
 
 export function useSession(): SupabaseUserInfo {
-  const [userInfo, setUserInfo] = useState<SupabaseUserInfo>({
-    profile: null,
-    session: null,
-  });
+  const { session, profile, setSession, setProfile } = useProfileContext();
   const [channel, setChannel] = useState<RealtimeChannel | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    supaClient.auth.onAuthStateChange(async (event) => {
+      if (event == "PASSWORD_RECOVERY") {
+        navigate("/recovery");
+      }
+    });
+  }, []);
 
   const setupLocalServer = useCallback(
     async (access_token: string, refresh_token: string) => {
@@ -56,12 +64,13 @@ export function useSession(): SupabaseUserInfo {
       const {
         data: { session },
       } = await supaClient.auth.getSession();
-      setUserInfo((prev) => ({ ...prev, session }));
+      setSession(session);
 
       const {
         data: { subscription },
       } = supaClient.auth.onAuthStateChange((_event, newSession) => {
-        setUserInfo({ session: newSession, profile: null });
+        setSession(newSession);
+        setProfile(null);
         if (!newSession) {
           localStorage.removeItem("lastLocation");
           localStorage.removeItem("plan");
@@ -77,21 +86,19 @@ export function useSession(): SupabaseUserInfo {
 
   useEffect(() => {
     const handleUserProfile = async () => {
-      if (userInfo.session?.user && !userInfo.profile) {
-        const newChannel = await listenToUserProfileChanges(
-          userInfo.session.user.id,
-        );
+      if (session?.user && !profile) {
+        const newChannel = await listenToUserProfileChanges(session.user.id);
         if (newChannel) {
           if (channel) {
             channel.unsubscribe();
           }
           setChannel(newChannel);
 
-          const access_token = userInfo.session?.access_token || "";
-          const refresh_token = userInfo.session?.refresh_token || "";
+          const access_token = session?.access_token || "";
+          const refresh_token = session?.refresh_token || "";
           setupLocalServer(access_token, refresh_token);
         }
-      } else if (!userInfo.session?.user) {
+      } else if (!session?.user) {
         if (channel) {
           channel.unsubscribe();
         }
@@ -100,7 +107,7 @@ export function useSession(): SupabaseUserInfo {
     };
 
     handleUserProfile();
-  }, [userInfo.session, userInfo.profile, channel, setupLocalServer]);
+  }, [session, profile, channel, setupLocalServer]);
 
   const listenToUserProfileChanges = useCallback(
     async (userId: string): Promise<RealtimeChannel | null> => {
@@ -116,11 +123,11 @@ export function useSession(): SupabaseUserInfo {
         }
 
         if (!data?.length) {
-          navigate("/welcome");
+          navigate("/termsAndConditions");
           return null;
         }
 
-        setUserInfo((prev) => ({ ...prev, profile: data[0] }));
+        setProfile(data[0]);
 
         const newChannel = supaClient
           .channel(`public:user_profiles`)
@@ -133,10 +140,7 @@ export function useSession(): SupabaseUserInfo {
               filter: `user_id=eq.${userId}`,
             },
             (payload) => {
-              setUserInfo((prev) => ({
-                ...prev,
-                profile: payload.new as UserProfile,
-              }));
+              setProfile(payload.new as UserProfile);
             },
           )
           .subscribe();
@@ -150,5 +154,5 @@ export function useSession(): SupabaseUserInfo {
     [navigate],
   );
 
-  return userInfo;
+  return { session, profile, setSession, setProfile };
 }
