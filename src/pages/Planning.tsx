@@ -224,7 +224,7 @@ export default function Planning() {
     try {
       const requestBody = {
         plan: plan,
-        selectedPatient: selectedPatient,
+        selectedPatient: selectedPatient[0],
       };
 
       const response = await fetch("http://localhost:3001/api/plan", {
