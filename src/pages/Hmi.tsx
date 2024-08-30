@@ -4,6 +4,7 @@ import ProgressionWidget from "../components/ProgressionWidget.tsx";
 
 import usePlanData from "../hooks/get-plan.ts";
 import useStm32 from "../hooks/use-stm32.ts";
+import { useProfileContext } from "../context/profileContext.tsx";
 
 import { useMediaQuery, useTheme } from "@mui/material";
 
@@ -27,7 +28,8 @@ interface ChartData {
 }
 
 export default function HMI() {
-  const { planData } = usePlanData();
+  const { profile } = useProfileContext();
+  const { planData } = usePlanData(profile?.user_id);
   const { stm32Data, socket, errorFromStm32 } = useStm32();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -56,9 +58,17 @@ export default function HMI() {
       planData &&
       socket
     ) {
-      let message = `{Auto;Plan;${planData.limits.angles.eversion};${planData.limits.angles.extension};${planData.limits.angles.dorsiflexion};${planData.limits.torque.eversion};${planData.limits.torque.extension};${planData.limits.torque.dorsiflexion}`;
-      planData.plan.forEach((exercise) => {
-        message += `;${exercise.exercise};${exercise.repetitions};${exercise.rest};${exercise.target_angle};${exercise.target_torque};${exercise.time}`;
+      let message = `{Auto;Plan;${planData.limits.left.angles.eversion};${planData.limits.right.angles.eversion};
+        ${planData.limits.left.angles.extension};${planData.limits.right.angles.extension};
+        ${planData.limits.left.angles.dorsiflexion};${planData.limits.right.angles.dorsiflexion};
+        ${planData.limits.left.torque.eversion};${planData.limits.right.torque.eversion};
+        ${planData.limits.left.torque.extension};${planData.limits.right.torque.extension};
+        ${planData.limits.left.torque.dorsiflexion};${planData.limits.right.torque.dorsiflexion}`;
+      planData.plan.forEach((set) => {
+        set.movement.forEach((exercise) => {
+          message += `;${exercise.exercise};${exercise.target_angle};${exercise.target_torque}`;
+        })
+        message += `;${set.repetitions};${set.rest};${set.speed};${set.time}`;
       });
       message += ";}";
       socket.emit("planData", message);

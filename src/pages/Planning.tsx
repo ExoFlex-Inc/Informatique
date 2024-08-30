@@ -28,11 +28,11 @@ export interface Set {
   rest: number;
   repetitions: number;
   speed: number;
+  time: number;
   movement: {
     exercise: string;
     target_angle: number;
     target_torque: number;
-    time: number;
   }[];
 }
 
@@ -46,12 +46,12 @@ export default function Planning() {
       rest: 0,
       repetitions: 0,
       speed: 0,
+      time: 0,
       movement: [
         {
           exercise: "",
           target_angle: 0,
           target_torque: 0,
-          time: 0,
         },
       ],
     },
@@ -160,7 +160,6 @@ export default function Planning() {
               exercise: "",
               target_angle: 0,
               target_torque: 0,
-              time: 0,
             },
           ];
         }
@@ -176,12 +175,12 @@ export default function Planning() {
         rest: 0,
         speed: 0,
         repetitions: 0,
+        time: 0,
         movement: [
           {
             exercise: "",
             target_angle: 0,
             target_torque: 0,
-            time: 0,
           },
         ],
       },
