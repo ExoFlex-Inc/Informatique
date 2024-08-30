@@ -70,7 +70,7 @@ const LineChart: React.FC<LineChartProps> = ({
           },
           y: {
             min: 0,
-            max: graphDataType == 'position' ? 180 : graphDataType == 'torque' ? 48 : 30,
+            max: graphDataType == 'position' ? 180 : graphDataType == 'torque' ? 48 : 15,
           },
         },
       };
@@ -148,8 +148,8 @@ const LineChart: React.FC<LineChartProps> = ({
               },
             },
             y: {
-              min: graphDataType == 'position' ? -65 : graphDataType == 'torque' ? 0 : -30,
-              max: graphDataType == 'position' ? 65 : graphDataType == 'torque' ? 48 : 30,
+              min: graphDataType == 'position' ? -65 : graphDataType == 'torque' ? 0 : 0,
+              max: graphDataType == 'position' ? 65 : graphDataType == 'torque' ? 48 : 15,
             },
           },
         }));
