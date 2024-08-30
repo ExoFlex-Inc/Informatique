@@ -34,7 +34,6 @@ const PatientMenuDropdown: React.FC<PatientMenuDropdownProps> = ({
 
     return true;
   }
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const { profile } = useProfileContext();
 
   const removeUser = async () => {

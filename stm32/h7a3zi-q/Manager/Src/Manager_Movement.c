@@ -139,33 +139,30 @@ void ManagerMovement_Reset()
 
 void ManagerMovement_Task()
 {
-    if (ManagerMotor_IsReady2Move())
-    {
-        switch (managerMovement.state)
-        {
-        case MMOV_STATE_WAITING_SECURITY:
-            ManagerMovement_WaitingSecurity();
-            break;
 
-        case MMOV_STATE_HOMING:
-            ManagerMovement_Homing();
-            break;
+	switch (managerMovement.state)
+	{
+	case MMOV_STATE_WAITING_SECURITY:
+		ManagerMovement_WaitingSecurity();
+		break;
 
-        case MMOV_STATE_MANUAL:
-            ManagerMovement_Manual();
-            break;
+	case MMOV_STATE_HOMING:
+		ManagerMovement_Homing();
+		break;
 
-        case MMOV_STATE_AUTOMATIC:
-            ManagerMovement_Automatic();
+	case MMOV_STATE_MANUAL:
+		ManagerMovement_Manual();
+		break;
 
-            break;
+	case MMOV_STATE_AUTOMATIC:
+		ManagerMovement_Automatic();
+		break;
 
-        case MMOV_STATE_ERROR:
-            // Wait for manual cmd or for state change
+	case MMOV_STATE_ERROR:
+		// Wait for manual cmd or for state change
 
-            break;
-        }
-    }
+		break;
+	}
 }
 
 /*
@@ -209,7 +206,7 @@ void ManagerMovement_Homing()
         break;
 
     case MMOV_HOMING_REST_POS:
-        ManagerMovement_RestPos();
+//        ManagerMovement_RestPos();
         break;
     }
 }
@@ -221,6 +218,7 @@ void ManagerMovement_Automatic()
     {
     case MMOV_AUTO_STATE_WAITING4PLAN:
         ManagerMovement_Waiting4Plan();
+
         break;
 
     case MMOV_AUTO_STATE_READY:
@@ -685,7 +683,7 @@ void ManagerMovement_RestPos()
     if (ManagerMovement_GoToPos(MMOV_EXTENSION, MMOV_REST_POS))
     {
         managerMovement.homingState = MMOV_VERIF_PERSON_IN;
-        managerMovement.state       = MMOV_STATE_MANUAL;
+        //managerMovement.state       = MMOV_STATE_MANUAL;
     }
 }
 
@@ -760,7 +758,7 @@ bool ManagerMovement_SetState(uint8_t newState)
 			managerMovement.homingState = MMOV_VERIF_PERSON_IN;
 			stateChanged = true;
 		}
-		else if (newState == MMOV_STATE_MANUAL && managerMovement.state != MMOV_STATE_HOMING)
+		else if (newState == MMOV_STATE_MANUAL /*&& managerMovement.state != MMOV_STATE_HOMING*/)
 		{
 			stateChanged = true;
 		}
