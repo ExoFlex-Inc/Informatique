@@ -27,7 +27,7 @@
 #define MAX_TRY 50  // 500 ms before flagging an error
 
 #define MOTOR_STEP   0.005
-#define MOTOR3_STEP	 0.002
+#define MOTOR3_STEP  0.002
 #define POSITION_TOL 0.01
 
 #define MMOT_MAX_MSG_DELAY TIMER * 4
@@ -484,14 +484,14 @@ int8_t ManagerMotor_GetMotorDirection(uint8_t motorIndex)
 
 void ManagerMotor_MotorIncrement(uint8_t motorIndex, int8_t direction)
 {
-	if(motorIndex == MMOT_MOTOR_3)
-	{
-		motors[motorIndex].nextPosition += direction * MOTOR3_STEP;
-	}
-	else
-	{
-		motors[motorIndex].nextPosition += direction * MOTOR_STEP;
-	}
+    if (motorIndex == MMOT_MOTOR_3)
+    {
+        motors[motorIndex].nextPosition += direction * MOTOR3_STEP;
+    }
+    else
+    {
+        motors[motorIndex].nextPosition += direction * MOTOR_STEP;
+    }
 }
 
 bool ManagerMotor_IsReady2Move()
