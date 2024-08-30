@@ -38,7 +38,7 @@ const LineChart: React.FC<LineChartProps> = ({
   setChartImage,
 }) => {
   const [graphPause, setGraphPause] = useState(false);
-  const [graphDataIsPosition, setGraphDataIsPosition] = useState(true);
+  const [graphDataType, setGraphDataIsType] = useState('position');
 
   const chartRef = useRef<Chart<"line"> | null>(null);
 
@@ -70,7 +70,7 @@ const LineChart: React.FC<LineChartProps> = ({
           },
           y: {
             min: 0,
-            max: graphDataIsPosition ? 180 : 48,
+            max: graphDataType ? 180 : 48,
           },
         },
       };
@@ -136,7 +136,7 @@ const LineChart: React.FC<LineChartProps> = ({
                     ) => {
                       dataset.data.push({
                         x: Date.now(),
-                        y: graphDataIsPosition
+                        y: graphDataType
                           ? message.Positions[index]
                           : message.Torques[index],
                       });
@@ -146,8 +146,8 @@ const LineChart: React.FC<LineChartProps> = ({
               },
             },
             y: {
-              min: graphDataIsPosition ? -65 : 0,
-              max: graphDataIsPosition ? 65 : 48,
+              min: graphDataType ? -65 : 0,
+              max: graphDataType ? 65 : 48,
             },
           },
         }));
@@ -157,7 +157,7 @@ const LineChart: React.FC<LineChartProps> = ({
         socket.off("stm32Data");
       };
     }
-  }, [socket?.connected, graphDataIsPosition]);
+  }, [socket?.connected, graphDataType]);
 
   useEffect(() => {
     setChartOptions((prevOptions: any) => ({
@@ -221,9 +221,9 @@ const LineChart: React.FC<LineChartProps> = ({
               <label>Position</label>
               <input
                 type="checkbox"
-                checked={graphDataIsPosition}
+                checked={graphDataType == 'position'}
                 onChange={() => {
-                  setGraphDataIsPosition(!graphDataIsPosition);
+                  setGraphDataIsType('position');
                 }}
               />
             </div>
@@ -231,9 +231,19 @@ const LineChart: React.FC<LineChartProps> = ({
               <label>Torque</label>
               <input
                 type="checkbox"
-                checked={!graphDataIsPosition}
+                checked={graphDataType == 'torque'}
                 onChange={() => {
-                  setGraphDataIsPosition(!graphDataIsPosition);
+                  setGraphDataIsType('torque');
+                }}
+              />
+            </div>
+            <div className="flex">
+              <label>Current</label>
+              <input
+                type="checkbox"
+                checked={graphDataType == 'current'}
+                onChange={() => {
+                  setGraphDataIsType('current');
                 }}
               />
             </div>
