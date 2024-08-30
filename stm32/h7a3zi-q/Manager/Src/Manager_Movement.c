@@ -86,9 +86,9 @@ void ManagerMovement_HomingDorsiflexion();
 void ManagerMovement_RestPos();
 
 // General movement functions
-bool ManagerMovement_GoToPos(uint8_t exerciseId, int8_t pos);
-void ManagerMovement_AutoMovement(uint8_t mouvType, float Position);
-void ManagerMovement_SetFirstPos(uint8_t exerciseIdx);
+bool  ManagerMovement_GoToPos(uint8_t exerciseId, int8_t pos);
+void  ManagerMovement_AutoMovement(uint8_t mouvType, float Position);
+void  ManagerMovement_SetFirstPos(uint8_t exerciseIdx);
 float ManagerMovement_GetMiddlePos(float leftPos, float rightPos);
 void  ManagerMovement_SetOrigins(uint8_t motorIndex);
 
@@ -125,7 +125,7 @@ void ManagerMovement_Reset()
     exerciseIdx = 0;
     repsCount   = 0;
 
-    commandSent = false;
+    commandSent      = false;
     buttonStartReset = false;
 
     // Init modes' states
@@ -139,30 +139,29 @@ void ManagerMovement_Reset()
 
 void ManagerMovement_Task()
 {
+    switch (managerMovement.state)
+    {
+    case MMOV_STATE_WAITING_SECURITY:
+        ManagerMovement_WaitingSecurity();
+        break;
 
-	switch (managerMovement.state)
-	{
-	case MMOV_STATE_WAITING_SECURITY:
-		ManagerMovement_WaitingSecurity();
-		break;
+    case MMOV_STATE_HOMING:
+        ManagerMovement_Homing();
+        break;
 
-	case MMOV_STATE_HOMING:
-		ManagerMovement_Homing();
-		break;
+    case MMOV_STATE_MANUAL:
+        ManagerMovement_Manual();
+        break;
 
-	case MMOV_STATE_MANUAL:
-		ManagerMovement_Manual();
-		break;
+    case MMOV_STATE_AUTOMATIC:
+        ManagerMovement_Automatic();
+        break;
 
-	case MMOV_STATE_AUTOMATIC:
-		ManagerMovement_Automatic();
-		break;
+    case MMOV_STATE_ERROR:
+        // Wait for manual cmd or for state change
 
-	case MMOV_STATE_ERROR:
-		// Wait for manual cmd or for state change
-
-		break;
-	}
+        break;
+    }
 }
 
 /*
@@ -206,7 +205,7 @@ void ManagerMovement_Homing()
         break;
 
     case MMOV_HOMING_REST_POS:
-    	ManagerMovement_RestPos();
+        ManagerMovement_RestPos();
         break;
     }
 }
@@ -529,10 +528,10 @@ void ManagerMovement_AutoStrectching()
 
 void ManagerMovement_Auto2FirstPos()
 {
-	if (ManagerMovement_GoToPos(exercises[exerciseIdx], firstPos[exerciseIdx]))
-	{
+    if (ManagerMovement_GoToPos(exercises[exerciseIdx], firstPos[exerciseIdx]))
+    {
         managerMovement.autoState = MMOV_AUTO_STATE_REST;
-        pauseTimer  = HAL_GetTick();
+        pauseTimer                = HAL_GetTick();
     }
 }
 
@@ -552,8 +551,8 @@ void ManagerMovement_AutoRest()
 void ManagerMovement_AutoStop()
 {
     // go to first pos
-	if (ManagerMovement_GoToPos(exercises[exerciseIdx], firstPos[exerciseIdx]))
-	{
+    if (ManagerMovement_GoToPos(exercises[exerciseIdx], firstPos[exerciseIdx]))
+    {
         if (exercises[exerciseIdx] == 0 || stopButton)
         {
             exerciseIdx = 0;
@@ -618,7 +617,9 @@ void ManagerMovement_HomingEversion()
                 evRightLimitHit = true;
             }
 
-            if (ManagerMovement_GoToPos(MMOV_EVERSION, ManagerMovement_GetMiddlePos(leftPos, rightPos)))
+            if (ManagerMovement_GoToPos(
+                    MMOV_EVERSION,
+                    ManagerMovement_GetMiddlePos(leftPos, rightPos)))
             {
                 evLeftLimitHit  = false;
                 evRightLimitHit = false;
@@ -656,8 +657,10 @@ void ManagerMovement_HomingDorsiflexion()
                 dorDownLimitHit = true;
             }
 
-            if (ManagerMovement_GoToPos(MMOV_DORSIFLEXION, ManagerMovement_GetMiddlePos(leftPos, rightPos)))
-			{
+            if (ManagerMovement_GoToPos(
+                    MMOV_DORSIFLEXION,
+                    ManagerMovement_GetMiddlePos(leftPos, rightPos)))
+            {
                 // ManagerMovement_SetOrigins(MMOT_MOTOR_1);
                 ManagerMovement_SetOrigins(MMOT_MOTOR_2);
 
@@ -703,23 +706,23 @@ void ManagerMovement_SetOrigins(uint8_t motorIndex)
 
 bool ManagerMovement_GoToPos(uint8_t exerciseId, int8_t pos)
 {
-	bool posReached = false;
+    bool posReached = false;
 
-	if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
-		!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2) &&
-		!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_3) && !commandSent)
-	{
-		ManagerMovement_AutoMovement(exerciseId, pos);
-		commandSent = true;
-	}
-	else if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
-			 !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2) &&
-			 !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_3))
-	{
-		posReached = true;
-		commandSent = false;
-	}
-	return posReached;
+    if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
+        !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2) &&
+        !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_3) && !commandSent)
+    {
+        ManagerMovement_AutoMovement(exerciseId, pos);
+        commandSent = true;
+    }
+    else if (!ManagerMotor_IsGoalStateReady(MMOT_MOTOR_1) &&
+             !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_2) &&
+             !ManagerMotor_IsGoalStateReady(MMOT_MOTOR_3))
+    {
+        posReached  = true;
+        commandSent = false;
+    }
+    return posReached;
 }
 
 /*
@@ -744,34 +747,36 @@ uint8_t ManagerMovement_GetState()
 
 bool ManagerMovement_SetState(uint8_t newState)
 {
-	bool stateChanged = false;
+    bool stateChanged = false;
 
-	if (newState != managerMovement.state)
-	{
-		if (newState == MMOV_STATE_AUTOMATIC && managerMovement.state != MMOV_STATE_HOMING)
-		{
-			managerMovement.autoState = MMOV_AUTO_STATE_WAITING4PLAN;
-			stateChanged = true;
-		}
-		else if (newState == MMOV_STATE_HOMING)
-		{
-			managerMovement.homingState = MMOV_VERIF_PERSON_IN;
-			stateChanged = true;
-		}
-		else if (newState == MMOV_STATE_MANUAL && managerMovement.state != MMOV_STATE_HOMING)
-		{
-			stateChanged = true;
-		}
+    if (newState != managerMovement.state)
+    {
+        if (newState == MMOV_STATE_AUTOMATIC &&
+            managerMovement.state != MMOV_STATE_HOMING)
+        {
+            managerMovement.autoState = MMOV_AUTO_STATE_WAITING4PLAN;
+            stateChanged              = true;
+        }
+        else if (newState == MMOV_STATE_HOMING)
+        {
+            managerMovement.homingState = MMOV_VERIF_PERSON_IN;
+            stateChanged                = true;
+        }
+        else if (newState == MMOV_STATE_MANUAL &&
+                 managerMovement.state != MMOV_STATE_HOMING)
+        {
+            stateChanged = true;
+        }
 
-		if(stateChanged)
-		{
-			managerMovement.state = newState;
-		}
-	}
-	else
-	{
-		stateChanged = true;
-	}
+        if (stateChanged)
+        {
+            managerMovement.state = newState;
+        }
+    }
+    else
+    {
+        stateChanged = true;
+    }
 
-	return stateChanged;
+    return stateChanged;
 }

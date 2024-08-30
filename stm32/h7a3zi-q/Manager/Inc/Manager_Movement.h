@@ -52,7 +52,7 @@ void ManagerMovement_Task();
 // Utilities
 uint8_t         ManagerMovement_GetState();
 autoPlanInfo_t* ManagerMovement_GetPlanData();
-bool ManagerMovement_SetState(uint8_t newState);
+bool            ManagerMovement_SetState(uint8_t newState);
 
 // Auto Setup
 void ManagerMovement_AddExercise(uint8_t exerciseIdx, uint8_t exerciseType,
