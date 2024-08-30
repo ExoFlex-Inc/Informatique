@@ -30,7 +30,7 @@
 #define MOTOR3_STEP  0.002
 #define POSITION_TOL 0.01
 
-#define MMOT_MAX_MSG_DELAY TIMER * 4
+#define MMOT_MAX_MSG_DELAY TIMER * 8
 
 typedef struct
 {
