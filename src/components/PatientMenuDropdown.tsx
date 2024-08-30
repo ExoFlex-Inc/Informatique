@@ -19,21 +19,7 @@ const PatientMenuDropdown: React.FC<PatientMenuDropdownProps> = ({
   index,
   buttonRef,
 }) => {
-  const dropdownRef = useDropdown(setOpenMenuIndex);
-
-  async function unlinkClientToAdmin(clientId: string) {
-    const { error: updateError } = await supaClient
-      .from("user_profiles")
-      .update({ admin_id: null })
-      .eq("user_id", clientId);
-
-    if (updateError) {
-      console.error("Error adding relationship to Supabase:", updateError);
-      return false;
-    }
-
-    return true;
-  }
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const { profile } = useProfileContext();
 
   const removeUser = async () => {
