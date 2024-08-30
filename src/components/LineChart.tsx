@@ -70,7 +70,7 @@ const LineChart: React.FC<LineChartProps> = ({
           },
           y: {
             min: 0,
-            max: graphDataType ? 180 : 48,
+            max: graphDataType == 'position' ? 180 : graphDataType == 'torque' ? 48 : 30,
           },
         },
       };
@@ -136,9 +136,11 @@ const LineChart: React.FC<LineChartProps> = ({
                     ) => {
                       dataset.data.push({
                         x: Date.now(),
-                        y: graphDataType
+                        y: graphDataType == 'position'
                           ? message.Positions[index]
-                          : message.Torques[index],
+                          : graphDataType == 'torque'
+                          ? message.Torques[index]
+                          : message.Current[index],
                       });
                     },
                   );
@@ -146,8 +148,8 @@ const LineChart: React.FC<LineChartProps> = ({
               },
             },
             y: {
-              min: graphDataType ? -65 : 0,
-              max: graphDataType ? 65 : 48,
+              min: graphDataType == 'position' ? -65 : graphDataType == 'torque' ? 0 : -30,
+              max: graphDataType == 'position' ? 65 : graphDataType == 'torque' ? 48 : 30,
             },
           },
         }));
@@ -227,7 +229,7 @@ const LineChart: React.FC<LineChartProps> = ({
                 }}
               />
             </div>
-            <div className="flex">
+            <div className="flex mr-4">
               <label>Torque</label>
               <input
                 type="checkbox"
