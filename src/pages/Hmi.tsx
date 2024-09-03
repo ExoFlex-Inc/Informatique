@@ -67,9 +67,13 @@ export default function HMI() {
        
       planData.plan.forEach((set) => {
         message += `;${set.movement.length}`
-        set.movement.forEach((exercise) => {
-          message += `;${exercise.exercise};${exercise.target_angle};${exercise.target_torque}`;
-        })
+        for (var i = 1; i < 4; i++) {
+          if (i <= set.movement.length) {
+            message += `;${exercise.exercise};${exercise.target_angle};${exercise.target_torque}`;
+          } else {
+            message += `;${0};${0};${0}`;
+          }
+        }
         message += `;${set.repetitions};${set.rest};${set.time};${set.speed}`;
       });
       message += ";}";
