@@ -15,8 +15,9 @@
 #define M_HMI_MODE_SECTION                   0
 #define M_HMI_ACTION_SECTION                 1
 #define M_HMI_CONTENT_SECTION                2
-#define M_HMI_EXERCISE_SECTION_NBR           6
-#define M_HMI_CONTENT_FIRST_EXERCISE_SECTION 6
+#define M_HMI_EXERCISE_SECTION_NBR           14
+#define M_HMI_CONTENT_FIRST_EXERCISE_SECTION 12
+#define MVT_MAX 3
 
 #define PI 3.1415926535
 
@@ -24,6 +25,10 @@ static const Motor* motorsData[MMOT_MOTOR_NBR];
 static uint32_t     timerMs = 0;
 char                ParsedMsg[SECTION_NBR][SECTION_LENGTH];
 char                buf[PUART_RX_BUF_SIZE];
+
+char strExercise[MVT_MAX];
+float pos[MVT_MAX];
+float torque[MVT_MAX];
 
 void ManagerHMI_ReceiveJSON();
 void ManagerHMI_SendJSON();
@@ -60,6 +65,13 @@ void ManagerHMI_Init()
     for (uint16_t i = 0; i < PUART_RX_BUF_SIZE; i++)
     {
         buf[i] = 0;
+    }
+
+    for (uint8_t i =0; i < MVT_MAX; i++)
+    {
+    	strExercise[i] = " ";
+    	pos[i] = 0.0;
+    	torque[i] = 0.0;
     }
 }
 
@@ -316,8 +328,25 @@ void ManagerHMI_ExecutePlanCmd(char* cmd, uint8_t size)
                 // Get exercise data
                 for (uint8_t i = 0; i < exNbr; i++)
                 {
-                    char* strExercise = cmd;
-                    cmd += M_HMI_STRING_LENGTH;
+                	uint8_t mvtNbr = atoi(cmd);
+                	cmd += M_HMI_STRING_LENGTH;
+
+                	for (uint8_t j = 0; j < mvtNbr; j++)
+                	{
+                		strExercise[j] = cmd;
+						cmd += M_HMI_STRING_LENGTH;
+
+						pos[j] = atof(cmd);
+						cmd += M_HMI_STRING_LENGTH;
+
+						torque[j] = atof(cmd);
+						cmd += M_HMI_STRING_LENGTH;
+
+						if(j+1 == mvtNbr)
+						{
+							cmd += M_HMI_STRING_LENGTH*(MVT_MAX-mvtNbr);
+						}
+                	}
 
                     uint8_t rep = atoi(cmd);
                     cmd += M_HMI_STRING_LENGTH;
@@ -325,35 +354,33 @@ void ManagerHMI_ExecutePlanCmd(char* cmd, uint8_t size)
                     float rest = atof(cmd);
                     cmd += M_HMI_STRING_LENGTH;
 
-                    float pos = atof(cmd);
-                    cmd += M_HMI_STRING_LENGTH;
-
-                    float torque = atof(cmd);
-                    cmd += M_HMI_STRING_LENGTH;
-
                     float time = atof(cmd);
                     cmd += M_HMI_STRING_LENGTH;
 
-                    uint8_t exercise;
+                    float speed = atof(cmd);
+					cmd += M_HMI_STRING_LENGTH;
 
-                    if (strcmp(strExercise, "Dorsiflexion") == 0)
-                    {
-                        exercise = MMOV_DORSIFLEXION;
-                    }
-                    else if (strcmp(strExercise, "Eversion") == 0)
-                    {
-                        exercise = MMOV_EVERSION;
-                    }
-                    else if (strcmp(strExercise, "Extension") == 0)
-                    {
-                        exercise = MMOV_EXTENSION;
-                    }
-
-                    ManagerMovement_AddExercise(i, exercise, rep,
-                                                ManagerHMI_Sec2Millis(time),
-                                                ManagerHMI_Sec2Millis(rest));
-                    ManagerMovement_SetFinalPos(
-                        i, ManagerHMI_Degrees2Radians(pos));
+					//To do: Parsed everythin into the movement variables
+//                    uint8_t exercise;
+//
+//                    if (strcmp(strExercise, "Dorsiflexion") == 0)
+//                    {
+//                        exercise = MMOV_DORSIFLEXION;
+//                    }
+//                    else if (strcmp(strExercise, "Eversion") == 0)
+//                    {
+//                        exercise = MMOV_EVERSION;
+//                    }
+//                    else if (strcmp(strExercise, "Extension") == 0)
+//                    {
+//                        exercise = MMOV_EXTENSION;
+//                    }
+//
+//                    ManagerMovement_AddExercise(i, exercise, rep,
+//                                                ManagerHMI_Sec2Millis(time),
+//                                                ManagerHMI_Sec2Millis(rest));
+//                    ManagerMovement_SetFinalPos(
+//                        i, ManagerHMI_Degrees2Radians(pos));
                 }
             }
         }
