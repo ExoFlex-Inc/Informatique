@@ -1,11 +1,11 @@
-import React from "react";
-import { createContext, useState } from "react";
+import { useEffect } from "react";
 import {
   Route,
   Outlet,
   createBrowserRouter,
   createRoutesFromElements,
   RouterProvider,
+  useNavigate,
 } from "react-router-dom";
 import { ColorModeContext, useMode } from "./hooks/theme";
 import { CssBaseline, ThemeProvider } from "@mui/material";
@@ -69,6 +69,14 @@ const router = createBrowserRouter(
 function AppLayout() {
   const { session } = useSupabaseSession();
   const { profile } = useUserProfile();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!session || !profile) {
+      navigate("/");
+    }
+  }, [session, profile, navigate]);
+
 
   return (
     <>
