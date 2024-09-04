@@ -110,7 +110,10 @@ export default function TopBar() {
         )}
         {session && (
           <IconButton className="h-14" onClick={onProfileClick}>
-            <Avatar ref={avatarRef} src={profile?.avatar_url? profile.avatar_url : Icon} />
+            <Avatar
+              ref={avatarRef}
+              src={profile?.avatar_url ? profile.avatar_url : Icon}
+            />
           </IconButton>
         )}
       </Box>
@@ -144,18 +147,19 @@ export default function TopBar() {
                     <ListItemText primary="See Profile" />
                   </ListItemButton>
                 </ListItem>
-                {profile?.permissions == "client" || "dev" && (
-                  <ListItem>
-                    <ListItemButton
-                      onClick={() => navigate("/professional_network")}
-                    >
-                      <ListItemIcon>
-                        <People />
-                      </ListItemIcon>
-                      <ListItemText primary="Professional Network" />
-                    </ListItemButton>
-                  </ListItem>
-                )}
+                {profile?.permissions == "client" ||
+                  ("dev" && (
+                    <ListItem>
+                      <ListItemButton
+                        onClick={() => navigate("/professional_network")}
+                      >
+                        <ListItemIcon>
+                          <People />
+                        </ListItemIcon>
+                        <ListItemText primary="Professional Network" />
+                      </ListItemButton>
+                    </ListItem>
+                  ))}
                 <Divider />
                 <ListItem>
                   <ListItemButton onClick={handleLogout}>

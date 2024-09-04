@@ -93,9 +93,9 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <QueryClientProvider client={queryClient}>
-            <div className="app">
-              <RouterProvider router={router} />
-            </div>
+          <div className="app">
+            <RouterProvider router={router} />
+          </div>
         </QueryClientProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>

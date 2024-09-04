@@ -67,21 +67,24 @@ export function useUserProfile() {
       }
     },
   });
-  
+
   const uploadAvatarMutation = useMutation({
     mutationFn: async (file: File) => {
       const formData = new FormData();
-      formData.append('avatar', file);
-  
-      const response = await fetch(`http://localhost:3001/user/avatar/${userId}`, {
-        method: 'POST',
-        body: formData,
-      });
-  
+      formData.append("avatar", file);
+
+      const response = await fetch(
+        `http://localhost:3001/user/avatar/${userId}`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
+
       if (!response.ok) {
         throw new Error(`Error uploading avatar image: ${response.statusText}`);
       }
-  
+
       const data = await response.json();
       return data.avatar_url;
     },
@@ -100,10 +103,14 @@ export function useUserProfile() {
 
   const downloadAvatarMutation = useMutation({
     mutationFn: async (path: string) => {
-      const response = await fetch(`http://localhost:3001/user/avatar/${userId}?path=${encodeURIComponent(path)}`);
+      const response = await fetch(
+        `http://localhost:3001/user/avatar/${userId}?path=${encodeURIComponent(path)}`,
+      );
 
       if (!response.ok) {
-        throw new Error(`Error downloading avatar image: ${response.statusText}`);
+        throw new Error(
+          `Error downloading avatar image: ${response.statusText}`,
+        );
       }
 
       const blob = await response.blob();
