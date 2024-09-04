@@ -29,8 +29,6 @@ import Forbidden from "./pages/Forbidden.tsx";
 
 import PrivateRoutes from "./components/PrivateRoutes";
 
-import { AvatarProvider } from "./context/avatarContext";
-
 import useVisibilityChange from "./hooks/use-visibility-change.ts";
 
 import { useSupabaseSession } from "./hooks/use-session.ts";
@@ -95,11 +93,9 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <QueryClientProvider client={queryClient}>
-          <AvatarProvider>
             <div className="app">
               <RouterProvider router={router} />
             </div>
-          </AvatarProvider>
         </QueryClientProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>

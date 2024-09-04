@@ -25,10 +25,8 @@ import Icon from "../../../public/assets/user.png";
 
 import Login from "../../components/Login.tsx";
 import { useNavigate } from "react-router-dom";
-import { useAvatarContext } from "../../context/avatarContext.tsx";
 import { useSupabaseSession } from "../../hooks/use-session.ts";
 import { useUserProfile } from "../../hooks/use-profile.ts";
-import { supaClient } from "../../hooks/supa-client.ts";
 
 export default function TopBar() {
   const { session } = useSupabaseSession();
@@ -42,8 +40,6 @@ export default function TopBar() {
   const navigate = useNavigate();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const { avatarUrl } = useAvatarContext();
 
   useEffect(() => {
     const handleClickOutside = (event: any) => {
@@ -114,7 +110,7 @@ export default function TopBar() {
         )}
         {session && (
           <IconButton className="h-14" onClick={onProfileClick}>
-            <Avatar ref={avatarRef} src={avatarUrl ? avatarUrl : Icon} />
+            <Avatar ref={avatarRef} src={profile?.avatar_url? profile.avatar_url : Icon} />
           </IconButton>
         )}
       </Box>
@@ -148,7 +144,7 @@ export default function TopBar() {
                     <ListItemText primary="See Profile" />
                   </ListItemButton>
                 </ListItem>
-                {profile?.permissions == "client" && (
+                {profile?.permissions == "client" || "dev" && (
                   <ListItem>
                     <ListItemButton
                       onClick={() => navigate("/professional_network")}

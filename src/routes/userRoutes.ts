@@ -1,8 +1,13 @@
 import express from "express";
-import { getUser } from "../controllers/userController.ts";
+import multer from "multer";
+import { getUserProfile, updateUserProfile, downloadAvatar, uploadAvatar } from "../controllers/userController";
 
 const router = express.Router();
+const upload = multer();
 
-router.get("/user", getUser);
+router.get("/:userId", getUserProfile);
+router.put("/:userId", updateUserProfile);
+router.get("/avatar/:userId", downloadAvatar);
+router.post("/avatar/:userId", upload.single('avatar'), uploadAvatar);
 
 export default router;

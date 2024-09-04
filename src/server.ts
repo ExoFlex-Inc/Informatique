@@ -37,10 +37,10 @@ app.use(
 // Session setup
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "default_secret", // Use a strong secret
+    secret: process.env.SESSION_SECRET || "default_secret",
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: process.env.NODE_ENV === "production" }, // Use secure cookies in production
+    cookie: { secure: process.env.NODE_ENV === "production" },
   }),
 );
 
@@ -49,7 +49,7 @@ app.use(passport.session());
 
 app.use("/auth", authRoutes);
 app.use("/api", serialPortRoutes);
-app.use("/api", userRoutes);
+app.use("/user", userRoutes);
 app.use("/api", planRoutes);
 app.use("/api", hmiRoutes);
 app.use("/api", wellnessNetworkRoutes);

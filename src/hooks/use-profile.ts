@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supaClient } from "../hooks/supa-client";
 import { useSupabaseSession } from "../hooks/use-session";
+import { useEffect } from "react";
 
 export interface UserProfile {
   first_name: string;
@@ -27,59 +27,99 @@ export function useUserProfile() {
         throw new Error("No userId available");
       }
 
-      const { data, error } = await supaClient
-        .from("user_profiles")
-        .select("*")
-        .eq("user_id", userId)
-        .single();
+      const response = await fetch(`http://localhost:3001/user/${userId}`);
 
-      if (error) {
-        throw new Error("Error fetching user profile");
+      if (!response.ok) {
+        throw new Error(`Error fetching user profile: ${response.statusText}`);
       }
 
+      const data = await response.json();
       return data;
     },
     enabled: !!userId,
-    staleTime: 1000 * 60 * 5,
-    cacheTime: 1000 * 60 * 10,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    cacheTime: 1000 * 60 * 10, // 10 minutes
   });
 
   const updateProfileMutation = useMutation({
     mutationFn: async (newProfile: UserProfile) => {
-      const { data: authData, error: authError } =
-        await supaClient.auth.updateUser({
-          data: {
-            first_name: newProfile.first_name,
-            last_name: newProfile.last_name,
-            speciality: newProfile.speciality,
-            permissions: newProfile.permissions,
-            avatar_url: newProfile.avatar_url,
-          },
-        });
+      const response = await fetch(`http://localhost:3001/user/${userId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newProfile),
+      });
 
-      if (authError) {
-        throw new Error("Error updating user authentication data");
+      if (!response.ok) {
+        throw new Error(`Error updating user profile: ${response.statusText}`);
       }
 
-      const { data: profileData, error: profileError } = await supaClient
-        .from("user_profiles")
-        .update(newProfile)
-        .eq("user_id", newProfile.user_id)
-        .select("*");
-
-      if (profileError) {
-        throw new Error("Error updating user profile in the database");
-      }
-
-      return profileData;
+      const data = await response.json();
+      return data;
     },
     onSuccess: (updatedProfile) => {
-      if (updatedProfile && updatedProfile.length > 0) {
+      if (updatedProfile) {
         queryClient.setQueryData(
-          ["userProfile", updatedProfile[0].user_id],
-          updatedProfile[0],
+          ["userProfile", updatedProfile.user_id],
+          updatedProfile,
         );
       }
+    },
+  });
+  
+  const uploadAvatarMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('avatar', file);
+  
+      const response = await fetch(`http://localhost:3001/user/avatar/${userId}`, {
+        method: 'POST',
+        body: formData,
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Error uploading avatar image: ${response.statusText}`);
+      }
+  
+      const data = await response.json();
+      return data.avatar_url;
+    },
+    onSuccess: (avatarUrl) => {
+      if (profile) {
+        queryClient.setQueryData(["userProfile", userId], {
+          ...profile,
+          avatar_url: avatarUrl,
+        });
+      }
+    },
+    onError: (error: any) => {
+      console.error("Error uploading avatar image:", error.message);
+    },
+  });
+
+  const downloadAvatarMutation = useMutation({
+    mutationFn: async (path: string) => {
+      const response = await fetch(`http://localhost:3001/user/avatar/${userId}?path=${encodeURIComponent(path)}`);
+
+      if (!response.ok) {
+        throw new Error(`Error downloading avatar image: ${response.statusText}`);
+      }
+
+      const blob = await response.blob();
+      return URL.createObjectURL(blob);
+    },
+    onSuccess: (url, variables) => {
+      queryClient.setQueryData(["avatarUrl", variables], url);
+      if (profile) {
+        queryClient.setQueryData(["userProfile", userId], {
+          ...profile,
+          avatar_url: url,
+        });
+      }
+    },
+    onError: (error: any) => {
+      console.error("Error downloading avatar image:", error.message);
     },
   });
 
@@ -93,5 +133,27 @@ export function useUserProfile() {
     }
   };
 
-  return { profile, isLoading, error, updateProfile, setUserProfile };
+  const uploadAvatar = (file: File) => {
+    uploadAvatarMutation.mutate(file);
+  };
+
+  const downloadAvatar = (path: string) => {
+    downloadAvatarMutation.mutate(path);
+  };
+
+  useEffect(() => {
+    if (profile?.avatar_url) {
+      downloadAvatar(profile.avatar_url);
+    }
+  }, [profile?.avatar_url]);
+
+  return {
+    profile,
+    isLoading,
+    error,
+    updateProfile,
+    setUserProfile,
+    uploadAvatar,
+    downloadAvatar,
+  };
 }

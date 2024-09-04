@@ -16,26 +16,19 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material";
 import DefaultProfilePic from "../../public/assets/user.png";
-import { useAvatar } from "../hooks/use-avatar.ts";
-import { useAvatarContext } from "../context/avatarContext.tsx";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
-import { supaClient } from "../hooks/supa-client.ts";
 import { useUserProfile } from "../hooks/use-profile.ts";
-import { useQueryClient } from "@tanstack/react-query";
 
 function Profile() {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { uploadImage } = useAvatar();
-  const { avatarUrl } = useAvatarContext();
   const [FieldError, setFieldError] = useState(false);
   const [fieldInput, setFieldInput] = useState("");
   const [editIndex, setEditIndex] = useState<Number | null>(null);
 
-  const queryClient = useQueryClient();
-  const { profile, updateProfile } = useUserProfile();
+  const { profile, updateProfile, uploadAvatar } = useUserProfile();
 
   function toggleEdit(index: Number) {
     setEditIndex(index === editIndex ? null : index);
@@ -64,6 +57,13 @@ function Profile() {
   const handleButtonClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
+    }
+  };
+
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      uploadAvatar(file);
     }
   };
 
@@ -99,7 +99,7 @@ function Profile() {
           badgeContent={<AddAPhotoIcon padding="4px" className="h-28" />}
         >
           <Avatar
-            src={avatarUrl ? avatarUrl : DefaultProfilePic}
+            src={profile?.avatar_url ? profile.avatar_url : DefaultProfilePic}
             sx={{ width: "25vw", height: "25vw" }}
           />
         </StyledBadge>
@@ -109,7 +109,7 @@ function Profile() {
           id="files"
           accept="image/*"
           className="hidden"
-          onChange={uploadImage}
+          onChange={handleAvatarChange}
         />
       </IconButton>
       <Box sx={{ display: "flex", margin: "16px" }}>
