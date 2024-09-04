@@ -62,7 +62,7 @@ const PatientList: React.FC<PatientListProps> = ({
       <ul className="divide-y rounded-bl-2xl divide-gray-400 bg-white">
         {visibleListOfPatients?.map((patient, index) => (
           <li key={index} className="text-black p-2">
-            {patient.username}
+            {patient.first_name}
           </li>
         ))}
       </ul>
@@ -70,7 +70,7 @@ const PatientList: React.FC<PatientListProps> = ({
       <ul className="divide-y divide-gray-400 bg-white">
         {visibleListOfPatients?.map((patient, index) => (
           <li key={index} className="text-black p-2">
-            {patient.lastname}
+            {patient.last_name}
           </li>
         ))}
       </ul>

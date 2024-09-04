@@ -16,35 +16,29 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material";
 import DefaultProfilePic from "../../public/assets/user.png";
-import { useAvatar } from "../hooks/use-avatar.ts";
-import { useAvatarContext } from "../context/avatarContext.tsx";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
-import { supaClient } from "../hooks/supa-client.ts";
-import { UserProfile } from "../hooks/use-session.ts";
-import { useProfileContext } from "../context/profileContext.tsx";
+import { useUserProfile } from "../hooks/use-profile.ts";
 
 function Profile() {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { uploadImage } = useAvatar();
-  const { avatarUrl } = useAvatarContext();
   const [FieldError, setFieldError] = useState(false);
   const [fieldInput, setFieldInput] = useState("");
-  const [refreshProfile, setRefreshProfile] = useState(false);
   const [editIndex, setEditIndex] = useState<Number | null>(null);
 
-  const { profile, setProfile } = useProfileContext();
+  const { profile, updateProfile, uploadAvatar } = useUserProfile();
+
   function toggleEdit(index: Number) {
     setEditIndex(index === editIndex ? null : index);
   }
 
   const shownInformation: any = {
-    username: "first name",
-    lastname: "last name",
-    speciality: "speciality",
-    phone_number: "phone number",
+    first_name: "First Name",
+    last_name: "Last Name",
+    speciality: "Speciality",
+    phone_number: "Phone Number",
   };
 
   const StyledBadge = styled(Badge)<BadgeProps>(() => ({
@@ -62,34 +56,29 @@ function Profile() {
 
   const handleButtonClick = () => {
     if (fileInputRef.current) {
-      fileInputRef.current?.click();
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      uploadAvatar(file);
     }
   };
 
   const onInputSubmit = async (key: string) => {
     if (fieldInput.length === 0) {
       setFieldError(true);
+      return;
     }
-    if (fieldInput.length !== 0) {
-      //Saving the modifications to supabase
-      const { error: updateError } = await supaClient
-        .from("user_profiles")
-        .update({ [key]: fieldInput })
-        .eq("user_id", profile?.user_id);
 
-      if (updateError) {
-        throw updateError;
-      }
-
-      if (profile) {
-        setProfile({
-          ...profile,
-          [key]: fieldInput,
-        });
-      }
-
+    try {
+      updateProfile({ ...profile, [key]: fieldInput });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    } finally {
       setEditIndex(null);
-      setRefreshProfile(!refreshProfile);
       setFieldInput("");
       setFieldError(false);
     }
@@ -110,7 +99,7 @@ function Profile() {
           badgeContent={<AddAPhotoIcon padding="4px" className="h-28" />}
         >
           <Avatar
-            src={avatarUrl ? avatarUrl : DefaultProfilePic}
+            src={profile?.avatar_url ? profile.avatar_url : DefaultProfilePic}
             sx={{ width: "25vw", height: "25vw" }}
           />
         </StyledBadge>
@@ -120,7 +109,7 @@ function Profile() {
           id="files"
           accept="image/*"
           className="hidden"
-          onChange={uploadImage}
+          onChange={handleAvatarChange}
         />
       </IconButton>
       <Box sx={{ display: "flex", margin: "16px" }}>
@@ -148,16 +137,20 @@ function Profile() {
                             error={FieldError ? true : false}
                             label={shownInformation[key]}
                             size="small"
-                            onKeyDown={(event) =>
-                              event.key === "Enter" && onInputSubmit(key)
-                            }
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter") {
+                                event.preventDefault();
+                                onInputSubmit(key);
+                              }
+                            }}
                             onChange={(event) =>
                               setFieldInput(event.target.value)
                             }
+                            defaultValue={profile[key as keyof typeof profile]}
                           />
                         ) : (
                           <ListItemText
-                            primary={`${profile[key as keyof UserProfile]}`}
+                            primary={`${profile[key as keyof typeof profile]}`}
                           />
                         )}
                       </Grid>

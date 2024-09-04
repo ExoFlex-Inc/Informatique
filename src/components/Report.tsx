@@ -39,7 +39,7 @@ const Report: React.FC<ReportProps> = ({
         if (!profile || error) {
           console.error("Forbidden");
         } else {
-          setReporter(`${profile[0].username} ${profile[0].lastname}`);
+          setReporter(`${profile[0].first_name} ${profile[0].last_name}`);
         }
       } catch (error) {
         console.log("Error retrieving reporter profile", error);
@@ -67,8 +67,8 @@ const Report: React.FC<ReportProps> = ({
           <Text style={{ marginLeft: "8px" }}>Patient Data:</Text>
           <View style={ReportStyle.creationInformation}>
             <Text>
-              Name of patient: {selectedPatient?.[0].username}{" "}
-              {selectedPatient?.[0].lastname}
+              Name of patient: {selectedPatient?.[0].first_name}{" "}
+              {selectedPatient?.[0].last_name}
             </Text>
             <Text>
               Beginning Date: {date?.[0].toISOString().split("T")[0]}{" "}

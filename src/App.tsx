@@ -1,4 +1,5 @@
-import { createContext, useEffect, useState } from "react";
+import React from "react";
+import { createContext, useState } from "react";
 import {
   Route,
   Outlet,
@@ -6,142 +7,96 @@ import {
   createRoutesFromElements,
   RouterProvider,
 } from "react-router-dom";
-import { ColorModeContext, useMode } from "./hooks/theme.ts";
+import { ColorModeContext, useMode } from "./hooks/theme";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import "./App.css";
 
-import Dashboard from "./pages/Dashboard.tsx";
-import ProfessionalNetwork from "./pages/ProfessionalNetwork.tsx";
-import { Welcome, welcomeLoader } from "./pages/Welcome.tsx";
-import HMI from "./pages/Hmi.tsx";
-import Activity from "./pages/Activity.tsx";
-import Recovery from "./pages/Recovery.tsx";
-import Manual from "./pages/Manual.tsx";
-import TermsAndConditions from "./pages/TermsAndConditions.tsx";
-import Settings from "./pages/Settings.tsx";
-import Planning from "./pages/Planning.tsx";
-import WellnessNetwork from "./pages/WellnessNetwork.tsx";
-import ProtectedRoute from "./components/ProtectedRoute.tsx";
+import Dashboard from "./pages/Dashboard";
+import ProfessionalNetwork from "./pages/ProfessionalNetwork";
+import { Welcome, welcomeLoader } from "./pages/Welcome";
+import HMI from "./pages/Hmi";
+import Activity from "./pages/Activity";
+import Recovery from "./pages/Recovery";
+import Manual from "./pages/Manual";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import Settings from "./pages/Settings";
+import Planning from "./pages/Planning";
+import WellnessNetwork from "./pages/WellnessNetwork";
+import TopBar from "./pages/global/TopBar";
+import ProSideBar from "./pages/global/Sidebar";
+import Profile from "./pages/Profile";
+import Forbidden from "./pages/Forbidden.tsx";
 
-import TopBar from "./pages/global/TopBar.tsx";
-import ProSideBar from "./pages/global/Sidebar.tsx";
+import PrivateRoutes from "./components/PrivateRoutes";
 
-import { SupabaseUserInfo, useSession } from "./hooks/use-session.ts";
-import Profile from "./pages/Profile.tsx";
-import { AvatarProvider } from "./context/avatarContext.tsx";
-import { UserProvider } from "./context/profileContext.tsx";
-import { UserProfile } from "./hooks/use-session.ts";
-import { Session } from "@supabase/supabase-js";
-import { useAvatar } from "./hooks/use-avatar.ts";
+import useVisibilityChange from "./hooks/use-visibility-change.ts";
+
+import { useSupabaseSession } from "./hooks/use-session.ts";
+import { useUserProfile } from "./hooks/use-profile.ts";
+
+// Import necessary modules from React Query
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path="/" element={<Layout />}>
+    <Route path="/" element={<AppLayout />}>
       <Route path="/recovery" element={<Recovery />} />
+
       <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute
-            component={Dashboard}
-            requiredPermission={["client"]}
-          />
-        }
-      />
-      <Route
-        path="/activity"
-        element={
-          <ProtectedRoute
-            component={Activity}
-            requiredPermission={["dev", "admin"]}
-          />
-        }
-      />
+        element={<PrivateRoutes requiredPermissions={["dev", "client"]} />}
+      >
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Route>
+
+      <Route element={<PrivateRoutes requiredPermissions={["dev", "admin"]} />}>
+        <Route path="/activity" element={<Activity />} />
+        <Route path="/manual" element={<Manual />} />
+        <Route path="/planning" element={<Planning />} />
+        <Route path="/wellness_network" element={<WellnessNetwork />} />
+      </Route>
+
       <Route path="/termsAndConditions" element={<TermsAndConditions />} />
       <Route path="/welcome" element={<Welcome />} loader={welcomeLoader} />
-      <Route
-        path="/manual"
-        element={
-          <ProtectedRoute
-            component={Manual}
-            requiredPermission={["dev", "admin"]}
-          />
-        }
-      />
       <Route path="/hmi" element={<HMI />} />
-      <Route
-        path="/planning"
-        element={
-          <ProtectedRoute
-            component={Planning}
-            requiredPermission={["dev", "admin"]}
-          />
-        }
-      />
       <Route path="/settings" element={<Settings />} />
-      <Route
-        path="/wellness_network"
-        element={
-          <ProtectedRoute
-            component={WellnessNetwork}
-            requiredPermission={["dev", "admin"]}
-          />
-        }
-      />
       <Route path="/profile" element={<Profile />} />
       <Route path="/professional_network" element={<ProfessionalNetwork />} />
+      <Route path="/forbidden" element={<Forbidden />} />
     </Route>,
   ),
 );
 
-function Layout() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-
-  const UserContext = createContext<SupabaseUserInfo>({
-    session,
-    profile,
-    setSession,
-    setProfile,
-  });
-
-  const supabaseUserInfo = useSession();
-  const { downloadImage } = useAvatar();
-
-  useEffect(() => {
-    if (supabaseUserInfo.profile) {
-      downloadImage(supabaseUserInfo.profile.avatar_url);
-    }
-  }, [supabaseUserInfo.profile]);
+function AppLayout() {
+  const { session } = useSupabaseSession();
+  const { profile } = useUserProfile();
 
   return (
-    <UserContext.Provider value={supabaseUserInfo}>
-      <>
-        {supabaseUserInfo.session && supabaseUserInfo.profile && (
-          <ProSideBar permissions={supabaseUserInfo.profile.permissions} />
-        )}
-        <main className="content">
-          <TopBar />
-          <Outlet />
-        </main>
-      </>
-    </UserContext.Provider>
+    <>
+      {session && profile && <ProSideBar permissions={profile.permissions} />}
+      <main className="content">
+        <TopBar />
+        <Outlet />
+      </main>
+    </>
   );
 }
 
 function App() {
   const [theme, colorMode] = useMode();
 
+  useVisibilityChange();
+
+  const queryClient = new QueryClient();
+
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <UserProvider>
-          <AvatarProvider>
-            <div className="app">
-              <RouterProvider router={router} />
-            </div>
-          </AvatarProvider>
-        </UserProvider>
+        <QueryClientProvider client={queryClient}>
+          <div className="app">
+            <RouterProvider router={router} />
+          </div>
+        </QueryClientProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>
   );

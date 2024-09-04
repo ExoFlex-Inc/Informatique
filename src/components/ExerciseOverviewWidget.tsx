@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supaClient } from "../hooks/supa-client.ts";
-import { useProfileContext } from "../context/profileContext.tsx";
+import { useUserProfile } from "../hooks/use-profile.ts";
 
 interface ExerciseOverviewWidgetProps {
   stm32Data?: string | null;
@@ -10,7 +10,7 @@ const ExerciseOverviewWidget: React.FC<ExerciseOverviewWidgetProps> = ({
   stm32Data,
 }) => {
   const [planData, setPlanData] = useState<any[]>([]);
-  const { profile } = useProfileContext();
+  const { profile } = useUserProfile();
 
   useEffect(() => {
     async function fetchPlan() {

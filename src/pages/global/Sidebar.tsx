@@ -20,8 +20,7 @@ import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import GroupIcon from "@mui/icons-material/Group";
 import Icon from "../../../public/assets/user.png";
 import { Avatar } from "@mui/material";
-import { useAvatarContext } from "../../context/avatarContext.tsx";
-import { useProfileContext } from "../../context/profileContext.tsx";
+import { useUserProfile } from "../../hooks/use-profile.ts";
 
 interface ProSidebarProps {
   permissions: string;
@@ -56,9 +55,8 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected] = useState(localStorage.getItem("selected") || "Dashboard");
 
-  const { profile } = useProfileContext();
+  const { profile } = useUserProfile();
   const isTablet = useMediaQuery("(max-width: 768px)");
-  const { avatarUrl } = useAvatarContext();
 
   useEffect(() => {
     setIsCollapsed(isTablet);
@@ -134,7 +132,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
             <Box mb="25px">
               <Box display="flex" justifyContent="center" alignItems="center">
                 <Avatar
-                  src={avatarUrl ? avatarUrl : Icon}
+                  src={profile.avatar_url ? profile.avatar_url : Icon}
                   sx={
                     isTablet
                       ? { width: 50, height: 50 }
@@ -150,7 +148,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                   fontWeight="bold"
                   sx={{ m: "10px 0 0 0" }}
                 >
-                  {profile?.username || "Client"}
+                  {profile?.first_name || "Client"}
                 </Typography>
                 <Typography
                   variant={isTablet ? "h6" : "h5"}
@@ -163,14 +161,15 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
           )}
 
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
-            {props.permissions === "client" && (
-              <Item
-                title="Dashboard"
-                to="/dashboard"
-                icon={<HomeOutlinedIcon />}
-                selected={selected}
-              />
-            )}
+            {props.permissions === "client" ||
+              (props.permissions === "dev" && (
+                <Item
+                  title="Dashboard"
+                  to="/dashboard"
+                  icon={<HomeOutlinedIcon />}
+                  selected={selected}
+                />
+              ))}
             {(props.permissions === "dev" || props.permissions === "admin") && (
               <Item
                 title="Planning"
