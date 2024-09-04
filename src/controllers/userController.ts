@@ -39,11 +39,9 @@ export const updateUserProfile = async (req: Request, res: Response) => {
   });
 
   if (authError) {
-    return res
-      .status(500)
-      .json({
-        error: `Error updating user authentication data: ${authError.message}`,
-      });
+    return res.status(500).json({
+      error: `Error updating user authentication data: ${authError.message}`,
+    });
   }
 
   const { data: profileData, error: profileError } = await supaClient
@@ -123,11 +121,9 @@ export const uploadAvatar = asyncHandler(
       .single();
 
     if (profileError) {
-      return res
-        .status(500)
-        .json({
-          error: `Error fetching user profile: ${profileError.message}`,
-        });
+      return res.status(500).json({
+        error: `Error fetching user profile: ${profileError.message}`,
+      });
     }
 
     await deleteOldImage(profile?.avatar_url);
