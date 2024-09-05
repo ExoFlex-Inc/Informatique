@@ -9,7 +9,7 @@
 #include "cJSON.h"
 
 #define SECTION_LENGTH                       20
-#define SECTION_NBR                          30
+#define SECTION_NBR                          150
 #define M_HMI_TIMER                          50
 #define M_HMI_STRING_LENGTH                  20
 #define M_HMI_MODE_SECTION                   0
