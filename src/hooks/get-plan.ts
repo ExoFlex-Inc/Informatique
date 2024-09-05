@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 const usePlanData = (user_id: string | undefined) => {
   const [planData, setPlanData] = useState(null);
-  const [get_plan, setRetryGet] = useState(true); // Set to true initially to trigger the first fetch
+  const [get_plan, setRetryGet] = useState(true);
 
   useEffect(() => {
     const getPlanRequests = async () => {

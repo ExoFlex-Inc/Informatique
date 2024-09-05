@@ -18,7 +18,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { useState, useEffect } from "react";
 import { supaClient } from "../hooks/supa-client.ts";
 import SendIcon from "@mui/icons-material/Send";
-import { useProfileContext } from "../context/profileContext.tsx";
+import { useUserProfile } from "../hooks/use-profile.ts";
 import {
   fetchRelation,
   sendRequest,
@@ -30,7 +30,7 @@ const ProfessionalNetwork = () => {
   const [tableAdmins, setTableAdmins] = useState<any[]>([]);
   const [relations, setRelations] = useState<any[]>([]);
 
-  const { profile } = useProfileContext();
+  const { profile } = useUserProfile();
   const [values, setValues] = useState<string | null>(null);
 
   const [selectedAdmin, setSelectedAdmin] = useState<any | null>(null);
@@ -160,7 +160,7 @@ const ProfessionalNetwork = () => {
                 {tableAdmins.map((admin) => (
                   <TableRow key={admin.user_id}>
                     <TableCell>
-                      {admin.username} {admin.lastname}
+                      {admin.first_name} {admin.last_name}
                     </TableCell>
                     <TableCell>
                       {

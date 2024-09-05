@@ -1,16 +1,19 @@
 import express, { Application } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import session from "express-session";
+import passport from "passport";
 import { createServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
+import authRoutes from "./routes/authRoutes.ts";
 import serialPortRoutes from "./routes/serialPortRoutes.ts";
 import planRoutes from "./routes/planRoutes.ts";
 import wellnessNetworkRoutes from "./routes/wellnessNetworkRoutes.ts";
 import hmiRoutes from "./routes/hmiRoutes.ts";
 import userRoutes from "./routes/userRoutes.ts";
-import localServerRoutes from "./routes/localServerRoutes.ts";
 import wellnessNetworkRoutes from "./routes/wellnessNetworkRoutes.ts";
 import { getSerialPort } from "./managers/serialPort.ts";
+import "./config/passportConfig.ts";
 
 dotenv.config();
 
@@ -24,13 +27,31 @@ const io = new SocketIOServer(httpServer, {
 });
 
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:1337",
+    credentials: true,
+  }),
+);
 
+// Session setup
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "default_secret",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: process.env.NODE_ENV === "production" },
+  }),
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use("/auth", authRoutes);
 app.use("/api", serialPortRoutes);
-app.use("/api", userRoutes);
+app.use("/user", userRoutes);
 app.use("/api", planRoutes);
 app.use("/api", hmiRoutes);
-app.use("/api", localServerRoutes);
 app.use("/api", wellnessNetworkRoutes);
 
 io.on("connection", (socket) => {
