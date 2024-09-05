@@ -149,18 +149,19 @@ export default function TopBar() {
                     <ListItemText primary="See Profile" />
                   </ListItemButton>
                 </ListItem>
-                  {(profile?.permissions == "client" || profile?.permissions == "dev") && (
-                    <ListItem>
-                      <ListItemButton
-                        onClick={() => navigate("/professional_network")}
-                      >
-                        <ListItemIcon>
-                          <People />
-                        </ListItemIcon>
-                        <ListItemText primary="Professional Network" />
-                      </ListItemButton>
-                    </ListItem>
-                  )}
+                {(profile?.permissions == "client" ||
+                  profile?.permissions == "dev") && (
+                  <ListItem>
+                    <ListItemButton
+                      onClick={() => navigate("/professional_network")}
+                    >
+                      <ListItemIcon>
+                        <People />
+                      </ListItemIcon>
+                      <ListItemText primary="Professional Network" />
+                    </ListItemButton>
+                  </ListItem>
+                )}
                 <Divider />
                 <ListItem>
                   <ListItemButton onClick={handleLogout}>

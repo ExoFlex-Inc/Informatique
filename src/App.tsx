@@ -77,7 +77,6 @@ function AppLayout() {
     }
   }, [session, profile, navigate]);
 
-
   return (
     <>
       {session && profile && <ProSideBar permissions={profile.permissions} />}
