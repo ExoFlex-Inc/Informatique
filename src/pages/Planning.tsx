@@ -146,7 +146,6 @@ export default function Planning() {
         }
       })
       .filter((element) => element !== undefined);
-
     setPlan((prevPlan) => {
       const newPlan = [...prevPlan];
       checkboxIndex.forEach((index) => {
