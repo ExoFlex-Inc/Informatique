@@ -348,14 +348,11 @@ void ManagerHMI_ExecutePlanCmd(char* cmd, uint8_t size)
 						}
 
 						ManagerMovement_AddMouvement(mvtIdx, movements, ManagerHMI_Degrees2Radians(pos));
+						mvtIdx++;
 
 						if(j == mvtNbr-1)
 						{
 							cmd += M_HMI_STRING_LENGTH*(3*(MVT_MAX-mvtNbr));
-						}
-						else
-						{
-							mvtIdx++;
 						}
                 	}
 
