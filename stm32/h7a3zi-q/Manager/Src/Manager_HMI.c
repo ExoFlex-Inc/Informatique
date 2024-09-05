@@ -94,11 +94,13 @@ void ManagerHMI_SendJSON()
 
     float positions[MMOT_MOTOR_NBR];
     float torques[MMOT_MOTOR_NBR];
+    float current[MMOT_MOTOR_NBR];
 
     for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
     {
         positions[i] = ManagerHMI_Radians2Degrees(motorsData[i]->position);
         torques[i]   = motorsData[i]->torque;
+        current[i]   = motorsData[i]->current;
     }
 
     // Add mode, exercise, repetitions, sets, and errorcode to the JSON object
@@ -111,8 +113,10 @@ void ManagerHMI_SendJSON()
 
     cJSON* positionsArray = cJSON_CreateFloatArray(positions, 3);
     cJSON* torquesArray   = cJSON_CreateFloatArray(torques, 3);
+    cJSON* currentArray   = cJSON_CreateFloatArray(current, 3);
     cJSON_AddItemToObject(root, "Positions", positionsArray);
     cJSON_AddItemToObject(root, "Torques", torquesArray);
+    cJSON_AddItemToObject(root, "Current", currentArray);
 
     // Print the JSON object
     char* jsonMessage = cJSON_PrintUnformatted(root);

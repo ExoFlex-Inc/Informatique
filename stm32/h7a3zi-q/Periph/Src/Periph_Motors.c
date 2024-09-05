@@ -6,10 +6,12 @@ float   PeriphMotors_ConvUintToFloat(int32_t val, float min, float max,
                                      uint8_t bits);
 
 /// @brief AK10-9
-const MotorParameters ak10_9 = {-12.5, 12.5, -50, 50, -65, 65, 0, 500, 0, 5};
+const MotorParameters ak10_9 = {-12.5, 12.5, -50, 50, -65, 65,
+                                0,     500,  0,   5,  0.16};
 
 /// @brief AK80-64 (AK80-80/64)
-const MotorParameters ak80_64 = {-12.5, 12.5, -8, 8, -144, 144, 0, 500, 0, 5};
+const MotorParameters ak80_64 = {-12.5, 12.5, -8, 8, -144, 144,
+                                 0,     500,  0,  5, 0.119};
 
 SendCanDataFunction PeriphMotors_SendCanData;
 
@@ -107,6 +109,8 @@ void PeriphMotors_ParseMotorState(Motor* pMotor, uint8_t* canData)
                                      pMotor->parameters.velocityMax, 12);
     pMotor->torque = PeriphMotors_ConvUintToFloat(
         tInt, -pMotor->parameters.torqueMax, pMotor->parameters.torqueMax, 12);
+
+    pMotor->current = pMotor->torque * pMotor->parameters.kt;
 }
 
 int32_t PeriphMotors_ConvFloatToUint(float val, float min, float max,

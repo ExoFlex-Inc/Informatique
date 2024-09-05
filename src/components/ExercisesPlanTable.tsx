@@ -98,9 +98,6 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
               <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Target Torque (Nm)
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Time (Sec)
-              </th>
               <th className="px-6 py-3"></th>
             </tr>
           </thead>
@@ -161,18 +158,6 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                     className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                   />
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <input
-                    type="number"
-                    name="time"
-                    placeholder="Time"
-                    value={element.time}
-                    onChange={(e) =>
-                      handleInputChange(setIndex, e, exerciseIndex)
-                    }
-                    className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
-                  />
-                </td>
                 {exerciseIndex === 0 && (
                   <td
                     rowSpan={0}
@@ -192,16 +177,22 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
           <thead className="bg-gray-50">
             <tr className="divide-x divide-gray-200">
               <th
-                colSpan={2}
+                colSpan={1}
                 className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
                 Repetitions
               </th>
               <th
-                colSpan={2}
+                colSpan={1}
                 className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
                 Rest (Sec)
+              </th>
+              <th
+                colSpan={1}
+                className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Time (Sec)
               </th>
               <th
                 colSpan={2}
@@ -213,7 +204,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
           </thead>
           <tbody className="bg-white">
             <tr>
-              <td colSpan={2} className="px-6 py-4 whitespace-nowrap">
+              <td className="px-6 py-4 whitespace-nowrap">
                 <input
                   type="number"
                   name="repetitions"
@@ -223,7 +214,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                   className="text-black border border-gray-300 rounded text-center px-2 py-1 w-full"
                 />
               </td>
-              <td colSpan={2} className="px-6 py-4 whitespace-nowrap">
+              <td className="px-6 py-4 whitespace-nowrap">
                 <input
                   type="number"
                   name="rest"
@@ -231,6 +222,16 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                   value={set.rest}
                   onChange={(e) => handleInputChange(setIndex, e)}
                   className="text-black border border-gray-300 rounded text-center px-2 py-1 w-full"
+                />
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <input
+                  type="number"
+                  name="time"
+                  placeholder="Time"
+                  value={set.time}
+                  onChange={(e) => handleInputChange(setIndex, e)}
+                  className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                 />
               </td>
               <td colSpan={2} className="px-6 py-4 whitespace-nowrap">
