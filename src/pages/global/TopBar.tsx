@@ -23,6 +23,8 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
 import Icon from "../../../public/assets/user.png";
 
+import Notification from "../../components/Notification.tsx";
+
 import Login from "../../components/Login.tsx";
 import { useNavigate } from "react-router-dom";
 import { useSupabaseSession } from "../../hooks/use-session.ts";
@@ -100,9 +102,9 @@ export default function TopBar() {
             )}
           </IconButton>
         )}
-        {/* {session && ( // Check if session exists
+        {session && ( // Check if session exists
           <Notification />
-        )} */}
+        )}
         {session && (
           <IconButton>
             <SettingsOutlinedIcon />
@@ -147,8 +149,7 @@ export default function TopBar() {
                     <ListItemText primary="See Profile" />
                   </ListItemButton>
                 </ListItem>
-                {profile?.permissions == "client" ||
-                  ("dev" && (
+                  {(profile?.permissions == "client" || profile?.permissions == "dev") && (
                     <ListItem>
                       <ListItemButton
                         onClick={() => navigate("/professional_network")}
@@ -159,7 +160,7 @@ export default function TopBar() {
                         <ListItemText primary="Professional Network" />
                       </ListItemButton>
                     </ListItem>
-                  ))}
+                  )}
                 <Divider />
                 <ListItem>
                   <ListItemButton onClick={handleLogout}>
