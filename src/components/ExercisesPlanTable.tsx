@@ -24,11 +24,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
   limitsRight,
   limitsLeft,
 }) => {
-  const exerciseOptions = [
-    "Extension",
-    "Dorsiflexion",
-    "Eversion",
-  ];
+  const exerciseOptions = ["Extension", "Dorsiflexion", "Eversion"];
 
   // Function to handle removing an exercise from the plan
   const removeExercise = (index: number) => {

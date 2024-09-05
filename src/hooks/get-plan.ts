@@ -17,7 +17,7 @@ const usePlanData = (profile: any) => {
               },
             },
           );
-  
+
           if (responseGetPlanning.ok) {
             console.log("Plan retrieved successfully.");
             const responsePlanData = await responseGetPlanning.json();
