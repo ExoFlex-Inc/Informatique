@@ -230,9 +230,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                   name="time"
                   placeholder="Time"
                   value={set.time}
-                  onChange={(e) =>
-                    handleInputChange(setIndex, e)
-                  }
+                  onChange={(e) => handleInputChange(setIndex, e)}
                   className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                 />
               </td>

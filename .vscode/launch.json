@@ -12,11 +12,21 @@
       "internalConsoleOptions": "neverOpen"
     },
     {
-      "type": "node",
-      "request": "attach",
-      "name": "Attach Debugger to Server",
-      "processId": "${command:PickProcess}",
-      "skipFiles": ["<node_internals>/**"]
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch Chrome against localhost",
+      "url": "http://localhost:1337",
+      "webRoot": "${workspaceFolder}/src"
+      // "preLaunchTask": "npm: dev"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Launch Full Stack",
+      "configurations": [
+        "Launch Server with Debugger",
+        "Launch Chrome against localhost"
+      ]
     }
   ]
 }

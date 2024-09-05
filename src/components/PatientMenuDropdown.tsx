@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
 import { removeRelation } from "../controllers/relationsController.ts";
-import { useProfileContext } from "../context/profileContext.tsx";
+import { useUserProfile } from "../hooks/use-profile.ts";
 
 interface PatientMenuDropdownProps {
   clientId: string;
-  setOpenMenuIndex: React.Dispatch<React.SetStateAction<Number | null>>;
+  setOpenMenuIndex: React.Dispatch<React.SetStateAction<number | null>>;
   visibleListOfPatients: any[];
   setListOfPatients: React.Dispatch<React.SetStateAction<any[]>>;
   index: number;
@@ -20,7 +20,7 @@ const PatientMenuDropdown: React.FC<PatientMenuDropdownProps> = ({
   buttonRef,
 }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { profile } = useProfileContext();
+  const { profile } = useUserProfile();
 
   const removeUser = async () => {
     const unlinkSuccessful = await removeRelation(clientId, profile);
@@ -36,7 +36,7 @@ const PatientMenuDropdown: React.FC<PatientMenuDropdownProps> = ({
   };
 
   useEffect(() => {
-    const handleClickOutside = (event: any) => {
+    const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node) &&

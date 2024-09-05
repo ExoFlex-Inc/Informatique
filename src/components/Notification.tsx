@@ -1,6 +1,6 @@
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import { useEffect, useState, useRef } from "react";
-import { useProfileContext } from "../context/profileContext.tsx";
+import { useUserProfile } from "../hooks/use-profile.ts";
 import { supaClient } from "../hooks/supa-client.ts";
 import {
   refuseRequest,
@@ -33,7 +33,7 @@ const Notification = () => {
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
 
-  const { profile } = useProfileContext();
+  const { profile } = useUserProfile();
 
   useEffect(() => {
     async function fetchAdminNotifications() {
@@ -203,7 +203,7 @@ const Notification = () => {
                             primary="Connection request"
                             secondary={
                               <Typography className="text-black">
-                                {client.username} {client.lastname} sends a
+                                {client.first_name} {client.last_name} sends a
                                 connection request
                               </Typography>
                             }

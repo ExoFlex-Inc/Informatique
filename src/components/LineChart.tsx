@@ -38,7 +38,7 @@ const LineChart: React.FC<LineChartProps> = ({
   setChartImage,
 }) => {
   const [graphPause, setGraphPause] = useState(false);
-  const [graphDataType, setGraphDataIsType] = useState('position');
+  const [graphDataType, setGraphDataIsType] = useState("position");
 
   const chartRef = useRef<Chart<"line"> | null>(null);
 
@@ -70,7 +70,12 @@ const LineChart: React.FC<LineChartProps> = ({
           },
           y: {
             min: 0,
-            max: graphDataType == 'position' ? 180 : graphDataType == 'torque' ? 48 : 15,
+            max:
+              graphDataType == "position"
+                ? 180
+                : graphDataType == "torque"
+                  ? 48
+                  : 15,
           },
         },
       };
@@ -136,11 +141,12 @@ const LineChart: React.FC<LineChartProps> = ({
                     ) => {
                       dataset.data.push({
                         x: Date.now(),
-                        y: graphDataType == 'position'
-                          ? message.Positions[index]
-                          : graphDataType == 'torque'
-                          ? message.Torques[index]
-                          : message.Current[index],
+                        y:
+                          graphDataType == "position"
+                            ? message.Positions[index]
+                            : graphDataType == "torque"
+                              ? message.Torques[index]
+                              : message.Current[index],
                       });
                     },
                   );
@@ -148,8 +154,18 @@ const LineChart: React.FC<LineChartProps> = ({
               },
             },
             y: {
-              min: graphDataType == 'position' ? -65 : graphDataType == 'torque' ? 0 : 0,
-              max: graphDataType == 'position' ? 65 : graphDataType == 'torque' ? 48 : 15,
+              min:
+                graphDataType == "position"
+                  ? -65
+                  : graphDataType == "torque"
+                    ? 0
+                    : 0,
+              max:
+                graphDataType == "position"
+                  ? 65
+                  : graphDataType == "torque"
+                    ? 48
+                    : 15,
             },
           },
         }));
@@ -223,9 +239,9 @@ const LineChart: React.FC<LineChartProps> = ({
               <label>Position</label>
               <input
                 type="checkbox"
-                checked={graphDataType == 'position'}
+                checked={graphDataType == "position"}
                 onChange={() => {
-                  setGraphDataIsType('position');
+                  setGraphDataIsType("position");
                 }}
               />
             </div>
@@ -233,9 +249,9 @@ const LineChart: React.FC<LineChartProps> = ({
               <label>Torque</label>
               <input
                 type="checkbox"
-                checked={graphDataType == 'torque'}
+                checked={graphDataType == "torque"}
                 onChange={() => {
-                  setGraphDataIsType('torque');
+                  setGraphDataIsType("torque");
                 }}
               />
             </div>
@@ -243,9 +259,9 @@ const LineChart: React.FC<LineChartProps> = ({
               <label>Current</label>
               <input
                 type="checkbox"
-                checked={graphDataType == 'current'}
+                checked={graphDataType == "current"}
                 onChange={() => {
-                  setGraphDataIsType('current');
+                  setGraphDataIsType("current");
                 }}
               />
             </div>

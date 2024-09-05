@@ -22,16 +22,17 @@ import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
 import Icon from "../../../public/assets/user.png";
+
 import Notification from "../../components/Notification.tsx";
 
 import Login from "../../components/Login.tsx";
-import { supaClient } from "../../hooks/supa-client.ts";
 import { useNavigate } from "react-router-dom";
-import { useAvatarContext } from "../../context/avatarContext.tsx";
-import { useProfileContext } from "../../context/profileContext.tsx";
+import { useSupabaseSession } from "../../hooks/use-session.ts";
+import { useUserProfile } from "../../hooks/use-profile.ts";
 
 export default function TopBar() {
-  const { session } = useProfileContext();
+  const { session } = useSupabaseSession();
+  const { profile } = useUserProfile();
   const theme = useTheme();
   // const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
@@ -39,11 +40,8 @@ export default function TopBar() {
   const menuRef = useRef(null);
   const avatarRef = useRef(null);
   const navigate = useNavigate();
-  const { profile } = useProfileContext();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const { avatarUrl } = useAvatarContext();
 
   useEffect(() => {
     const handleClickOutside = (event: any) => {
@@ -63,10 +61,28 @@ export default function TopBar() {
     };
   }, [menuRef]);
 
-  const handleLogout = () => {
+  const handleLogout = async (event) => {
+    event.preventDefault();
+
     if (window.confirm("Are you sure you want to log out?")) {
-      supaClient.auth.signOut();
-      setIsMenuOpen(false);
+      try {
+        setIsMenuOpen(false);
+
+        const response = await fetch("http://localhost:3001/auth/logout", {
+          method: "POST",
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to log out");
+        }
+
+        window.location.href = "/";
+      } catch (error) {
+        console.error("Error logging out:", error.message);
+
+        alert("An error occurred while logging out. Please try again.");
+      }
     }
   };
 
@@ -77,7 +93,7 @@ export default function TopBar() {
   return (
     <Box className="nav-bar relative justify-end">
       <Box className="flex items-center">
-        {session && ( // Check if session exists
+        {session && (
           <IconButton onClick={colorMode.toggleColorMode}>
             {theme.palette.mode === "dark" ? (
               <DarkModeOutlinedIcon />
@@ -89,14 +105,17 @@ export default function TopBar() {
         {session && ( // Check if session exists
           <Notification />
         )}
-        {session && ( // Check if session exists
+        {session && (
           <IconButton>
             <SettingsOutlinedIcon />
           </IconButton>
         )}
         {session && (
           <IconButton className="h-14" onClick={onProfileClick}>
-            <Avatar ref={avatarRef} src={avatarUrl ? avatarUrl : Icon} />
+            <Avatar
+              ref={avatarRef}
+              src={profile?.avatar_url ? profile.avatar_url : Icon}
+            />
           </IconButton>
         )}
       </Box>
@@ -130,7 +149,8 @@ export default function TopBar() {
                     <ListItemText primary="See Profile" />
                   </ListItemButton>
                 </ListItem>
-                {profile?.permissions == "client" && (
+                {(profile?.permissions == "client" ||
+                  profile?.permissions == "dev") && (
                   <ListItem>
                     <ListItemButton
                       onClick={() => navigate("/professional_network")}

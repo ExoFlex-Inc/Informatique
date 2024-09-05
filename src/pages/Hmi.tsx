@@ -4,7 +4,6 @@ import ProgressionWidget from "../components/ProgressionWidget.tsx";
 
 import usePlanData from "../hooks/get-plan.ts";
 import useStm32 from "../hooks/use-stm32.ts";
-import { useProfileContext } from "../context/profileContext.tsx";
 
 import { useMediaQuery, useTheme } from "@mui/material";
 
@@ -28,8 +27,7 @@ interface ChartData {
 }
 
 export default function HMI() {
-  const { profile } = useProfileContext();
-  const { planData } = usePlanData(profile?.user_id);
+  const { planData } = usePlanData();
   const { stm32Data, socket, errorFromStm32 } = useStm32();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -64,9 +62,9 @@ export default function HMI() {
         ${planData.limits.left.torque.eversion};${planData.limits.right.torque.eversion};
         ${planData.limits.left.torque.extension};${planData.limits.right.torque.extension};
         ${planData.limits.left.torque.dorsiflexion};${planData.limits.right.torque.dorsiflexion}`;
-       
+
       planData.plan.forEach((set) => {
-        message += `;${set.movement.length}`
+        message += `;${set.movement.length}`;
         for (var i = 1; i < 4; i++) {
           if (i <= set.movement.length) {
             message += `;${exercise.exercise};${exercise.target_angle};${exercise.target_torque}`;
