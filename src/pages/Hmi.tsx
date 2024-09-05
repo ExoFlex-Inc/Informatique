@@ -4,7 +4,6 @@ import ProgressionWidget from "../components/ProgressionWidget.tsx";
 
 import usePlanData from "../hooks/get-plan.ts";
 import useStm32 from "../hooks/use-stm32.ts";
-import { useProfileContext } from "../context/profileContext.tsx";
 
 import { useMediaQuery, useTheme } from "@mui/material";
 
@@ -28,8 +27,7 @@ interface ChartData {
 }
 
 export default function HMI() {
-  const { profile } = useProfileContext();
-  const { planData } = usePlanData(profile?.user_id);
+  const { planData } = usePlanData();
   const { stm32Data, socket, errorFromStm32 } = useStm32();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
