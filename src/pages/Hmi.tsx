@@ -6,6 +6,7 @@ import usePlanData from "../hooks/get-plan.ts";
 import useStm32 from "../hooks/use-stm32.ts";
 
 import { useMediaQuery, useTheme } from "@mui/material";
+import { useUserProfile } from "../hooks/use-profile.ts";
 
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
@@ -27,7 +28,8 @@ interface ChartData {
 }
 
 export default function HMI() {
-  const { planData } = usePlanData();
+  const { profile } = useUserProfile();
+  const { planData } = usePlanData(profile);
   const { stm32Data, socket, errorFromStm32 } = useStm32();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
