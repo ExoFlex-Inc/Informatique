@@ -41,7 +41,7 @@ typedef struct
     float           position;
     float           velocity;
     float           torque;
-    float			current;
+    float           current;
     MotorParameters parameters;
 } Motor;
 

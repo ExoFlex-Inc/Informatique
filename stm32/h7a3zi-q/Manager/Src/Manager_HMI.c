@@ -100,7 +100,7 @@ void ManagerHMI_SendJSON()
     {
         positions[i] = ManagerHMI_Radians2Degrees(motorsData[i]->position);
         torques[i]   = motorsData[i]->torque;
-        current[i]	 = motorsData[i]->current;
+        current[i]   = motorsData[i]->current;
     }
 
     // Add mode, exercise, repetitions, sets, and errorcode to the JSON object

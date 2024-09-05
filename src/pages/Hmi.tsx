@@ -62,9 +62,9 @@ export default function HMI() {
         ${planData.limits.left.torque.eversion};${planData.limits.right.torque.eversion};
         ${planData.limits.left.torque.extension};${planData.limits.right.torque.extension};
         ${planData.limits.left.torque.dorsiflexion};${planData.limits.right.torque.dorsiflexion}`;
-       
+
       planData.plan.forEach((set) => {
-        message += `;${set.movement.length}`
+        message += `;${set.movement.length}`;
         for (var i = 1; i < 4; i++) {
           if (i <= set.movement.length) {
             message += `;${exercise.exercise};${exercise.target_angle};${exercise.target_torque}`;

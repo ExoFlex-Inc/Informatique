@@ -7,14 +7,13 @@ const usePlanData = () => {
   useEffect(() => {
     const getPlanRequests = async () => {
       try {
-
         const responseGetPlanning = await fetch(
           "http://localhost:3001/api/plan",
           {
             method: "GET",
           },
         );
-  
+
         if (responseGetPlanning.ok) {
           console.log("Plan retrieved successfully.");
           const responsePlanData = await responseGetPlanning.json();
