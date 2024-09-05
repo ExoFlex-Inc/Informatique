@@ -26,10 +26,6 @@ static uint32_t     timerMs = 0;
 char                ParsedMsg[SECTION_NBR][SECTION_LENGTH];
 char                buf[PUART_RX_BUF_SIZE];
 
-char strExercise[MVT_MAX];
-float pos[MVT_MAX];
-float torque[MVT_MAX];
-
 void ManagerHMI_ReceiveJSON();
 void ManagerHMI_SendJSON();
 void ManagerHMI_SetMotorDataToString();
@@ -65,13 +61,6 @@ void ManagerHMI_Init()
     for (uint16_t i = 0; i < PUART_RX_BUF_SIZE; i++)
     {
         buf[i] = 0;
-    }
-
-    for (uint8_t i =0; i < MVT_MAX; i++)
-    {
-    	strExercise[i] = " ";
-    	pos[i] = 0.0;
-    	torque[i] = 0.0;
     }
 }
 
@@ -325,26 +314,48 @@ void ManagerHMI_ExecutePlanCmd(char* cmd, uint8_t size)
             {
                 uint8_t exNbr = size / M_HMI_EXERCISE_SECTION_NBR;
 
+                uint8_t mvtIdx = 0;
+
                 // Get exercise data
                 for (uint8_t i = 0; i < exNbr; i++)
                 {
+                	uint8_t movements;
                 	uint8_t mvtNbr = atoi(cmd);
                 	cmd += M_HMI_STRING_LENGTH;
 
                 	for (uint8_t j = 0; j < mvtNbr; j++)
                 	{
-                		strExercise[j] = cmd;
+                		char *strMvt = cmd;
 						cmd += M_HMI_STRING_LENGTH;
 
-						pos[j] = atof(cmd);
+						float pos = atof(cmd);
 						cmd += M_HMI_STRING_LENGTH;
 
-						torque[j] = atof(cmd);
+						float torque = atof(cmd);
 						cmd += M_HMI_STRING_LENGTH;
 
-						if(j+1 == mvtNbr)
+						if (strcmp(strMvt, "Dorsiflexion") == 0)
 						{
-							cmd += M_HMI_STRING_LENGTH*(MVT_MAX-mvtNbr);
+							movements = MMOV_DORSIFLEXION;
+						}
+						else if (strcmp(strMvt, "Eversion") == 0)
+						{
+							movements = MMOV_EVERSION;
+						}
+						else if (strcmp(strMvt, "Extension") == 0)
+						{
+							movements = MMOV_EXTENSION;
+						}
+
+						ManagerMovement_AddMouvement(mvtIdx, movements, ManagerHMI_Degrees2Radians(pos));
+
+						if(j == mvtNbr-1)
+						{
+							cmd += M_HMI_STRING_LENGTH*(3*(MVT_MAX-mvtNbr));
+						}
+						else
+						{
+							mvtIdx++;
 						}
                 	}
 
@@ -360,27 +371,9 @@ void ManagerHMI_ExecutePlanCmd(char* cmd, uint8_t size)
                     float speed = atof(cmd);
 					cmd += M_HMI_STRING_LENGTH;
 
-					//To do: Parsed everythin into the movement variables
-//                    uint8_t exercise;
-//
-//                    if (strcmp(strExercise, "Dorsiflexion") == 0)
-//                    {
-//                        exercise = MMOV_DORSIFLEXION;
-//                    }
-//                    else if (strcmp(strExercise, "Eversion") == 0)
-//                    {
-//                        exercise = MMOV_EVERSION;
-//                    }
-//                    else if (strcmp(strExercise, "Extension") == 0)
-//                    {
-//                        exercise = MMOV_EXTENSION;
-//                    }
-//
-//                    ManagerMovement_AddExercise(i, exercise, rep,
-//                                                ManagerHMI_Sec2Millis(time),
-//                                                ManagerHMI_Sec2Millis(rest));
-//                    ManagerMovement_SetFinalPos(
-//                        i, ManagerHMI_Degrees2Radians(pos));
+                    ManagerMovement_AddExerciseInfo(i, mvtNbr, rep,
+                                                ManagerHMI_Sec2Millis(time),
+                                                ManagerHMI_Sec2Millis(rest));
                 }
             }
         }
