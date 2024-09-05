@@ -32,6 +32,15 @@
 
 #define MMOT_MAX_MSG_DELAY TIMER * 4
 
+#define MMOT_INIT_IDLE          0
+#define MMOT_INIT_START         1
+#define MMOT_INIT_START_OK      2
+#define MMOT_INIT_DISABLEMOV    3
+#define MMOT_INIT_DISABLEMOV_OK 4
+#define MMOT_INIT_ORIGIN        5
+#define MMOT_INIT_OK            6
+#define MMOT_INIT_ERROR         7
+
 typedef struct
 {
     Motor    motor;
@@ -39,6 +48,8 @@ typedef struct
     float    goalPosition;
     float    kp;
     float    kd;
+    uint8_t  initState;
+    uint8_t  initTry;
     bool     detected;
     bool     goalReady;
     uint32_t lastMsgTime;
@@ -56,8 +67,7 @@ typedef struct
 
 } managerMotor_t;
 
-static uint8_t  tryCount = 0;
-static uint32_t timerMs  = 0;
+static uint32_t timerMs = 0;
 
 MotorControl motors[MMOT_MOTOR_NBR];
 uint8_t      data[8];
@@ -70,21 +80,18 @@ managerMotor_t managerMotor;
 // Prototypes
 void ManagerMotor_Reset();
 void ManagerMotor_ReceiveFromMotors();
-void ManagerMotor_StartMotors();
-void ManagerMotor_DisableMovement();
 void ManagerMotor_WaitingSecurity();
-void ManagerMotor_SetOrigines();
+void ManagerMotor_StartMotors();
+void ManagerMotor_StartMotor(uint8_t motorIndex);
 void ManagerMotor_CalculateNextPositions();
 void ManagerMotor_SendToMotors();
-void ManagerMotor_VerifyMotorConnection();
-void ManagerMotor_VerifyMotorState();
-
-void ManagerMotor_ApplyOriginShift(uint8_t motorIndex);
-
 void ManagerMotor_DisableMotors();
-void ManagerMotor_EnableMotors();
-void ManagerMotor_DisableMoveCmd();
 
+void ManagerMotor_VerifyMotorsConnection();
+void ManagerMotor_VerifyMotorsState();
+bool ManagerMotor_VerifyMotorState(uint8_t motorIndex);
+
+void   ManagerMotor_ApplyOriginShift(uint8_t motorIndex);
 int8_t ManagerMotor_GetMotorDirection(uint8_t motorIndex);
 void   ManagerMotor_MotorIncrement(uint8_t motorIndex, int8_t direction);
 
@@ -101,12 +108,20 @@ void ManagerMotor_Init()
 void ManagerMotor_Reset()
 {
     // Init motors
+#ifndef MMOT_DEV_MOTOR_1_DISABLE
     PeriphMotors_InitMotor(&motors[MMOT_MOTOR_1].motor, MMOT_MOTOR_1_CAN_ID,
                            MOTOR_AK10_9);
+#endif
+
+#ifndef MMOT_DEV_MOTOR_2_DISABLE
     PeriphMotors_InitMotor(&motors[MMOT_MOTOR_2].motor, MMOT_MOTOR_2_CAN_ID,
                            MOTOR_AK10_9);
+#endif
+
+#ifndef MMOT_DEV_MOTOR_3_DISABLE
     PeriphMotors_InitMotor(&motors[MMOT_MOTOR_3].motor, MMOT_MOTOR_3_CAN_ID,
                            MOTOR_AK80_64);
+#endif
 
     // Init motor control info
     for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
@@ -117,6 +132,8 @@ void ManagerMotor_Reset()
         motors[i].goalReady    = false;
         motors[i].lastMsgTime  = 0;
         motors[i].originShift  = 0.0f;
+        motors[i].initState    = MMOT_INIT_IDLE;
+        motors[i].initTry      = 0;
     }
 
     // Set Kp Kd
@@ -155,7 +172,7 @@ void ManagerMotor_Task()
     // State machine that Init, sets to zero, reads informations and sends
     // informations to the motors
     ManagerMotor_ReceiveFromMotors();
-    ManagerMotor_VerifyMotorState();
+    ManagerMotor_VerifyMotorsState();
 
     if (HAL_GetTick() - timerMs >= TIMER)
     {
@@ -169,18 +186,10 @@ void ManagerMotor_Task()
             ManagerMotor_StartMotors();
             break;
 
-        case MMOT_STATE_DISABLE_MOVE_CMD:
-            ManagerMotor_DisableMovement();
-            break;
-
-        case MMOT_STATE_SET_ORIGIN:
-            ManagerMotor_SetOrigines();
-            break;
-
         case MMOT_STATE_READY2MOVE:
             ManagerMotor_CalculateNextPositions();
             ManagerMotor_SendToMotors();
-            ManagerMotor_VerifyMotorConnection();
+            ManagerMotor_VerifyMotorsConnection();
 
             break;
 
@@ -194,23 +203,15 @@ void ManagerMotor_Task()
 
 void ManagerMotor_DisableMotors()
 {
+#ifndef MMOT_DEV_MOTOR_1_DISABLE
     PeriphMotors_Disable(&motors[MMOT_MOTOR_1].motor);
+#endif
+#ifndef MMOT_DEV_MOTOR_2_DISABLE
     PeriphMotors_Disable(&motors[MMOT_MOTOR_2].motor);
+#endif
+#ifndef MMOT_DEV_MOTOR_3_DISABLE
     PeriphMotors_Disable(&motors[MMOT_MOTOR_3].motor);
-}
-
-void ManagerMotor_EnableMotors()
-{
-    PeriphMotors_Enable(&motors[MMOT_MOTOR_1].motor);
-    PeriphMotors_Enable(&motors[MMOT_MOTOR_2].motor);
-    PeriphMotors_Enable(&motors[MMOT_MOTOR_3].motor);
-}
-
-void ManagerMotor_DisableMoveCmd()
-{
-    PeriphMotors_Move(&motors[MMOT_MOTOR_1].motor, 0, 0, 0, 0, 0);
-    PeriphMotors_Move(&motors[MMOT_MOTOR_2].motor, 0, 0, 0, 0, 0);
-    PeriphMotors_Move(&motors[MMOT_MOTOR_3].motor, 0, 0, 0, 0, 0);
+#endif
 }
 
 void ManagerMotor_ReceiveFromMotors()
@@ -242,174 +243,241 @@ void ManagerMotor_WaitingSecurity()
 
 void ManagerMotor_StartMotors()
 {
-    if (managerMotor.setupFirstPass)
+    bool verifM1 = true;
+    bool verifM2 = true;
+    bool verifM3 = true;
+
+#ifndef MMOT_DEV_MOTOR_1_DISABLE
+    ManagerMotor_StartMotor(MMOT_MOTOR_1);
+    if (motors[MMOT_MOTOR_1].initState != MMOT_INIT_OK)
     {
-        motors[MMOT_MOTOR_1].detected = false;
-        motors[MMOT_MOTOR_2].detected = false;
-        motors[MMOT_MOTOR_3].detected = false;
-        managerMotor.setupFirstPass   = false;
+        verifM1 = false;
     }
-    else if (motors[MMOT_MOTOR_1].detected && motors[MMOT_MOTOR_2].detected &&
-             motors[MMOT_MOTOR_3].detected)
+#endif
+
+#ifndef MMOT_DEV_MOTOR_2_DISABLE
+    ManagerMotor_StartMotor(MMOT_MOTOR_2);
+    if (motors[MMOT_MOTOR_2].initState != MMOT_INIT_OK)
     {
-        managerMotor.setupFirstPass = true;
-        tryCount                    = 0;
-        managerMotor.state          = MMOT_STATE_DISABLE_MOVE_CMD;
+        verifM1 = false;
     }
-    else if (tryCount < MAX_TRY)
+#endif
+
+#ifndef MMOT_DEV_MOTOR_3_DISABLE
+    ManagerMotor_StartMotor(MMOT_MOTOR_3);
+    if (motors[MMOT_MOTOR_3].initState != MMOT_INIT_OK)
     {
-        ManagerMotor_EnableMotors();
-        tryCount += 1;
+        verifM1 = false;
     }
-    else
+#endif
+
+    if (verifM1 && verifM2 && verifM3)
     {
-        managerMotor.state     = MMOT_STATE_ERROR;
-        managerMotor.errorCode = ERROR_CAN_CONNECTION_MOTORS;
+        managerMotor.state = MMOT_STATE_READY2MOVE;
     }
 }
 
-void ManagerMotor_DisableMovement()
+void ManagerMotor_StartMotor(uint8_t motorIndex)
 {
-    if (managerMotor.setupFirstPass)
+    switch (motors[motorIndex].initState)
     {
-        motors[MMOT_MOTOR_1].detected = false;
-        motors[MMOT_MOTOR_2].detected = false;
-        motors[MMOT_MOTOR_3].detected = false;
-        managerMotor.setupFirstPass   = false;
-    }
-    else if (motors[MMOT_MOTOR_1].detected && motors[MMOT_MOTOR_2].detected &&
-             motors[MMOT_MOTOR_3].detected)
-    {
-        managerMotor.setupFirstPass = true;
-        tryCount                    = 0;
-        managerMotor.state          = MMOT_STATE_SET_ORIGIN;
-    }
-    else if (tryCount < MAX_TRY)
-    {
-        ManagerMotor_DisableMoveCmd();
-        tryCount += 1;
-    }
-    else
-    {
-        managerMotor.state     = MMOT_STATE_ERROR;
-        managerMotor.errorCode = ERROR_CAN_CONNECTION_MOTORS;
-    }
-}
+    case MMOT_INIT_IDLE:
+        motors[motorIndex].detected  = false;
+        motors[motorIndex].initTry   = 0;
+        motors[motorIndex].initState = MMOT_INIT_START;
 
-void ManagerMotor_SetOrigines()
-{
-    if (motors[MMOT_MOTOR_1].motor.position <= 0.001 &&
-        motors[MMOT_MOTOR_1].motor.position >= -0.001 &&
-        motors[MMOT_MOTOR_2].motor.position <= 0.001 &&
-        motors[MMOT_MOTOR_2].motor.position >= -0.001 &&
-        motors[MMOT_MOTOR_3].motor.position <= 0.001 &&
-        motors[MMOT_MOTOR_3].motor.position >= -0.001)
-    {
-        for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
+        break;
+    case MMOT_INIT_START:
+
+        if (motors[motorIndex].detected)
         {
-            motors[i].lastMsgTime = HAL_GetTick();
+            motors[motorIndex].initState = MMOT_INIT_START_OK;
+        }
+        else if (motors[motorIndex].initTry < MAX_TRY)
+        {
+            PeriphMotors_Enable(&motors[motorIndex].motor);
+            motors[motorIndex].initTry += 1;
+        }
+        else
+        {
+            motors[motorIndex].initState = MMOT_INIT_ERROR;
+            managerMotor.state           = MMOT_STATE_ERROR;
+            managerMotor.errorCode       = ERROR_CAN_CONNECTION_MOTORS;
         }
 
-        managerMotor.state = MMOT_STATE_READY2MOVE;
-        tryCount           = 0;
-    }
-    else if (tryCount < MAX_TRY)
-    {
-        ManagerMotor_SetMotorOrigin(MMOT_MOTOR_1);
-        ManagerMotor_SetMotorOrigin(MMOT_MOTOR_2);
-        ManagerMotor_SetMotorOrigin(MMOT_MOTOR_3);
+        break;
 
-        tryCount += 1;
-    }
-    else
-    {
-        managerMotor.state     = MMOT_STATE_ERROR;
-        managerMotor.errorCode = ERROR_SET_ORIGINES_MOTORS;
-    }
-}
+    case MMOT_INIT_START_OK:
+        motors[motorIndex].detected  = false;
+        motors[motorIndex].initTry   = 0;
+        motors[motorIndex].initState = MMOT_INIT_DISABLEMOV;
+        break;
 
-void ManagerMotor_SetMotorOrigin(uint8_t motorIndex)
-{
-    PeriphMotors_SetZeroPosition(&motors[motorIndex].motor);
+    case MMOT_INIT_DISABLEMOV:
+        if (motors[motorIndex].detected)
+        {
+            motors[motorIndex].initState = MMOT_INIT_DISABLEMOV_OK;
+        }
+        else if (motors[motorIndex].initTry < MAX_TRY)
+        {
+            PeriphMotors_Move(&motors[motorIndex].motor, 0, 0, 0, 0, 0);
+            motors[motorIndex].initTry += 1;
+        }
+        else
+        {
+            motors[motorIndex].initState = MMOT_INIT_ERROR;
+            managerMotor.state           = MMOT_STATE_ERROR;
+            managerMotor.errorCode       = ERROR_CAN_CONNECTION_MOTORS;
+        }
+        break;
+
+    case MMOT_INIT_DISABLEMOV_OK:
+        motors[motorIndex].detected  = false;
+        motors[motorIndex].initTry   = 0;
+        motors[motorIndex].initState = MMOT_INIT_ORIGIN;
+        break;
+
+    case MMOT_INIT_ORIGIN:
+        if (motors[motorIndex].detected &&
+            motors[motorIndex].motor.position <= 0.001 &&
+            motors[motorIndex].motor.position >= -0.001)
+        {
+            motors[motorIndex].initState = MMOT_INIT_OK;
+        }
+        else if (motors[motorIndex].initTry < MAX_TRY)
+        {
+            PeriphMotors_SetZeroPosition(&motors[motorIndex].motor);
+            motors[motorIndex].initTry += 1;
+        }
+        else
+        {
+            motors[motorIndex].initState = MMOT_INIT_ERROR;
+            managerMotor.state           = MMOT_STATE_ERROR;
+            managerMotor.errorCode       = ERROR_SET_ORIGINES_MOTORS;
+        }
+        break;
+    }
 }
 
 void ManagerMotor_SendToMotors()
 {
-    for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
-    {
-        PeriphMotors_Move(&motors[i].motor, motors[i].nextPosition, 0, 0,
-                          motors[i].kp, motors[i].kd);
-    }
+#ifndef MMOT_DEV_MOTOR_1_DISABLE
+    PeriphMotors_Move(&motors[MMOT_MOTOR_1].motor,
+                      motors[MMOT_MOTOR_1].nextPosition, 0, 0,
+                      motors[MMOT_MOTOR_1].kp, motors[MMOT_MOTOR_1].kd);
+#endif
+#ifndef MMOT_DEV_MOTOR_2_DISABLE
+    PeriphMotors_Move(&motors[MMOT_MOTOR_2].motor,
+                      motors[MMOT_MOTOR_2].nextPosition, 0, 0,
+                      motors[MMOT_MOTOR_2].kp, motors[MMOT_MOTOR_2].kd);
+#endif
+#ifndef MMOT_DEV_MOTOR_3_DISABLE
+    PeriphMotors_Move(&motors[MMOT_MOTOR_3].motor,
+                      motors[MMOT_MOTOR_3].nextPosition, 0, 0,
+                      motors[MMOT_MOTOR_3].kp, motors[MMOT_MOTOR_3].kd);
+#endif
 }
 
-void ManagerMotor_VerifyMotorConnection()
+void ManagerMotor_VerifyMotorsConnection()
 {
-    for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
+    bool verifM1 = true;
+    bool verifM2 = true;
+    bool verifM3 = true;
+
+#ifndef MMOT_DEV_MOTOR_1_DISABLE
+    if (HAL_GetTick() - motors[MMOT_MOTOR_1].lastMsgTime > MMOT_MAX_MSG_DELAY)
     {
-        if (HAL_GetTick() - motors[i].lastMsgTime > MMOT_MAX_MSG_DELAY)
-        {
-            managerMotor.state     = MMOT_STATE_ERROR;
-            managerMotor.errorCode = ERROR_CAN_MAX_MSG_DELAY;
-        }
+        verifM1 = false;
+    }
+#endif
+
+#ifndef MMOT_DEV_MOTOR_2_DISABLE
+    if (HAL_GetTick() - motors[MMOT_MOTOR_2].lastMsgTime > MMOT_MAX_MSG_DELAY)
+    {
+        verifM2 = false;
+    }
+#endif
+
+#ifndef MMOT_DEV_MOTOR_3_DISABLE
+    if (HAL_GetTick() - motors[MMOT_MOTOR_3].lastMsgTime > MMOT_MAX_MSG_DELAY)
+    {
+        verifM3 = false;
+    }
+#endif
+
+    if (!verifM1 || !verifM2 || !verifM3)
+    {
+        managerMotor.state     = MMOT_STATE_ERROR;
+        managerMotor.errorCode = ERROR_CAN_MAX_MSG_DELAY;
     }
 }
 
-void ManagerMotor_VerifyMotorState()
+void ManagerMotor_VerifyMotorsState()
+{
+    bool verifM1 = true;
+    bool verifM2 = true;
+    bool verifM3 = true;
+
+#ifndef MMOT_DEV_MOTOR_1_DISABLE
+    verifM1 = ManagerMotor_VerifyMotorState(MMOT_MOTOR_1);
+#endif
+
+#ifndef MMOT_DEV_MOTOR_2_DISABLE
+    verifM2 = ManagerMotor_VerifyMotorState(MMOT_MOTOR_2);
+#endif
+
+#ifndef MMOT_DEV_MOTOR_3_DISABLE
+    verifM3 = ManagerMotor_VerifyMotorState(MMOT_MOTOR_3);
+#endif
+
+    if (!verifM1 || !verifM2 || !verifM3)
+    {
+        managerMotor.state     = MMOT_STATE_ERROR;
+        managerMotor.errorCode = ERROR_MOTOR_MINMAX;
+    }
+}
+
+bool ManagerMotor_VerifyMotorState(uint8_t motorIndex)
 {
     bool verif = true;
 
     if (managerMotor.state == MMOT_STATE_READY2MOVE)
     {
-        for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
+        if (motors[motorIndex].motor.velocity > MMOT_MOVING_MAX_SPEED ||
+            motors[motorIndex].motor.velocity < -MMOT_MOVING_MAX_SPEED)
         {
-            if (motors[i].motor.velocity > MMOT_MOVING_MAX_SPEED ||
-                motors[i].motor.velocity < -MMOT_MOVING_MAX_SPEED)
-            {
-                verif = false;
-                break;
-            }
+            verif = false;
+        }
 
-            if (motors[i].motor.torque > MMOT_MOVING_MAX_TORQUE ||
-                motors[i].motor.torque < -MMOT_MOVING_MAX_TORQUE)
-            {
-                verif = false;
-                break;
-            }
+        if (motors[motorIndex].motor.torque > MMOT_MOVING_MAX_TORQUE ||
+            motors[motorIndex].motor.torque < -MMOT_MOVING_MAX_TORQUE)
+        {
+            verif = false;
+        }
 
-            if (motors[i].motor.position > motorsMaxPos[i] ||
-                motors[i].motor.position < motorsMinPos[i])
-            {
-                verif = false;
-                break;
-            }
+        if (motors[motorIndex].motor.position > motorsMaxPos[motorIndex] ||
+            motors[motorIndex].motor.position < motorsMinPos[motorIndex])
+        {
+            verif = false;
         }
     }
 
     else
     {
-        for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
+        if (motors[motorIndex].motor.velocity > MMOT_IDLE_MAX_SPEED ||
+            motors[motorIndex].motor.velocity < -MMOT_IDLE_MAX_SPEED)
         {
-            if (motors[i].motor.velocity > MMOT_IDLE_MAX_SPEED ||
-                motors[i].motor.velocity < -MMOT_IDLE_MAX_SPEED)
-            {
-                verif = false;
-                break;
-            }
+            verif = false;
+        }
 
-            if (motors[i].motor.torque > MMOT_IDLE_MAX_TORQUE ||
-                motors[i].motor.torque < -MMOT_IDLE_MAX_TORQUE)
-            {
-                verif = false;
-                break;
-            }
+        if (motors[motorIndex].motor.torque > MMOT_IDLE_MAX_TORQUE ||
+            motors[motorIndex].motor.torque < -MMOT_IDLE_MAX_TORQUE)
+        {
+            verif = false;
         }
     }
 
-    if (!verif)
-    {
-        managerMotor.state     = MMOT_STATE_ERROR;
-        managerMotor.errorCode = ERROR_MOTOR_MINMAX;
-    }
+    return verif;
 }
 
 void ManagerMotor_SetMotorGoal(uint8_t motorIndex, float goal)

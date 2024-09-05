@@ -4,6 +4,13 @@
 #include "Periph_Motors.h"
 #include "main.h"
 
+/***********************************************/
+// Define to disable motor and bypass security
+//#define MMOT_DEV_MOTOR_1_DISABLE
+//#define MMOT_DEV_MOTOR_2_DISABLE
+//#define MMOT_DEV_MOTOR_3_DISABLE
+/***********************************************/
+
 #define MMOT_MOTOR_NBR 3
 #define MMOT_MOTOR_1   0
 #define MMOT_MOTOR_2   1
@@ -11,8 +18,6 @@
 
 #define MMOT_STATE_WAITING_SECURITY 1
 #define MMOT_STATE_START_MOTORS     2
-#define MMOT_STATE_DISABLE_MOVE_CMD 3
-#define MMOT_STATE_SET_ORIGIN       4
 #define MMOT_STATE_READY2MOVE       5
 #define MMOT_STATE_ERROR            6
 
