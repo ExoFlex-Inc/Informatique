@@ -137,6 +137,7 @@ function Profile() {
                             error={FieldError ? true : false}
                             label={shownInformation[key]}
                             size="small"
+                            inputProps={{ maxLength: 20}}
                             onKeyDown={(event) => {
                               if (event.key === "Enter") {
                                 event.preventDefault();

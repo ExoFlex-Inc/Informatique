@@ -143,6 +143,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
 
               <Box textAlign="center">
                 <Typography
+                  className="truncate p-2"
                   variant={isTablet ? "h3" : "h2"}
                   color={colors.grey[100]}
                   fontWeight="bold"
