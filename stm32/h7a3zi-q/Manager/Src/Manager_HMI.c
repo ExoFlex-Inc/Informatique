@@ -9,14 +9,15 @@
 #include "cJSON.h"
 
 #define SECTION_LENGTH                       20
-#define SECTION_NBR                          30
+#define SECTION_NBR                          150
 #define M_HMI_TIMER                          50
 #define M_HMI_STRING_LENGTH                  20
 #define M_HMI_MODE_SECTION                   0
 #define M_HMI_ACTION_SECTION                 1
 #define M_HMI_CONTENT_SECTION                2
-#define M_HMI_EXERCISE_SECTION_NBR           6
-#define M_HMI_CONTENT_FIRST_EXERCISE_SECTION 6
+#define M_HMI_EXERCISE_SECTION_NBR           14
+#define M_HMI_CONTENT_FIRST_EXERCISE_SECTION 12
+#define MVT_MAX                              3
 
 #define PI 3.1415926535
 
@@ -313,11 +314,49 @@ void ManagerHMI_ExecutePlanCmd(char* cmd, uint8_t size)
             {
                 uint8_t exNbr = size / M_HMI_EXERCISE_SECTION_NBR;
 
+                uint8_t mvtIdx = 0;
+
                 // Get exercise data
                 for (uint8_t i = 0; i < exNbr; i++)
                 {
-                    char* strExercise = cmd;
+                    uint8_t movements;
+                    uint8_t mvtNbr = atoi(cmd);
                     cmd += M_HMI_STRING_LENGTH;
+
+                    for (uint8_t j = 0; j < mvtNbr; j++)
+                    {
+                        char* strMvt = cmd;
+                        cmd += M_HMI_STRING_LENGTH;
+
+                        float pos = atof(cmd);
+                        cmd += M_HMI_STRING_LENGTH;
+
+                        float torque = atof(cmd);
+                        cmd += M_HMI_STRING_LENGTH;
+
+                        if (strcmp(strMvt, "Dorsiflexion") == 0)
+                        {
+                            movements = MMOV_DORSIFLEXION;
+                        }
+                        else if (strcmp(strMvt, "Eversion") == 0)
+                        {
+                            movements = MMOV_EVERSION;
+                        }
+                        else if (strcmp(strMvt, "Extension") == 0)
+                        {
+                            movements = MMOV_EXTENSION;
+                        }
+
+                        ManagerMovement_AddMouvement(
+                            mvtIdx, movements, ManagerHMI_Degrees2Radians(pos));
+                        mvtIdx++;
+
+                        if (j == mvtNbr - 1)
+                        {
+                            cmd +=
+                                M_HMI_STRING_LENGTH * (3 * (MVT_MAX - mvtNbr));
+                        }
+                    }
 
                     uint8_t rep = atoi(cmd);
                     cmd += M_HMI_STRING_LENGTH;
@@ -325,35 +364,15 @@ void ManagerHMI_ExecutePlanCmd(char* cmd, uint8_t size)
                     float rest = atof(cmd);
                     cmd += M_HMI_STRING_LENGTH;
 
-                    float pos = atof(cmd);
-                    cmd += M_HMI_STRING_LENGTH;
-
-                    float torque = atof(cmd);
-                    cmd += M_HMI_STRING_LENGTH;
-
                     float time = atof(cmd);
                     cmd += M_HMI_STRING_LENGTH;
 
-                    uint8_t exercise;
+                    float speed = atof(cmd);
+                    cmd += M_HMI_STRING_LENGTH;
 
-                    if (strcmp(strExercise, "Dorsiflexion") == 0)
-                    {
-                        exercise = MMOV_DORSIFLEXION;
-                    }
-                    else if (strcmp(strExercise, "Eversion") == 0)
-                    {
-                        exercise = MMOV_EVERSION;
-                    }
-                    else if (strcmp(strExercise, "Extension") == 0)
-                    {
-                        exercise = MMOV_EXTENSION;
-                    }
-
-                    ManagerMovement_AddExercise(i, exercise, rep,
-                                                ManagerHMI_Sec2Millis(time),
-                                                ManagerHMI_Sec2Millis(rest));
-                    ManagerMovement_SetFinalPos(
-                        i, ManagerHMI_Degrees2Radians(pos));
+                    ManagerMovement_AddExerciseInfo(
+                        i, mvtNbr, rep, ManagerHMI_Sec2Millis(time),
+                        ManagerHMI_Sec2Millis(rest));
                 }
             }
         }
