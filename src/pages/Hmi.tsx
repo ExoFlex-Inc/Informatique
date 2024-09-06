@@ -71,7 +71,7 @@ export default function HMI() {
         message += `;${set.repetitions};${set.rest};${set.time};${set.speed}`;
       });
       message += "}";
-      console.log("plan",message);
+      console.log("plan", message);
       socket.emit("planData", message);
     }
   }, [stm32Data, planData, socket]);
