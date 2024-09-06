@@ -69,7 +69,7 @@ export default function HMI() {
         message += `;${set.movement.length}`;
         for (var i = 1; i < 4; i++) {
           if (i <= set.movement.length) {
-            message += `;${exercise.exercise};${exercise.target_angle};${exercise.target_torque}`;
+            message += `;${set.movement[i].exercise};${set.movement[i].target_angle};${set.movement[i].target_torque}`;
           } else {
             message += `;${0};${0};${0}`;
           }
