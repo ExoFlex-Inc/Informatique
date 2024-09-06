@@ -288,7 +288,10 @@ export default function Activity() {
             >
               <Paper sx={{ width: "25vw" }}>
                 <div className="divide-x-2 flex divide-solid divide-gray-500 h-full">
-                  <Typography className="text-gray-500 p-2 content-center" variant="h5">
+                  <Typography
+                    className="text-gray-500 p-2 content-center"
+                    variant="h5"
+                  >
                     Missing exercise days
                   </Typography>
                   {missingDates.map((element, index) => (
@@ -312,12 +315,15 @@ export default function Activity() {
                 },
               })}
             >
-              <Paper sx={{ width: "25vw"}}>
+              <Paper sx={{ width: "25vw" }}>
                 <div className="divide-x-2 flex divide-solid divide-gray-500">
                   <Typography className="text-gray-500 p-2" variant="h5">
                     Maximum amplitude average in dates selection
                   </Typography>
-                  <Typography className="text-black p-3 content-center" variant="body1">
+                  <Typography
+                    className="text-black p-3 content-center"
+                    variant="body1"
+                  >
                     {averageAmplitude} degrees
                   </Typography>
                 </div>
@@ -327,10 +333,7 @@ export default function Activity() {
         )}
         {selectedPatient?.length !== 0 && date && graphType && (
           <div className="flex mr-4 justify-end">
-            <Button
-              className="!bg-blue-600"
-              variant="contained"
-            >
+            <Button className="!bg-blue-600" variant="contained">
               <PDFDownloadLink
                 document={
                   <Report
