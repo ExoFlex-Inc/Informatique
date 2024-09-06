@@ -58,17 +58,11 @@ export default function HMI() {
       planData &&
       socket
     ) {
-      let message = `{Auto;Plan;${planData.limits.left.angles.eversion};${planData.limits.right.angles.eversion};
-        ${planData.limits.left.angles.extension};${planData.limits.right.angles.extension};
-        ${planData.limits.left.angles.dorsiflexion};${planData.limits.right.angles.dorsiflexion};
-        ${planData.limits.left.torque.eversion};${planData.limits.right.torque.eversion};
-        ${planData.limits.left.torque.extension};${planData.limits.right.torque.extension};
-        ${planData.limits.left.torque.dorsiflexion};${planData.limits.right.torque.dorsiflexion}`;
-
+      let message = `{Auto;Plan;${planData.limits.left.angles.eversion};${planData.limits.right.angles.eversion};${planData.limits.left.angles.extension};${planData.limits.right.angles.extension};${planData.limits.left.angles.dorsiflexion};${planData.limits.right.angles.dorsiflexion};${planData.limits.left.torque.eversion};${planData.limits.right.torque.eversion};${planData.limits.left.torque.extension};${planData.limits.right.torque.extension};${planData.limits.left.torque.dorsiflexion};${planData.limits.right.torque.dorsiflexion}`;
       planData.plan.forEach((set) => {
         message += `;${set.movement.length}`;
-        for (var i = 1; i < 4; i++) {
-          if (i <= set.movement.length) {
+        for (var i = 0; i < 3; i++) {
+          if (i <= set.movement.length - 1) {
             message += `;${set.movement[i].exercise};${set.movement[i].target_angle};${set.movement[i].target_torque}`;
           } else {
             message += `;${0};${0};${0}`;
@@ -76,7 +70,8 @@ export default function HMI() {
         }
         message += `;${set.repetitions};${set.rest};${set.time};${set.speed}`;
       });
-      message += ";}";
+      message += "}";
+      console.log("plan",message);
       socket.emit("planData", message);
     }
   }, [stm32Data, planData, socket]);

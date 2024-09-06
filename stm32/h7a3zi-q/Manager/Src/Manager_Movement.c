@@ -94,7 +94,7 @@ void ManagerMovement_HomingDorsiflexion();
 void ManagerMovement_RestPos();
 
 // General movement functions
-bool  ManagerMovement_GoToPos(uint8_t exerciseId, int8_t pos);
+bool  ManagerMovement_GoToPos(uint8_t exerciseId, float pos);
 void  ManagerMovement_AutoMovement(uint8_t mouvType, float Position);
 void  ManagerMovement_SetFirstPos(uint8_t exerciseIdx);
 float ManagerMovement_GetMiddlePos(float leftPos, float rightPos);
@@ -186,7 +186,7 @@ void ManagerMovement_WaitingSecurity()
 {
     if (managerMovement.securityPass)
     {
-        managerMovement.state = MMOV_STATE_MANUAL;
+        managerMovement.state = MMOV_STATE_HOMING;
     }
 }
 
@@ -498,6 +498,8 @@ void ManagerMovement_AutoReady()
         if (repsCount >= repetitions[exerciseIdx] && !buttonStartReset)
         {
             startButton      = false;
+            movementIdx += mvtNbr[exerciseIdx];
+
             buttonStartReset = true;
         }
         // Waiting for button Start on HMI
@@ -585,7 +587,7 @@ void ManagerMovement_Auto2FirstPos()
 	 * Once the positions are reached, movementIdx is incremented to the last movement done, the flags are reset,
 	 * and the state is changed.
 	 */
-	if (!pos1Reached && mvtNbr[exerciseIdx] >= 3)
+	if (!pos3Reached && mvtNbr[exerciseIdx] >= 3)
 	{
 		if(ManagerMovement_GoToPos(movements[movementIdx], firstPos[2]))
 		{
@@ -601,7 +603,7 @@ void ManagerMovement_Auto2FirstPos()
 			movementIdx--;
 		}
 	}
-	else if (!pos3Reached && mvtNbr[exerciseIdx] >= 1)
+	else if (!pos1Reached && mvtNbr[exerciseIdx] >= 1)
 	{
 		if(ManagerMovement_GoToPos(movements[movementIdx], firstPos[0]))
 		{
@@ -638,7 +640,7 @@ void ManagerMovement_AutoRest()
 void ManagerMovement_AutoStop()
 {
     // Go to first pos
-	if (!pos1Reached && mvtNbr[exerciseIdx] >= 3)
+	if (!pos3Reached && mvtNbr[exerciseIdx] >= 3)
 	{
 		if(ManagerMovement_GoToPos(movements[movementIdx], firstPos[2]))
 		{
@@ -654,7 +656,7 @@ void ManagerMovement_AutoStop()
 			movementIdx--;
 		}
 	}
-	else if (!pos3Reached && mvtNbr[exerciseIdx] >= 1)
+	else if (!pos1Reached && mvtNbr[exerciseIdx] >= 1)
 	{
 		if(ManagerMovement_GoToPos(movements[movementIdx], firstPos[0]))
 		{
@@ -677,10 +679,6 @@ void ManagerMovement_AutoStop()
 			exerciseIdx = 0;
 			movementIdx = 0;
 			repsCount   = 0;
-		}
-		else //Increment the movementIdx to the next setof movements
-		{
-			movementIdx += mvtNbr[exerciseIdx];
 		}
 
 		managerMovement.autoState = MMOV_AUTO_STATE_READY;
@@ -828,7 +826,7 @@ void ManagerMovement_SetOrigins(uint8_t motorIndex)
     managerMovement.motorsNextGoal[motorIndex] = 0.0f;
 }
 
-bool ManagerMovement_GoToPos(uint8_t exerciseId, int8_t pos)
+bool ManagerMovement_GoToPos(uint8_t exerciseId, float pos)
 {
     bool posReached = false;
 
