@@ -55,9 +55,10 @@ autoPlanInfo_t* ManagerMovement_GetPlanData();
 bool            ManagerMovement_SetState(uint8_t newState);
 
 // Auto Setup
-void ManagerMovement_AddExercise(uint8_t exerciseIdx, uint8_t exerciseType,
-                                 uint8_t reps, float eTime, float pTime);
-void ManagerMovement_SetFinalPos(uint8_t exerciseIdx, float finalPosition);
+void ManagerMovement_AddExerciseInfo(uint8_t exerciseIdx, uint8_t moveNbr,
+                                     uint8_t reps, float eTime, float pTime);
+void ManagerMovement_AddMouvement(uint8_t mvtIdx, uint8_t movementType,
+                                  float finalPosition);
 bool ManagerMovement_ResetExercise();
 
 // Auto buttons

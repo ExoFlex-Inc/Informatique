@@ -38,7 +38,7 @@ const LineChart: React.FC<LineChartProps> = ({
   setChartImage,
 }) => {
   const [graphPause, setGraphPause] = useState(false);
-  const [graphDataIsPosition, setGraphDataIsPosition] = useState(true);
+  const [graphDataType, setGraphDataIsType] = useState("position");
 
   const chartRef = useRef<Chart<"line"> | null>(null);
 
@@ -70,7 +70,12 @@ const LineChart: React.FC<LineChartProps> = ({
           },
           y: {
             min: 0,
-            max: graphDataIsPosition ? 180 : 48,
+            max:
+              graphDataType == "position"
+                ? 180
+                : graphDataType == "torque"
+                  ? 48
+                  : 15,
           },
         },
       };
@@ -136,9 +141,12 @@ const LineChart: React.FC<LineChartProps> = ({
                     ) => {
                       dataset.data.push({
                         x: Date.now(),
-                        y: graphDataIsPosition
-                          ? message.Positions[index]
-                          : message.Torques[index],
+                        y:
+                          graphDataType == "position"
+                            ? message.Positions[index]
+                            : graphDataType == "torque"
+                              ? message.Torques[index]
+                              : message.Current[index],
                       });
                     },
                   );
@@ -146,8 +154,18 @@ const LineChart: React.FC<LineChartProps> = ({
               },
             },
             y: {
-              min: graphDataIsPosition ? -65 : 0,
-              max: graphDataIsPosition ? 65 : 48,
+              min:
+                graphDataType == "position"
+                  ? -65
+                  : graphDataType == "torque"
+                    ? 0
+                    : 0,
+              max:
+                graphDataType == "position"
+                  ? 65
+                  : graphDataType == "torque"
+                    ? 48
+                    : 15,
             },
           },
         }));
@@ -157,7 +175,7 @@ const LineChart: React.FC<LineChartProps> = ({
         socket.off("stm32Data");
       };
     }
-  }, [socket?.connected, graphDataIsPosition]);
+  }, [socket?.connected, graphDataType]);
 
   useEffect(() => {
     setChartOptions((prevOptions: any) => ({
@@ -221,19 +239,29 @@ const LineChart: React.FC<LineChartProps> = ({
               <label>Position</label>
               <input
                 type="checkbox"
-                checked={graphDataIsPosition}
+                checked={graphDataType == "position"}
                 onChange={() => {
-                  setGraphDataIsPosition(!graphDataIsPosition);
+                  setGraphDataIsType("position");
+                }}
+              />
+            </div>
+            <div className="flex mr-4">
+              <label>Torque</label>
+              <input
+                type="checkbox"
+                checked={graphDataType == "torque"}
+                onChange={() => {
+                  setGraphDataIsType("torque");
                 }}
               />
             </div>
             <div className="flex">
-              <label>Torque</label>
+              <label>Current</label>
               <input
                 type="checkbox"
-                checked={!graphDataIsPosition}
+                checked={graphDataType == "current"}
                 onChange={() => {
-                  setGraphDataIsPosition(!graphDataIsPosition);
+                  setGraphDataIsType("current");
                 }}
               />
             </div>

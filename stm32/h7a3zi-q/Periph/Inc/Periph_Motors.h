@@ -31,6 +31,8 @@ typedef struct
 
     float kdMin;
     float kdMax;
+
+    float kt;
 } MotorParameters;
 
 typedef struct
@@ -39,6 +41,7 @@ typedef struct
     float           position;
     float           velocity;
     float           torque;
+    float           current;
     MotorParameters parameters;
 } Motor;
 

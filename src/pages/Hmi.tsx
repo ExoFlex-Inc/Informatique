@@ -6,6 +6,7 @@ import usePlanData from "../hooks/get-plan.ts";
 import useStm32 from "../hooks/use-stm32.ts";
 
 import { useMediaQuery, useTheme } from "@mui/material";
+import { useUserProfile } from "../hooks/use-profile.ts";
 
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
@@ -27,7 +28,8 @@ interface ChartData {
 }
 
 export default function HMI() {
-  const { planData } = usePlanData();
+  const { profile } = useUserProfile();
+  const { planData } = usePlanData(profile);
   const { stm32Data, socket, errorFromStm32 } = useStm32();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -56,11 +58,20 @@ export default function HMI() {
       planData &&
       socket
     ) {
-      let message = `{Auto;Plan;${planData.limits.angles.eversion};${planData.limits.angles.extension};${planData.limits.angles.dorsiflexion};${planData.limits.torque.eversion};${planData.limits.torque.extension};${planData.limits.torque.dorsiflexion}`;
-      planData.plan.forEach((exercise) => {
-        message += `;${exercise.exercise};${exercise.repetitions};${exercise.rest};${exercise.target_angle};${exercise.target_torque};${exercise.time}`;
+      let message = `{Auto;Plan;${planData.limits.left.angles.eversion};${planData.limits.right.angles.eversion};${planData.limits.left.angles.extension};${planData.limits.right.angles.extension};${planData.limits.left.angles.dorsiflexion};${planData.limits.right.angles.dorsiflexion};${planData.limits.left.torque.eversion};${planData.limits.right.torque.eversion};${planData.limits.left.torque.extension};${planData.limits.right.torque.extension};${planData.limits.left.torque.dorsiflexion};${planData.limits.right.torque.dorsiflexion}`;
+      planData.plan.forEach((set) => {
+        message += `;${set.movement.length}`;
+        for (var i = 0; i < 3; i++) {
+          if (i <= set.movement.length - 1) {
+            message += `;${set.movement[i].exercise};${set.movement[i].target_angle};${set.movement[i].target_torque}`;
+          } else {
+            message += `;${0};${0};${0}`;
+          }
+        }
+        message += `;${set.repetitions};${set.rest};${set.time};${set.speed}`;
       });
-      message += ";}";
+      message += "}";
+      console.log("plan", message);
       socket.emit("planData", message);
     }
   }, [stm32Data, planData, socket]);

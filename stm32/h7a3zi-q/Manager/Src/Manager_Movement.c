@@ -9,7 +9,8 @@
 
 #define MMOV_REST_POS -1
 
-#define MAX_EXERCISES 5
+#define MAX_EXERCISES 10
+#define MAX_MOVEMENT  3
 
 typedef struct
 {
@@ -30,7 +31,12 @@ static const Motor* motorsData[MMOT_MOTOR_NBR];
 
 // Auto setup
 uint8_t exerciseIdx;
+uint8_t movementIdx;
 uint8_t repsCount;
+
+bool pos1Reached;
+bool pos2Reached;
+bool pos3Reached;
 
 // Limit switch Hit
 bool dorUpLimitHit;
@@ -45,12 +51,13 @@ bool buttonStartReset;
 float leftPos;
 float rightPos;
 
-uint8_t exercises[MAX_EXERCISES];
+uint8_t movements[MAX_EXERCISES];
 uint8_t repetitions[MAX_EXERCISES];
+uint8_t mvtNbr[MAX_EXERCISES];
 float   exercisesTime[MAX_EXERCISES];
 float   pauseTime[MAX_EXERCISES];
 float   finalPos[MAX_EXERCISES];
-float   firstPos[MAX_EXERCISES];
+float   firstPos[MAX_MOVEMENT];
 
 bool            commandSent;
 static uint32_t exerciseTimer = 0;
@@ -86,7 +93,7 @@ void ManagerMovement_HomingDorsiflexion();
 void ManagerMovement_RestPos();
 
 // General movement functions
-bool  ManagerMovement_GoToPos(uint8_t exerciseId, int8_t pos);
+bool  ManagerMovement_GoToPos(uint8_t exerciseId, float pos);
 void  ManagerMovement_AutoMovement(uint8_t mouvType, float Position);
 void  ManagerMovement_SetFirstPos(uint8_t exerciseIdx);
 float ManagerMovement_GetMiddlePos(float leftPos, float rightPos);
@@ -104,16 +111,17 @@ void ManagerMovement_Reset()
     {
         motorsData[i]                     = ManagerMotor_GetMotorData(i);
         managerMovement.motorsNextGoal[i] = 0.0f;
+
+        firstPos[i] = 0.0f;
     }
 
     // Init exercises tables
     for (uint8_t i = 0; i < MAX_EXERCISES; i++)
     {
         finalPos[i] = 0.0f;
-        firstPos[i] = 0.0f;
 
-        exercises[i]     = 0;
         repetitions[i]   = 0;
+        mvtNbr[i]        = 0;
         exercisesTime[i] = 0.0f;
         pauseTime[i]     = 0.0f;
     }
@@ -123,10 +131,15 @@ void ManagerMovement_Reset()
     stopButton  = false;
 
     exerciseIdx = 0;
+    movementIdx = 0;
     repsCount   = 0;
 
     commandSent      = false;
     buttonStartReset = false;
+
+    pos1Reached = false;
+    pos2Reached = false;
+    pos3Reached = false;
 
     // Init modes' states
     managerMovement.reset        = false;
@@ -394,13 +407,20 @@ void ManagerMovement_AutoMovement(uint8_t mouvType, float Position)
 /*
  * Auto setup
  */
-void ManagerMovement_AddExercise(uint8_t exerciseIdx, uint8_t exerciseType,
-                                 uint8_t reps, float eTime, float pTime)
+void ManagerMovement_AddExerciseInfo(uint8_t exerciseIdx, uint8_t moveNbr,
+                                     uint8_t reps, float eTime, float pTime)
 {
-    exercises[exerciseIdx]     = exerciseType;
+    mvtNbr[exerciseIdx]        = moveNbr;
     repetitions[exerciseIdx]   = reps;
     exercisesTime[exerciseIdx] = eTime;
     pauseTime[exerciseIdx]     = pTime;
+}
+
+void ManagerMovement_AddMouvement(uint8_t mvtIdx, uint8_t movementType,
+                                  float finalPosition)
+{
+    movements[mvtIdx] = movementType;
+    finalPos[mvtIdx]  = finalPosition;
 }
 
 bool ManagerMovement_ResetExercise()
@@ -410,7 +430,6 @@ bool ManagerMovement_ResetExercise()
     {
         for (uint8_t i = 0; i < MAX_EXERCISES; i++)
         {
-            exercises[i]     = 0;
             repetitions[i]   = 0;
             exercisesTime[i] = 0.0f;
             finalPos[i]      = 0.0f;
@@ -420,11 +439,6 @@ bool ManagerMovement_ResetExercise()
         reset                     = true;
     }
     return reset;
-}
-
-void ManagerMovement_SetFinalPos(uint8_t exerciseIdx, float finalPosition)
-{
-    finalPos[exerciseIdx] = finalPosition;
 }
 
 void ManagerMovement_StartExercise()
@@ -442,19 +456,21 @@ void ManagerMovement_StopExercise()
     stopButton = true;
 }
 
-void ManagerMovement_SetFirstPos(uint8_t exerciseIdx)
+void ManagerMovement_SetFirstPos(uint8_t mvtNbr)
 {
-    if (exercises[exerciseIdx] == MMOV_DORSIFLEXION ||
-        exercises[exerciseIdx] == MMOV_EVERSION)
+    // Sets an array of the first position of each movements for all the reps,
+    // so the array has max 3 values and is overwritten each sets
+    for (uint8_t i = 0; i < mvtNbr; i++)
     {
-        firstPos[exerciseIdx] =
-            motorsData[MMOT_MOTOR_1]
-                ->position;  // Set first position for exercies
-                             // idx to the initial position
-    }
-    else if (exercises[exerciseIdx] == MMOV_EXTENSION)
-    {
-        firstPos[exerciseIdx] = motorsData[MMOT_MOTOR_3]->position;
+        if (movements[i + movementIdx] == MMOV_DORSIFLEXION ||
+            movements[i + movementIdx] == MMOV_EVERSION)
+        {
+            firstPos[i] = motorsData[MMOT_MOTOR_1]->position;
+        }
+        else if (movements[i + movementIdx] == MMOV_EXTENSION)
+        {
+            firstPos[i] = motorsData[MMOT_MOTOR_3]->position;
+        }
     }
 }
 
@@ -463,7 +479,7 @@ void ManagerMovement_SetFirstPos(uint8_t exerciseIdx)
  */
 void ManagerMovement_Waiting4Plan()
 {
-    if (exercises[0] != 0)
+    if (movements[0] != 0)
     {
         managerMovement.autoState = MMOV_AUTO_STATE_READY;
     }
@@ -471,20 +487,22 @@ void ManagerMovement_Waiting4Plan()
 
 void ManagerMovement_AutoReady()
 {
-    // Waiting for button next and or start
-    if (exercises[exerciseIdx] == 0 || exerciseIdx == MAX_EXERCISES)
+    // Verify if the plan as good values
+    if (mvtNbr[exerciseIdx] == 0 || exerciseIdx == MAX_EXERCISES)
     {
         managerMovement.autoState = MMOV_AUTO_STATE_STOP;
     }
     else
     {
+        // Stops the start cmd if reps are over
         if (repsCount >= repetitions[exerciseIdx] && !buttonStartReset)
         {
-            startButton      = false;
+            startButton = false;
+            movementIdx += mvtNbr[exerciseIdx];
+
             buttonStartReset = true;
         }
-
-        // Set the position that the exercise is starting
+        // Waiting for button Start on HMI
         if (startButton)
         {
             if (repsCount >= repetitions[exerciseIdx])
@@ -495,7 +513,8 @@ void ManagerMovement_AutoReady()
 
             if (repsCount == 0)
             {
-                ManagerMovement_SetFirstPos(exerciseIdx);
+                // Set the position that the exercise is starting
+                ManagerMovement_SetFirstPos(mvtNbr[exerciseIdx]);
             }
             buttonStartReset          = false;
             managerMovement.autoState = MMOV_AUTO_STATE_2GOAL;
@@ -505,10 +524,49 @@ void ManagerMovement_AutoReady()
 
 void ManagerMovement_Auto2Goal()
 {
-    if (ManagerMovement_GoToPos(exercises[exerciseIdx], finalPos[exerciseIdx]))
+    /* The machine executes the series of mvtNbr movement for the specified
+     * exercises. Depending on the mvtNbr, one, two or three movement can be
+     * executed. Once the positions are reached, movementIdx is decremented to
+     * the last movement done, the flags are reset, and the state is changed.
+     */
+
+    if (!pos1Reached && mvtNbr[exerciseIdx] >= 1)
+    {
+        if (ManagerMovement_GoToPos(movements[movementIdx],
+                                    finalPos[movementIdx]))
+        {
+            pos1Reached = true;
+            movementIdx++;
+        }
+    }
+    else if (!pos2Reached && mvtNbr[exerciseIdx] >= 2)
+    {
+        if (ManagerMovement_GoToPos(movements[movementIdx],
+                                    finalPos[movementIdx]))
+        {
+            pos2Reached = true;
+            movementIdx++;
+        }
+    }
+    else if (!pos3Reached && mvtNbr[exerciseIdx] >= 3)
+    {
+        if (ManagerMovement_GoToPos(movements[movementIdx],
+                                    finalPos[movementIdx]))
+        {
+            pos3Reached = true;
+            movementIdx++;
+        }
+    }
+    else
     {
         managerMovement.autoState = MMOV_AUTO_STATE_STRETCHING;
         exerciseTimer             = HAL_GetTick();
+
+        pos1Reached = false;
+        pos2Reached = false;
+        pos3Reached = false;
+
+        movementIdx--;
     }
 }
 
@@ -528,10 +586,45 @@ void ManagerMovement_AutoStrectching()
 
 void ManagerMovement_Auto2FirstPos()
 {
-    if (ManagerMovement_GoToPos(exercises[exerciseIdx], firstPos[exerciseIdx]))
+    /* The machine executes the same series of position, but in reverse and
+     * going back to the firstPos. Once the positions are reached, movementIdx
+     * is incremented to the last movement done, the flags are reset, and the
+     * state is changed.
+     */
+    if (!pos3Reached && mvtNbr[exerciseIdx] >= 3)
+    {
+        if (ManagerMovement_GoToPos(movements[movementIdx], firstPos[2]))
+        {
+            pos3Reached = true;
+            movementIdx--;
+        }
+    }
+    else if (!pos2Reached && mvtNbr[exerciseIdx] >= 2)
+    {
+        if (ManagerMovement_GoToPos(movements[movementIdx], firstPos[1]))
+        {
+            pos2Reached = true;
+            movementIdx--;
+        }
+    }
+    else if (!pos1Reached && mvtNbr[exerciseIdx] >= 1)
+    {
+        if (ManagerMovement_GoToPos(movements[movementIdx], firstPos[0]))
+        {
+            pos1Reached = true;
+            movementIdx--;
+        }
+    }
+    else
     {
         managerMovement.autoState = MMOV_AUTO_STATE_REST;
         pauseTimer                = HAL_GetTick();
+
+        pos1Reached = false;
+        pos2Reached = false;
+        pos3Reached = false;
+
+        movementIdx++;
     }
 }
 
@@ -550,12 +643,45 @@ void ManagerMovement_AutoRest()
 
 void ManagerMovement_AutoStop()
 {
-    // go to first pos
-    if (ManagerMovement_GoToPos(exercises[exerciseIdx], firstPos[exerciseIdx]))
+    // Go to first pos
+    if (!pos3Reached && mvtNbr[exerciseIdx] >= 3)
     {
-        if (exercises[exerciseIdx] == 0 || stopButton)
+        if (ManagerMovement_GoToPos(movements[movementIdx], firstPos[2]))
+        {
+            pos3Reached = true;
+            movementIdx--;
+        }
+    }
+    else if (!pos2Reached && mvtNbr[exerciseIdx] >= 2)
+    {
+        if (ManagerMovement_GoToPos(movements[movementIdx], firstPos[1]))
+        {
+            pos2Reached = true;
+            movementIdx--;
+        }
+    }
+    else if (!pos1Reached && mvtNbr[exerciseIdx] >= 1)
+    {
+        if (ManagerMovement_GoToPos(movements[movementIdx], firstPos[0]))
+        {
+            pos1Reached = true;
+            movementIdx--;
+        }
+    }
+    else
+    {
+        // Resets everything like in Auto2FirstPos()
+        movementIdx++;
+
+        pos1Reached = false;
+        pos2Reached = false;
+        pos3Reached = false;
+
+        // Reset the counter if exercises are done or if stop command on the HMI
+        if (mvtNbr[exerciseIdx] == 0 || stopButton)
         {
             exerciseIdx = 0;
+            movementIdx = 0;
             repsCount   = 0;
         }
 
@@ -704,7 +830,7 @@ void ManagerMovement_SetOrigins(uint8_t motorIndex)
     managerMovement.motorsNextGoal[motorIndex] = 0.0f;
 }
 
-bool ManagerMovement_GoToPos(uint8_t exerciseId, int8_t pos)
+bool ManagerMovement_GoToPos(uint8_t exerciseId, float pos)
 {
     bool posReached = false;
 
