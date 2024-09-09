@@ -30,7 +30,7 @@ export default function Manual() {
   };
 
   return (
-    <div className="flex flex-col custom-height">
+    <div className="flex flex-col custom-height overflow-auto">
       <div className="justify-center flex mb-10">
         <LineChart
           chartData={manualData}
@@ -39,7 +39,7 @@ export default function Manual() {
           socket={socket}
         />
       </div>
-      <div className="flex justify-center h-80">
+      <div className="flex justify-center h-80 mb-4">
         <MotorControlWidget
           title={"Motor Control"}
           icon={<ComputerRoundedIcon sx={{ fontSize: "56px" }} />}

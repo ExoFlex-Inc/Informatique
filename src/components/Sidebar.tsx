@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 
 import { useNavigate } from "react-router-dom";
-import { tokens } from "../../hooks/theme.ts";
+import { tokens } from "../hooks/theme.ts";
 
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
@@ -18,9 +18,9 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import FeedOutlinedIcon from "@mui/icons-material/FeedOutlined";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import GroupIcon from "@mui/icons-material/Group";
-import Icon from "../../../public/assets/user.png";
+import Icon from "../../public/assets/user.png";
 import { Avatar } from "@mui/material";
-import { useUserProfile } from "../../hooks/use-profile.ts";
+import { useUserProfile } from "../hooks/use-profile.ts";
 
 interface ProSidebarProps {
   permissions: string;

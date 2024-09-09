@@ -1,5 +1,5 @@
 import { useContext, useState, useRef, useEffect } from "react";
-import { ColorModeContext, tokens } from "../../hooks/theme.ts";
+import { ColorModeContext, tokens } from "../hooks/theme.ts";
 
 import {
   Box,
@@ -21,14 +21,14 @@ import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
-import Icon from "../../../public/assets/user.png";
+import Icon from "../../public/assets/user.png";
 
-import Notification from "../../components/Notification.tsx";
+import Notification from "./Notification.tsx";
 
-import Login from "../../components/Login.tsx";
+import Login from "./Login.tsx";
 import { useNavigate } from "react-router-dom";
-import { useSupabaseSession } from "../../hooks/use-session.ts";
-import { useUserProfile } from "../../hooks/use-profile.ts";
+import { useSupabaseSession } from "../hooks/use-session.ts";
+import { useUserProfile } from "../hooks/use-profile.ts";
 
 export default function TopBar() {
   const { session } = useSupabaseSession();
