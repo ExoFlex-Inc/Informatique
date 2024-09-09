@@ -80,7 +80,7 @@ function AppLayout() {
   return (
     <>
       {session && profile && <ProSideBar permissions={profile.permissions} />}
-      <main className="content">
+      <main className="content overflow-hidden">
         <TopBar />
         <Outlet />
       </main>
