@@ -1,7 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSupabaseSession } from "../hooks/use-session";
-import { useEffect } from "react";
-
 export interface UserProfile {
   first_name: string;
   last_name: string;
@@ -27,14 +25,26 @@ export function useUserProfile() {
         throw new Error("No userId available");
       }
 
-      const response = await fetch(`http://localhost:3001/user/${userId}`);
+      // Fetch the profile data
+      const profileResponse = await fetch(`http://localhost:3001/user/${userId}`);
+      if (!profileResponse.ok) {
+        throw new Error(`Error fetching user profile: ${profileResponse.statusText}`);
+      }
+      const profileData = await profileResponse.json();
 
-      if (!response.ok) {
-        throw new Error(`Error fetching user profile: ${response.statusText}`);
+      // Fetch the avatar if it exists
+      if (profileData.avatar_url) {
+        const avatarResponse = await fetch(
+          `http://localhost:3001/user/avatar/${userId}?path=${encodeURIComponent(profileData.avatar_url)}`
+        );
+        if (avatarResponse.ok) {
+          const avatarBlob = await avatarResponse.blob();
+          const avatarUrl = URL.createObjectURL(avatarBlob);
+          profileData.avatar_url = avatarUrl;
+        }
       }
 
-      const data = await response.json();
-      return data;
+      return profileData;
     },
     enabled: !!userId,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -64,6 +74,7 @@ export function useUserProfile() {
           ["userProfile", updatedProfile.user_id],
           updatedProfile,
         );
+        queryClient.invalidateQueries(["userProfile", updatedProfile.user_id]);
       }
     },
   });
@@ -72,7 +83,7 @@ export function useUserProfile() {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append("avatar", file);
-
+  
       const response = await fetch(
         `http://localhost:3001/user/avatar/${userId}`,
         {
@@ -80,11 +91,11 @@ export function useUserProfile() {
           body: formData,
         },
       );
-
+  
       if (!response.ok) {
         throw new Error(`Error uploading avatar image: ${response.statusText}`);
       }
-
+  
       const data = await response.json();
       return data.avatar_url;
     },
@@ -94,39 +105,11 @@ export function useUserProfile() {
           ...profile,
           avatar_url: avatarUrl,
         });
+        queryClient.invalidateQueries(["userProfile", userId]);
       }
     },
     onError: (error: any) => {
       console.error("Error uploading avatar image:", error.message);
-    },
-  });
-
-  const downloadAvatarMutation = useMutation({
-    mutationFn: async (path: string) => {
-      const response = await fetch(
-        `http://localhost:3001/user/avatar/${userId}?path=${encodeURIComponent(path)}`,
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          `Error downloading avatar image: ${response.statusText}`,
-        );
-      }
-
-      const blob = await response.blob();
-      return URL.createObjectURL(blob);
-    },
-    onSuccess: (url, variables) => {
-      queryClient.setQueryData(["avatarUrl", variables], url);
-      if (profile) {
-        queryClient.setQueryData(["userProfile", userId], {
-          ...profile,
-          avatar_url: url,
-        });
-      }
-    },
-    onError: (error: any) => {
-      console.error("Error downloading avatar image:", error.message);
     },
   });
 
@@ -144,23 +127,12 @@ export function useUserProfile() {
     uploadAvatarMutation.mutate(file);
   };
 
-  const downloadAvatar = (path: string) => {
-    downloadAvatarMutation.mutate(path);
-  };
-
-  useEffect(() => {
-    if (profile?.avatar_url) {
-      downloadAvatar(profile.avatar_url);
-    }
-  }, [profile?.avatar_url]);
-
   return {
     profile,
     isLoading,
     error,
     updateProfile,
     setUserProfile,
-    uploadAvatar,
-    downloadAvatar,
+    uploadAvatar
   };
 }

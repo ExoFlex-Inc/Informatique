@@ -12,7 +12,7 @@ import {
   ThemeProvider,
   ListItemText,
   Paper,
-  TextField,
+  TextField
 } from "@mui/material";
 import { styled } from "@mui/material";
 import DefaultProfilePic from "../../public/assets/user.png";
@@ -21,6 +21,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import { useUserProfile } from "../hooks/use-profile.ts";
+import Loading from "../components/Loading.tsx";
 
 function Profile() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -28,7 +29,7 @@ function Profile() {
   const [fieldInput, setFieldInput] = useState("");
   const [editIndex, setEditIndex] = useState<Number | null>(null);
 
-  const { profile, updateProfile, uploadAvatar } = useUserProfile();
+  const { profile, updateProfile, uploadAvatar, isLoading } = useUserProfile();
 
   function toggleEdit(index: Number) {
     setEditIndex(index === editIndex ? null : index);
@@ -66,7 +67,6 @@ function Profile() {
       uploadAvatar(file);
     }
   };
-
   const onInputSubmit = async (key: string) => {
     if (fieldInput.length === 0) {
       setFieldError(true);
@@ -88,6 +88,12 @@ function Profile() {
     setEditIndex(null);
     setFieldError(false);
   };
+
+  if (isLoading) {
+    return (
+      <Loading />
+    );
+  }
 
   return (
     <div className="flex">

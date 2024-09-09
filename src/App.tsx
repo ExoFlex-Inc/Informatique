@@ -7,27 +7,28 @@ import {
   RouterProvider,
   useNavigate,
 } from "react-router-dom";
-import { ColorModeContext, useMode } from "./hooks/theme";
+import { ColorModeContext, useMode } from "./hooks/theme.ts";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import "./App.css";
 
-import Dashboard from "./pages/Dashboard";
-import ProfessionalNetwork from "./pages/ProfessionalNetwork";
-import { Welcome, welcomeLoader } from "./pages/Welcome";
-import HMI from "./pages/Hmi";
-import Activity from "./pages/Activity";
-import Recovery from "./pages/Recovery";
-import Manual from "./pages/Manual";
-import TermsAndConditions from "./pages/TermsAndConditions";
-import Settings from "./pages/Settings";
-import Planning from "./pages/Planning";
-import WellnessNetwork from "./pages/WellnessNetwork";
-import TopBar from "./pages/global/TopBar";
-import ProSideBar from "./pages/global/Sidebar";
-import Profile from "./pages/Profile";
+import Dashboard from "./pages/Dashboard.tsx";
+import ProfessionalNetwork from "./pages/ProfessionalNetwork.tsx";
+import { Welcome, welcomeLoader } from "./pages/Welcome.tsx";
+import HMI from "./pages/Hmi.tsx";
+import Activity from "./pages/Activity.tsx";
+import Recovery from "./pages/Recovery.tsx";
+import Manual from "./pages/Manual.tsx";
+import TermsAndConditions from "./pages/TermsAndConditions.tsx";
+import Settings from "./pages/Settings.tsx";
+import Planning from "./pages/Planning.tsx";
+import WellnessNetwork from "./pages/WellnessNetwork.tsx";
+import Profile from "./pages/Profile.tsx";
 import Forbidden from "./pages/Forbidden.tsx";
 
-import PrivateRoutes from "./components/PrivateRoutes";
+import PrivateRoutes from "./components/PrivateRoutes.tsx";
+import Loading from "./components/Loading.tsx";
+import ProSideBar from "./components/Sidebar.tsx";
+import TopBar from "./components/TopBar.tsx";
 
 import useVisibilityChange from "./hooks/use-visibility-change.ts";
 
@@ -67,15 +68,19 @@ const router = createBrowserRouter(
 );
 
 function AppLayout() {
-  const { session } = useSupabaseSession();
-  const { profile } = useUserProfile();
   const navigate = useNavigate();
+  const { session, isLoading: isSessionLoading } = useSupabaseSession();
+  const { profile, isLoading: isProfileLoading } = useUserProfile();
 
   useEffect(() => {
-    if (!session || !profile) {
-      navigate("/");
+    if (!isSessionLoading && !isProfileLoading && (!session || !profile)) {
+      navigate("/"); 
     }
-  }, [session, profile, navigate]);
+  }, [isSessionLoading, isProfileLoading, session, profile, navigate]);
+
+  if (isSessionLoading || isProfileLoading) {
+    return <Loading />;
+  }
 
   return (
     <>
