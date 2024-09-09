@@ -156,7 +156,9 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
 
               <Box textAlign="center">
                 <Typography
-                  className={profile?.first_name.length < 15 ? 'text-4xl' : 'text-xl'}
+                  className={
+                    profile?.first_name.length < 15 ? "text-4xl" : "text-xl"
+                  }
                   variant={isTablet ? "h3" : "h2"}
                   color={colors.grey[100]}
                   fontWeight="bold"
