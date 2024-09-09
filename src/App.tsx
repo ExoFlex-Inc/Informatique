@@ -74,7 +74,7 @@ function AppLayout() {
 
   useEffect(() => {
     if (!isSessionLoading && !isProfileLoading && (!session || !profile)) {
-      navigate("/"); 
+      navigate("/");
     }
   }, [isSessionLoading, isProfileLoading, session, profile, navigate]);
 

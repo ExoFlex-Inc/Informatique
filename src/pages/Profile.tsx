@@ -12,7 +12,7 @@ import {
   ThemeProvider,
   ListItemText,
   Paper,
-  TextField
+  TextField,
 } from "@mui/material";
 import { styled } from "@mui/material";
 import DefaultProfilePic from "../../public/assets/user.png";
@@ -90,9 +90,7 @@ function Profile() {
   };
 
   if (isLoading) {
-    return (
-      <Loading />
-    );
+    return <Loading />;
   }
 
   return (

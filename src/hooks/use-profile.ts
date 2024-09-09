@@ -26,16 +26,20 @@ export function useUserProfile() {
       }
 
       // Fetch the profile data
-      const profileResponse = await fetch(`http://localhost:3001/user/${userId}`);
+      const profileResponse = await fetch(
+        `http://localhost:3001/user/${userId}`,
+      );
       if (!profileResponse.ok) {
-        throw new Error(`Error fetching user profile: ${profileResponse.statusText}`);
+        throw new Error(
+          `Error fetching user profile: ${profileResponse.statusText}`,
+        );
       }
       const profileData = await profileResponse.json();
 
       // Fetch the avatar if it exists
       if (profileData.avatar_url) {
         const avatarResponse = await fetch(
-          `http://localhost:3001/user/avatar/${userId}?path=${encodeURIComponent(profileData.avatar_url)}`
+          `http://localhost:3001/user/avatar/${userId}?path=${encodeURIComponent(profileData.avatar_url)}`,
         );
         if (avatarResponse.ok) {
           const avatarBlob = await avatarResponse.blob();
@@ -83,7 +87,7 @@ export function useUserProfile() {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append("avatar", file);
-  
+
       const response = await fetch(
         `http://localhost:3001/user/avatar/${userId}`,
         {
@@ -91,11 +95,11 @@ export function useUserProfile() {
           body: formData,
         },
       );
-  
+
       if (!response.ok) {
         throw new Error(`Error uploading avatar image: ${response.statusText}`);
       }
-  
+
       const data = await response.json();
       return data.avatar_url;
     },
@@ -133,6 +137,6 @@ export function useUserProfile() {
     error,
     updateProfile,
     setUserProfile,
-    uploadAvatar
+    uploadAvatar,
   };
 }
