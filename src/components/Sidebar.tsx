@@ -53,10 +53,24 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [selected] = useState(localStorage.getItem("selected") || "Dashboard");
+  const pageUrl = window.location.href;
+  const page = pageUrl.match(/[^/]+$/)?.[0] || "";
+  const [selected, setSelected] = useState("");
 
   const { profile } = useUserProfile();
   const isTablet = useMediaQuery("(max-width: 768px)");
+
+  useEffect(() => {
+    let upperCasePage;
+    if (page == "hmi") {
+      upperCasePage = "HMI";
+    } else if (page == "wellness_network") {
+      upperCasePage = "Wellness Network";
+    } else {
+      upperCasePage = page.charAt(0).toUpperCase() + page.slice(1);
+    }
+    setSelected(upperCasePage);
+  }, [page]);
 
   useEffect(() => {
     setIsCollapsed(isTablet);
