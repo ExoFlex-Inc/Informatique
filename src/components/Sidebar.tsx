@@ -57,6 +57,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
   const page = pageUrl.match(/[^/]+$/)?.[0] || "";
   const [selected, setSelected] = useState("");
 
+  
   const { profile } = useUserProfile();
   const isTablet = useMediaQuery("(max-width: 768px)");
 
