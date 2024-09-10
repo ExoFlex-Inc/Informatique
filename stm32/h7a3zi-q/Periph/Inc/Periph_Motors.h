@@ -32,7 +32,7 @@ typedef struct
     float kdMin;
     float kdMax;
 
-    float kt;
+    float AmpPerNm;
 } MotorParameters;
 
 typedef struct
