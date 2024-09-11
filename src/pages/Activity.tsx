@@ -6,7 +6,6 @@ import GraphFilters from "../components/GraphFilters.tsx";
 import { DateRangePicker } from "rsuite";
 import "rsuite/DateRangePicker/styles/index.css";
 import { DateRange } from "rsuite/esm/DateRangePicker/types.js";
-import { supaClient } from "../hooks/supa-client.ts";
 import { ChartData } from "chart.js";
 import {
   Button,
@@ -16,8 +15,8 @@ import {
   Paper,
   Typography,
 } from "@mui/material";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import Report from "../components/Report.tsx";
+// import { PDFDownloadLink } from "@react-pdf/renderer";
+// import Report from "../components/Report.tsx";
 
 export interface dataStructure {
   angle_max: number;
@@ -54,20 +53,34 @@ export default function Activity() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (selectedPatient?.length === 0 || !date) return;
-      const { data, error } = await supaClient
-        .from("exercise_data")
-        .select("*")
-        .eq("user_id", selectedPatient?.[0].user_id)
-        .gte("date", date[0].toISOString())
-        .lte("date", date[1].toISOString());
-
-      if (error) {
+      if (!selectedPatient || selectedPatient.length === 0 || !date) return;
+  
+      const userId = selectedPatient[0].user_id;
+      const startDate = date[0].toISOString();
+      const endDate = date[1].toISOString();
+  
+      const url = `http://localhost:3001/exercise-data/${userId}?start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`;
+  
+      try {
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+  
+        const result = await response.json();
+  
+        if (response.ok) {
+          setData(result);
+        } else {
+          console.error(result.message);
+        }
+      } catch (error) {
         console.error(error.message);
-      } else {
-        setData(data);
       }
     };
+  
     fetchData();
   }, [selectedPatient, date]);
 
@@ -331,7 +344,7 @@ export default function Activity() {
             </ThemeProvider>
           </Box>
         )}
-        {selectedPatient?.length !== 0 && date && graphType && (
+        {/* {selectedPatient?.length !== 0 && date && graphType && (
           <div className="flex mr-4 justify-end">
             <Button className="!bg-blue-600" variant="contained">
               <PDFDownloadLink
@@ -349,7 +362,7 @@ export default function Activity() {
               </PDFDownloadLink>
             </Button>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

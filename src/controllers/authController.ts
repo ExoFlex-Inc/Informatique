@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import passport from "passport";
-import { supaClient } from "../hooks/supa-client";
+import  supaClient  from "../utils/supabaseClient.ts";
 import { validationResult } from "express-validator";
 
 export const signup = async (req: Request, res: Response) => {
@@ -128,14 +128,32 @@ export const logout = async (req: Request, res: Response) => {
 
 export const getSession = async (req: Request, res: Response) => {
   try {
+
     const { data, error } = await supaClient.auth.getSession();
 
-    if (error) {
-      return res.status(500).json({ error: error.message });
+    if (error || !data?.session) {
+      const accessToken = req.cookies['access_token'];
+      const refreshToken = req.cookies['refresh_token'];
+
+      if (!accessToken || !refreshToken) {
+        return res.status(401).json({ error: 'No access or refresh token available' });
+      }
+
+      const { data: sessionData, error: setError } = await supaClient.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      });
+
+      if (setError) {
+        return res.status(401).json({ error: 'Unable to set session', details: setError.message });
+      }
+
+      return res.status(200).json({ session: sessionData.session });
     }
 
     return res.status(200).json({ session: data.session });
   } catch (err) {
+
     return res.status(500).json({ error: err.message });
   }
 };
@@ -152,6 +170,20 @@ export const setSession = async (req: Request, res: Response) => {
     if (error) {
       return res.status(500).json({ error: error.message });
     }
+
+    res.cookie('access_token', data.session.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 1000 * 60 * 60, // 1 hour
+    });
+
+    res.cookie('refresh_token', data.session.refresh_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+    });
 
     return res.status(200).json({ session: data.session });
   } catch (err) {

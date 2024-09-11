@@ -59,7 +59,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
 
   const { profile } = useUserProfile();
   const isTablet = useMediaQuery("(max-width: 768px)");
-
+  
   useEffect(() => {
     let upperCasePage;
     if (page == "hmi") {

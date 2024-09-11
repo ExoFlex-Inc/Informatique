@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { supaClient } from "../hooks/supa-client.ts";
+import  supaClient  from "../utils/supabaseClient.ts";
 
 export const getUserProfile = async (req: Request, res: Response) => {
   const userId = req.params.userId;
@@ -57,6 +57,27 @@ export const updateUserProfile = async (req: Request, res: Response) => {
   }
 
   res.json(profileData);
+};
+
+export const getAdmins = async (req: Request, res: Response) => {
+
+  const limit = parseInt(req.query.limit as string) || 50;
+
+  try {
+    const { data, error } = await supaClient
+      .from("user_profiles")
+      .select("*")
+      .eq("permissions", "admin")
+      .limit(limit);
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.status(200).json({ admins: data });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
 };
 
 async function deleteOldImage(path: string | null) {

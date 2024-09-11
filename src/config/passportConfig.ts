@@ -1,7 +1,7 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcryptjs";
-import { supaClient } from "../hooks/supa-client.ts";
+import  supaClient  from "../utils/supabaseClient.ts";
 
 passport.use(
   new LocalStrategy(

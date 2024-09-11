@@ -3,15 +3,17 @@ import cors from "cors";
 import dotenv from "dotenv";
 import session from "express-session";
 import passport from "passport";
+import cookieParser from "cookie-parser";
 import { createServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
 import authRoutes from "./routes/authRoutes.ts";
 import serialPortRoutes from "./routes/serialPortRoutes.ts";
 import planRoutes from "./routes/planRoutes.ts";
-import wellnessNetworkRoutes from "./routes/wellnessNetworkRoutes.ts";
 import hmiRoutes from "./routes/hmiRoutes.ts";
 import userRoutes from "./routes/userRoutes.ts";
+import relationsRoutes from "./routes/relationsRoutes.ts";
 import wellnessNetworkRoutes from "./routes/wellnessNetworkRoutes.ts";
+import exerciseDataRoute from './routes/exerciseDataRoutes.ts';
 import { getSerialPort } from "./managers/serialPort.ts";
 import "./config/passportConfig.ts";
 
@@ -34,7 +36,8 @@ app.use(
   }),
 );
 
-// Session setup
+app.use(cookieParser());
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "default_secret",
@@ -48,8 +51,10 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use("/auth", authRoutes);
-app.use("/api", serialPortRoutes);
 app.use("/user", userRoutes);
+app.use("/relations", relationsRoutes);
+app.use('/exercise-data', exerciseDataRoute);
+app.use("/api", serialPortRoutes);
 app.use("/api", planRoutes);
 app.use("/api", hmiRoutes);
 app.use("/api", wellnessNetworkRoutes);

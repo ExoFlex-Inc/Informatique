@@ -13,10 +13,9 @@ import "./App.css";
 
 import Dashboard from "./pages/Dashboard.tsx";
 import ProfessionalNetwork from "./pages/ProfessionalNetwork.tsx";
-import { Welcome, welcomeLoader } from "./pages/Welcome.tsx";
 import HMI from "./pages/Hmi.tsx";
 import Activity from "./pages/Activity.tsx";
-import Recovery from "./pages/Recovery.tsx";
+// import Recovery from "./pages/Recovery.tsx";
 import Manual from "./pages/Manual.tsx";
 import TermsAndConditions from "./pages/TermsAndConditions.tsx";
 import Settings from "./pages/Settings.tsx";
@@ -30,18 +29,15 @@ import Loading from "./components/Loading.tsx";
 import ProSideBar from "./components/Sidebar.tsx";
 import TopBar from "./components/TopBar.tsx";
 
-import useVisibilityChange from "./hooks/use-visibility-change.ts";
-
 import { useSupabaseSession } from "./hooks/use-session.ts";
 import { useUserProfile } from "./hooks/use-profile.ts";
 
-// Import necessary modules from React Query
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<AppLayout />}>
-      <Route path="/recovery" element={<Recovery />} />
+      {/* <Route path="/recovery" element={<Recovery />} /> */}
 
       <Route
         element={<PrivateRoutes requiredPermissions={["dev", "client"]} />}
@@ -57,7 +53,6 @@ const router = createBrowserRouter(
       </Route>
 
       <Route path="/termsAndConditions" element={<TermsAndConditions />} />
-      <Route path="/welcome" element={<Welcome />} loader={welcomeLoader} />
       <Route path="/hmi" element={<HMI />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/profile" element={<Profile />} />
@@ -95,8 +90,6 @@ function AppLayout() {
 
 function App() {
   const [theme, colorMode] = useMode();
-
-  useVisibilityChange();
 
   const queryClient = new QueryClient();
 

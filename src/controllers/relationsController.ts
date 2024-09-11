@@ -1,105 +1,103 @@
-import { supaClient } from "../hooks/supa-client.ts";
-import { UserProfile } from "../hooks/use-session.ts";
+import { Request, Response } from "express";
+import supaClient from "../utils/supabaseClient.ts";
 
-const removeRelation = async (
-  clientId: string,
-  profile: UserProfile | null,
-) => {
+const fetchRelation = async (req: Request, res: Response) => {
+  const user_id = req.params.userId;
+
+  if (!user_id) {
+    return res.status(400).json({ success: false, message: "No user_id provided" });
+  }
+
+  try {
+    const { data, error } = await supaClient
+      .from("relations")
+      .select("*")
+      .eq("client_id", user_id);
+
+    if (error) {
+      return res.status(500).json({ success: false, message: "Failed to fetch relations", error: error.message });
+    }
+
+    return res.status(200).json({ success: true, data });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Error fetching relations", error: error.message });
+  }
+};
+
+const postRelation = async (req: Request, res: Response) => {
+  const { user_id, admin_id } = req.body;
+
+  if (!user_id && !admin_id) {
+    return res.status(400).json({ success: false, message: "Profile or selected admin missing" });
+  }
+
+  try {
+    const { error } = await supaClient.from("relations").insert({
+      admin_id: admin_id,
+      client_id: user_id,
+      relation_status: "pending",
+    });
+
+    if (error) {
+      return res.status(500).json({ success: false, message: "Failed to send request", error: error.message });
+    }
+
+    return res.status(200).json({ success: true, message: "Request sent successfully" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Error sending request", error: error.message });
+  }
+};
+
+const removeRelation = async (req: Request, res: Response) => {
+  const { relationId } = req.params;
+
+  if (!relationId) {
+    return res.status(400).json({ success: false, message: "Invalid relation" });
+  }
+
   try {
     const { error } = await supaClient
-      .from("admin_client")
+      .from("relations")
       .delete()
-      .eq("admin_id", profile?.user_id)
-      .eq("client_id", clientId);
+      .eq("id", relationId);
 
-    if (!error) {
-      console.log("Relationship remove from Supabase");
-      return true;
-    } else {
-      console.error("Failed to remove relationship from Supabase", error);
-      return false;
+    if (error) {
+      return res.status(500).json({ success: false, message: "Failed to refuse the relation", error: error.message });
     }
+
+    return res.status(200).json({ success: true, message: "Request removed successfully" });
   } catch (error) {
-    console.error("Error removing relationship from Supabase:", error);
-    return false;
+    return res.status(500).json({ success: false, message: "Error refusing relation", error: error.message });
   }
 };
 
-const fetchRelation = async (profile: UserProfile | null) => {
-  if (profile) {
-    const { data, error } = await supaClient
-      .from("admin_client")
-      .select()
-      .eq("client_id", profile?.user_id);
-    if (error) {
-      console.error("Error fetching client ID:", error.message);
-      return null;
-    } else {
-      return data;
-    }
-  }
-};
-const sendRequest = async (selectedAdmin: any, profile: UserProfile | null) => {
-  const { error } = await supaClient.from("admin_client").insert({
-    admin_id: selectedAdmin.user_id,
-    client_id: profile?.user_id,
-    relation_status: "pending",
-  });
-  if (error) {
-    throw error;
-  }
-};
+const acceptRequest = async (req: Request, res: Response) => {
+  const { relationId } = req.params;
 
-const refuseRequest = async (relation: any) => {
-  const { error } = await supaClient
-    .from("admin_client")
-    .delete()
-    .eq("id", relation.id);
-  if (error) {
-    console.error("Failed to delete the relation", error);
-    return false;
-  } else {
-    return true;
+  if (!relationId) {
+    return res.status(400).json({ success: false, message: "Invalid relation" });
   }
-};
 
-const acceptRequest = async (relation: any) => {
-  console.log("relation", relation);
-  const { error } = await supaClient
-    .from("admin_client")
-    .update({ relation_status: "accepted" })
-    .eq("id", relation.id);
-  if (error) {
-    console.error("Failed to update the relation", error);
-    return false;
-  } else {
-    return true;
-  }
-};
-
-const fetchNotifications = async (profile: UserProfile | null) => {
-  if (profile) {
-    const { data, error } = await supaClient
-      .from("admin_client")
-      .select()
-      .eq("admin_id", profile?.user_id)
-      .eq("relation_status", "pending")
-      .limit(10);
+  try {
+    const { error } = await supaClient
+      .from("relations")
+      .update({ relation_status: "accepted" })
+      .eq("id", relationId);
 
     if (error) {
-      console.error("Error fetching notifications:", error.message);
-      return null;
-    } else {
-      return data;
+      return res.status(500).json({ success: false, message: "Failed to accept the relation", error: error.message });
     }
+
+    return res.status(200).json({ success: true, message: "Request accepted successfully" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Error accepting relation", error: error.message });
   }
 };
+
 
 export {
   removeRelation,
   fetchRelation,
-  sendRequest,
-  refuseRequest,
+  postRelation,
   acceptRequest,
-  fetchNotifications,
 };

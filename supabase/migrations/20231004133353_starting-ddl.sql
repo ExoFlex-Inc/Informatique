@@ -36,18 +36,13 @@ CREATE TABLE user_profiles (
   password TEXT CHECK (char_length(password) > 0)
 );
 
-CREATE TABLE admin_client (
+CREATE TABLE relations (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4() not null,
   admin_id UUID,
   client_id UUID,
   relation_status client_admin_status NOT NULL,
   FOREIGN KEY (admin_id) REFERENCES user_profiles(user_id),
   FOREIGN KEY (client_id) REFERENCES user_profiles(user_id)
-);
-
-CREATE TABLE machine (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4() not null,
-  user_id uuid references auth.users(id) not null
 );
 
 CREATE TABLE plans (
@@ -59,7 +54,6 @@ CREATE TABLE plans (
 
 CREATE TABLE encoder (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
-  machine_id UUID REFERENCES machine(id),
   user_id uuid references auth.users(id) not null,
   angle_data JSONB,
   created_at DATE DEFAULT CURRENT_DATE
@@ -90,29 +84,6 @@ CREATE TABLE exercise_data (
 .##.......##.....##.##...###.##....##....##.....##..##.....##.##...###.##....##
 .##........#######..##....##..######.....##....####..#######..##....##..######.
 */
-CREATE OR REPLACE FUNCTION get_or_create_machine_for_user(search_id uuid)
-RETURNS uuid 
-LANGUAGE plpgsql 
-AS $$
-DECLARE
-  machine_id uuid;
-BEGIN
-
-  SELECT id INTO machine_id FROM machine WHERE user_id = search_id;
-
-  IF machine_id IS NOT NULL THEN
-    -- If the user_id already exists, return the existing user's machine ID
-    RETURN machine_id;
-  ELSE
-    -- If the user_id doesn't exist, create a new record and associate it with the user
-    INSERT INTO machine (id, user_id)
-    VALUES (DEFAULT, search_id)
-    RETURNING id INTO machine_id;
-    RETURN machine_id;
-  END IF;
-END;
-$$;
-
 
 CREATE FUNCTION push_angle(machine_id uuid, user_id uuid, angles jsonb, created_at date)
 RETURNS void AS $$
@@ -187,7 +158,7 @@ BEGIN
     FROM 
         user_profiles c
     JOIN 
-        admin_client a ON c.user_id = a.client_id
+        relations a ON c.user_id = a.client_id
     WHERE 
         a.admin_id = get_clients_for_admin.admin_id AND a.relation_status = 'accepted';
 END;
@@ -216,11 +187,10 @@ INSERT INTO storage.buckets(id, name, public, file_size_limit) VALUES ('avatars'
 */
 
 alter table user_profiles disable row level security;
-alter table machine enable row level security;
 alter table encoder enable row level security;
 alter table plans enable row level security;
 alter table exercise_data enable row level security;
-alter table admin_client enable row level security;
+alter table relations enable row level security;
 
 CREATE POLICY "avatars policy all can see" ON "storage"."objects"
 AS permissive FOR SELECT
@@ -242,23 +212,23 @@ AS permissive FOR INSERT
 TO public
 WITH CHECK ((bucket_id = 'avatars'::text));
 
-CREATE POLICY "all can see" ON "public"."admin_client"
+CREATE POLICY "all can see" ON "public"."relations"
 AS PERMISSIVE FOR SELECT
 TO public
 USING (true);
 
-CREATE POLICY "users can insert" ON "public"."admin_client"
+CREATE POLICY "users can insert" ON "public"."relations"
 AS PERMISSIVE FOR INSERT
 TO public
 WITH CHECK (true);
 
-CREATE POLICY "owners can update" ON "public"."admin_client"
+CREATE POLICY "owners can update" ON "public"."relations"
 AS PERMISSIVE FOR UPDATE
 TO public
 USING (true)
 WITH CHECK (true);
 
-CREATE POLICY "owners can delete" ON "public"."admin_client"
+CREATE POLICY "owners can delete" ON "public"."relations"
 AS PERMISSIVE FOR DELETE
 TO public
 USING (true);
@@ -294,16 +264,6 @@ AS PERMISSIVE FOR UPDATE
 TO public
 USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "all can see" ON "public"."machine"
-AS PERMISSIVE FOR SELECT
-TO public
-USING (true);
-
-CREATE POLICY "users can insert machine" ON "public"."machine"
-AS PERMISSIVE FOR INSERT
-TO public
-WITH CHECK (auth.uid() IS NOT NULL);
 
 CREATE POLICY "all can see" ON "public"."encoder"
 AS PERMISSIVE FOR SELECT

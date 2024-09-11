@@ -12,12 +12,25 @@
       "internalConsoleOptions": "neverOpen"
     },
     {
+      "name": "Launch Vite DEV server",
+      "request": "launch",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": [
+        "dev",
+      ],
+      "type": "node",
+      "serverReadyAction": {
+        "action": "debugWithChrome",
+        "pattern": "Local: http://localhost:([0-9]+)",
+        "uriFormat": "http://localhost:%s"
+      }
+    },
+    {
       "type": "chrome",
       "request": "launch",
       "name": "Launch Chrome against localhost",
       "url": "http://localhost:1337",
       "webRoot": "${workspaceFolder}/src"
-      // "preLaunchTask": "npm: dev"
     }
   ],
   "compounds": [
@@ -25,6 +38,7 @@
       "name": "Launch Full Stack",
       "configurations": [
         "Launch Server with Debugger",
+        "Launch Vite DEV server",
         "Launch Chrome against localhost"
       ]
     }
