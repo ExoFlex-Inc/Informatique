@@ -40,9 +40,9 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
           }
         } else {
           return i !== setIndex;
-        }     
-      }
-    ));
+        }
+      }),
+    );
   };
 
   const handleInputChange = (
@@ -165,9 +165,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                     className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                   />
                 </td>
-                <td
-                  className="px-6 py-4 whitespace-nowrap text-right"
-                >
+                <td className="px-6 py-4 whitespace-nowrap text-right">
                   <button
                     className="text-black"
                     onClick={() => removeExercise(setIndex, exerciseIndex)}
