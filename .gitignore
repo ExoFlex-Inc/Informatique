@@ -1,10 +1,3 @@
-
-#Arduino
-**/.pio
-# **/.vscode
-IMC/arduino/build/
-IMC/arduino/downloadedLibraries/
-
 #STM32
 stm32/l432kc/.settings/
 stm32/l432kc/Debug/
@@ -25,3 +18,6 @@ __pycache__/
 #Data collect
 machineAngles
 stm32/.metadata
+
+#Env variables
+.env
