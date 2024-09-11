@@ -56,7 +56,6 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
   const pageUrl = window.location.href;
   const page = pageUrl.match(/[^/]+$/)?.[0] || "";
   const [selected, setSelected] = useState("");
-
   const { profile } = useUserProfile();
   const isTablet = useMediaQuery("(max-width: 768px)");
 
@@ -157,6 +156,9 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
 
               <Box textAlign="center">
                 <Typography
+                  className={
+                    profile?.first_name.length < 15 ? "text-4xl" : "text-xl"
+                  }
                   variant={isTablet ? "h3" : "h2"}
                   color={colors.grey[100]}
                   fontWeight="bold"
