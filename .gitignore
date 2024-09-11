@@ -21,3 +21,4 @@ stm32/.metadata
 
 #Env variables
 .env
+.env.production
