@@ -1,0 +1,13 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "yarn:dev",
+      "type": "shell",
+      "command": "yarn dev",
+      "group": "build",
+      "problemMatcher": [],
+      "detail": "Run the development server using yarn dev"
+    }
+  ]
+}

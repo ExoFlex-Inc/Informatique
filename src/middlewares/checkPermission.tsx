@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { supaClient } from "../hooks/supa-client.ts";
+import supaClient from "../utils/supabaseClient.ts";
 
 export const checkPermission = (requiredPermissions: string[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
