@@ -256,4 +256,62 @@ BEGIN
         crypt('exoflex', gen_salt('bf'))
     );
 
+    INSERT INTO admin_client (
+        id,
+        admin_id,
+        client_id,
+        relation_status
+    )
+    VALUES (
+        gen_random_uuid(),
+        new_id,
+        new_id,
+        'accepted'
+    );
+
+    FOR j IN 1..50 LOOP
+        exercise_id := gen_random_uuid();
+
+        new_date := base_date + INTERVAL '1 day';
+        base_date := new_date;
+
+        random_force_avg := round((random() * 100)::numeric, 2);
+        random_force_max := round((random() * 150)::numeric, 2);
+        random_angle_max := round((random() * 90)::numeric, 2);
+        random_angle_target := round((random() * 75)::numeric, 2);
+        random_repetitions_done := floor(random() * 30) + 1;
+        random_repetitions_success_rate := round((random() * 100)::numeric, 2);
+        random_predicted_total_time := round((random() * 100)::numeric, 2);
+        random_actual_total_time := round((random() * 120)::numeric, 2);
+        random_rated_pain := floor(random() * 10) + 1;
+
+        INSERT INTO exercise_data (
+            id,
+            user_id,
+            date,
+            force_avg,
+            force_max,
+            angle_max,
+            angle_target,
+            repetitions_done,
+            repetitions_success_rate,
+            predicted_total_time,
+            actual_total_time,
+            rated_pain
+        )
+        VALUES (
+            exercise_id,
+            new_id,
+            new_date,
+            random_force_avg,
+            random_force_max,
+            random_angle_max,
+            random_angle_target,
+            random_repetitions_done,
+            random_repetitions_success_rate,
+            random_predicted_total_time,
+            random_actual_total_time,
+            random_rated_pain
+        );
+    END LOOP;
 END $$;
