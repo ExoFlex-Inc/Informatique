@@ -13,8 +13,8 @@ const ExerciseOverviewWidget: React.FC<ExerciseOverviewWidgetProps> = ({
   const { planData } = usePlanData(profile);
 
   useEffect(() => {
-    console.log("planData",planData);
-  }, [planData])
+    console.log("planData", planData);
+  }, [planData]);
 
   return (
     <div className="bg-white rounded-lg p-4 max-h-96 overflow-auto overflow-x-hidden">
@@ -39,38 +39,35 @@ const ExerciseOverviewWidget: React.FC<ExerciseOverviewWidgetProps> = ({
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {planData && Array.isArray(planData.plan) ? (
-            planData.plan.map(
-              (item, index) =>
-                "movement" in item && (
-                  <tr
-                    key={index}
-                    className={
-                      index === stm32Data?.ExerciseIdx
-                        ? "bg-green-200"
-                        : index % 2 === 0
-                        ? "bg-gray-50"
-                        : "bg-white"
-                    }
-                  >
-                    <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
-                      {item.movement.map((movement: any, index: number) => (
-                        <div key={index}>{movement.exercise}</div>
-                      ))}
-                    </td>
-                    <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
-                      {item.repetitions}
-                    </td>
-                    <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
-                      {item.rest}
-                    </td>
-                  </tr>
-                )
-            )
-          ) : (
-            true
-          )}
-
+          {planData && Array.isArray(planData.plan)
+            ? planData.plan.map(
+                (item, index) =>
+                  "movement" in item && (
+                    <tr
+                      key={index}
+                      className={
+                        index === stm32Data?.ExerciseIdx
+                          ? "bg-green-200"
+                          : index % 2 === 0
+                            ? "bg-gray-50"
+                            : "bg-white"
+                      }
+                    >
+                      <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
+                        {item.movement.map((movement: any, index: number) => (
+                          <div key={index}>{movement.exercise}</div>
+                        ))}
+                      </td>
+                      <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
+                        {item.repetitions}
+                      </td>
+                      <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
+                        {item.rest}
+                      </td>
+                    </tr>
+                  ),
+              )
+            : true}
         </tbody>
       </table>
     </div>
