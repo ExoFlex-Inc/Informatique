@@ -282,7 +282,11 @@ export default function Activity() {
             )}
             {dataset2 && selectedPatient?.length !== 0 && date && graphType && (
               <div className="mt-4 basis-full">
-                <LineChart type="activity" chartData={dataset2} title={title2} />
+                <LineChart
+                  type="activity"
+                  chartData={dataset2}
+                  title={title2}
+                />
               </div>
             )}
           </div>
@@ -347,7 +351,7 @@ export default function Activity() {
             </Box>
           )}
         </CustomScrollbar>
-          {/* {selectedPatient?.length !== 0 && date && graphType && (
+        {/* {selectedPatient?.length !== 0 && date && graphType && (
             <div className="flex mr-4 justify-end">
               <Button className="!bg-blue-600" variant="contained">
                 <PDFDownloadLink

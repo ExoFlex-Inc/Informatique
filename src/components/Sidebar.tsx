@@ -188,7 +188,8 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                   selected={selected}
                 />
               )}
-              {(props.permissions === "dev" || props.permissions === "admin") && (
+              {(props.permissions === "dev" ||
+                props.permissions === "admin") && (
                 <Item
                   title="Planning"
                   to="/planning"
@@ -196,7 +197,8 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                   selected={selected}
                 />
               )}
-              {(props.permissions === "dev" || props.permissions === "admin") && (
+              {(props.permissions === "dev" ||
+                props.permissions === "admin") && (
                 <Item
                   title="Wellness Network"
                   to="/wellness_network"
@@ -205,7 +207,8 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                 />
               )}
 
-              {(props.permissions === "dev" || props.permissions === "admin") && (
+              {(props.permissions === "dev" ||
+                props.permissions === "admin") && (
                 <Item
                   title="Activity"
                   to="/activity"
