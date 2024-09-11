@@ -186,7 +186,7 @@ INSERT INTO storage.buckets(id, name, public, file_size_limit) VALUES ('avatars'
 .##.........#######..########.####..######..####.########..######.
 */
 
-alter table user_profiles disable row level security;
+alter table user_profiles enable row level security;
 alter table encoder enable row level security;
 alter table plans enable row level security;
 alter table exercise_data enable row level security;
@@ -241,7 +241,7 @@ USING (true);
 CREATE POLICY "users can insert" ON "public"."user_profiles"
 AS PERMISSIVE FOR INSERT
 TO public
-WITH CHECK (auth.uid() = user_id);
+WITH CHECK (true);
 
 CREATE POLICY "owners can update" ON "public"."user_profiles"
 AS PERMISSIVE FOR UPDATE
