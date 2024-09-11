@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 const usePlanData = (profile: any) => {
-  const [planData, setPlanData] = useState(null);
+  const [planData, setPlanData] = useState<any>(null);
   const [get_plan, setRetryGet] = useState(true);
 
   useEffect(() => {

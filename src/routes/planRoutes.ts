@@ -1,10 +1,9 @@
 import express from "express";
 import { postPlan, getPlan } from "../controllers/planController.ts";
-import { authenticateUser } from "../middlewares/authMiddleware.ts";
 
 const router = express.Router();
 
-router.post("/plan", authenticateUser, postPlan);
-router.get("/plan", authenticateUser, getPlan);
+router.post("/plan", postPlan);
+router.get("/plan", getPlan);
 
 export default router;
