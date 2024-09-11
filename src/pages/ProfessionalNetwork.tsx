@@ -35,16 +35,21 @@ const ProfessionalNetwork = () => {
   const fetchData = async () => {
     try {
       // Fetch both admins and relations
-      const adminsResponse = await fetch("http://localhost:3001/user/admin?limit=50");
+      const adminsResponse = await fetch(
+        "http://localhost:3001/user/admin?limit=50",
+      );
       const adminsData = await adminsResponse.json();
       setAdmins(adminsData.admins);
 
-      const relationsResponse = await fetch(`http://localhost:3001/relations/${profile.user_id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
+      const relationsResponse = await fetch(
+        `http://localhost:3001/relations/${profile.user_id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
       const relationsData = await relationsResponse.json();
       setRelations(relationsData);
     } catch (error) {
@@ -76,9 +81,13 @@ const ProfessionalNetwork = () => {
     }
   };
 
-  const availableAdmins = Array.isArray(relations) && relations.length > 0
-  ? admins.filter((admin) => !relations.some((relation) => relation.admin_id === admin.user_id))
-  : admins;
+  const availableAdmins =
+    Array.isArray(relations) && relations.length > 0
+      ? admins.filter(
+          (admin) =>
+            !relations.some((relation) => relation.admin_id === admin.user_id),
+        )
+      : admins;
 
   return (
     <div className="flex flex-col gap-4">
@@ -151,11 +160,13 @@ const ProfessionalNetwork = () => {
                       {admin.first_name} {admin.last_name}
                     </TableCell>
                     <TableCell>
-                      {
-                        relations && Array.isArray(relations) && relations.length > 0
-                        ? relations.find((relation) => relation.admin_id === admin.user_id)?.relation_status || "Unknown"
-                        : "Unknown"
-                      }
+                      {relations &&
+                      Array.isArray(relations) &&
+                      relations.length > 0
+                        ? relations.find(
+                            (relation) => relation.admin_id === admin.user_id,
+                          )?.relation_status || "Unknown"
+                        : "Unknown"}
                     </TableCell>
                     <TableCell>{admin.email}</TableCell>
                   </TableRow>

@@ -15,9 +15,7 @@
       "name": "Launch Vite DEV server",
       "request": "launch",
       "runtimeExecutable": "yarn",
-      "runtimeArgs": [
-        "dev",
-      ],
+      "runtimeArgs": ["dev"],
       "type": "node",
       "serverReadyAction": {
         "action": "debugWithChrome",

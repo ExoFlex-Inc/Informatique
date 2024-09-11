@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import  supaClient  from "../utils/supabaseClient.ts";
+import supaClient from "../utils/supabaseClient.ts";
 
 export const getUserProfile = async (req: Request, res: Response) => {
   const userId = req.params.userId;
@@ -60,7 +60,6 @@ export const updateUserProfile = async (req: Request, res: Response) => {
 };
 
 export const getAdmins = async (req: Request, res: Response) => {
-
   const limit = parseInt(req.query.limit as string) || 50;
 
   try {

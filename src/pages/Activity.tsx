@@ -54,23 +54,23 @@ export default function Activity() {
   useEffect(() => {
     const fetchData = async () => {
       if (!selectedPatient || selectedPatient.length === 0 || !date) return;
-  
+
       const userId = selectedPatient[0].user_id;
       const startDate = date[0].toISOString();
       const endDate = date[1].toISOString();
-  
+
       const url = `http://localhost:3001/exercise-data/${userId}?start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`;
-  
+
       try {
         const response = await fetch(url, {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         });
-  
+
         const result = await response.json();
-  
+
         if (response.ok) {
           setData(result);
         } else {
@@ -80,7 +80,7 @@ export default function Activity() {
         console.error(error.message);
       }
     };
-  
+
     fetchData();
   }, [selectedPatient, date]);
 
