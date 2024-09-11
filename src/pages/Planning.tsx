@@ -10,6 +10,7 @@ import PatientSearchBar from "../components/PatientSearchBar.tsx";
 import { blue } from "@mui/material/colors";
 import ExercisesLimitsTable from "../components/ExercisesLimitsTable.tsx";
 import ExercisesPlanTable from "../components/ExercisesPlanTable.tsx";
+import CustomScrollbar from "../components/CustomScrollbars.tsx";
 
 export interface Limits {
   torque: {
@@ -278,66 +279,68 @@ export default function Planning() {
           setSelectedPatient={setSelectedPatient}
         />
       </div>
-      <div className="overflow-auto">
-        <ExercisesLimitsTable
-          limitsLeft={limitsLeft}
-          limitsRight={limitsRight}
-          side={side}
-          setLimitsLeft={setLimitsLeft}
-          setLimitsRight={setLimitsRight}
-          plan={plan}
-        />
-
-        {plan.map((set, setIndex) => (
-          <ExercisesPlanTable
-            key={setIndex}
-            set={set}
-            setIndex={setIndex}
-            setPlan={setPlan}
-            plan={plan}
-            checkboxRefs={checkboxRefs}
-            setChecked={setChecked}
-            checked={checked}
+      <CustomScrollbar>
+        <div className="overflow-auto">
+          <ExercisesLimitsTable
             limitsLeft={limitsLeft}
             limitsRight={limitsRight}
+            side={side}
+            setLimitsLeft={setLimitsLeft}
+            setLimitsRight={setLimitsRight}
+            plan={plan}
           />
-        ))}
-      </div>
-      <div className="flex justify-center my-4">
-        <button
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mr-4 rounded"
-          onClick={addSet}
-        >
-          Add Set
-        </button>
 
-        <button
-          className="bg-rose-500 hover:bg-rose-700 text-white font-bold py-2 px-4 mr-4 rounded"
-          onClick={addSetRest}
-        >
-          Add Set Rest
-        </button>
+          {plan.map((set, setIndex) => (
+            <ExercisesPlanTable
+              key={setIndex}
+              set={set}
+              setIndex={setIndex}
+              setPlan={setPlan}
+              plan={plan}
+              checkboxRefs={checkboxRefs}
+              setChecked={setChecked}
+              checked={checked}
+              limitsLeft={limitsLeft}
+              limitsRight={limitsRight}
+            />
+          ))}
+        </div>
+        <div className="flex justify-center my-4">
+          <button
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mr-4 rounded"
+            onClick={addSet}
+          >
+            Add Set
+          </button>
 
-        <button
-          disabled={addExerciseDisable}
-          className={
-            addExerciseDisable
-              ? "bg-gray-500 text-white font-bold py-2 px-4 mr-4 rounded cursor-not-allowed"
-              : "bg-cyan-500 hover:bg-cyan-700 text-white font-bold py-2 px-4 mr-4 rounded"
-          }
-          onClick={addExercise}
-        >
-          Add Exercise
-        </button>
-        <button
-          className={`text-white font-bold py-2 px-4 rounded
-            ${isDisabled ? "bg-gray-500 cursor-not-allowed" : "bg-green-500 hover:bg-green-700"}`}
-          onClick={savePlan}
-          disabled={isDisabled}
-        >
-          Save Plan
-        </button>
-      </div>
+          <button
+            className="bg-rose-500 hover:bg-rose-700 text-white font-bold py-2 px-4 mr-4 rounded"
+            onClick={addSetRest}
+          >
+            Add Set Rest
+          </button>
+
+          <button
+            disabled={addExerciseDisable}
+            className={
+              addExerciseDisable
+                ? "bg-gray-500 text-white font-bold py-2 px-4 mr-4 rounded cursor-not-allowed"
+                : "bg-cyan-500 hover:bg-cyan-700 text-white font-bold py-2 px-4 mr-4 rounded"
+            }
+            onClick={addExercise}
+          >
+            Add Exercise
+          </button>
+          <button
+            className={`text-white font-bold py-2 px-4 rounded
+              ${isDisabled ? "bg-gray-500 cursor-not-allowed" : "bg-green-500 hover:bg-green-700"}`}
+            onClick={savePlan}
+            disabled={isDisabled}
+          >
+            Save Plan
+          </button>
+        </div>
+      </CustomScrollbar>
     </div>
   );
 }

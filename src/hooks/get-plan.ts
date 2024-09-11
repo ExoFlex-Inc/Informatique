@@ -34,7 +34,9 @@ const usePlanData = (profile: any) => {
         }
       } catch (error) {
         console.error("An error occurred:", error);
-        window.alert("An error occurred: " + error);
+        window.alert(
+          "An error occurred, couldn't retrieved the plan. Have you defined a plan for this user?",
+        );
         setRetryGet(true);
       }
     };
