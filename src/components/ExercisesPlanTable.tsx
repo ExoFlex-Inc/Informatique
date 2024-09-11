@@ -27,8 +27,22 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
   const exerciseOptions = ["Extension", "Dorsiflexion", "Eversion"];
 
   // Function to handle removing an exercise from the plan
-  const removeExercise = (index: number) => {
-    setPlan((prevPlan) => prevPlan.filter((_, i) => i !== index));
+  const removeExercise = (setIndex: number, exerciseIndex: number) => {
+    console.log("setI", setIndex, "exI", exerciseIndex);
+    setPlan((prevPlan) =>
+      prevPlan.filter((set, i) => {
+        if ("movement" in set) {
+          if (set.movement.length == 1) {
+            return false;
+          } else {
+            set.movement = set.movement.filter((_, j) => j !== exerciseIndex);
+            return true;
+          }
+        } else {
+          return i !== setIndex;
+        }     
+      }
+    ));
   };
 
   const handleInputChange = (
@@ -100,12 +114,12 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                 {exerciseIndex === 0 && (
                   <td
                     rowSpan={0}
-                    className="px-6 py-4 whitespace-nowrap text-right"
+                    className="px-6 py-4 text-center whitespace-nowrap"
                   >
                     <input
                       ref={(el) => (checkboxRefs.current[setIndex] = el)}
                       type="checkbox"
-                      className="mr-4"
+                      className="mr-4 size-5"
                       onChange={() => setChecked(!checked)}
                     />
                   </td>
@@ -151,19 +165,16 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                     className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                   />
                 </td>
-                {exerciseIndex === 0 && (
-                  <td
-                    rowSpan={0}
-                    className="px-6 py-4 whitespace-nowrap text-right"
+                <td
+                  className="px-6 py-4 whitespace-nowrap text-right"
+                >
+                  <button
+                    className="text-black"
+                    onClick={() => removeExercise(setIndex, exerciseIndex)}
                   >
-                    <button
-                      className="text-black"
-                      onClick={() => removeExercise(setIndex)}
-                    >
-                      <DeleteIcon />
-                    </button>
-                  </td>
-                )}
+                    <DeleteIcon />
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
