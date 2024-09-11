@@ -321,7 +321,7 @@ void ManagerMovement_ManualCmdExtension(int8_t direction)
     if (managerMovement.state == MMOV_STATE_MANUAL ||
         managerMovement.state == MMOV_STATE_HOMING)
     {
-        ManagerMovement_ManualIncrement(MMOT_MOTOR_3,direction);
+        ManagerMovement_ManualIncrement(MMOT_MOTOR_3, direction);
     }
 }
 
@@ -727,6 +727,8 @@ void ManagerMovement_HomingEversion()
                     MMOV_EVERSION,
                     ManagerMovement_GetMiddlePos(leftPos, rightPos)))
             {
+            	ManagerMovement_SetOrigins(MMOT_MOTOR_2);
+
                 evLeftLimitHit  = false;
                 evRightLimitHit = false;
 
@@ -751,7 +753,7 @@ void ManagerMovement_HomingDorsiflexion()
     {
         if (!dorUpLimitHit)
         {
-            leftPos       = motorsData[MMOT_MOTOR_2]->position;
+            leftPos       = motorsData[MMOT_MOTOR_1]->position;
             dorUpLimitHit = true;
         }
 
@@ -759,7 +761,7 @@ void ManagerMovement_HomingDorsiflexion()
         {
             if (!dorDownLimitHit)
             {
-                rightPos        = motorsData[MMOT_MOTOR_2]->position;
+                rightPos        = motorsData[MMOT_MOTOR_1]->position;
                 dorDownLimitHit = true;
             }
 
@@ -767,8 +769,7 @@ void ManagerMovement_HomingDorsiflexion()
                     MMOV_DORSIFLEXION,
                     ManagerMovement_GetMiddlePos(leftPos, rightPos)))
             {
-                // ManagerMovement_SetOrigins(MMOT_MOTOR_1);
-                ManagerMovement_SetOrigins(MMOT_MOTOR_2);
+                ManagerMovement_SetOrigins(MMOT_MOTOR_1);
 
                 dorUpLimitHit   = false;
                 dorDownLimitHit = false;
