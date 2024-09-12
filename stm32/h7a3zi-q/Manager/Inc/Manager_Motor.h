@@ -16,9 +16,9 @@
 #define MMOT_MOTOR_2   1
 #define MMOT_MOTOR_3   2
 
-#define MMOT_CONTROL_POSITION   0
-#define MMOT_CONTROL_TORQUE  1
-#define MMOT_CONTROL_SPEED   2
+#define MMOT_CONTROL_POSITION 0
+#define MMOT_CONTROL_TORQUE   1
+#define MMOT_CONTROL_SPEED    2
 
 #define MMOT_STATE_WAITING_SECURITY 1
 #define MMOT_STATE_START_MOTORS     2
@@ -29,11 +29,11 @@ void ManagerMotor_Init();
 void ManagerMotor_Reset();
 void ManagerMotor_Task();
 
-
 Motor* ManagerMotor_GetMotorData(uint8_t motorIndex);
 bool   ManagerMotor_IsReady2Move();
 bool   ManagerMotor_IsGoalStateReady(uint8_t motorIndex);
-void ManagerMotor_SetMotorGoal(uint8_t motorIndex, uint8_t controlType, float goal);
+void   ManagerMotor_SetMotorGoal(uint8_t motorIndex, uint8_t controlType,
+                                 float goal);
 
 bool    ManagerMotor_IsWaitingSecurity();
 void    ManagerMotor_SecurityPassed();

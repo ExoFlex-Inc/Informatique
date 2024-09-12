@@ -331,7 +331,7 @@ void ManagerMovement_ManualCmdHome(uint8_t motorIndex)
         !ManagerMotor_IsGoalStateReady(motorIndex))
     {
         managerMovement.motorsNextGoal[motorIndex] = 0.0;
-        ManagerMotor_SetMotorGoal(motorIndex,MMOT_CONTROL_POSITION,
+        ManagerMotor_SetMotorGoal(motorIndex, MMOT_CONTROL_POSITION,
                                   managerMovement.motorsNextGoal[motorIndex]);
     }
 }
@@ -364,21 +364,21 @@ void ManagerMovement_AutoMovement(uint8_t mouvType, float Position)
                                         // MMOV_DORSIFLEXION
     {
         managerMovement.motorsNextGoal[MMOT_MOTOR_1] = Position;
-        ManagerMotor_SetMotorGoal(MMOT_MOTOR_1,MMOT_CONTROL_POSITION,
+        ManagerMotor_SetMotorGoal(MMOT_MOTOR_1, MMOT_CONTROL_POSITION,
                                   managerMovement.motorsNextGoal[MMOT_MOTOR_1]);
     }
     else if (mouvType == MMOV_EVERSION)  // Set goalPosition for motor 2 and
                                          // for MMOV_EVERSION
     {
         managerMovement.motorsNextGoal[MMOT_MOTOR_2] = Position;
-        ManagerMotor_SetMotorGoal(MMOT_MOTOR_2,MMOT_CONTROL_POSITION,
+        ManagerMotor_SetMotorGoal(MMOT_MOTOR_2, MMOT_CONTROL_POSITION,
                                   managerMovement.motorsNextGoal[MMOT_MOTOR_2]);
     }
     else if (mouvType ==
              MMOV_EXTENSION)  // Set goalPosition for motor 3 for MMOV_EXTENSION
     {
         managerMovement.motorsNextGoal[MMOT_MOTOR_3] = Position;
-        ManagerMotor_SetMotorGoal(MMOT_MOTOR_3,MMOT_CONTROL_POSITION,
+        ManagerMotor_SetMotorGoal(MMOT_MOTOR_3, MMOT_CONTROL_POSITION,
                                   managerMovement.motorsNextGoal[MMOT_MOTOR_3]);
     }
 }
