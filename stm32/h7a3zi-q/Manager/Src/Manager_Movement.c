@@ -363,23 +363,27 @@ void ManagerMovement_ManualIncrement(uint8_t motorIndex, int8_t factor)
 void ManagerMovement_AutoMovement(uint8_t mouvType, float Position)
 {
     if (mouvType == MMOV_DORSIFLEXION)  // Set goalPosition for motor 1 for
-                                    // MMOV_DORSIFLEXION
+                                        // MMOV_DORSIFLEXION
     {
-    	managerMovement.motorsNextGoal[MMOT_MOTOR_1] = Position;
-		ManagerMotor_SetMotorGoal(MMOT_MOTOR_1, managerMovement.motorsNextGoal[MMOT_MOTOR_1]);
-		ManagerMotor_SetMotorGoalState(MMOT_MOTOR_1, true);
+        managerMovement.motorsNextGoal[MMOT_MOTOR_1] = Position;
+        ManagerMotor_SetMotorGoal(MMOT_MOTOR_1,
+                                  managerMovement.motorsNextGoal[MMOT_MOTOR_1]);
+        ManagerMotor_SetMotorGoalState(MMOT_MOTOR_1, true);
     }
     else if (mouvType == MMOV_EVERSION)  // Set goalPosition for motor 2 and
-                                             // for MMOV_EVERSION
+                                         // for MMOV_EVERSION
     {
-    	managerMovement.motorsNextGoal[MMOT_MOTOR_2] = Position;
-		ManagerMotor_SetMotorGoal(MMOT_MOTOR_2, managerMovement.motorsNextGoal[MMOT_MOTOR_2]);
-		ManagerMotor_SetMotorGoalState(MMOT_MOTOR_2, true);
+        managerMovement.motorsNextGoal[MMOT_MOTOR_2] = Position;
+        ManagerMotor_SetMotorGoal(MMOT_MOTOR_2,
+                                  managerMovement.motorsNextGoal[MMOT_MOTOR_2]);
+        ManagerMotor_SetMotorGoalState(MMOT_MOTOR_2, true);
     }
-    else if (mouvType == MMOV_EXTENSION)  // Set goalPosition for motor 3 for MMOV_EXTENSION
+    else if (mouvType ==
+             MMOV_EXTENSION)  // Set goalPosition for motor 3 for MMOV_EXTENSION
     {
         managerMovement.motorsNextGoal[MMOT_MOTOR_3] = Position;
-        ManagerMotor_SetMotorGoal(MMOT_MOTOR_3, managerMovement.motorsNextGoal[MMOT_MOTOR_3]);
+        ManagerMotor_SetMotorGoal(MMOT_MOTOR_3,
+                                  managerMovement.motorsNextGoal[MMOT_MOTOR_3]);
         ManagerMotor_SetMotorGoalState(MMOT_MOTOR_3, true);
     }
 }
@@ -727,7 +731,7 @@ void ManagerMovement_HomingEversion()
                     MMOV_EVERSION,
                     ManagerMovement_GetMiddlePos(leftPos, rightPos)))
             {
-            	ManagerMovement_SetOrigins(MMOT_MOTOR_2);
+                ManagerMovement_SetOrigins(MMOT_MOTOR_2);
 
                 evLeftLimitHit  = false;
                 evRightLimitHit = false;
