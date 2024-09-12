@@ -95,6 +95,10 @@ void   ManagerMotor_ApplyOriginShift(uint8_t motorIndex);
 int8_t ManagerMotor_GetMotorDirection(uint8_t motorIndex);
 void   ManagerMotor_MotorIncrement(uint8_t motorIndex, int8_t direction);
 
+/********************************************
+ * Manager init and reset
+ ********************************************/
+
 void ManagerMotor_Init()
 {
     // InitCanBus
@@ -201,18 +205,11 @@ void ManagerMotor_Task()
     }
 }
 
-void ManagerMotor_DisableMotors()
-{
-#ifndef MMOT_DEV_MOTOR_1_DISABLE
-    PeriphMotors_Disable(&motors[MMOT_MOTOR_1].motor);
-#endif
-#ifndef MMOT_DEV_MOTOR_2_DISABLE
-    PeriphMotors_Disable(&motors[MMOT_MOTOR_2].motor);
-#endif
-#ifndef MMOT_DEV_MOTOR_3_DISABLE
-    PeriphMotors_Disable(&motors[MMOT_MOTOR_3].motor);
-#endif
-}
+
+
+/********************************************
+ * Motor data reception
+ ********************************************/
 
 void ManagerMotor_ReceiveFromMotors()
 {
@@ -233,13 +230,11 @@ void ManagerMotor_ReceiveFromMotors()
     }
 }
 
-void ManagerMotor_WaitingSecurity()
-{
-    if (managerMotor.securityPass)
-    {
-        managerMotor.state = MMOT_STATE_START_MOTORS;
-    }
-}
+
+
+/********************************************
+ * Motor initialisation
+ ********************************************/
 
 void ManagerMotor_StartMotors()
 {
@@ -359,6 +354,52 @@ void ManagerMotor_StartMotor(uint8_t motorIndex)
     }
 }
 
+/********************************************
+ * Calculate next action and send to motors
+ ********************************************/
+
+void ManagerMotor_CalculateNextPositions()
+{
+    if (fabsf(motors[MMOT_MOTOR_1].motor.position -
+              motors[MMOT_MOTOR_1].goalPosition) > POSITION_TOL &&
+        motors[MMOT_MOTOR_1].goalReady)
+    {
+        ManagerMotor_MotorIncrement(
+            MMOT_MOTOR_1, ManagerMotor_GetMotorDirection(MMOT_MOTOR_1));
+    }
+    else
+    {
+        motors[MMOT_MOTOR_1].goalReady    = false;  // Motor reached his goal
+        motors[MMOT_MOTOR_1].goalPosition = motors[MMOT_MOTOR_1].motor.position;
+    }
+
+    if (fabsf(motors[MMOT_MOTOR_2].motor.position -
+              motors[MMOT_MOTOR_2].goalPosition) > POSITION_TOL &&
+        motors[MMOT_MOTOR_2].goalReady)
+    {
+        ManagerMotor_MotorIncrement(
+            MMOT_MOTOR_2, ManagerMotor_GetMotorDirection(MMOT_MOTOR_2));
+    }
+    else
+    {
+        motors[MMOT_MOTOR_2].goalReady    = false;
+        motors[MMOT_MOTOR_2].goalPosition = motors[MMOT_MOTOR_2].motor.position;
+    }
+
+    if (fabsf(motors[MMOT_MOTOR_3].motor.position -
+              motors[MMOT_MOTOR_3].goalPosition) > POSITION_TOL &&
+        motors[MMOT_MOTOR_3].goalReady)
+    {
+        ManagerMotor_MotorIncrement(
+            MMOT_MOTOR_3, ManagerMotor_GetMotorDirection(MMOT_MOTOR_3));
+    }
+    else
+    {
+        motors[MMOT_MOTOR_3].goalReady    = false;
+        motors[MMOT_MOTOR_3].goalPosition = motors[MMOT_MOTOR_3].motor.position;
+    }
+}
+
 void ManagerMotor_SendToMotors()
 {
 #ifndef MMOT_DEV_MOTOR_1_DISABLE
@@ -376,6 +417,77 @@ void ManagerMotor_SendToMotors()
                       motors[MMOT_MOTOR_3].nextPosition, 0, 0,
                       motors[MMOT_MOTOR_3].kp, motors[MMOT_MOTOR_3].kd);
 #endif
+}
+
+/********************************************
+ * Goal and movements SET/GET
+ ********************************************/
+
+
+Motor* ManagerMotor_GetMotorData(uint8_t motorIndex)
+{
+    return &motors[motorIndex].motor;
+}
+
+bool ManagerMotor_IsGoalStateReady(uint8_t motorIndex)
+{
+    return motors[motorIndex]
+        .goalReady;  // motor is ready when it has reached it's command
+}
+
+void ManagerMotor_SetMotorGoal(uint8_t motorIndex, float goal)
+{
+    motors[motorIndex].goalPosition = goal;
+}
+
+void ManagerMotor_SetMotorGoalState(uint8_t motorIndex, bool readyState)
+{
+    motors[motorIndex].goalReady = readyState;
+}
+
+
+int8_t ManagerMotor_GetMotorDirection(uint8_t motorIndex)
+{
+    if (motors[motorIndex].goalPosition < motors[motorIndex].motor.position)
+    {
+        return -1;
+    }
+    else
+    {
+        return 1;
+    }
+}
+
+void ManagerMotor_MotorIncrement(uint8_t motorIndex, int8_t direction)
+{
+    if (motorIndex == MMOT_MOTOR_3)
+    {
+        motors[motorIndex].nextPosition += direction * MOTOR3_STEP;
+    }
+    else
+    {
+        motors[motorIndex].nextPosition += direction * MOTOR_STEP;
+    }
+}
+
+/********************************************
+ * Security commands and verificartions
+ ********************************************/
+void ManagerMotor_WaitingSecurity()
+{
+    if (managerMotor.securityPass)
+    {
+        managerMotor.state = MMOT_STATE_START_MOTORS;
+    }
+}
+
+bool ManagerMotor_IsWaitingSecurity()
+{
+    if (managerMotor.state == MMOT_STATE_WAITING_SECURITY)
+    {
+        return true;
+    }
+    return false;
 }
 
 void ManagerMotor_VerifyMotorsConnection()
@@ -480,88 +592,27 @@ bool ManagerMotor_VerifyMotorState(uint8_t motorIndex)
     return verif;
 }
 
-void ManagerMotor_SetMotorGoal(uint8_t motorIndex, float goal)
+void ManagerMotor_SecurityPassed()
 {
-    motors[motorIndex].goalPosition = goal;
+    managerMotor.securityPass = true;
 }
 
-Motor* ManagerMotor_GetMotorData(uint8_t motorIndex)
+void ManagerMotor_DisableMotors()
 {
-    return &motors[motorIndex].motor;
+#ifndef MMOT_DEV_MOTOR_1_DISABLE
+    PeriphMotors_Disable(&motors[MMOT_MOTOR_1].motor);
+#endif
+#ifndef MMOT_DEV_MOTOR_2_DISABLE
+    PeriphMotors_Disable(&motors[MMOT_MOTOR_2].motor);
+#endif
+#ifndef MMOT_DEV_MOTOR_3_DISABLE
+    PeriphMotors_Disable(&motors[MMOT_MOTOR_3].motor);
+#endif
 }
 
-bool ManagerMotor_IsGoalStateReady(uint8_t motorIndex)
-{
-    return motors[motorIndex]
-        .goalReady;  // motor is ready when it has reached it's command
-}
-
-void ManagerMotor_CalculateNextPositions()
-{
-    if (fabsf(motors[MMOT_MOTOR_1].motor.position -
-              motors[MMOT_MOTOR_1].goalPosition) > POSITION_TOL &&
-        motors[MMOT_MOTOR_1].goalReady)
-    {
-        ManagerMotor_MotorIncrement(
-            MMOT_MOTOR_1, ManagerMotor_GetMotorDirection(MMOT_MOTOR_1));
-    }
-    else
-    {
-        motors[MMOT_MOTOR_1].goalReady    = false;  // Motor reached his goal
-        motors[MMOT_MOTOR_1].goalPosition = motors[MMOT_MOTOR_1].motor.position;
-    }
-
-    if (fabsf(motors[MMOT_MOTOR_2].motor.position -
-              motors[MMOT_MOTOR_2].goalPosition) > POSITION_TOL &&
-        motors[MMOT_MOTOR_2].goalReady)
-    {
-        ManagerMotor_MotorIncrement(
-            MMOT_MOTOR_2, ManagerMotor_GetMotorDirection(MMOT_MOTOR_2));
-    }
-    else
-    {
-        motors[MMOT_MOTOR_2].goalReady    = false;
-        motors[MMOT_MOTOR_2].goalPosition = motors[MMOT_MOTOR_2].motor.position;
-    }
-
-    if (fabsf(motors[MMOT_MOTOR_3].motor.position -
-              motors[MMOT_MOTOR_3].goalPosition) > POSITION_TOL &&
-        motors[MMOT_MOTOR_3].goalReady)
-    {
-        ManagerMotor_MotorIncrement(
-            MMOT_MOTOR_3, ManagerMotor_GetMotorDirection(MMOT_MOTOR_3));
-    }
-    else
-    {
-        motors[MMOT_MOTOR_3].goalReady    = false;
-        motors[MMOT_MOTOR_3].goalPosition = motors[MMOT_MOTOR_3].motor.position;
-    }
-}
-
-int8_t ManagerMotor_GetMotorDirection(uint8_t motorIndex)
-{
-    if (motors[motorIndex].goalPosition < motors[motorIndex].motor.position)
-    {
-        return -1;
-    }
-    else
-    {
-        return 1;
-    }
-}
-
-void ManagerMotor_MotorIncrement(uint8_t motorIndex, int8_t direction)
-{
-    if (motorIndex == MMOT_MOTOR_3)
-    {
-        motors[motorIndex].nextPosition += direction * MOTOR3_STEP;
-    }
-    else
-    {
-        motors[motorIndex].nextPosition += direction * MOTOR_STEP;
-    }
-}
-
+/********************************************
+ * Manager motor state
+ ********************************************/
 bool ManagerMotor_IsReady2Move()
 {
     if (managerMotor.state == MMOT_STATE_READY2MOVE)
@@ -569,28 +620,6 @@ bool ManagerMotor_IsReady2Move()
         return true;
     }
     return false;
-}
-
-void ManagerMotor_SetMotorGoalState(uint8_t motorIndex, bool readyState)
-{
-    motors[motorIndex].goalReady = readyState;
-}
-
-/*
- * Security commands
- */
-bool ManagerMotor_IsWaitingSecurity()
-{
-    if (managerMotor.state == MMOT_STATE_WAITING_SECURITY)
-    {
-        return true;
-    }
-    return false;
-}
-
-void ManagerMotor_SecurityPassed()
-{
-    managerMotor.securityPass = true;
 }
 
 void ManagerMotor_SetError()
@@ -611,6 +640,10 @@ uint8_t ManagerMotor_GetState()
 {
     return managerMotor.state;
 }
+
+/********************************************
+ * Origin shift
+ ********************************************/
 
 void ManagerMotor_ApplyOriginShift(uint8_t motorIndex)
 {
