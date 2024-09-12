@@ -6,7 +6,6 @@ import GraphFilters from "../components/GraphFilters.tsx";
 import { DateRangePicker } from "rsuite";
 import "rsuite/DateRangePicker/styles/index.css";
 import { DateRange } from "rsuite/esm/DateRangePicker/types.js";
-import { supaClient } from "../hooks/supa-client.ts";
 import { ChartData } from "chart.js";
 import {
   Button,
@@ -16,8 +15,9 @@ import {
   Paper,
   Typography,
 } from "@mui/material";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import Report from "../components/Report.tsx";
+import CustomScrollbar from "../components/CustomScrollbars.tsx";
+// import { PDFDownloadLink } from "@react-pdf/renderer";
+// import Report from "../components/Report.tsx";
 
 export interface dataStructure {
   angle_max: number;
@@ -54,20 +54,34 @@ export default function Activity() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (selectedPatient?.length === 0 || !date) return;
-      const { data, error } = await supaClient
-        .from("exercise_data")
-        .select("*")
-        .eq("user_id", selectedPatient?.[0].user_id)
-        .gte("date", date[0].toISOString())
-        .lte("date", date[1].toISOString());
+      if (!selectedPatient || selectedPatient.length === 0 || !date) return;
 
-      if (error) {
+      const userId = selectedPatient[0].user_id;
+      const startDate = date[0].toISOString();
+      const endDate = date[1].toISOString();
+
+      const url = `http://localhost:3001/exercise-data/${userId}?start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`;
+
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          setData(result);
+        } else {
+          console.error(result.message);
+        }
+      } catch (error) {
         console.error(error.message);
-      } else {
-        setData(data);
       }
     };
+
     fetchData();
   }, [selectedPatient, date]);
 
@@ -253,103 +267,109 @@ export default function Activity() {
           setIsGraphFilterOpen={setIsGraphFilterOpen}
         />
       )}
-      <div className="overflow-auto max-h-[calc(100vh-190px)]">
-        <div className="flex justify-center">
-          {dataset1 && selectedPatient?.length !== 0 && date && graphType && (
-            <div className="mt-4 basis-full">
-              <LineChart
-                type="activity"
-                setChartImage={setChartImage1}
-                chartData={dataset1}
-                title={title1}
-              />
-            </div>
-          )}
-          {dataset2 && selectedPatient?.length !== 0 && date && graphType && (
-            <div className="mt-4 basis-full">
-              <LineChart type="activity" chartData={dataset2} title={title2} />
-            </div>
-          )}
-        </div>
-
-        {selectedPatient.length !== 0 && date && graphType && (
-          <Box
-            justifyContent="center"
-            sx={{ display: "flex", margin: "15px", gap: "15px" }}
-          >
-            <ThemeProvider
-              theme={createTheme({
-                palette: {
-                  mode: "light",
-                  primary: { main: "rgb(102, 157, 246)" },
-                  background: { paper: "rgb(235, 235, 235)" },
-                },
-              })}
-            >
-              <Paper sx={{ width: "25vw" }}>
-                <div className="divide-x-2 flex divide-solid divide-gray-500 h-full">
-                  <Typography
-                    className="text-gray-500 p-2 content-center"
-                    variant="h5"
-                  >
-                    Missing exercise days
-                  </Typography>
-                  {missingDates.map((element, index) => (
-                    <Typography
-                      key={index}
-                      variant="body1"
-                      className="text-black p-3 content-center text-nowrap"
-                    >
-                      {element}
-                    </Typography>
-                  ))}
-                </div>
-              </Paper>
-            </ThemeProvider>
-            <ThemeProvider
-              theme={createTheme({
-                palette: {
-                  mode: "light",
-                  primary: { main: "rgb(102, 157, 246)" },
-                  background: { paper: "rgb(235, 235, 235)" },
-                },
-              })}
-            >
-              <Paper sx={{ width: "25vw" }}>
-                <div className="divide-x-2 flex divide-solid divide-gray-500">
-                  <Typography className="text-gray-500 p-2" variant="h5">
-                    Maximum amplitude average in dates selection
-                  </Typography>
-                  <Typography
-                    className="text-black p-3 content-center"
-                    variant="body1"
-                  >
-                    {averageAmplitude} degrees
-                  </Typography>
-                </div>
-              </Paper>
-            </ThemeProvider>
-          </Box>
-        )}
-        {selectedPatient?.length !== 0 && date && graphType && (
-          <div className="flex mr-4 justify-end">
-            <Button className="!bg-blue-600" variant="contained">
-              <PDFDownloadLink
-                document={
-                  <Report
-                    selectedPatient={selectedPatient}
-                    chartImage1={chartImage1}
-                    data={data}
-                    date={date}
-                  />
-                }
-                fileName={`report_${selectedPatient?.[0].email}_${Date.now()}.pdf`}
-              >
-                Download Report
-              </PDFDownloadLink>
-            </Button>
+      <div className="overflow-auto h-screen max-h-[calc(100vh-190px)]">
+        <CustomScrollbar>
+          <div className="flex justify-center">
+            {dataset1 && selectedPatient?.length !== 0 && date && graphType && (
+              <div className="mt-4 basis-full">
+                <LineChart
+                  type="activity"
+                  setChartImage={setChartImage1}
+                  chartData={dataset1}
+                  title={title1}
+                />
+              </div>
+            )}
+            {dataset2 && selectedPatient?.length !== 0 && date && graphType && (
+              <div className="mt-4 basis-full">
+                <LineChart
+                  type="activity"
+                  chartData={dataset2}
+                  title={title2}
+                />
+              </div>
+            )}
           </div>
-        )}
+
+          {selectedPatient.length !== 0 && date && graphType && (
+            <Box
+              justifyContent="center"
+              sx={{ display: "flex", margin: "15px", gap: "15px" }}
+            >
+              <ThemeProvider
+                theme={createTheme({
+                  palette: {
+                    mode: "light",
+                    primary: { main: "rgb(102, 157, 246)" },
+                    background: { paper: "rgb(235, 235, 235)" },
+                  },
+                })}
+              >
+                <Paper sx={{ width: "25vw" }}>
+                  <div className="divide-x-2 flex divide-solid divide-gray-500 h-full">
+                    <Typography
+                      className="text-gray-500 p-2 content-center"
+                      variant="h5"
+                    >
+                      Missing exercise days
+                    </Typography>
+                    {missingDates.map((element, index) => (
+                      <Typography
+                        key={index}
+                        variant="body1"
+                        className="text-black p-3 content-center text-nowrap"
+                      >
+                        {element}
+                      </Typography>
+                    ))}
+                  </div>
+                </Paper>
+              </ThemeProvider>
+              <ThemeProvider
+                theme={createTheme({
+                  palette: {
+                    mode: "light",
+                    primary: { main: "rgb(102, 157, 246)" },
+                    background: { paper: "rgb(235, 235, 235)" },
+                  },
+                })}
+              >
+                <Paper sx={{ width: "25vw" }}>
+                  <div className="divide-x-2 flex divide-solid divide-gray-500">
+                    <Typography className="text-gray-500 p-2" variant="h5">
+                      Maximum amplitude average in dates selection
+                    </Typography>
+                    <Typography
+                      className="text-black p-3 content-center"
+                      variant="body1"
+                    >
+                      {averageAmplitude} degrees
+                    </Typography>
+                  </div>
+                </Paper>
+              </ThemeProvider>
+            </Box>
+          )}
+        </CustomScrollbar>
+        {/* {selectedPatient?.length !== 0 && date && graphType && (
+            <div className="flex mr-4 justify-end">
+              <Button className="!bg-blue-600" variant="contained">
+                <PDFDownloadLink
+                  document={
+                    <Report
+                      selectedPatient={selectedPatient}
+                      chartImage1={chartImage1}
+                      data={data}
+                      date={date}
+                    />
+                  }
+                  fileName={`report_${selectedPatient?.[0].email}_${Date.now()}.pdf`}
+                >
+                  Download Report
+                </PDFDownloadLink>
+              </Button>
+            </div>
+          )} */}
       </div>
     </div>
   );

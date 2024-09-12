@@ -5,11 +5,13 @@ import {
   updateUserProfile,
   downloadAvatar,
   uploadAvatar,
+  getAdmins,
 } from "../controllers/userController";
 
 const router = express.Router();
 const upload = multer();
 
+router.get("/admin", getAdmins);
 router.get("/:userId", getUserProfile);
 router.put("/:userId", updateUserProfile);
 router.get("/avatar/:userId", downloadAvatar);

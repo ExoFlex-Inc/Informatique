@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 const usePlanData = (profile: any) => {
-  const [planData, setPlanData] = useState(null);
+  const [planData, setPlanData] = useState<any>(null);
   const [get_plan, setRetryGet] = useState(true);
 
   useEffect(() => {
@@ -34,7 +34,9 @@ const usePlanData = (profile: any) => {
         }
       } catch (error) {
         console.error("An error occurred:", error);
-        window.alert("An error occurred: " + error);
+        window.alert(
+          "An error occurred, couldn't retrieved the plan. Have you defined a plan for this user?",
+        );
         setRetryGet(true);
       }
     };
