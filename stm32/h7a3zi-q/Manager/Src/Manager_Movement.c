@@ -303,8 +303,7 @@ void ManagerMovement_ManualCmdEversion(int8_t direction)
     if (managerMovement.state == MMOV_STATE_MANUAL ||
         managerMovement.state == MMOV_STATE_HOMING)
     {
-        ManagerMovement_ManualIncrement(MMOT_MOTOR_1, 1 * direction);
-        ManagerMovement_ManualIncrement(MMOT_MOTOR_2, 1 * direction);
+        ManagerMovement_ManualIncrement(MMOT_MOTOR_2, direction);
     }
 }
 
@@ -313,8 +312,7 @@ void ManagerMovement_ManualCmdDorsiflexion(int8_t direction)
     if (managerMovement.state == MMOV_STATE_MANUAL ||
         managerMovement.state == MMOV_STATE_HOMING)
     {
-        ManagerMovement_ManualIncrement(MMOT_MOTOR_1, -1 * direction);
-        ManagerMovement_ManualIncrement(MMOT_MOTOR_2, 1 * direction);
+        ManagerMovement_ManualIncrement(MMOT_MOTOR_1, direction);
     }
 }
 
@@ -323,7 +321,7 @@ void ManagerMovement_ManualCmdExtension(int8_t direction)
     if (managerMovement.state == MMOV_STATE_MANUAL ||
         managerMovement.state == MMOV_STATE_HOMING)
     {
-        ManagerMovement_ManualIncrement(MMOT_MOTOR_3, 1 * direction);
+        ManagerMovement_ManualIncrement(MMOT_MOTOR_3, direction);
     }
 }
 
@@ -364,35 +362,21 @@ void ManagerMovement_ManualIncrement(uint8_t motorIndex, int8_t factor)
 
 void ManagerMovement_AutoMovement(uint8_t mouvType, float Position)
 {
-    float deltaPos = Position - motorsData[MMOT_MOTOR_2]->position;
-
-    if (mouvType == MMOV_EVERSION)  // Set goalPosition for motor 1 and 2 for
-                                    // MMOV_DORSIFLEXION
+    if (mouvType == MMOV_DORSIFLEXION)  // Set goalPosition for motor 1 for
+                                        // MMOV_DORSIFLEXION
     {
-        managerMovement.motorsNextGoal[MMOT_MOTOR_2] = Position;
-        ManagerMotor_SetMotorGoal(MMOT_MOTOR_2,
-                                  managerMovement.motorsNextGoal[MMOT_MOTOR_2]);
-        ManagerMotor_SetMotorGoalState(MMOT_MOTOR_2, true);
-
-        managerMovement.motorsNextGoal[MMOT_MOTOR_1] =
-            motorsData[MMOT_MOTOR_1]->position + deltaPos;
+        managerMovement.motorsNextGoal[MMOT_MOTOR_1] = Position;
         ManagerMotor_SetMotorGoal(MMOT_MOTOR_1,
                                   managerMovement.motorsNextGoal[MMOT_MOTOR_1]);
         ManagerMotor_SetMotorGoalState(MMOT_MOTOR_1, true);
     }
-    else if (mouvType == MMOV_DORSIFLEXION)  // Set goalPosition for motor 1 and
-                                             // 2 for MMOV_EVERSION
+    else if (mouvType == MMOV_EVERSION)  // Set goalPosition for motor 2 and
+                                         // for MMOV_EVERSION
     {
         managerMovement.motorsNextGoal[MMOT_MOTOR_2] = Position;
         ManagerMotor_SetMotorGoal(MMOT_MOTOR_2,
                                   managerMovement.motorsNextGoal[MMOT_MOTOR_2]);
         ManagerMotor_SetMotorGoalState(MMOT_MOTOR_2, true);
-
-        managerMovement.motorsNextGoal[MMOT_MOTOR_1] =
-            motorsData[MMOT_MOTOR_1]->position - deltaPos;
-        ManagerMotor_SetMotorGoal(MMOT_MOTOR_1,
-                                  managerMovement.motorsNextGoal[MMOT_MOTOR_1]);
-        ManagerMotor_SetMotorGoalState(MMOT_MOTOR_1, true);
     }
     else if (mouvType ==
              MMOV_EXTENSION)  // Set goalPosition for motor 3 for MMOV_EXTENSION
@@ -747,6 +731,8 @@ void ManagerMovement_HomingEversion()
                     MMOV_EVERSION,
                     ManagerMovement_GetMiddlePos(leftPos, rightPos)))
             {
+                ManagerMovement_SetOrigins(MMOT_MOTOR_2);
+
                 evLeftLimitHit  = false;
                 evRightLimitHit = false;
 
@@ -771,7 +757,7 @@ void ManagerMovement_HomingDorsiflexion()
     {
         if (!dorUpLimitHit)
         {
-            leftPos       = motorsData[MMOT_MOTOR_2]->position;
+            leftPos       = motorsData[MMOT_MOTOR_1]->position;
             dorUpLimitHit = true;
         }
 
@@ -779,7 +765,7 @@ void ManagerMovement_HomingDorsiflexion()
         {
             if (!dorDownLimitHit)
             {
-                rightPos        = motorsData[MMOT_MOTOR_2]->position;
+                rightPos        = motorsData[MMOT_MOTOR_1]->position;
                 dorDownLimitHit = true;
             }
 
@@ -787,8 +773,7 @@ void ManagerMovement_HomingDorsiflexion()
                     MMOV_DORSIFLEXION,
                     ManagerMovement_GetMiddlePos(leftPos, rightPos)))
             {
-                // ManagerMovement_SetOrigins(MMOT_MOTOR_1);
-                ManagerMovement_SetOrigins(MMOT_MOTOR_2);
+                ManagerMovement_SetOrigins(MMOT_MOTOR_1);
 
                 dorUpLimitHit   = false;
                 dorDownLimitHit = false;
