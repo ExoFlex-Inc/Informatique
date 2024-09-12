@@ -149,9 +149,9 @@ void ManagerMotor_Reset()
 
     // Set Kp Kd
     // AK 10-9
-    motors[MMOT_MOTOR_1].kp = 500.0f;
+    motors[MMOT_MOTOR_1].kp = 100.0f;
     motors[MMOT_MOTOR_1].kd = 5.0f;
-    motors[MMOT_MOTOR_2].kp = 500.0f;
+    motors[MMOT_MOTOR_2].kp = 100.0f;
     motors[MMOT_MOTOR_2].kd = 5.0f;
     // AK 80-64
     motors[MMOT_MOTOR_3].kp = 500.0f;
@@ -428,13 +428,13 @@ void ManagerMotor_SendToMotors()
 	{
 		PeriphMotors_Move(&motors[MMOT_MOTOR_1].motor,
 				                      0, 0, motors[MMOT_MOTOR_1].goalTorque,
-				                      motors[MMOT_MOTOR_1].kp, motors[MMOT_MOTOR_1].kd);
+				                      0, 0);
 	}
 	else if (motors[MMOT_MOTOR_1].controlType == MMOT_CONTROL_SPEED)
 	{
 		PeriphMotors_Move(&motors[MMOT_MOTOR_1].motor,
 				                      0, motors[MMOT_MOTOR_1].goalSpeed, 0,
-				                      motors[MMOT_MOTOR_1].kp, motors[MMOT_MOTOR_1].kd);
+				                      0, motors[MMOT_MOTOR_1].kd);
 	}
 #endif
 
@@ -449,13 +449,13 @@ void ManagerMotor_SendToMotors()
 	{
 		PeriphMotors_Move(&motors[MMOT_MOTOR_2].motor,
 				                      0, 0, motors[MMOT_MOTOR_2].goalTorque,
-				                      motors[MMOT_MOTOR_2].kp, motors[MMOT_MOTOR_2].kd);
+				                      0, 0);
 	}
 	else if (motors[MMOT_MOTOR_2].controlType == MMOT_CONTROL_SPEED)
 	{
 		PeriphMotors_Move(&motors[MMOT_MOTOR_2].motor,
 				                      0, motors[MMOT_MOTOR_2].goalSpeed, 0,
-				                      motors[MMOT_MOTOR_2].kp, motors[MMOT_MOTOR_2].kd);
+				                      0, motors[MMOT_MOTOR_2].kd);
 	}
 #endif
 
@@ -474,13 +474,13 @@ void ManagerMotor_SendToMotors()
 	{
 		PeriphMotors_Move(&motors[MMOT_MOTOR_3].motor,
 				                      0, 0, motors[MMOT_MOTOR_3].goalTorque,
-				                      motors[MMOT_MOTOR_3].kp, motors[MMOT_MOTOR_3].kd);
+				                      0, 0);
 	}
 	else if (motors[MMOT_MOTOR_3].controlType == MMOT_CONTROL_SPEED)
 	{
 		PeriphMotors_Move(&motors[MMOT_MOTOR_3].motor,
 				                      0, motors[MMOT_MOTOR_3].goalSpeed, 0,
-				                      motors[MMOT_MOTOR_3].kp, motors[MMOT_MOTOR_3].kd);
+				                      0, motors[MMOT_MOTOR_3].kd);
 	}
 #endif
 }
