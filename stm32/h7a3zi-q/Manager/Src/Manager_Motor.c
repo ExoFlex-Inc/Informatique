@@ -44,8 +44,11 @@
 typedef struct
 {
     Motor    motor;
+    uint8_t  controlType;
     float    nextPosition;
     float    goalPosition;
+    float    goalTorque;
+    float    goalSpeed;
     float    kp;
     float    kd;
     uint8_t  initState;
@@ -130,8 +133,11 @@ void ManagerMotor_Reset()
     // Init motor control info
     for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
     {
+        motors[i].controlType  = MMOT_CONTROL_POSITION;
         motors[i].nextPosition = 0.0;
         motors[i].goalPosition = 0.0;
+        motors[i].goalTorque   = 0.0;
+        motors[i].goalSpeed    = 0.0;
         motors[i].detected     = false;
         motors[i].goalReady    = false;
         motors[i].lastMsgTime  = 0;
@@ -142,9 +148,9 @@ void ManagerMotor_Reset()
 
     // Set Kp Kd
     // AK 10-9
-    motors[MMOT_MOTOR_1].kp = 500.0f;
+    motors[MMOT_MOTOR_1].kp = 100.0f;
     motors[MMOT_MOTOR_1].kd = 5.0f;
-    motors[MMOT_MOTOR_2].kp = 500.0f;
+    motors[MMOT_MOTOR_2].kp = 100.0f;
     motors[MMOT_MOTOR_2].kd = 5.0f;
     // AK 80-64
     motors[MMOT_MOTOR_3].kp = 500.0f;
@@ -205,8 +211,6 @@ void ManagerMotor_Task()
     }
 }
 
-
-
 /********************************************
  * Motor data reception
  ********************************************/
@@ -229,8 +233,6 @@ void ManagerMotor_ReceiveFromMotors()
         }
     }
 }
-
-
 
 /********************************************
  * Motor initialisation
@@ -360,69 +362,129 @@ void ManagerMotor_StartMotor(uint8_t motorIndex)
 
 void ManagerMotor_CalculateNextPositions()
 {
-    if (fabsf(motors[MMOT_MOTOR_1].motor.position -
-              motors[MMOT_MOTOR_1].goalPosition) > POSITION_TOL &&
-        motors[MMOT_MOTOR_1].goalReady)
+    if (motors[MMOT_MOTOR_1].controlType == MMOT_CONTROL_POSITION)
     {
-        ManagerMotor_MotorIncrement(
-            MMOT_MOTOR_1, ManagerMotor_GetMotorDirection(MMOT_MOTOR_1));
-    }
-    else
-    {
-        motors[MMOT_MOTOR_1].goalReady    = false;  // Motor reached his goal
-        motors[MMOT_MOTOR_1].goalPosition = motors[MMOT_MOTOR_1].motor.position;
-    }
-
-    if (fabsf(motors[MMOT_MOTOR_2].motor.position -
-              motors[MMOT_MOTOR_2].goalPosition) > POSITION_TOL &&
-        motors[MMOT_MOTOR_2].goalReady)
-    {
-        ManagerMotor_MotorIncrement(
-            MMOT_MOTOR_2, ManagerMotor_GetMotorDirection(MMOT_MOTOR_2));
-    }
-    else
-    {
-        motors[MMOT_MOTOR_2].goalReady    = false;
-        motors[MMOT_MOTOR_2].goalPosition = motors[MMOT_MOTOR_2].motor.position;
+        if (fabsf(motors[MMOT_MOTOR_1].motor.position -
+                  motors[MMOT_MOTOR_1].goalPosition) > POSITION_TOL &&
+            motors[MMOT_MOTOR_1].goalReady)
+        {
+            ManagerMotor_MotorIncrement(
+                MMOT_MOTOR_1, ManagerMotor_GetMotorDirection(MMOT_MOTOR_1));
+        }
+        else
+        {
+            motors[MMOT_MOTOR_1].goalReady = false;  // Motor reached his goal
+            motors[MMOT_MOTOR_1].goalPosition =
+                motors[MMOT_MOTOR_1].motor.position;
+        }
     }
 
-    if (fabsf(motors[MMOT_MOTOR_3].motor.position -
-              motors[MMOT_MOTOR_3].goalPosition) > POSITION_TOL &&
-        motors[MMOT_MOTOR_3].goalReady)
+    if (motors[MMOT_MOTOR_2].controlType == MMOT_CONTROL_POSITION)
     {
-        ManagerMotor_MotorIncrement(
-            MMOT_MOTOR_3, ManagerMotor_GetMotorDirection(MMOT_MOTOR_3));
+        if (fabsf(motors[MMOT_MOTOR_2].motor.position -
+                  motors[MMOT_MOTOR_2].goalPosition) > POSITION_TOL &&
+            motors[MMOT_MOTOR_2].goalReady)
+        {
+            ManagerMotor_MotorIncrement(
+                MMOT_MOTOR_2, ManagerMotor_GetMotorDirection(MMOT_MOTOR_2));
+        }
+        else
+        {
+            motors[MMOT_MOTOR_2].goalReady = false;
+            motors[MMOT_MOTOR_2].goalPosition =
+                motors[MMOT_MOTOR_2].motor.position;
+        }
     }
-    else
+
+    if (motors[MMOT_MOTOR_3].controlType == MMOT_CONTROL_POSITION)
     {
-        motors[MMOT_MOTOR_3].goalReady    = false;
-        motors[MMOT_MOTOR_3].goalPosition = motors[MMOT_MOTOR_3].motor.position;
+        if (fabsf(motors[MMOT_MOTOR_3].motor.position -
+                  motors[MMOT_MOTOR_3].goalPosition) > POSITION_TOL &&
+            motors[MMOT_MOTOR_3].goalReady)
+        {
+            ManagerMotor_MotorIncrement(
+                MMOT_MOTOR_3, ManagerMotor_GetMotorDirection(MMOT_MOTOR_3));
+        }
+        else
+        {
+            motors[MMOT_MOTOR_3].goalReady = false;
+            motors[MMOT_MOTOR_3].goalPosition =
+                motors[MMOT_MOTOR_3].motor.position;
+        }
     }
 }
 
 void ManagerMotor_SendToMotors()
 {
 #ifndef MMOT_DEV_MOTOR_1_DISABLE
-    PeriphMotors_Move(&motors[MMOT_MOTOR_1].motor,
-                      motors[MMOT_MOTOR_1].nextPosition, 0, 0,
-                      motors[MMOT_MOTOR_1].kp, motors[MMOT_MOTOR_1].kd);
+
+    if (motors[MMOT_MOTOR_1].controlType == MMOT_CONTROL_POSITION)
+    {
+        PeriphMotors_Move(&motors[MMOT_MOTOR_1].motor,
+                          motors[MMOT_MOTOR_1].nextPosition, 0, 0,
+                          motors[MMOT_MOTOR_1].kp, motors[MMOT_MOTOR_1].kd);
+    }
+    else if (motors[MMOT_MOTOR_1].controlType == MMOT_CONTROL_TORQUE)
+    {
+        PeriphMotors_Move(&motors[MMOT_MOTOR_1].motor, 0, 0,
+                          motors[MMOT_MOTOR_1].goalTorque, 0, 0);
+    }
+    else if (motors[MMOT_MOTOR_1].controlType == MMOT_CONTROL_SPEED)
+    {
+        PeriphMotors_Move(&motors[MMOT_MOTOR_1].motor, 0,
+                          motors[MMOT_MOTOR_1].goalSpeed, 0, 0,
+                          motors[MMOT_MOTOR_1].kd);
+    }
 #endif
+
 #ifndef MMOT_DEV_MOTOR_2_DISABLE
-    PeriphMotors_Move(&motors[MMOT_MOTOR_2].motor,
-                      motors[MMOT_MOTOR_2].nextPosition, 0, 0,
-                      motors[MMOT_MOTOR_2].kp, motors[MMOT_MOTOR_2].kd);
+    if (motors[MMOT_MOTOR_2].controlType == MMOT_CONTROL_POSITION)
+    {
+        PeriphMotors_Move(&motors[MMOT_MOTOR_2].motor,
+                          motors[MMOT_MOTOR_2].nextPosition, 0, 0,
+                          motors[MMOT_MOTOR_2].kp, motors[MMOT_MOTOR_2].kd);
+    }
+    else if (motors[MMOT_MOTOR_2].controlType == MMOT_CONTROL_TORQUE)
+    {
+        PeriphMotors_Move(&motors[MMOT_MOTOR_2].motor, 0, 0,
+                          motors[MMOT_MOTOR_2].goalTorque, 0, 0);
+    }
+    else if (motors[MMOT_MOTOR_2].controlType == MMOT_CONTROL_SPEED)
+    {
+        PeriphMotors_Move(&motors[MMOT_MOTOR_2].motor, 0,
+                          motors[MMOT_MOTOR_2].goalSpeed, 0, 0,
+                          motors[MMOT_MOTOR_2].kd);
+    }
 #endif
+
 #ifndef MMOT_DEV_MOTOR_3_DISABLE
     PeriphMotors_Move(&motors[MMOT_MOTOR_3].motor,
                       motors[MMOT_MOTOR_3].nextPosition, 0, 0,
                       motors[MMOT_MOTOR_3].kp, motors[MMOT_MOTOR_3].kd);
+
+    if (motors[MMOT_MOTOR_3].controlType == MMOT_CONTROL_POSITION)
+    {
+        PeriphMotors_Move(&motors[MMOT_MOTOR_3].motor,
+                          motors[MMOT_MOTOR_3].nextPosition, 0, 0,
+                          motors[MMOT_MOTOR_3].kp, motors[MMOT_MOTOR_3].kd);
+    }
+    else if (motors[MMOT_MOTOR_3].controlType == MMOT_CONTROL_TORQUE)
+    {
+        PeriphMotors_Move(&motors[MMOT_MOTOR_3].motor, 0, 0,
+                          motors[MMOT_MOTOR_3].goalTorque, 0, 0);
+    }
+    else if (motors[MMOT_MOTOR_3].controlType == MMOT_CONTROL_SPEED)
+    {
+        PeriphMotors_Move(&motors[MMOT_MOTOR_3].motor, 0,
+                          motors[MMOT_MOTOR_3].goalSpeed, 0, 0,
+                          motors[MMOT_MOTOR_3].kd);
+    }
 #endif
 }
 
 /********************************************
  * Goal and movements SET/GET
  ********************************************/
-
 
 Motor* ManagerMotor_GetMotorData(uint8_t motorIndex)
 {
@@ -435,16 +497,26 @@ bool ManagerMotor_IsGoalStateReady(uint8_t motorIndex)
         .goalReady;  // motor is ready when it has reached it's command
 }
 
-void ManagerMotor_SetMotorGoal(uint8_t motorIndex, float goal)
+void ManagerMotor_SetMotorGoal(uint8_t motorIndex, uint8_t controlType,
+                               float goal)
 {
-    motors[motorIndex].goalPosition = goal;
+    if (controlType == MMOT_CONTROL_POSITION)
+    {
+        motors[motorIndex].controlType  = MMOT_CONTROL_POSITION;
+        motors[motorIndex].goalPosition = goal;
+        motors[motorIndex].goalReady    = true;
+    }
+    else if (controlType == MMOT_CONTROL_TORQUE)
+    {
+        motors[motorIndex].controlType = MMOT_CONTROL_TORQUE;
+        motors[motorIndex].goalTorque  = goal;
+    }
+    else if (controlType == MMOT_CONTROL_SPEED)
+    {
+        motors[motorIndex].controlType = MMOT_CONTROL_SPEED;
+        motors[motorIndex].goalSpeed   = goal;
+    }
 }
-
-void ManagerMotor_SetMotorGoalState(uint8_t motorIndex, bool readyState)
-{
-    motors[motorIndex].goalReady = readyState;
-}
-
 
 int8_t ManagerMotor_GetMotorDirection(uint8_t motorIndex)
 {
