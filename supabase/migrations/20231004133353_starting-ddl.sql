@@ -32,6 +32,7 @@ CREATE TABLE user_profiles (
   speciality TEXT CHECK (char_length(speciality) > 0 AND char_length(speciality) <= 50 AND speciality !~ '\d'),
   phone_number TEXT CHECK (char_length(phone_number) > 0 AND char_length(phone_number) <= 50 AND phone_number ~ '\d'),
   email TEXT CHECK (char_length(email) > 0 AND char_length(email) <= 50),
+  fcm_token TEXT,
   avatar_url TEXT,
   password TEXT CHECK (char_length(password) > 0)
 );
@@ -73,6 +74,13 @@ CREATE TABLE exercise_data (
   actual_total_time float,
   rated_pain int
 
+);
+
+create table notifications (
+  id uuid not null default gen_random_uuid(),
+  user_id uuid references auth.users(id) not null,
+  created_at timestamp with time zone not null default now(),
+  body text not null
 );
 
 /*

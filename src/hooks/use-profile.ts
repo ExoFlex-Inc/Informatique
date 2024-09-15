@@ -7,6 +7,7 @@ export interface UserProfile {
   user_id: string;
   permissions: string;
   avatar_url?: string;
+  fcm_token?: string;
 }
 
 export function useUserProfile() {

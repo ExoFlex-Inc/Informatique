@@ -14,7 +14,9 @@ export default defineConfig({
       process.env.SUPABASE_ANON_KEY,
     ),
   },
-  plugins: [react()],
+  plugins: [
+    react()
+  ],
   server: {
     hmr: {},
     port: 1337,

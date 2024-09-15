@@ -35,6 +35,7 @@ export const updateUserProfile = async (req: Request, res: Response) => {
       speciality: newProfile.speciality,
       permissions: newProfile.permissions,
       avatar_url: newProfile.avatar_url,
+      fcm_token: newProfile.fcm_token,
     },
   });
 
