@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import dotenv from "dotenv";
+import { VitePWA } from 'vite-plugin-pwa';
 
 dotenv.config();
 
@@ -15,7 +16,16 @@ export default defineConfig({
     ),
   },
   plugins: [
-    react()
+    react(),
+    VitePWA({
+      mode: 'development',
+      injectManifest: {
+        globPatterns: ['**/*'],
+      },
+      strategies: 'injectManifest',
+      srcDir: 'public',
+      filename: 'firebase-messaging-sw.js',
+    })
   ],
   server: {
     hmr: {},

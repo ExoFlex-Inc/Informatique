@@ -4,7 +4,7 @@ import { useTheme } from "@emotion/react";
 import { useSupabaseSession } from "../hooks/use-session.ts";
 import { useUserProfile } from "../hooks/use-profile.ts";
 import { getToken } from "firebase/messaging";
-import { fireMessaging } from "../utils/firebaseClient.ts";
+import { messaging } from "../utils/firebaseClient.ts";
 
 export default function Login() {
   const [showModal, setShowModal] = useState(false);
@@ -41,20 +41,32 @@ export default function Login() {
   
       setSession(data.session.access_token, data.session.refresh_token); //TODO Add Loading page while this and user profile loads
   
-      // Retrieve FCM token after successful login
-      let fcmToken = "";
+      // Register the service worker
+      const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+      console.log('Service Worker registered with scope:', registration.scope);
+
+      // Request permission and get FCM token
+      let fcmToken = '';
       try {
-        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-        fcmToken = await getToken(fireMessaging, {
-          vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-          serviceWorkerRegistration: registration,
-        });
-  
-        if (!fcmToken) {
-          console.warn("Failed to get FCM token");
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          console.log('Notification permission granted.');
+
+          fcmToken = await getToken(messaging, {
+            vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+            serviceWorkerRegistration: registration,
+          });
+
+          if (fcmToken) {
+            console.log('FCM Token:', fcmToken);
+          } else {
+            console.warn('Failed to get FCM token');
+          }
+        } else {
+          console.warn('Notification permission not granted');
         }
       } catch (fcmError) {
-        console.error("Error fetching FCM token:", fcmError);
+        console.error('Error fetching FCM token:', fcmError);
       }
   
       // Set user profile in your app state

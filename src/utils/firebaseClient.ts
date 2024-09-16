@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getMessaging } from 'firebase/messaging';
+import { getMessaging, onMessage } from 'firebase/messaging';
 
 // Firebase configuration object
 const firebaseConfig = {
@@ -13,9 +13,9 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase app client
-const fireClient = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 
 // Initialize Firebase Messaging
-const fireMessaging = getMessaging(fireClient);
+const messaging = getMessaging(app);
 
-export { fireClient, fireMessaging };
+export { messaging, onMessage };
