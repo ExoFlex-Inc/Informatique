@@ -8,10 +8,10 @@ dotenv.config();
 export default defineConfig({
   define: {
     "process.env.SUPABASE_API_URL": JSON.stringify(
-      process.env.VITE_SUPABASE_API_URL,
+      process.env.SUPABASE_API_URL,
     ),
     "process.env.SUPABASE_ANON_KEY": JSON.stringify(
-      process.env.VITE_SUPABASE_ANON_KEY,
+      process.env.SUPABASE_ANON_KEY,
     ),
   },
   plugins: [react()],
