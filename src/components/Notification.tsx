@@ -1,7 +1,7 @@
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import { useEffect, useState, useRef } from "react";
 import { useUserProfile } from "../hooks/use-profile.ts";
-import { supaClient } from "../hooks/supa-client.ts";
+
 import {
   refuseRequest,
   acceptRequest,
@@ -35,24 +35,24 @@ const Notification = () => {
 
   const { profile } = useUserProfile();
 
-  useEffect(() => {
-    async function fetchAdminNotifications() {
-      const notificationData = await fetchNotifications(profile);
-      if (notificationData) {
-        if (notificationData.length > 0) {
-          setIsNotifications(true);
-          const clients = await Promise.all(
-            notificationData.map((element: any) =>
-              fetchClient(element.client_id),
-            ),
-          );
-          setClients(clients);
-          setRelations(notificationData);
-        }
-      }
-    }
-    fetchAdminNotifications();
-  }, []);
+  // useEffect(() => {
+  //   async function fetchAdminNotifications() {
+  //     const notificationData = await fetchNotifications(profile);
+  //     if (notificationData) {
+  //       if (notificationData.length > 0) {
+  //         setIsNotifications(true);
+  //         const clients = await Promise.all(
+  //           notificationData.map((element: any) =>
+  //             // fetchClient(element.client_id),
+  //           ),
+  //         );
+  //         setClients(clients);
+  //         setRelations(notificationData);
+  //       }
+  //     }
+  //   }
+  //   fetchAdminNotifications();
+  // }, []);
 
   useEffect(() => {
     const paths = clients.map((client) => client.avatar_url);
@@ -118,19 +118,19 @@ const Notification = () => {
     }
   }
 
-  async function acceptClientRequest(relation: any) {
-    const requestAccepted = await acceptRequest(relation);
-    if (requestAccepted) {
-      filteringNotifications(relation);
-    }
-  }
+  // async function acceptClientRequest(relation: any) {
+  //   const requestAccepted = await acceptRequest(relation);
+  //   if (requestAccepted) {
+  //     filteringNotifications(relation);
+  //   }
+  // }
 
-  async function refuseClientRequest(relation: any) {
-    const isRequestRefuse = await refuseRequest(relation);
-    if (isRequestRefuse) {
-      filteringNotifications(relation);
-    }
-  }
+  // async function refuseClientRequest(relation: any) {
+  //   const isRequestRefuse = await refuseRequest(relation);
+  //   if (isRequestRefuse) {
+  //     filteringNotifications(relation);
+  //   }
+  // }
 
   function filteringNotifications(relation: any) {
     const newClients = clients.filter((client) => {
@@ -211,17 +211,17 @@ const Notification = () => {
                         </Grid>
                         <Grid className="" item xs={12}>
                           <Button
-                            onClick={() =>
-                              acceptClientRequest(relations[index])
-                            }
+                            // onClick={() =>
+                            //   acceptClientRequest(relations[index])
+                            // }
                             color="success"
                           >
                             Accept
                           </Button>
                           <Button
-                            onClick={() =>
-                              refuseClientRequest(relations[index])
-                            }
+                            // onClick={() =>
+                            //   refuseClientRequest(relations[index])
+                            // }
                             color="error"
                           >
                             Refuse

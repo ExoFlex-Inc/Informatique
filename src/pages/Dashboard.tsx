@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import LineChart from "../components/LineChart.tsx";
-import { supaClient } from "../hooks/supa-client.ts";
 import { dataStructure } from "./Activity.tsx";
 import { ChartData } from "chart.js";
 import ExerciseOverviewWidget from "../components/ExerciseOverviewWidget.tsx";
@@ -16,29 +15,29 @@ export default function Dashboard() {
 
   //UseEffect
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const {
-          data: { user },
-        } = await supaClient.auth.getUser();
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const {
+  //         data: { user },
+  //       } = await supaClient.auth.getUser();
 
-        if (user) {
-          const { data } = await supaClient
-            .from("exercise_data")
-            .select("*")
-            .eq("user_id", user.id);
+  //       if (user) {
+  //         const { data } = await supaClient
+  //           .from("exercise_data")
+  //           .select("*")
+  //           .eq("user_id", user.id);
 
-          if (data) {
-            setData(data);
-          }
-        }
-      } catch (error) {
-        console.error("Couldn't get user exercise data", error);
-      }
-    };
-    fetchData();
-  }, []);
+  //         if (data) {
+  //           setData(data);
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error("Couldn't get user exercise data", error);
+  //     }
+  //   };
+  //   fetchData();
+  // }, []);
 
   useEffect(() => {
     if (data.length > 0) {

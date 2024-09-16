@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { supaClient } from "../hooks/supa-client.ts";
+import supaClient from "../utils/supabaseClient.ts";
 
 const getAdminClientsList = asyncHandler(
   async (req: Request, res: Response) => {
