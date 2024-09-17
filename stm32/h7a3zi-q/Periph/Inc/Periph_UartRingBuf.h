@@ -21,5 +21,7 @@ void PeriphUartRingBuf_Init();
 void PeriphUartRingBuf_Read(char* buf, uint32_t* size);
 void PeriphUartRingBuf_Send(char* buf, uint32_t size);
 void PeriphUartRingBuf_ReadJson(char* buf, uint32_t* size);
+void PeriphUartRingBuf_ReadJson(char* buf, uint32_t* size);
+uint32_t PeriphUartRingBuf_GetRxTimerDelay();
 
 #endif /* INC_PERIPH_UARTRINGBUF_H_ */

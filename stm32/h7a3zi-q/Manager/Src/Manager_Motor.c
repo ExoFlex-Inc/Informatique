@@ -713,6 +713,11 @@ uint8_t ManagerMotor_GetState()
     return managerMotor.state;
 }
 
+void ManagerMotor_StopManualMovement(uint8_t motorindex)
+{
+	motors[motorindex].goalReady = false;
+}
+
 /********************************************
  * Origin shift
  ********************************************/

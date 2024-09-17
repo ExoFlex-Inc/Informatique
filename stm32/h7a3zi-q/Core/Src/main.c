@@ -127,13 +127,13 @@ int main(void)
 
   while (1)
   {
+	PeriphUartRingBuf_Task();
+	PeriphSwitch_Task();
+
 	ManagerMotor_Task();
 	ManagerHMI_Task();
 	ManagerMovement_Task();
 	ManagerSecurity_Task();
-	PeriphSwitch_Task();
-
-
 
     /* USER CODE END WHILE */
 

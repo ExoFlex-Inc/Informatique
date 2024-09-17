@@ -11,6 +11,7 @@ extern DMA_HandleTypeDef  hdma_usart2_rx;
 uint8_t rxBuf[PUART_RX_BUF_SIZE];
 
 uint16_t head, tail, peak;
+uint32_t rxTimerDelay, timerHalReset;
 bool     foundJsonStart;
 bool     foundJsonEnd;
 
@@ -28,6 +29,13 @@ void PeriphUartRingBuf_Init()
     peak           = 0;
     foundJsonStart = false;
     foundJsonEnd   = false;
+    rxTimerDelay = 0;
+    timerHalReset = 0;
+}
+
+void PeriphUartRingBuf_Task()
+{
+	rxTimerDelay = HAL_GetTick() - timerHalReset;
 }
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart, uint16_t Size)
@@ -51,6 +59,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart, uint16_t Size)
     }
 
     PeriphUartRingBuf_AdvanceHead(bytesReceived);
+    PeriphUartRingBuf_ResetRxTimerDelay();
 }
 
 // code used to increment the head and discard old data
@@ -183,4 +192,15 @@ void PeriphUartRingBuf_ReadTailToPeak(char* buf, uint32_t* size)
             tail = 0;
         }
     }
+}
+
+uint32_t PeriphUartRingBuf_GetRxTimerDelay()
+{
+	return rxTimerDelay;
+}
+
+void PeriphUartRingBuf_ResetRxTimerDelay()
+{
+	timerHalReset = HAL_GetTick();
+	rxTimerDelay = 0;
 }
