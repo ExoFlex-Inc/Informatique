@@ -715,7 +715,7 @@ uint8_t ManagerMotor_GetState()
 
 void ManagerMotor_StopManualMovement(uint8_t motorindex)
 {
-	motors[motorindex].goalReady = false;
+    motors[motorindex].goalReady = false;
 }
 
 /********************************************

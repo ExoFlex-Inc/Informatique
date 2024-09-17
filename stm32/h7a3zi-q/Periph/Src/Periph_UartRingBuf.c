@@ -29,13 +29,13 @@ void PeriphUartRingBuf_Init()
     peak           = 0;
     foundJsonStart = false;
     foundJsonEnd   = false;
-    rxTimerDelay = 0;
-    timerHalReset = 0;
+    rxTimerDelay   = 0;
+    timerHalReset  = 0;
 }
 
 void PeriphUartRingBuf_Task()
 {
-	rxTimerDelay = HAL_GetTick() - timerHalReset;
+    rxTimerDelay = HAL_GetTick() - timerHalReset;
 }
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart, uint16_t Size)
@@ -196,11 +196,11 @@ void PeriphUartRingBuf_ReadTailToPeak(char* buf, uint32_t* size)
 
 uint32_t PeriphUartRingBuf_GetRxTimerDelay()
 {
-	return rxTimerDelay;
+    return rxTimerDelay;
 }
 
 void PeriphUartRingBuf_ResetRxTimerDelay()
 {
-	timerHalReset = HAL_GetTick();
-	rxTimerDelay = 0;
+    timerHalReset = HAL_GetTick();
+    rxTimerDelay  = 0;
 }
