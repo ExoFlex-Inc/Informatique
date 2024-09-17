@@ -354,8 +354,7 @@ void ManagerMovement_ManualIncrement(uint8_t motorIndex, int8_t factor)
     // motor is ready when nextPos has been reached
     if (!ManagerMotor_IsGoalStateReady(motorIndex))
     {
-        managerMovement.motorsNextGoal[motorIndex] =
-            motorsData[motorIndex]->position + factor * EXTREME_POS;;
+        managerMovement.motorsNextGoal[motorIndex] = factor * EXTREME_POS;
         ManagerMotor_SetMotorGoal(motorIndex, MMOT_CONTROL_POSITION,
                                   managerMovement.motorsNextGoal[motorIndex]);
     }
