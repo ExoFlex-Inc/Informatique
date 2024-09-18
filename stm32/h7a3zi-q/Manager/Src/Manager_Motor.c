@@ -30,7 +30,7 @@
 #define MOTOR3_STEP  0.002
 #define POSITION_TOL 0.01
 
-#define MMOT_MAX_MSG_DELAY TIMER * 8
+#define MMOT_MAX_MSG_DELAY 100
 
 #define MMOT_INIT_IDLE          0
 #define MMOT_INIT_START         1
@@ -417,7 +417,6 @@ void ManagerMotor_CalculateNextPositions()
 void ManagerMotor_SendToMotors()
 {
 #ifndef MMOT_DEV_MOTOR_1_DISABLE
-
     if (motors[MMOT_MOTOR_1].controlType == MMOT_CONTROL_POSITION)
     {
         PeriphMotors_Move(&motors[MMOT_MOTOR_1].motor,
@@ -458,10 +457,6 @@ void ManagerMotor_SendToMotors()
 #endif
 
 #ifndef MMOT_DEV_MOTOR_3_DISABLE
-    PeriphMotors_Move(&motors[MMOT_MOTOR_3].motor,
-                      motors[MMOT_MOTOR_3].nextPosition, 0, 0,
-                      motors[MMOT_MOTOR_3].kp, motors[MMOT_MOTOR_3].kd);
-
     if (motors[MMOT_MOTOR_3].controlType == MMOT_CONTROL_POSITION)
     {
         PeriphMotors_Move(&motors[MMOT_MOTOR_3].motor,
