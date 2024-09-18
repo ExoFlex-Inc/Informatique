@@ -5,12 +5,13 @@
 #include <Periph_Switch.h>
 #include <string.h>
 
-#define GOAL_STEP 0.015
-
 #define MMOV_REST_POS -1
 
 #define MAX_EXERCISES 10
 #define MAX_MOVEMENT  3
+#define EXTREME_POS   4
+
+#define MANUAL_MAX_TRANSMIT_TIME 15  // ms
 
 typedef struct
 {
@@ -185,13 +186,18 @@ void ManagerMovement_WaitingSecurity()
 {
     if (managerMovement.securityPass)
     {
-        managerMovement.state = MMOV_STATE_MANUAL;
+        managerMovement.state = MMOV_STATE_HOMING;
     }
 }
 
 void ManagerMovement_Manual()  // TODO
 {
-    // conditions pour changer d'état ici
+    if (PeriphUartRingBuf_GetRxTimerDelay() > MANUAL_MAX_TRANSMIT_TIME)
+    {
+        ManagerMotor_StopManualMovement(MMOT_MOTOR_1);
+        ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
+        ManagerMotor_StopManualMovement(MMOT_MOTOR_3);
+    }
 }
 
 void ManagerMovement_Homing()
@@ -348,8 +354,7 @@ void ManagerMovement_ManualIncrement(uint8_t motorIndex, int8_t factor)
     // motor is ready when nextPos has been reached
     if (!ManagerMotor_IsGoalStateReady(motorIndex))
     {
-        managerMovement.motorsNextGoal[motorIndex] =
-            motorsData[motorIndex]->position + factor * GOAL_STEP;
+        managerMovement.motorsNextGoal[motorIndex] = factor * EXTREME_POS;
         ManagerMotor_SetMotorGoal(motorIndex, MMOT_CONTROL_POSITION,
                                   managerMovement.motorsNextGoal[motorIndex]);
     }
@@ -679,6 +684,7 @@ void ManagerMovement_HomingExtension()
 
     if (PeriphSwitch_ExtensionUp() || exUpLimitHit)
     {
+        ManagerMotor_StopManualMovement(MMOT_MOTOR_3);
         if (!exUpLimitHit)
         {
             exUpLimitHit = true;
@@ -686,10 +692,10 @@ void ManagerMovement_HomingExtension()
 
         if (!PeriphSwitch_ExtensionUp())
         {
-            managerMovement.homingState =
-                MMOV_HOMING_EVERSION;  // Doit aller a eversion avec les
-                                       // deux moteurs
-            exUpLimitHit = false;
+            ManagerMotor_StopManualMovement(MMOT_MOTOR_3);
+
+            managerMovement.homingState = MMOV_HOMING_EVERSION;
+            exUpLimitHit                = false;
             ManagerMovement_SetOrigins(MMOT_MOTOR_3);
         }
         else
@@ -708,6 +714,7 @@ void ManagerMovement_HomingEversion()
     // Increment until limitswitch
     if (PeriphSwitch_EversionLeft() || evLeftLimitHit)
     {
+        ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
         if (!evLeftLimitHit)
         {
             leftPos        = motorsData[MMOT_MOTOR_2]->position;
@@ -716,6 +723,7 @@ void ManagerMovement_HomingEversion()
 
         if (PeriphSwitch_EversionRight() || evRightLimitHit)
         {
+            ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
             if (!evRightLimitHit)
             {
                 rightPos        = motorsData[MMOT_MOTOR_2]->position;
@@ -750,6 +758,7 @@ void ManagerMovement_HomingDorsiflexion()
     // Increment until limitswitch
     if (PeriphSwitch_DorsiflexionUp() || dorUpLimitHit)
     {
+        ManagerMotor_StopManualMovement(MMOT_MOTOR_1);
         if (!dorUpLimitHit)
         {
             leftPos       = motorsData[MMOT_MOTOR_1]->position;
@@ -758,6 +767,7 @@ void ManagerMovement_HomingDorsiflexion()
 
         if (PeriphSwitch_DorsiflexionDown() || dorDownLimitHit)
         {
+            ManagerMotor_StopManualMovement(MMOT_MOTOR_1);
             if (!dorDownLimitHit)
             {
                 rightPos        = motorsData[MMOT_MOTOR_1]->position;
