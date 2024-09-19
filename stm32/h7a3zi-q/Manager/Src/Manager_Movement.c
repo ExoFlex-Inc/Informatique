@@ -3,6 +3,7 @@
 #include <Manager_Motor.h>
 #include <Manager_Movement.h>
 #include <Periph_Switch.h>
+#include <Periph_UartRingBuf.h>
 #include <string.h>
 
 #define MMOV_REST_POS -1
@@ -11,7 +12,7 @@
 #define MAX_MOVEMENT  3
 #define EXTREME_POS   4
 
-#define MANUAL_MAX_TRANSMIT_TIME 15  // ms
+#define MANUAL_MAX_TRANSMIT_TIME 50  // ms
 
 typedef struct
 {
@@ -186,7 +187,7 @@ void ManagerMovement_WaitingSecurity()
 {
     if (managerMovement.securityPass)
     {
-        managerMovement.state = MMOV_STATE_HOMING;
+        managerMovement.state = MMOV_STATE_MANUAL;
     }
 }
 

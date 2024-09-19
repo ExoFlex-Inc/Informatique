@@ -30,7 +30,7 @@
 #define MOTOR3_STEP  0.002
 #define POSITION_TOL 0.01
 
-#define MMOT_MAX_MSG_DELAY 100
+#define MMOT_MAX_MSG_DELAY 80
 
 #define MMOT_INIT_IDLE          0
 #define MMOT_INIT_START         1
@@ -153,7 +153,7 @@ void ManagerMotor_Reset()
     motors[MMOT_MOTOR_2].kp = 100.0f;
     motors[MMOT_MOTOR_2].kd = 5.0f;
     // AK 80-64
-    motors[MMOT_MOTOR_3].kp = 500.0f;
+    motors[MMOT_MOTOR_3].kp = 300.0f;
     motors[MMOT_MOTOR_3].kd = 5.0f;
 
     // Set max min pos
