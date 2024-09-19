@@ -1,4 +1,4 @@
-import PatientSearchBar from "../components/PatientSearchBar.tsx";
+import UserSearchBar from "../components/UserSearchBar.tsx";
 import { useEffect, useState } from "react";
 import LineChart from "../components/LineChart.tsx";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
@@ -35,7 +35,7 @@ export interface dataStructure {
 }
 
 export default function Activity() {
-  const [selectedPatient, setSelectedPatient] = useState<any[]>([]);
+  const [selectedUser, setSelectedUser] = useState<any[]>([]);
   const [isGraphFilterOpen, setIsGraphFilterOpen] = useState(false);
   const [graphType, setGraphType] = useState("");
   const [date, setDate] = useState<DateRange | null>();
@@ -54,9 +54,9 @@ export default function Activity() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!selectedPatient || selectedPatient.length === 0 || !date) return;
+      if (!selectedUser || selectedUser.length === 0 || !date) return;
 
-      const userId = selectedPatient[0].user_id;
+      const userId = selectedUser[0].user_id;
       const startDate = date[0].toISOString();
       const endDate = date[1].toISOString();
 
@@ -83,7 +83,7 @@ export default function Activity() {
     };
 
     fetchData();
-  }, [selectedPatient, date]);
+  }, [selectedUser, date]);
 
   useEffect(() => {
     if (data.length > 0) {
@@ -239,9 +239,9 @@ export default function Activity() {
   return (
     <div className="pb-4 mx-auto">
       <div className="flex justify-center">
-        <PatientSearchBar
+        <UserSearchBar
           sx={{ width: 500 }}
-          setSelectedPatient={setSelectedPatient}
+          setSelectedUser={setSelectedUser}
         />
       </div>
       <div className="grid grid-cols-5 items-center">
@@ -270,7 +270,7 @@ export default function Activity() {
       <div className="overflow-auto h-screen max-h-[calc(100vh-190px)]">
         <CustomScrollbar>
           <div className="flex justify-center">
-            {dataset1 && selectedPatient?.length !== 0 && date && graphType && (
+            {dataset1 && selectedUser?.length !== 0 && date && graphType && (
               <div className="mt-4 basis-full">
                 <LineChart
                   type="activity"
@@ -280,7 +280,7 @@ export default function Activity() {
                 />
               </div>
             )}
-            {dataset2 && selectedPatient?.length !== 0 && date && graphType && (
+            {dataset2 && selectedUser?.length !== 0 && date && graphType && (
               <div className="mt-4 basis-full">
                 <LineChart
                   type="activity"
@@ -291,7 +291,7 @@ export default function Activity() {
             )}
           </div>
 
-          {selectedPatient.length !== 0 && date && graphType && (
+          {selectedUser.length !== 0 && date && graphType && (
             <Box
               justifyContent="center"
               sx={{ display: "flex", margin: "15px", gap: "15px" }}
