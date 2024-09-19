@@ -14,6 +14,7 @@ import userRoutes from "./routes/userRoutes.ts";
 import relationsRoutes from "./routes/relationsRoutes.ts";
 import wellnessNetworkRoutes from "./routes/wellnessNetworkRoutes.ts";
 import exerciseDataRoute from "./routes/exerciseDataRoutes.ts";
+import notificationRoute from "./routes/notificationRoutes.ts";
 import { getSerialPort } from "./managers/serialPort.ts";
 import "./config/passportConfig.ts";
 
@@ -52,8 +53,9 @@ app.use(passport.session());
 
 app.use("/auth", authRoutes);
 app.use("/user", userRoutes);
-app.use("/relations", relationsRoutes);
+app.use("/relation", relationsRoutes);
 app.use("/exercise-data", exerciseDataRoute);
+app.use("/notification", notificationRoute);
 app.use("/api", serialPortRoutes);
 app.use("/api", planRoutes);
 app.use("/api", hmiRoutes);

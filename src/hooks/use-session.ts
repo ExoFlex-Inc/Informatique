@@ -10,11 +10,19 @@ export function useSupabaseSession() {
   } = useQuery({
     queryKey: ["session"],
     queryFn: async () => {
+
       try {
+
         const response = await fetch("http://localhost:3001/auth/session", {
           method: "GET",
           credentials: "include",
         });
+
+        if (response.status === 401) {
+          const data = await response.json();
+          console.warn("Session not valid, logging out:", data);
+          return null;
+        }
 
         if (!response.ok) {
           throw new Error("Error fetching session");

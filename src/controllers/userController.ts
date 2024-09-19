@@ -149,7 +149,7 @@ export const uploadAvatar = asyncHandler(
 
     await deleteOldImage(profile?.avatar_url);
 
-    const { error: uploadError } = await supaClient.storage
+    const { data: avatarUrl, error: uploadError } = await supaClient.storage
       .from("avatars")
       .upload(filePath, file.buffer, { contentType: file.mimetype });
 
@@ -170,6 +170,6 @@ export const uploadAvatar = asyncHandler(
         .json({ error: `Error updating user profile: ${updateError.message}` });
     }
 
-    res.json({ avatar_url: filePath });
+    res.json({ avatar_url: avatarUrl.path });
   },
 );

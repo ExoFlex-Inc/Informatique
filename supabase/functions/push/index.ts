@@ -4,8 +4,12 @@ import serviceAccount from '../service-account.json' with { type: 'json' }
 
 interface Notification {
   id: string
+  title: string
+  type: string
   user_id: string
+  user_name: string
   body: string
+  image: string
 }
 
 interface WebhookPayload {
@@ -23,13 +27,17 @@ const supabase = createClient(
 Deno.serve(async (req) => {
   const payload: WebhookPayload = await req.json()
 
+  console.log(payload)
+
   const { data } = await supabase
     .from('user_profiles')
     .select('fcm_token')
-    .eq('id', payload.record.user_id)
+    .eq('user_id', payload.record.user_id)
     .single()
 
   const fcmToken = data!.fcm_token as string
+
+  console.log('Sending notification to', fcmToken)
 
   const accessToken = await getAccessToken({
     clientEmail: serviceAccount.client_email,
@@ -48,9 +56,16 @@ Deno.serve(async (req) => {
         message: {
           token: fcmToken,
           notification: {
-            title: `Notification from Supabase`,
+            title: "ExoFlex",
             body: payload.record.body,
+            image: payload.record.image,
           },
+          data: {
+            id: payload.record.id,
+            user_name: payload.record.user_name,
+            type: payload.record.type,
+            user_id: payload.record.user_id,
+          }
         },
       }),
     }

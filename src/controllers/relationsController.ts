@@ -35,36 +35,37 @@ const fetchRelation = async (req: Request, res: Response) => {
 };
 
 const postRelation = async (req: Request, res: Response) => {
-  const { user_id, admin_id } = req.body;
+  const { client_id, admin_id } = req.body;
 
-  if (!user_id && !admin_id) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Profile or selected admin missing" });
+  // Validate input
+  if (!client_id || !admin_id) {
+    return res.status(400).json({
+      success: false,
+      message: "Client or admin id missing",
+    });
   }
 
   try {
     const { error } = await supaClient.from("relations").insert({
+      client_id: client_id,
       admin_id: admin_id,
-      client_id: user_id,
-      relation_status: "pending",
     });
 
     if (error) {
       return res.status(500).json({
         success: false,
-        message: "Failed to send request",
+        message: "Failed to create relation",
         error: error.message,
       });
     }
 
     return res
       .status(200)
-      .json({ success: true, message: "Request sent successfully" });
+      .json({ success: true, message: "Relation request sent successfully" });
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Error sending request",
+      message: "Error creating relation",
       error: error.message,
     });
   }
@@ -105,39 +106,4 @@ const removeRelation = async (req: Request, res: Response) => {
   }
 };
 
-const acceptRequest = async (req: Request, res: Response) => {
-  const { relationId } = req.params;
-
-  if (!relationId) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Invalid relation" });
-  }
-
-  try {
-    const { error } = await supaClient
-      .from("relations")
-      .update({ relation_status: "accepted" })
-      .eq("id", relationId);
-
-    if (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Failed to accept the relation",
-        error: error.message,
-      });
-    }
-
-    return res
-      .status(200)
-      .json({ success: true, message: "Request accepted successfully" });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Error accepting relation",
-      error: error.message,
-    });
-  }
-};
-
-export { removeRelation, fetchRelation, postRelation, acceptRequest };
+export { removeRelation, fetchRelation, postRelation };

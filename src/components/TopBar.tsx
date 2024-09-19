@@ -106,11 +106,6 @@ export default function TopBar() {
           <Notification />
         )}
         {session && (
-          <IconButton>
-            <SettingsOutlinedIcon />
-          </IconButton>
-        )}
-        {session && (
           <IconButton className="h-14" onClick={onProfileClick}>
             <Avatar
               ref={avatarRef}

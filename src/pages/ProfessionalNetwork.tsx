@@ -42,7 +42,7 @@ const ProfessionalNetwork = () => {
       setAdmins(adminsData.admins);
 
       const relationsResponse = await fetch(
-        `http://localhost:3001/relations/${profile.user_id}`,
+        `http://localhost:3001/relation/${profile.user_id}`,
         {
           method: "GET",
           headers: {
@@ -59,13 +59,13 @@ const ProfessionalNetwork = () => {
 
   const sendRequestToAdmin = async () => {
     try {
-      const response = await fetch("http://localhost:3001/relations/request", {
+      const response = await fetch("http://localhost:3001/relations", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          user_id: profile.user_id,
+          client_id: profile.user_id,
           admin_id: selectedAdmin.user_id,
         }),
       });

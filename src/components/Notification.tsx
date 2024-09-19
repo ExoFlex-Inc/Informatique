@@ -1,37 +1,42 @@
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import { useEffect, useState, useRef } from "react";
-import { useUserProfile } from "../hooks/use-profile.ts";
-import { messaging, onMessage } from "../utils/firebaseClient.ts"; // Import Firebase messaging instance
-
 import {
   List,
   ListItem,
   Grid,
   Badge,
   Paper,
-  Button,
   IconButton,
   ThemeProvider,
   Box,
   ListItemText,
+  Button,
+  Typography,
   Avatar,
   ListItemAvatar,
-  Typography,
   createTheme,
 } from "@mui/material";
+import { useNotification } from "../hooks/use-notification.ts";
+import { useUserProfile } from "../hooks/use-profile.ts";
 
 const Notification = () => {
   const [isNotifications, setIsNotifications] = useState(false);
-  const [clients, setClients] = useState<any[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<any[]>([]); // State for notifications
+  const [responseMessage, setResponseMessage] = useState({});
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
 
+  const { notifications } = useNotification();
   const { profile } = useUserProfile();
 
   useEffect(() => {
-    const handleClickOutside = (event: any) => {
+    if (notifications && notifications.length > 0) {
+      setIsNotifications(true);
+    }
+  }, [notifications]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node) &&
@@ -46,30 +51,83 @@ const Notification = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [dropdownRef, buttonRef, setIsOpen]);
+  }, [dropdownRef, buttonRef]);
 
-  // Listen for FCM notifications
-  useEffect(() => {
-    const unsubscribe = onMessage(messaging, (payload) => {
-      console.log("Message received. ", payload);
-      const { title, body } = payload.notification;
+  // Handle Accept action
+  const handleAccept = async (notification: any) => {
+    if (!profile?.user_id) {
+      console.error("User profile is missing");
+      return;
+    }
 
-      setNotifications((prev) => [
-        { title, body, timestamp: new Date() },
-        ...prev,
-      ]);
+    setResponseMessage((prev) => ({ ...prev, [notification.id]: "Processing..." }));
 
-      setIsNotifications(true);
-    });
+    try {
+      const responseRelation = await fetch(`http://localhost:3001/relation`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          client_id: profile.user_id,
+          admin_id: notification.user_id,
+        }),
+      });
 
-    return () => {
-      unsubscribe();
-    };
-  }, []);
+      if (!responseRelation.ok) {
+        throw new Error("Error accepting relation request");
+      }
+
+      const response = await fetch(`http://localhost:3001/notification/${notification.id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include"
+      });
+
+      if (!response.ok) {
+        throw new Error("Error deleting notification");
+      }
+
+      setResponseMessage((prev) => ({ ...prev, [notification.id]: "Relation request accepted" }));
+    } catch (error) {
+      console.error("Error accepting relation request:", error);
+      setResponseMessage((prev) => ({ ...prev, [notification.id]: "Error processing request" }));
+    }
+  };
+
+  const handleReject = async (notification: any) => {
+
+    setResponseMessage((prev) => ({ ...prev, [notification.id]: "Processing..." }));
+
+    try {
+      const response = await fetch(`http://localhost:3001/notification/${notification.id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include"
+      });
+
+      if (!response.ok) {
+        throw new Error("Error rejecting relation request");
+      }
+
+      setResponseMessage((prev) => ({ ...prev, [notification.id]: "Relation request rejected" }));
+    } catch (error) {
+      console.error("Error rejecting relation request:", error);
+      setResponseMessage((prev) => ({ ...prev, [notification.id]: "Error processing request" }));
+    }
+  };
 
   return (
     <div>
-      <IconButton ref={buttonRef} onClick={() => setIsOpen(!isOpen)}>
+      <IconButton ref={buttonRef} onClick={() => { 
+        setIsOpen(!isOpen);
+        if (isNotifications) setIsNotifications(false);
+      }}>
         {isNotifications ? (
           <Badge color="error" variant="dot">
             <NotificationsOutlinedIcon />
@@ -78,6 +136,7 @@ const Notification = () => {
           <NotificationsOutlinedIcon />
         )}
       </IconButton>
+
       {isOpen && (
         <Box
           ref={dropdownRef}
@@ -87,7 +146,7 @@ const Notification = () => {
             position: "absolute",
             top: "70px",
             right: "90px",
-            zIndex: "20",
+            zIndex: 20,
           }}
         >
           <ThemeProvider
@@ -99,30 +158,83 @@ const Notification = () => {
               },
             })}
           >
-            <Paper sx={{ width: "30vw" }}>
+            <Paper sx={{ width: "30vw", padding: 2 }}>
               <List>
                 {notifications.length > 0 ? (
                   notifications.map((notification, index) => (
-                    <ListItem key={index}>
+                    <ListItem key={notification.id || index} alignItems="flex-start">
+                      <ListItemAvatar>
+                        <Avatar
+                          alt="Avatar"
+                          src={notification.image}
+                        />
+                      </ListItemAvatar>
                       <Grid container>
-                        <Grid
-                          className="content-center justify-center"
-                          item
-                          xs={4}
-                        >
-                          <ListItemAvatar>
-                            <Avatar />
-                          </ListItemAvatar>
-                        </Grid>
-                        <Grid item xs={8}>
+                        <Grid item xs={12}>
                           <ListItemText
-                            primary={notification.title}
-                            secondary={
-                              <Typography className="text-black">
-                                {notification.body}
+                            primary={
+                              <Typography variant="body1" component="span">
+                                {notification.user_name}
                               </Typography>
                             }
+                            secondary={
+                              <>
+                                {notification.body && (
+                                  <Typography
+                                    variant="body2"
+                                    component="span"
+                                    className="text-black"
+                                    display="block"
+                                  >
+                                    {notification.body}
+                                  </Typography>
+                                )}
+                                <Typography
+                                  variant="caption"
+                                  component="span"
+                                  display="block"
+                                  color="textSecondary"
+                                >
+                                  {new Date(notification.created_at).toLocaleString()}
+                                </Typography>
+                              </>
+                            }
                           />
+                          {notification.type === "relation" && (
+                            <Box
+                              sx={{
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                marginTop: 1,
+                              }}
+                            >
+                              {responseMessage[notification.id] ? (
+                                <Typography variant="body2" color="textSecondary">
+                                  {responseMessage[notification.id]}
+                                </Typography>
+                              ) : (
+                                <>
+                                  <Button
+                                    variant="contained"
+                                    color="primary"
+                                    size="small"
+                                    sx={{ marginRight: 1 }}
+                                    onClick={() => handleAccept(notification)}
+                                  >
+                                    Accept
+                                  </Button>
+                                  <Button
+                                    variant="outlined"
+                                    color="error"
+                                    size="small"
+                                    onClick={() => handleReject(notification)}
+                                  >
+                                    Reject
+                                  </Button>
+                                </>
+                              )}
+                            </Box>
+                          )}
                         </Grid>
                       </Grid>
                     </ListItem>

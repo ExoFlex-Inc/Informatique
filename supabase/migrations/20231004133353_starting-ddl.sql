@@ -38,12 +38,10 @@ CREATE TABLE user_profiles (
 );
 
 CREATE TABLE relations (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4() not null,
-  admin_id UUID,
-  client_id UUID,
-  relation_status client_admin_status NOT NULL,
-  FOREIGN KEY (admin_id) REFERENCES user_profiles(user_id),
-  FOREIGN KEY (client_id) REFERENCES user_profiles(user_id)
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+  client_id UUID REFERENCES auth.users(id) NOT NULL,
+  admin_id UUID REFERENCES auth.users(id) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE plans (
@@ -76,12 +74,26 @@ CREATE TABLE exercise_data (
 
 );
 
-create table notifications (
-  id uuid not null default gen_random_uuid(),
-  user_id uuid references auth.users(id) not null,
-  created_at timestamp with time zone not null default now(),
-  body text not null
+CREATE TABLE notifications (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+  user_id UUID REFERENCES auth.users(id) NOT NULL,
+  type TEXT NOT NULL,
+  user_name TEXT NOT NULL,
+  image TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  body TEXT NOT NULL
 );
+
+create trigger "notifications" after insert
+on "public"."notifications" for each row
+execute function "supabase_functions"."http_request"(
+  'http://host.docker.internal:54326/functions/v1/push',
+  'POST',
+  '{"Content-Type":"application/json"}',
+  '{}',
+  '1000'
+);
+
 
 /*
 .########.##.....##.##....##..######..########.####..#######..##....##..######.
@@ -168,7 +180,7 @@ BEGIN
     JOIN 
         relations a ON c.user_id = a.client_id
     WHERE 
-        a.admin_id = get_clients_for_admin.admin_id AND a.relation_status = 'accepted';
+        a.admin_id = get_clients_for_admin.admin_id;
 END;
 $$ LANGUAGE plpgsql;
 
