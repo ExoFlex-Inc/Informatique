@@ -727,7 +727,14 @@ void ManagerMotor_SetOriginShift(uint8_t motorIndex, float shiftValue)
     motors[motorIndex].originShift = shiftValue;
 }
 
-float ManagerMotor_CalculatedNextKp(uint8_t motorIndex, )
+float ManagerMotor_CalculNextKp(uint8_t motorIndex)
 {
-
+	if (motors[motorIndex].motor.torque > 10.0)
+	{
+		motors[motorIndex].kp = 500;
+	}
+	else
+	{
+		motors[motorIndex].kp = 200;
+	}
 }
