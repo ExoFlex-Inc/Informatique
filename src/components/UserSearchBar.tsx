@@ -15,9 +15,11 @@ const UserSearchBar: React.FC<UserSearchBarProps> = ({
   setListOfUsers,
 }) => {
   const [searchElement, setSearchElement] = useState("");
-  const [listOfUsersMapped, setListOfUsersMapped] = useState<{label: any}[]>([]);
-  const {pathname} = useLocation();
-  const {admins} = useAdminProfile();
+  const [listOfUsersMapped, setListOfUsersMapped] = useState<{ label: any }[]>(
+    [],
+  );
+  const { pathname } = useLocation();
+  const { admins } = useAdminProfile();
   const [users, setUsers] = useState<any[]>([]);
 
   async function fetchUsers() {
@@ -26,10 +28,10 @@ const UserSearchBar: React.FC<UserSearchBarProps> = ({
         const responseGetUsers = await fetch(
           `http://localhost:3001/api/wellness_network`,
           {
-              method: "GET",
+            method: "GET",
           },
         );
-    
+
         if (responseGetUsers.ok) {
           console.log("List retrieved successfully.");
           const listData = await responseGetUsers.json();
@@ -40,9 +42,9 @@ const UserSearchBar: React.FC<UserSearchBarProps> = ({
           return { loaded: false, listData: null };
         }
       } catch (error) {
-          console.error("An error occurred:", error);
-          window.alert("An error occurred: " + error);
-          return { loaded: false, listData: null };
+        console.error("An error occurred:", error);
+        window.alert("An error occurred: " + error);
+        return { loaded: false, listData: null };
       }
     }
   }
@@ -56,7 +58,7 @@ const UserSearchBar: React.FC<UserSearchBarProps> = ({
   }
   useEffect(() => {
     fetchListData();
-  },[])
+  }, []);
 
   useEffect(() => {
     if (admins && pathname === "/professional_network") {
@@ -69,7 +71,7 @@ const UserSearchBar: React.FC<UserSearchBarProps> = ({
         }),
       );
     }
-  }, [admins])
+  }, [admins]);
 
   useEffect(() => {
     if (users) {
@@ -81,43 +83,45 @@ const UserSearchBar: React.FC<UserSearchBarProps> = ({
         }),
       );
     }
-  }, [users])
+  }, [users]);
 
   useEffect(() => {
     let newList;
     if (pathname === "/professional_network" && admins) {
-      searchElement !== undefined ?
-        newList = admins.filter((admin: any) => admin.email.includes(searchElement) ? true : false)
-        :
-        newList = admins
-        setListOfUsersMapped(
-          newList.map((el: any) => {
-            return {
-              label: el.email,
-            };
-          }),
-        )
+      searchElement !== undefined
+        ? (newList = admins.filter((admin: any) =>
+            admin.email.includes(searchElement) ? true : false,
+          ))
+        : (newList = admins);
+      setListOfUsersMapped(
+        newList.map((el: any) => {
+          return {
+            label: el.email,
+          };
+        }),
+      );
     } else {
-      searchElement !== undefined ? 
-        newList = users.filter((user: any) => user.email.includes(searchElement) ? true : false)
-        :
-        newList = users
-        setListOfUsersMapped(
-          newList.map((el: any) => {
-            return {
-              label: el.email,
-            };
-          }),
-        )
+      searchElement !== undefined
+        ? (newList = users.filter((user: any) =>
+            user.email.includes(searchElement) ? true : false,
+          ))
+        : (newList = users);
+      setListOfUsersMapped(
+        newList.map((el: any) => {
+          return {
+            label: el.email,
+          };
+        }),
+      );
     }
     setListOfUsers?.(newList ? newList : []);
-  },[searchElement])
+  }, [searchElement]);
 
-  function onInputChange (target: any) {
-    if(target.value) {
+  function onInputChange(target: any) {
+    if (target.value) {
       setSearchElement(target.value);
     } else {
-      setSearchElement(target.innerText)
+      setSearchElement(target.innerText);
     }
     const user = users.filter((user) => {
       if (user.email === target.textContent) {
@@ -134,7 +138,7 @@ const UserSearchBar: React.FC<UserSearchBarProps> = ({
       <Autocomplete
         disablePortal
         id="combo-box"
-        options={listOfUsersMapped.slice(0,10)}
+        options={listOfUsersMapped.slice(0, 10)}
         onInputChange={({ target }) => {
           onInputChange(target);
         }}

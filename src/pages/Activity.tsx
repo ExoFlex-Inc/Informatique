@@ -239,10 +239,7 @@ export default function Activity() {
   return (
     <div className="pb-4 mx-auto">
       <div className="flex justify-center">
-        <UserSearchBar
-          sx={{ width: 500 }}
-          setSelectedUser={setSelectedUser}
-        />
+        <UserSearchBar sx={{ width: 500 }} setSelectedUser={setSelectedUser} />
       </div>
       <div className="grid grid-cols-5 items-center">
         <div className=" flex col-span-2">

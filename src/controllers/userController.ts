@@ -60,12 +60,11 @@ export const updateUserProfile = async (req: Request, res: Response) => {
 };
 
 export const getAdmins = async (req: Request, res: Response) => {
-
   try {
     const { data, error } = await supaClient
       .from("user_profiles")
       .select("*")
-      .eq("permissions", "admin")
+      .eq("permissions", "admin");
 
     if (error) {
       return res.status(500).json({ error: error.message });

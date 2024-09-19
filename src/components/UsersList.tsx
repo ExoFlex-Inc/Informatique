@@ -1,5 +1,5 @@
 import ListIcon from "@mui/icons-material/List";
-import SendIcon from '@mui/icons-material/Send';
+import SendIcon from "@mui/icons-material/Send";
 import UserMenuDropdown from "./UserMenuDropdown.tsx";
 import { useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
@@ -10,13 +10,10 @@ interface UserListProps {
   setListOfUsers: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
-const UserList: React.FC<UserListProps> = ({
-  listOfUsers,
-  setListOfUsers,
-}) => {
+const UserList: React.FC<UserListProps> = ({ listOfUsers, setListOfUsers }) => {
   const [openMenuIndex, setOpenMenuIndex] = useState<Number | null>(null);
   const buttonRefs = useRef<HTMLButtonElement[]>([]);
-  const {pathname} = useLocation();
+  const { pathname } = useLocation();
 
   const addToButtonRefs = (el: HTMLButtonElement | null, index: number) => {
     if (el && !buttonRefs.current[index]) {
@@ -30,7 +27,7 @@ const UserList: React.FC<UserListProps> = ({
     setOpenMenuIndex(index === openMenuIndex ? null : index);
   }
 
-  function sendInvitation (index: number) {
+  function sendInvitation(index: number) {
     // Ajouter nouveau code ici Olivier
   }
 
@@ -70,49 +67,41 @@ const UserList: React.FC<UserListProps> = ({
       </label>
 
       <ul className="divide-y rounded-b-2xl col-span-4 divide-gray-400 bg-white">
-        {listOfUsers?.map((user, index) => (
-          (index < 10 ? 
+        {listOfUsers?.map((user, index) =>
+          index < 10 ? (
             <div key={index} className="grid grid-cols-4 items-center">
-              <li className="text-black p-2">
-                {user.first_name}
-              </li>
-              <li className="text-black p-2">
-                {user.last_name}
-              </li>
-              <li className="text-black p-2">
-                {user.email}
-              </li>
+              <li className="text-black p-2">{user.first_name}</li>
+              <li className="text-black p-2">{user.last_name}</li>
+              <li className="text-black p-2">{user.email}</li>
               <div className="relative">
-                <li
-                  className="text-black flex items-center justify-between p-2"
-                >
+                <li className="text-black flex items-center justify-between p-2">
                   <span>{user.phone_number}</span>
-                    <Box>
-                      {pathname == "/wellness_network" ?
-                        <IconButton
-                          sx={{
-                            '&:hover': {
-                              bgcolor: '#D1D5DB',
-                            }
-                          }}
-                          ref={(el) => addToButtonRefs(el, index)}
-                          onClick={() => toggleDropdown(index)}
-                        >
-                          <ListIcon color="primary" />
-                        </IconButton>
-                        :
-                        <IconButton
-                          onClick={() => sendInvitation(index)}
-                          sx={{
-                            '&:hover': {
-                              bgcolor: '#D1D5DB',
-                            }
-                          }}  
-                        >
-                          <SendIcon color="success" />
-                        </IconButton>
-                      } 
-                    </Box>
+                  <Box>
+                    {pathname == "/wellness_network" ? (
+                      <IconButton
+                        sx={{
+                          "&:hover": {
+                            bgcolor: "#D1D5DB",
+                          },
+                        }}
+                        ref={(el) => addToButtonRefs(el, index)}
+                        onClick={() => toggleDropdown(index)}
+                      >
+                        <ListIcon color="primary" />
+                      </IconButton>
+                    ) : (
+                      <IconButton
+                        onClick={() => sendInvitation(index)}
+                        sx={{
+                          "&:hover": {
+                            bgcolor: "#D1D5DB",
+                          },
+                        }}
+                      >
+                        <SendIcon color="success" />
+                      </IconButton>
+                    )}
+                  </Box>
                 </li>
                 {openMenuIndex === index && (
                   <UserMenuDropdown
@@ -126,10 +115,10 @@ const UserList: React.FC<UserListProps> = ({
                 )}
               </div>
             </div>
-            :
+          ) : (
             true
-          )
-        ))}
+          ),
+        )}
       </ul>
     </div>
   );

@@ -274,10 +274,7 @@ export default function Planning() {
             />
           </RadioGroup>
         </FormControl>
-        <UserSearchBar
-          sx={{ width: 500 }}
-          setSelectedUser={setSelectedUser}
-        />
+        <UserSearchBar sx={{ width: 500 }} setSelectedUser={setSelectedUser} />
       </div>
       <CustomScrollbar>
         <div className="overflow-auto">
