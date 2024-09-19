@@ -23,11 +23,13 @@
 /* USER CODE BEGIN Includes */
 
 
+#include <Periph_Switch.h>
+#include <Periph_UartRingBuf.h>
 #include <Manager_Motor.h>
 #include <Manager_HMI.h>
 #include <Manager_Movement.h>
 #include <Manager_Security.h>
-#include <Periph_Switch.h>
+
 
 /* USER CODE END Includes */
 
@@ -120,10 +122,26 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
+  //	uint32_t lastTime = HAL_GetTick();
+  //	uint32_t cycleTime[1000];
+  //	uint32_t cycleMaxTime[1000];
+  //
+  //
+  //	for (int i =0; i< 1000; i++)
+  //	{
+  //		cycleTime[i] = 0;
+  //		cycleMaxTime[i] = 0;
+  //	}
+  //
+  //	int step = 0;
+  //	int stepMax = 0;
+
+
 	ManagerMotor_Init();
 	ManagerHMI_Init();
 	ManagerMovement_Init();
 	ManagerSecurity_Init();
+
 
   while (1)
   {
@@ -134,6 +152,29 @@ int main(void)
 	ManagerHMI_Task();
 	ManagerMovement_Task();
 	ManagerSecurity_Task();
+
+
+//	cycleTime[step] = HAL_GetTick() - lastTime;
+//	lastTime = HAL_GetTick();
+//
+//	step++;
+//
+//
+//
+//	if (cycleTime[step] > 2){
+//
+//		cycleMaxTime[stepMax] = cycleTime[step];
+//		stepMax++;
+//	}
+//
+//	if (step > 999){
+//		step = 0;
+//	}
+//
+//	if (stepMax > 999){
+//		stepMax = 0;
+//	}
+
 
     /* USER CODE END WHILE */
 

@@ -30,7 +30,7 @@
 #define MOTOR3_STEP  0.002
 #define POSITION_TOL 0.01
 
-#define MMOT_MAX_MSG_DELAY 80
+#define MMOT_MAX_MSG_DELAY 30
 
 #define MMOT_INIT_IDLE          0
 #define MMOT_INIT_START         1
