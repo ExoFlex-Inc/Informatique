@@ -107,13 +107,13 @@ void ManagerSecurity_Watch()
         return;
     }
 
-    if (!ManagerSecurity_VerifCycleMS())
+    if (!ManagerSecurity_VerifLimitSwitch())
     {
         ManagerSecurity.state = MS_STATE_STOPPING;
         return;
     }
 
-    if (!ManagerSecurity_VerifMouvement())
+    if (!ManagerSecurity_VerifCycleMS())
     {
         ManagerSecurity.state = MS_STATE_STOPPING;
         return;
@@ -186,32 +186,32 @@ bool ManagerSecurity_VerifLimitSwitch()
         if (PeriphSwitch_ExtensionUp())
         {
         	ManagerError_SetError(ERROR_4_LS_EXT_UP);
-            ret = true;
+            ret = false;
         }
         if (PeriphSwitch_ExtensionDown())
         {
         	ManagerError_SetError(ERROR_5_LS_EXT_DOWN);
-            ret = true;
+            ret = false;
         }
         if (PeriphSwitch_DorsiflexionUp())
         {
         	ManagerError_SetError(ERROR_10_LS_DORS_UP);
-            ret = true;
+            ret = false;
         }
         if (PeriphSwitch_DorsiflexionDown())
         {
         	ManagerError_SetError(ERROR_11_LS_DORS_DOWN);
-            ret = true;
+            ret = false;
         }
         if (PeriphSwitch_EversionLeft())
         {
         	ManagerError_SetError(ERROR_8_LS_EVER_UP);
-            ret = true;
+            ret = false;
         }
         if (PeriphSwitch_EversionRight())
         {
         	ManagerError_SetError(ERROR_9_LS_EVER_DOWN);
-            ret = true;
+            ret = false;
         }
         return ret;
     }

@@ -359,7 +359,7 @@ void ManagerMotor_StartMotor(uint8_t motorIndex)
             motors[motorIndex].initState = MMOT_INIT_ERROR;
             managerMotor.state           = MMOT_STATE_ERROR;
             managerMotor.errorCode       = ERROR_SET_ORIGINES_MOTORS;
-            ManagerError_SetError(ERROR_13_MMOT_SET_ORIGIN);
+            ManagerError_SetError(ERROR_16_MMOT_SET_ORIGIN);
             ManagerMotor_SetMotorError(motorIndex);
         }
         break;
