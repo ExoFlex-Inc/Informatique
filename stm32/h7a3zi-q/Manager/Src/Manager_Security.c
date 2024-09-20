@@ -15,6 +15,8 @@
 #define MS_STATE_ERROR    3
 #define MS_STATE_RESET    4
 
+#define MS_MAX_CYCLE_MS 4
+
 typedef struct
 {
     uint8_t state;
@@ -31,12 +33,14 @@ bool ManagerSecurity_VerifMotors();
 bool ManagerSecurity_VerifMouvement();
 bool ManagerSecurity_VerifCanbus();
 bool ManagerSecurity_VerifLimitSwitch();
+bool ManagerSecurity_VerifCycleMS();
 
 ManagerSecurity_t   ManagerSecurity;
 static const Motor* motorsData[MMOT_MOTOR_NBR];
 
-bool securityTestError;
-bool securityTestReset;
+
+uint32_t lastTime;
+uint32_t cycleTime;
 
 void ManagerSecurity_Init()
 {
@@ -49,8 +53,8 @@ void ManagerSecurity_Init()
     ManagerSecurity.state = MS_STATE_IDLE;
     ManagerSecurity.reset = false;
 
-    securityTestError = true;
-    securityTestReset = false;
+    cycleTime = 0;
+    lastTime = HAL_GetTick();
 }
 
 void ManagerSecurity_Task()
@@ -74,12 +78,6 @@ void ManagerSecurity_Task()
         break;
     }
 
-    if (securityTestReset)
-    {
-        ManagerSecurity_Reset();
-        securityTestReset = false;
-        securityTestError = true;
-    }
 }
 
 void ManagerSecurity_Idle()
@@ -107,13 +105,13 @@ void ManagerSecurity_Watch()
         return;
     }
 
-    if (!ManagerSecurity_VerifLimitSwitch())
+    if (!ManagerSecurity_VerifCycleMS())
     {
         ManagerSecurity.state = MS_STATE_STOPPING;
         return;
     }
 
-    if (!securityTestError)
+    if (!ManagerSecurity_VerifMouvement())
     {
         ManagerSecurity.state = MS_STATE_STOPPING;
         return;
@@ -189,6 +187,21 @@ bool ManagerSecurity_VerifLimitSwitch()
     }
 
     return ret;
+}
+
+bool ManagerSecurity_VerifCycleMS()
+{
+	bool ret = true;
+
+	cycleTime = HAL_GetTick() - lastTime;
+	lastTime = HAL_GetTick();
+
+	if (cycleTime > MS_MAX_CYCLE_MS)
+	{
+		ret = false;
+	}
+
+	return ret;
 }
 
 void ManagerSecurity_Reset()
