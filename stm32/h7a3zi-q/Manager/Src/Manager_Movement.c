@@ -1,10 +1,10 @@
 
+#include <Manager_Error.h>
 #include <Manager_HMI.h>
 #include <Manager_Motor.h>
 #include <Manager_Movement.h>
 #include <Periph_Switch.h>
 #include <Periph_UartRingBuf.h>
-#include <Manager_Error.h>
 #include <string.h>
 
 #define MMOV_REST_POS -1
@@ -174,7 +174,7 @@ void ManagerMovement_Task()
         break;
 
     case MMOV_STATE_ERROR:
-    	ManagerError_SetError(ERROR_3_MMOV);
+        ManagerError_SetError(ERROR_3_MMOV);
 
         break;
     }

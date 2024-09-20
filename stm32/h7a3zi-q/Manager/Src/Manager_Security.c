@@ -5,10 +5,10 @@
  *      Author: Charles Henri
  */
 
+#include <Manager_Error.h>
 #include <Manager_Motor.h>
 #include <Manager_Movement.h>
 #include <Periph_Switch.h>
-#include <Manager_Error.h>
 
 #define MS_STATE_IDLE     0
 #define MS_STATE_WATCHING 1
@@ -39,7 +39,6 @@ bool ManagerSecurity_VerifCycleMS();
 ManagerSecurity_t   ManagerSecurity;
 static const Motor* motorsData[MMOT_MOTOR_NBR];
 
-
 uint32_t lastTime;
 uint32_t cycleTime;
 
@@ -55,7 +54,7 @@ void ManagerSecurity_Init()
     ManagerSecurity.reset = false;
 
     cycleTime = 0;
-    lastTime = HAL_GetTick();
+    lastTime  = HAL_GetTick();
 }
 
 void ManagerSecurity_Task()
@@ -79,7 +78,6 @@ void ManagerSecurity_Task()
         ManagerError_SetError(ERROR_0_MSEC);
         break;
     }
-
 }
 
 void ManagerSecurity_Idle()
@@ -185,32 +183,32 @@ bool ManagerSecurity_VerifLimitSwitch()
     {
         if (PeriphSwitch_ExtensionUp())
         {
-        	ManagerError_SetError(ERROR_4_LS_EXT_UP);
+            ManagerError_SetError(ERROR_4_LS_EXT_UP);
             ret = false;
         }
         if (PeriphSwitch_ExtensionDown())
         {
-        	ManagerError_SetError(ERROR_5_LS_EXT_DOWN);
+            ManagerError_SetError(ERROR_5_LS_EXT_DOWN);
             ret = false;
         }
         if (PeriphSwitch_DorsiflexionUp())
         {
-        	ManagerError_SetError(ERROR_10_LS_DORS_UP);
+            ManagerError_SetError(ERROR_10_LS_DORS_UP);
             ret = false;
         }
         if (PeriphSwitch_DorsiflexionDown())
         {
-        	ManagerError_SetError(ERROR_11_LS_DORS_DOWN);
+            ManagerError_SetError(ERROR_11_LS_DORS_DOWN);
             ret = false;
         }
         if (PeriphSwitch_EversionLeft())
         {
-        	ManagerError_SetError(ERROR_8_LS_EVER_UP);
+            ManagerError_SetError(ERROR_8_LS_EVER_UP);
             ret = false;
         }
         if (PeriphSwitch_EversionRight())
         {
-        	ManagerError_SetError(ERROR_9_LS_EVER_DOWN);
+            ManagerError_SetError(ERROR_9_LS_EVER_DOWN);
             ret = false;
         }
         return ret;
@@ -221,18 +219,18 @@ bool ManagerSecurity_VerifLimitSwitch()
 
 bool ManagerSecurity_VerifCycleMS()
 {
-	bool ret = true;
+    bool ret = true;
 
-	cycleTime = HAL_GetTick() - lastTime;
-	lastTime = HAL_GetTick();
+    cycleTime = HAL_GetTick() - lastTime;
+    lastTime  = HAL_GetTick();
 
-	if (cycleTime > MS_MAX_CYCLE_MS)
-	{
-		ret = false;
-		ManagerError_SetError(ERROR_12_CYCLEMS);
-	}
+    if (cycleTime > MS_MAX_CYCLE_MS)
+    {
+        ret = false;
+        ManagerError_SetError(ERROR_12_CYCLEMS);
+    }
 
-	return ret;
+    return ret;
 }
 
 void ManagerSecurity_Reset()

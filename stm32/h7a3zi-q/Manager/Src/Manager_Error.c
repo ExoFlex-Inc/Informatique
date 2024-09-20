@@ -3,10 +3,9 @@
 // Static variable to store the current error status
 uint32_t errorStatus = 0;
 
-
 void ManagerError_Init()
 {
-	errorStatus = 0;
+    errorStatus = 0;
 }
 
 // Sets the specified error bit in the error register
