@@ -4,6 +4,7 @@
 #include <Manager_Movement.h>
 #include <Periph_Switch.h>
 #include <Periph_UartRingBuf.h>
+#include <Manager_Error.h>
 #include <string.h>
 
 #define MMOV_REST_POS -1
@@ -173,7 +174,7 @@ void ManagerMovement_Task()
         break;
 
     case MMOV_STATE_ERROR:
-        // Wait for manual cmd or for state change
+    	ManagerError_SetError(ERROR_3_MMOV);
 
         break;
     }

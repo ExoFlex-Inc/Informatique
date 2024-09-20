@@ -29,6 +29,7 @@
 #include <Manager_HMI.h>
 #include <Manager_Movement.h>
 #include <Manager_Security.h>
+#include <Manager_Error.h>
 
 
 /* USER CODE END Includes */
@@ -124,7 +125,7 @@ int main(void)
 
 
 
-
+    ManagerError_Init();
 	ManagerMotor_Init();
 	ManagerHMI_Init();
 	ManagerMovement_Init();
