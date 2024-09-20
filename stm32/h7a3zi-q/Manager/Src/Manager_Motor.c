@@ -1,3 +1,4 @@
+#include <Manager_Error.h>
 #include <Manager_Motor.h>
 #include <Periph_Canbus.h>
 
@@ -97,6 +98,8 @@ bool ManagerMotor_VerifyMotorState(uint8_t motorIndex);
 void   ManagerMotor_ApplyOriginShift(uint8_t motorIndex);
 int8_t ManagerMotor_GetMotorDirection(uint8_t motorIndex);
 void   ManagerMotor_MotorIncrement(uint8_t motorIndex, int8_t direction);
+
+void ManagerMotor_SetMotorError(uint8_t motorIndex);
 
 /********************************************
  * Manager init and reset
@@ -205,6 +208,7 @@ void ManagerMotor_Task()
 
         case MMOT_STATE_ERROR:
             ManagerMotor_DisableMotors();
+            ManagerError_SetError(ERROR_2_MMOT);
             break;
         }
         timerMs = HAL_GetTick();
@@ -300,6 +304,8 @@ void ManagerMotor_StartMotor(uint8_t motorIndex)
             motors[motorIndex].initState = MMOT_INIT_ERROR;
             managerMotor.state           = MMOT_STATE_ERROR;
             managerMotor.errorCode       = ERROR_CAN_CONNECTION_MOTORS;
+            ManagerError_SetError(ERROR_14_MMOT_CAN_CONNECT);
+            ManagerMotor_SetMotorError(motorIndex);
         }
 
         break;
@@ -325,6 +331,8 @@ void ManagerMotor_StartMotor(uint8_t motorIndex)
             motors[motorIndex].initState = MMOT_INIT_ERROR;
             managerMotor.state           = MMOT_STATE_ERROR;
             managerMotor.errorCode       = ERROR_CAN_CONNECTION_MOTORS;
+            ManagerError_SetError(ERROR_14_MMOT_CAN_CONNECT);
+            ManagerMotor_SetMotorError(motorIndex);
         }
         break;
 
@@ -351,8 +359,26 @@ void ManagerMotor_StartMotor(uint8_t motorIndex)
             motors[motorIndex].initState = MMOT_INIT_ERROR;
             managerMotor.state           = MMOT_STATE_ERROR;
             managerMotor.errorCode       = ERROR_SET_ORIGINES_MOTORS;
+            ManagerError_SetError(ERROR_16_MMOT_SET_ORIGIN);
+            ManagerMotor_SetMotorError(motorIndex);
         }
         break;
+    }
+}
+
+void ManagerMotor_SetMotorError(uint8_t motorIndex)
+{
+    if (motorIndex == MMOT_MOTOR_1)
+    {
+        ManagerError_SetError(ERROR_17_MOTOR_1);
+    }
+    else if (motorIndex == MMOT_MOTOR_2)
+    {
+        ManagerError_SetError(ERROR_18_MOTOR_2);
+    }
+    else if (motorIndex == MMOT_MOTOR_3)
+    {
+        ManagerError_SetError(ERROR_19_MOTOR_3);
     }
 }
 
@@ -566,6 +592,7 @@ void ManagerMotor_VerifyMotorsConnection()
 #ifndef MMOT_DEV_MOTOR_1_DISABLE
     if (HAL_GetTick() - motors[MMOT_MOTOR_1].lastMsgTime > MMOT_MAX_MSG_DELAY)
     {
+        ManagerMotor_SetMotorError(MMOT_MOTOR_1);
         verifM1 = false;
     }
 #endif
@@ -573,6 +600,7 @@ void ManagerMotor_VerifyMotorsConnection()
 #ifndef MMOT_DEV_MOTOR_2_DISABLE
     if (HAL_GetTick() - motors[MMOT_MOTOR_2].lastMsgTime > MMOT_MAX_MSG_DELAY)
     {
+        ManagerMotor_SetMotorError(MMOT_MOTOR_2);
         verifM2 = false;
     }
 #endif
@@ -580,6 +608,7 @@ void ManagerMotor_VerifyMotorsConnection()
 #ifndef MMOT_DEV_MOTOR_3_DISABLE
     if (HAL_GetTick() - motors[MMOT_MOTOR_3].lastMsgTime > MMOT_MAX_MSG_DELAY)
     {
+        ManagerMotor_SetMotorError(MMOT_MOTOR_3);
         verifM3 = false;
     }
 #endif
@@ -588,6 +617,7 @@ void ManagerMotor_VerifyMotorsConnection()
     {
         managerMotor.state     = MMOT_STATE_ERROR;
         managerMotor.errorCode = ERROR_CAN_MAX_MSG_DELAY;
+        ManagerError_SetError(ERROR_15_MMOT_CAN_MAX_DELAY);
     }
 }
 
@@ -625,18 +655,24 @@ bool ManagerMotor_VerifyMotorState(uint8_t motorIndex)
         if (motors[motorIndex].motor.velocity > MMOT_MOVING_MAX_SPEED ||
             motors[motorIndex].motor.velocity < -MMOT_MOVING_MAX_SPEED)
         {
+            ManagerError_SetError(ERROR_22_MMOT_MINMAX_SPEED);
+            ManagerMotor_SetMotorError(motorIndex);
             verif = false;
         }
 
         if (motors[motorIndex].motor.torque > MMOT_MOVING_MAX_TORQUE ||
             motors[motorIndex].motor.torque < -MMOT_MOVING_MAX_TORQUE)
         {
+            ManagerError_SetError(ERROR_21_MMOT_MINMAX_TORQUE);
+            ManagerMotor_SetMotorError(motorIndex);
             verif = false;
         }
 
         if (motors[motorIndex].motor.position > motorsMaxPos[motorIndex] ||
             motors[motorIndex].motor.position < motorsMinPos[motorIndex])
         {
+            ManagerError_SetError(ERROR_20_MMOT_MINMAX_POS);
+            ManagerMotor_SetMotorError(motorIndex);
             verif = false;
         }
     }
@@ -646,12 +682,16 @@ bool ManagerMotor_VerifyMotorState(uint8_t motorIndex)
         if (motors[motorIndex].motor.velocity > MMOT_IDLE_MAX_SPEED ||
             motors[motorIndex].motor.velocity < -MMOT_IDLE_MAX_SPEED)
         {
+            ManagerError_SetError(ERROR_22_MMOT_MINMAX_SPEED);
+            ManagerMotor_SetMotorError(motorIndex);
             verif = false;
         }
 
         if (motors[motorIndex].motor.torque > MMOT_IDLE_MAX_TORQUE ||
             motors[motorIndex].motor.torque < -MMOT_IDLE_MAX_TORQUE)
         {
+            ManagerError_SetError(ERROR_21_MMOT_MINMAX_TORQUE);
+            ManagerMotor_SetMotorError(motorIndex);
             verif = false;
         }
     }

@@ -1,3 +1,4 @@
+#include <Manager_Error.h>
 #include <Manager_HMI.h>
 #include <Manager_Motor.h>
 #include <Manager_Movement.h>
@@ -76,7 +77,8 @@ void ManagerHMI_Task()
     }
 }
 
-void ManagerHMI_SendJSON() {
+void ManagerHMI_SendJSON()
+{
     autoPlanInfo_t* pPlan = ManagerMovement_GetPlanData();
 
     // Define static buffers to avoid dynamic memory allocations
@@ -84,7 +86,6 @@ void ManagerHMI_SendJSON() {
     char strMode[M_HMI_STRING_LENGTH];
     char strAutoState[M_HMI_STRING_LENGTH];
     char strHomingState[M_HMI_STRING_LENGTH];
-    char strErrorCode[] = "NoError";  // Constant, so no need to dynamically allocate
 
     // Get the data for the JSON fields
     ManagerHMI_GetStrMode(ManagerMovement_GetState(), strMode);
@@ -92,31 +93,31 @@ void ManagerHMI_SendJSON() {
     ManagerHMI_GetStrAutoState(pPlan->autoState, strAutoState);
 
     uint8_t exerciseIdx = pPlan->exCount;
-    uint8_t repsCount = pPlan->repsCount;
+    uint8_t repsCount   = pPlan->repsCount;
 
     float positions[MMOT_MOTOR_NBR];
     float torques[MMOT_MOTOR_NBR];
     float current[MMOT_MOTOR_NBR];
 
     // Convert motor data
-    for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++) {
+    for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
+    {
         positions[i] = ManagerHMI_Radians2Degrees(motorsData[i]->position);
-        torques[i] = motorsData[i]->torque;
-        current[i] = motorsData[i]->current;
+        torques[i]   = motorsData[i]->torque;
+        current[i]   = motorsData[i]->current;
     }
 
     // Manually build the JSON string using snprintf
     snprintf(jsonMessage, PUART_TX_BUF_SIZE,
-        "{\"Mode\":\"%s\",\"AutoState\":\"%s\",\"HomingState\":\"%s\","
-        "\"Repetitions\":%d,\"ExerciseIdx\":%d,\"ErrorCode\":\"%s\","
-        "\"Positions\":[%.2f,%.2f,%.2f],"
-        "\"Torques\":[%.2f,%.2f,%.2f],"
-        "\"Current\":[%.2f,%.2f,%.2f]}",
-        strMode, strAutoState, strHomingState,
-        repsCount, exerciseIdx, strErrorCode,
-        positions[0], positions[1], positions[2],
-        torques[0], torques[1], torques[2],
-        current[0], current[1], current[2]);
+             "{\"Mode\":\"%s\",\"AutoState\":\"%s\",\"HomingState\":\"%s\","
+             "\"Repetitions\":%d,\"ExerciseIdx\":%d,\"ErrorCode\":\"%lu\","
+             "\"Positions\":[%.2f,%.2f,%.2f],"
+             "\"Torques\":[%.2f,%.2f,%.2f],"
+             "\"Current\":[%.2f,%.2f,%.2f]}",
+             strMode, strAutoState, strHomingState, repsCount, exerciseIdx,
+             ManagerError_GetErrorStatus(), positions[0], positions[1],
+             positions[2], torques[0], torques[1], torques[2], current[0],
+             current[1], current[2]);
 
     // Send JSON string over UART
     PeriphUartRingBuf_Send(jsonMessage, strlen(jsonMessage));
