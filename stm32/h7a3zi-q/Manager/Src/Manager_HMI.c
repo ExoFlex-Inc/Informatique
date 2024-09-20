@@ -2,6 +2,7 @@
 #include <Manager_Motor.h>
 #include <Manager_Movement.h>
 #include <Periph_UartRingBuf.h>
+#include <Manager_Error.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -84,7 +85,6 @@ void ManagerHMI_SendJSON() {
     char strMode[M_HMI_STRING_LENGTH];
     char strAutoState[M_HMI_STRING_LENGTH];
     char strHomingState[M_HMI_STRING_LENGTH];
-    char strErrorCode[] = "NoError";  // Constant, so no need to dynamically allocate
 
     // Get the data for the JSON fields
     ManagerHMI_GetStrMode(ManagerMovement_GetState(), strMode);
@@ -108,12 +108,12 @@ void ManagerHMI_SendJSON() {
     // Manually build the JSON string using snprintf
     snprintf(jsonMessage, PUART_TX_BUF_SIZE,
         "{\"Mode\":\"%s\",\"AutoState\":\"%s\",\"HomingState\":\"%s\","
-        "\"Repetitions\":%d,\"ExerciseIdx\":%d,\"ErrorCode\":\"%s\","
+        "\"Repetitions\":%d,\"ExerciseIdx\":%d,\"ErrorCode\":\"%lu\","
         "\"Positions\":[%.2f,%.2f,%.2f],"
         "\"Torques\":[%.2f,%.2f,%.2f],"
         "\"Current\":[%.2f,%.2f,%.2f]}",
         strMode, strAutoState, strHomingState,
-        repsCount, exerciseIdx, strErrorCode,
+        repsCount, exerciseIdx, ManagerError_GetErrorStatus(),
         positions[0], positions[1], positions[2],
         torques[0], torques[1], torques[2],
         current[0], current[1], current[2]);
