@@ -80,6 +80,9 @@ int8_t motorsMaxPos[MMOT_MOTOR_NBR];
 
 managerMotor_t managerMotor;
 
+float torqueMaxKp;
+float torqueMinKp;
+
 // Prototypes
 void ManagerMotor_Reset();
 void ManagerMotor_ReceiveFromMotors();
@@ -110,6 +113,7 @@ void ManagerMotor_Init()
     HAL_Delay(50);
 
     ManagerMotor_Reset();
+
 }
 
 void ManagerMotor_Reset()
@@ -175,6 +179,9 @@ void ManagerMotor_Reset()
     managerMotor.securityPass   = false;
     managerMotor.setupFirstPass = true;
     managerMotor.state          = MMOT_STATE_WAITING_SECURITY;
+
+    torqueMaxKp = 10.0;
+    torqueMinKp = 3.0;
 }
 
 void ManagerMotor_Task()
@@ -419,6 +426,7 @@ void ManagerMotor_SendToMotors()
 #ifndef MMOT_DEV_MOTOR_1_DISABLE
     if (motors[MMOT_MOTOR_1].controlType == MMOT_CONTROL_POSITION)
     {
+    	ManagerMotor_CalculNextKp(MMOT_MOTOR_1);
         PeriphMotors_Move(&motors[MMOT_MOTOR_1].motor,
                           motors[MMOT_MOTOR_1].nextPosition, 0, 0,
                           motors[MMOT_MOTOR_1].kp, motors[MMOT_MOTOR_1].kd);
@@ -439,6 +447,7 @@ void ManagerMotor_SendToMotors()
 #ifndef MMOT_DEV_MOTOR_2_DISABLE
     if (motors[MMOT_MOTOR_2].controlType == MMOT_CONTROL_POSITION)
     {
+    	ManagerMotor_CalculNextKp(MMOT_MOTOR_2);
         PeriphMotors_Move(&motors[MMOT_MOTOR_2].motor,
                           motors[MMOT_MOTOR_2].nextPosition, 0, 0,
                           motors[MMOT_MOTOR_2].kp, motors[MMOT_MOTOR_2].kd);
@@ -459,6 +468,7 @@ void ManagerMotor_SendToMotors()
 #ifndef MMOT_DEV_MOTOR_3_DISABLE
     if (motors[MMOT_MOTOR_3].controlType == MMOT_CONTROL_POSITION)
     {
+    	ManagerMotor_CalculNextKp(MMOT_MOTOR_3);
         PeriphMotors_Move(&motors[MMOT_MOTOR_3].motor,
                           motors[MMOT_MOTOR_3].nextPosition, 0, 0,
                           motors[MMOT_MOTOR_3].kp, motors[MMOT_MOTOR_3].kd);
@@ -729,12 +739,16 @@ void ManagerMotor_SetOriginShift(uint8_t motorIndex, float shiftValue)
 
 float ManagerMotor_CalculNextKp(uint8_t motorIndex)
 {
-	if (motors[motorIndex].motor.torque > 10.0)
+	if (motors[motorIndex].motor.torque >= torqueMaxKp)
 	{
-		motors[motorIndex].kp = 500;
+		motors[motorIndex].kp = 500.0;
+	}
+	else if (motors[motorIndex].motor.torque <= torqueMinKp)
+	{
+		motors[motorIndex].kp = 200.0;
 	}
 	else
 	{
-		motors[motorIndex].kp = 200;
+		motors[motorIndex].kp = 200.0 + (motors[motorIndex].motor.torque - torqueMinKp) * (500.0 - 200.0) / (torqueMaxKp - torqueMinKp);
 	}
 }
