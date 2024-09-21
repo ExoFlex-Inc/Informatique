@@ -2,20 +2,20 @@ import { useEffect, useRef } from "react";
 import { removeRelation } from "../controllers/relationsController.ts";
 import { useUserProfile } from "../hooks/use-profile.ts";
 
-interface PatientMenuDropdownProps {
+interface UserMenuDropdownProps {
   clientId: string;
   setOpenMenuIndex: React.Dispatch<React.SetStateAction<number | null>>;
-  visibleListOfPatients: any[];
-  setListOfPatients: React.Dispatch<React.SetStateAction<any[]>>;
+  visibleListOfUsers: any[];
+  setListOfUsers: React.Dispatch<React.SetStateAction<any[]>>;
   index: number;
   buttonRef: React.RefObject<HTMLButtonElement>;
 }
 
-const PatientMenuDropdown: React.FC<PatientMenuDropdownProps> = ({
+const UserMenuDropdown: React.FC<UserMenuDropdownProps> = ({
   clientId,
   setOpenMenuIndex,
-  visibleListOfPatients,
-  setListOfPatients,
+  visibleListOfUsers,
+  setListOfUsers,
   index,
   buttonRef,
 }) => {
@@ -27,10 +27,10 @@ const PatientMenuDropdown: React.FC<PatientMenuDropdownProps> = ({
 
     if (unlinkSuccessful) {
       const newList = [
-        ...visibleListOfPatients.slice(0, index),
-        ...visibleListOfPatients.slice(index + 1),
+        ...visibleListOfUsers.slice(0, index),
+        ...visibleListOfUsers.slice(index + 1),
       ];
-      setListOfPatients(newList);
+      setListOfUsers(newList);
       setOpenMenuIndex(null);
     }
   };
@@ -67,11 +67,11 @@ const PatientMenuDropdown: React.FC<PatientMenuDropdownProps> = ({
           onClick={removeUser}
           className="text-red-500 rounded-b-md px-2 hover:bg-gray-200"
         >
-          Remove Patient
+          Remove User
         </li>
       </ul>
     </div>
   );
 };
 
-export default PatientMenuDropdown;
+export default UserMenuDropdown;

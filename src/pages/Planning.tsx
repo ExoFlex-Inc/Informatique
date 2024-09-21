@@ -6,11 +6,13 @@ import {
   FormControl,
   FormLabel,
 } from "@mui/material";
-import PatientSearchBar from "../components/PatientSearchBar.tsx";
+import UserSearchBar from "../components/UserSearchBar.tsx";
 import { blue } from "@mui/material/colors";
 import ExercisesLimitsTable from "../components/ExercisesLimitsTable.tsx";
 import ExercisesPlanTable from "../components/ExercisesPlanTable.tsx";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
+import { useRelations } from "../hooks/use-relations.ts";
+import Loading from "../components/Loading.tsx";
 
 export interface Limits {
   torque: {
@@ -66,12 +68,13 @@ export default function Planning() {
     torque: { dorsiflexion: 0, extension: 0, eversion: 0 },
     angles: { dorsiflexion: 0, extension: 0, eversion: 0 },
   });
-  const [selectedPatient, setSelectedPatient] = useState<any[]>([]);
+  const [selectedUser, setSelectedUser] = useState<any[]>([]);
   const [isDisabled, setIsDisabled] = useState(true);
   const [addExerciseDisable, setAddExerciseDisable] = useState(true);
   const [side, setSide] = useState("Left");
   const [checked, setChecked] = useState(false);
   const checkboxRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const { relations, isLoading } = useRelations();
 
   useEffect(() => {
     if (plan.length < 1) {
@@ -80,7 +83,7 @@ export default function Planning() {
   }, [plan]);
 
   useEffect(() => {
-    if (selectedPatient.length != 0) {
+    if (selectedUser.length != 0) {
       async function fetchPlanData() {
         const data = await planInit();
         if (data.loaded && data.planData[0]) {
@@ -90,9 +93,9 @@ export default function Planning() {
         }
       }
       fetchPlanData();
-      selectedPatient.length == 0 ? setIsDisabled(true) : setIsDisabled(false);
+      selectedUser.length == 0 ? setIsDisabled(true) : setIsDisabled(false);
     }
-  }, [selectedPatient]);
+  }, [selectedUser]);
 
   useEffect(() => {
     const filteredCheckbox = checkboxRefs.current.filter((element) => {
@@ -110,14 +113,14 @@ export default function Planning() {
 
   async function planInit() {
     try {
-      if (selectedPatient) {
+      if (selectedUser) {
         console.log("Getting the current plan...");
         const responseGetPlanning = await fetch(
           "http://localhost:3001/api/plan",
           {
             method: "GET",
             headers: {
-              UserId: selectedPatient[0].user_id,
+              UserId: selectedUser[0].user_id,
             },
           },
         );
@@ -223,7 +226,7 @@ export default function Planning() {
     try {
       const requestBody = {
         plan: plan,
-        selectedPatient: selectedPatient[0],
+        selectedPatient: selectedUser[0],
       };
 
       const response = await fetch("http://localhost:3001/api/plan", {
@@ -245,6 +248,10 @@ export default function Planning() {
       console.error("Error saving plan to Supabase:", error);
     }
   };
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <div className="flex flex-col custom-height">
@@ -274,9 +281,10 @@ export default function Planning() {
             />
           </RadioGroup>
         </FormControl>
-        <PatientSearchBar
+        <UserSearchBar
           sx={{ width: 500 }}
-          setSelectedPatient={setSelectedPatient}
+          setSearchQuery={setSelectedUser}
+          users={relations}
         />
       </div>
       <CustomScrollbar>

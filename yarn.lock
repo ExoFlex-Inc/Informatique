@@ -2716,6 +2716,18 @@
   resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.51.24.tgz#da901637c8652ba5703b92bd07496e7c9ae27836"
   integrity sha512-qtIR0FMHUDIWyIQw87q4C+so7XaN59MsGfWrc6rgi2VTHrVZF3Hd0St2dbpqRetHf6XW5yY5lzTrXpTilPlxUg==
 
+"@tanstack/query-devtools@5.56.1":
+  version "5.56.1"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-devtools/-/query-devtools-5.56.1.tgz#319c362dd19c6cfe005e74a8777baefa4a4f72de"
+  integrity sha512-xnp9jq/9dHfSCDmmf+A5DjbIjYqbnnUL2ToqlaaviUQGRTapXQ8J+GxusYUu1IG0vZMaWdiVUA4HRGGZYAUU+A==
+
+"@tanstack/react-query-devtools@^5.56.2":
+  version "5.56.2"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query-devtools/-/react-query-devtools-5.56.2.tgz#c129cdb811927085434ea27691e4b7f605eb4128"
+  integrity sha512-7nINJtRZZVwhTTyDdMIcSaXo+EHMLYJu1S2e6FskvvD5prx87LlAXXWZDfU24Qm4HjshEtM5lS3HIOszNGblcw==
+  dependencies:
+    "@tanstack/query-devtools" "5.56.1"
+
 "@tanstack/react-query@^5.51.24":
   version "5.51.24"
   resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.51.24.tgz#11385bee6b83a2d0ed6d5d03e16aab1cdf2cc24f"
@@ -6682,10 +6694,10 @@ sucrase@^3.32.0:
     pirates "^4.0.1"
     ts-interface-checker "^0.1.9"
 
-supabase@^1.188.4:
-  version "1.188.4"
-  resolved "https://registry.yarnpkg.com/supabase/-/supabase-1.188.4.tgz#4547a6b274b152f63159302a0bba9e3a03532ce2"
-  integrity sha512-ntOhjrBlnMdacbcmGmuv7Q2JuH6oeukc5iCHFtjZxQRmE583p02HdsALEq7KdITEMjFJOvjM4xJ5/32HAYuRQQ==
+supabase@^1.192.5:
+  version "1.192.5"
+  resolved "https://registry.yarnpkg.com/supabase/-/supabase-1.192.5.tgz#57b649923d7e5c24a8930cbcb780b3326966a513"
+  integrity sha512-xRn5wu4jtSgaPXfNrYRYv6Y1oxevxp7Ff95rJyhh1Us7WqSxjmJcpFygXG/tZx/Oxp/iD1JMhip+mFVlfcaVcw==
   dependencies:
     bin-links "^4.0.3"
     https-proxy-agent "^7.0.2"

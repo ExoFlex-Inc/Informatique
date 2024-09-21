@@ -159,31 +159,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION get_clients_for_admin(admin_id UUID)
-RETURNS TABLE (
-    user_id UUID,
-    first_name TEXT,
-    last_name TEXT,
-    phone_number TEXT,
-    email TEXT
-) AS $$
-BEGIN
-    RETURN QUERY
-    SELECT 
-        c.user_id, 
-        c.first_name, 
-        c.last_name, 
-        c.phone_number, 
-        c.email
-    FROM 
-        user_profiles c
-    JOIN 
-        relations a ON c.user_id = a.client_id
-    WHERE 
-        a.admin_id = get_clients_for_admin.admin_id;
-END;
-$$ LANGUAGE plpgsql;
-
 /*
 ..######..########..#######..########.....###.....#######..########
 .##....##....##....##.....##.##.....##...##.##...##.....##.##......

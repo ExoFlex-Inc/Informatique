@@ -11,26 +11,46 @@ const fetchRelation = async (req: Request, res: Response) => {
   }
 
   try {
-    const { data, error } = await supaClient
+    const { data: relations, error: relationsError } = await supaClient
       .from("relations")
-      .select("*")
-      .eq("client_id", user_id);
+      .select("admin_id, client_id")
+      .or(`admin_id.eq.${user_id},client_id.eq.${user_id}`);
 
-    if (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Failed to fetch relations",
-        error: error.message,
-      });
+    if (relationsError) {
+      console.error("Failed to fetch relations:", relationsError);
+      return res
+        .status(500)
+        .json({
+          message: "Failed to fetch relations",
+          error: relationsError.message,
+        });
     }
 
-    return res.status(200).json({ success: true, data });
+    if (!relations || relations.length === 0) {
+      console.log("No relations found for this user");
+      return res.status(404).json({ message: "No relations found" });
+    }
+
+    const relationsIds = relations.map((relation) =>
+      relation.admin_id === user_id ? relation.client_id : relation.admin_id,
+    );
+
+    const { data: userProfiles, error: profilesError } = await supaClient
+      .from("user_profiles")
+      .select("user_id, first_name, last_name, phone_number, email")
+      .in("user_id", relationsIds);
+
+    if (profilesError) {
+      console.error("Error getting user profiles:", profilesError);
+      return res.status(500).json({ error: "Error getting user profiles" });
+    }
+
+    return res.status(200).json(userProfiles);
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Error fetching relations",
-      error: error.message,
-    });
+    console.error("Error fetching relations:", error);
+    return res
+      .status(500)
+      .json({ message: "Error fetching relations", error: error.message });
   }
 };
 

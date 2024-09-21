@@ -12,7 +12,6 @@ import planRoutes from "./routes/planRoutes.ts";
 import hmiRoutes from "./routes/hmiRoutes.ts";
 import userRoutes from "./routes/userRoutes.ts";
 import relationsRoutes from "./routes/relationsRoutes.ts";
-import wellnessNetworkRoutes from "./routes/wellnessNetworkRoutes.ts";
 import exerciseDataRoute from "./routes/exerciseDataRoutes.ts";
 import notificationRoute from "./routes/notificationRoutes.ts";
 import { getSerialPort } from "./managers/serialPort.ts";
@@ -59,7 +58,6 @@ app.use("/notification", notificationRoute);
 app.use("/api", serialPortRoutes);
 app.use("/api", planRoutes);
 app.use("/api", hmiRoutes);
-app.use("/api", wellnessNetworkRoutes);
 
 io.on("connection", (socket) => {
   console.log("A client connected");

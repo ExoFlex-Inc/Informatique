@@ -33,6 +33,7 @@ import { useSupabaseSession } from "./hooks/use-session.ts";
 import { useUserProfile } from "./hooks/use-profile.ts";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -42,6 +43,7 @@ const router = createBrowserRouter(
       <Route
         element={<PrivateRoutes requiredPermissions={["dev", "client"]} />}
       >
+        <Route path="/professional_network" element={<ProfessionalNetwork />} />
         <Route path="/dashboard" element={<Dashboard />} />
       </Route>
 
@@ -49,14 +51,13 @@ const router = createBrowserRouter(
         <Route path="/activity" element={<Activity />} />
         <Route path="/manual" element={<Manual />} />
         <Route path="/planning" element={<Planning />} />
-        <Route path="/wellness_network" element={<WellnessNetwork />} />
       </Route>
 
+      <Route path="/wellness_network" element={<WellnessNetwork />} />
       <Route path="/termsAndConditions" element={<TermsAndConditions />} />
       <Route path="/hmi" element={<HMI />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/profile" element={<Profile />} />
-      <Route path="/professional_network" element={<ProfessionalNetwork />} />
       <Route path="/forbidden" element={<Forbidden />} />
     </Route>,
   ),
@@ -101,6 +102,7 @@ function App() {
           <div className="app">
             <RouterProvider router={router} />
           </div>
+          <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>
