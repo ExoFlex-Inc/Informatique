@@ -13,7 +13,7 @@ const ProfessionalNetwork = () => {
   const { profile } = useUserProfile();
   const { admins, isLoading } = useAdminProfile();
 
-  const [filteredUsers, setFilteredUsers] = useState(admins)
+  const [filteredUsers, setFilteredUsers] = useState(admins);
 
   useEffect(() => {
     setFilteredUsers(admins);

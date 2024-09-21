@@ -13,7 +13,11 @@ interface UserSearchBarProps {
   setSearchQuery?: React.Dispatch<React.SetStateAction<User[]>>;
 }
 
-const UserSearchBar: React.FC<UserSearchBarProps> = ({ sx, users, setSearchQuery }) => {
+const UserSearchBar: React.FC<UserSearchBarProps> = ({
+  sx,
+  users,
+  setSearchQuery,
+}) => {
   return (
     <div className="ml-4 mb-2">
       <Autocomplete
@@ -34,7 +38,7 @@ const UserSearchBar: React.FC<UserSearchBarProps> = ({ sx, users, setSearchQuery
             onChange={(event) => {
               const inputValue = event.target.value.toLowerCase();
               const filteredUsers = users.filter((user) =>
-                user.email.toLowerCase().includes(inputValue)
+                user.email.toLowerCase().includes(inputValue),
               );
               setSearchQuery?.(filteredUsers); // Update with filtered users
             }}

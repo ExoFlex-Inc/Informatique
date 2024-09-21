@@ -11,11 +11,11 @@ export default function WellnessNetwork() {
   const navigate = useNavigate();
   const { profile } = useUserProfile();
   const { relations, isLoading } = useRelations();
-  
+
   const [filteredRelations, setFilteredRelations] = useState([relations]);
 
   useEffect(() => {
-      setFilteredRelations(relations);
+    setFilteredRelations(relations);
   }, [relations]);
 
   if (isLoading) {
@@ -30,7 +30,8 @@ export default function WellnessNetwork() {
           setSearchQuery={setFilteredRelations}
           users={relations}
         />
-        {(profile?.permissions === "dev" || profile?.permissions === "client") && (
+        {(profile?.permissions === "dev" ||
+          profile?.permissions === "client") && (
           <Button
             variant="contained"
             color="info"

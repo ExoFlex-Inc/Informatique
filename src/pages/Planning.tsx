@@ -281,7 +281,10 @@ export default function Planning() {
             />
           </RadioGroup>
         </FormControl>
-        <UserSearchBar sx={{ width: 500 }} setSearchQuery={setSelectedUser} users={relations}
+        <UserSearchBar
+          sx={{ width: 500 }}
+          setSearchQuery={setSelectedUser}
+          users={relations}
         />
       </div>
       <CustomScrollbar>

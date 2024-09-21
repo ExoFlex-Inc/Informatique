@@ -5,11 +5,12 @@ const fetchRelation = async (req: Request, res: Response) => {
   const user_id = req.params.userId;
 
   if (!user_id) {
-    return res.status(400).json({ success: false, message: "No user_id provided" });
+    return res
+      .status(400)
+      .json({ success: false, message: "No user_id provided" });
   }
 
   try {
-
     const { data: relations, error: relationsError } = await supaClient
       .from("relations")
       .select("admin_id, client_id")
@@ -17,7 +18,12 @@ const fetchRelation = async (req: Request, res: Response) => {
 
     if (relationsError) {
       console.error("Failed to fetch relations:", relationsError);
-      return res.status(500).json({ message: "Failed to fetch relations", error: relationsError.message });
+      return res
+        .status(500)
+        .json({
+          message: "Failed to fetch relations",
+          error: relationsError.message,
+        });
     }
 
     if (!relations || relations.length === 0) {
@@ -26,7 +32,7 @@ const fetchRelation = async (req: Request, res: Response) => {
     }
 
     const relationsIds = relations.map((relation) =>
-      relation.admin_id === user_id ? relation.client_id : relation.admin_id
+      relation.admin_id === user_id ? relation.client_id : relation.admin_id,
     );
 
     const { data: userProfiles, error: profilesError } = await supaClient
@@ -42,7 +48,9 @@ const fetchRelation = async (req: Request, res: Response) => {
     return res.status(200).json(userProfiles);
   } catch (error) {
     console.error("Error fetching relations:", error);
-    return res.status(500).json({ message: "Error fetching relations", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error fetching relations", error: error.message });
   }
 };
 
