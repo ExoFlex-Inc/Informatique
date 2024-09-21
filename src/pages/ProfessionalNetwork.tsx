@@ -6,20 +6,32 @@ import { useUserProfile } from "../hooks/use-profile.ts";
 import { useState, useEffect } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import { useAdminProfile } from "../hooks/use-admin.ts";
+import Loading from "../components/Loading.tsx";
 
 const ProfessionalNetwork = () => {
   const navigate = useNavigate();
   const { profile } = useUserProfile();
-  const [listOfUsers, setListOfUsers] = useState<any[]>([]);
+  const { admins, isLoading } = useAdminProfile();
+
+  const [filteredUsers, setFilteredUsers] = useState(admins)
+
+  useEffect(() => {
+    setFilteredUsers(admins);
+  }, [admins]);
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <div>
       <div className="flex items-center gap-4 relative">
         <UserSearchBar
           sx={{ width: 500 }}
-          setListOfUsers={setListOfUsers}
-          listOfUsers={listOfUsers}
+          setSearchQuery={setFilteredUsers}
+          users={admins}
         />
+
         {profile?.permissions == "dev" || profile?.permissions == "client" ? (
           <Button
             variant="contained"
@@ -35,7 +47,7 @@ const ProfessionalNetwork = () => {
           true
         )}
       </div>
-      <UserList setListOfUsers={setListOfUsers} listOfUsers={listOfUsers} />
+      <UserList listOfUsers={filteredUsers} />
     </div>
   );
 };

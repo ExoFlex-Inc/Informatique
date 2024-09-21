@@ -1,146 +1,28 @@
+import React from "react";
 import { TextField, InputAdornment, Autocomplete } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-import { useAdminProfile } from "../hooks/use-admin.ts";
-interface UserSearchBarProps {
-  sx?: object;
-  setSelectedUser?: React.Dispatch<React.SetStateAction<any[]>>;
-  setListOfUsers?: React.Dispatch<React.SetStateAction<any[]>>;
+
+interface User {
+  email: string;
+  // Add other properties as needed
 }
 
-const UserSearchBar: React.FC<UserSearchBarProps> = ({
-  sx,
-  setSelectedUser,
-  setListOfUsers,
-}) => {
-  const [searchElement, setSearchElement] = useState("");
-  const [listOfUsersMapped, setListOfUsersMapped] = useState<{ label: any }[]>(
-    [],
-  );
-  const { pathname } = useLocation();
-  const { admins } = useAdminProfile();
-  const [users, setUsers] = useState<any[]>([]);
+interface UserSearchBarProps {
+  sx?: object;
+  users: User[];
+  setSearchQuery?: React.Dispatch<React.SetStateAction<User[]>>;
+}
 
-  async function fetchUsers() {
-    if (pathname !== "/professional_network") {
-      try {
-        const responseGetUsers = await fetch(
-          `http://localhost:3001/api/wellness_network`,
-          {
-            method: "GET",
-          },
-        );
-
-        if (responseGetUsers.ok) {
-          console.log("List retrieved successfully.");
-          const listData = await responseGetUsers.json();
-          return { loaded: true, listData: listData };
-        } else {
-          console.error("Failed to retrieve list.");
-          window.alert("Failed to retrieve list.");
-          return { loaded: false, listData: null };
-        }
-      } catch (error) {
-        console.error("An error occurred:", error);
-        window.alert("An error occurred: " + error);
-        return { loaded: false, listData: null };
-      }
-    }
-  }
-
-  async function fetchListData() {
-    const data = await fetchUsers();
-    if (data && data.loaded && data.listData) {
-      setListOfUsers?.(data.listData);
-      setUsers(data.listData);
-    }
-  }
-  useEffect(() => {
-    fetchListData();
-  }, []);
-
-  useEffect(() => {
-    if (admins && pathname === "/professional_network") {
-      setListOfUsers?.(admins);
-      setListOfUsersMapped(
-        admins.map((admin: any) => {
-          return {
-            label: admin.email,
-          };
-        }),
-      );
-    }
-  }, [admins]);
-
-  useEffect(() => {
-    if (users) {
-      setListOfUsersMapped(
-        users.map((user) => {
-          return {
-            label: user.email,
-          };
-        }),
-      );
-    }
-  }, [users]);
-
-  useEffect(() => {
-    let newList;
-    if (pathname === "/professional_network" && admins) {
-      searchElement !== undefined
-        ? (newList = admins.filter((admin: any) =>
-            admin.email.includes(searchElement) ? true : false,
-          ))
-        : (newList = admins);
-      setListOfUsersMapped(
-        newList.map((el: any) => {
-          return {
-            label: el.email,
-          };
-        }),
-      );
-    } else {
-      searchElement !== undefined
-        ? (newList = users.filter((user: any) =>
-            user.email.includes(searchElement) ? true : false,
-          ))
-        : (newList = users);
-      setListOfUsersMapped(
-        newList.map((el: any) => {
-          return {
-            label: el.email,
-          };
-        }),
-      );
-    }
-    setListOfUsers?.(newList ? newList : []);
-  }, [searchElement]);
-
-  function onInputChange(target: any) {
-    if (target.value) {
-      setSearchElement(target.value);
-    } else {
-      setSearchElement(target.innerText);
-    }
-    const user = users.filter((user) => {
-      if (user.email === target.textContent) {
-        return true;
-      } else {
-        return false;
-      }
-    });
-    setSelectedUser?.(user);
-  }
-
+const UserSearchBar: React.FC<UserSearchBarProps> = ({ sx, users, setSearchQuery }) => {
   return (
     <div className="ml-4 mb-2">
       <Autocomplete
         disablePortal
         id="combo-box"
-        options={listOfUsersMapped.slice(0, 10)}
-        onInputChange={({ target }) => {
-          onInputChange(target);
+        options={users.map((user) => user.email)}
+        onChange={(event, value) => {
+          const selectedUser = users.find((user) => user.email === value);
+          setSearchQuery?.(selectedUser ? [selectedUser] : []);
         }}
         renderInput={(params) => (
           <TextField
@@ -148,7 +30,14 @@ const UserSearchBar: React.FC<UserSearchBarProps> = ({
             variant="outlined"
             size="small"
             sx={sx}
-            placeholder="Search email"
+            label="Search email"
+            onChange={(event) => {
+              const inputValue = event.target.value.toLowerCase();
+              const filteredUsers = users.filter((user) =>
+                user.email.toLowerCase().includes(inputValue)
+              );
+              setSearchQuery?.(filteredUsers); // Update with filtered users
+            }}
             InputProps={{
               ...params.InputProps,
               startAdornment: (

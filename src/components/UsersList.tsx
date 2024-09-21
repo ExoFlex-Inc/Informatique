@@ -7,10 +7,9 @@ import { Box, IconButton } from "@mui/material";
 
 interface UserListProps {
   listOfUsers: any[];
-  setListOfUsers: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
-const UserList: React.FC<UserListProps> = ({ listOfUsers, setListOfUsers }) => {
+const UserList: React.FC<UserListProps> = ({ listOfUsers }) => {
   const [openMenuIndex, setOpenMenuIndex] = useState<Number | null>(null);
   const buttonRefs = useRef<HTMLButtonElement[]>([]);
   const { pathname } = useLocation();
@@ -103,7 +102,7 @@ const UserList: React.FC<UserListProps> = ({ listOfUsers, setListOfUsers }) => {
                     )}
                   </Box>
                 </li>
-                {openMenuIndex === index && (
+                {/* {openMenuIndex === index && (
                   <UserMenuDropdown
                     buttonRef={{ current: buttonRefs.current[index] }}
                     clientId={user.user_id}
@@ -112,7 +111,7 @@ const UserList: React.FC<UserListProps> = ({ listOfUsers, setListOfUsers }) => {
                     index={index}
                     setOpenMenuIndex={setOpenMenuIndex}
                   />
-                )}
+                )} */}
               </div>
             </div>
           ) : (

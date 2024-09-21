@@ -33,6 +33,7 @@ import { useSupabaseSession } from "./hooks/use-session.ts";
 import { useUserProfile } from "./hooks/use-profile.ts";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -101,6 +102,7 @@ function App() {
           <div className="app">
             <RouterProvider router={router} />
           </div>
+          <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>

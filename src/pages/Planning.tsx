@@ -11,6 +11,8 @@ import { blue } from "@mui/material/colors";
 import ExercisesLimitsTable from "../components/ExercisesLimitsTable.tsx";
 import ExercisesPlanTable from "../components/ExercisesPlanTable.tsx";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
+import { useRelations } from "../hooks/use-relations.ts";
+import Loading from "../components/Loading.tsx";
 
 export interface Limits {
   torque: {
@@ -72,6 +74,7 @@ export default function Planning() {
   const [side, setSide] = useState("Left");
   const [checked, setChecked] = useState(false);
   const checkboxRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const { relations, isLoading } = useRelations();
 
   useEffect(() => {
     if (plan.length < 1) {
@@ -246,6 +249,10 @@ export default function Planning() {
     }
   };
 
+  if (isLoading) {
+    return <Loading />;
+  }
+
   return (
     <div className="flex flex-col custom-height">
       <div className="flex justify-center items-center">
@@ -274,7 +281,8 @@ export default function Planning() {
             />
           </RadioGroup>
         </FormControl>
-        <UserSearchBar sx={{ width: 500 }} setSelectedUser={setSelectedUser} />
+        <UserSearchBar sx={{ width: 500 }} setSearchQuery={setSelectedUser} users={relations}
+        />
       </div>
       <CustomScrollbar>
         <div className="overflow-auto">

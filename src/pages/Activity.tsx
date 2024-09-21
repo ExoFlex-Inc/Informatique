@@ -16,6 +16,8 @@ import {
   Typography,
 } from "@mui/material";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
+import { useRelations } from "../hooks/use-relations.ts";
+import Loading from "../components/Loading.tsx";
 // import { PDFDownloadLink } from "@react-pdf/renderer";
 // import Report from "../components/Report.tsx";
 
@@ -51,6 +53,7 @@ export default function Activity() {
   const [title2, setTitle2] = useState("");
   const [missingDates, setMissingDates] = useState<string[]>([]);
   const [averageAmplitude, setAverageAmplitude] = useState<string>();
+  const { relations, isLoading } = useRelations();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -236,10 +239,14 @@ export default function Activity() {
     setMissingDates(missingDates);
   }
 
+  if (isLoading) {
+    return <Loading />;
+  }
+
   return (
     <div className="pb-4 mx-auto">
       <div className="flex justify-center">
-        <UserSearchBar sx={{ width: 500 }} setSelectedUser={setSelectedUser} />
+      <UserSearchBar sx={{ width: 500 }} setSearchQuery={setSelectedUser} users={relations} />
       </div>
       <div className="grid grid-cols-5 items-center">
         <div className=" flex col-span-2">
