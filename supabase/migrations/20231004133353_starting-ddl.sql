@@ -76,7 +76,8 @@ CREATE TABLE exercise_data (
 
 CREATE TABLE notifications (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
-  user_id UUID REFERENCES auth.users(id) NOT NULL,
+  sender_id UUID REFERENCES auth.users(id) NOT NULL,
+  receiver_id UUID REFERENCES auth.users(id) NOT NULL,
   type TEXT NOT NULL,
   user_name TEXT NOT NULL,
   image TEXT NOT NULL,

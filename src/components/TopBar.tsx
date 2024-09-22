@@ -71,7 +71,7 @@ export default function TopBar() {
       try {
         setIsMenuOpen(false);
 
-        await deleteToken(messaging);
+        // await deleteToken(messaging);
 
         const response = await fetch("http://localhost:3001/auth/logout", {
           method: "POST",

@@ -6,7 +6,8 @@ interface Notification {
   id: string
   title: string
   type: string
-  user_id: string
+  sender_id: string
+  receiver_id: string
   user_name: string
   body: string
   image: string
@@ -32,7 +33,7 @@ Deno.serve(async (req) => {
   const { data } = await supabase
     .from('user_profiles')
     .select('fcm_token')
-    .eq('user_id', payload.record.user_id)
+    .eq('user_id', payload.record.receiver_id)
     .single()
 
   const fcmToken = data!.fcm_token as string
@@ -64,7 +65,7 @@ Deno.serve(async (req) => {
             id: payload.record.id,
             user_name: payload.record.user_name,
             type: payload.record.type,
-            user_id: payload.record.user_id,
+            sender_id: payload.record.sender_id,
           }
         },
       }),

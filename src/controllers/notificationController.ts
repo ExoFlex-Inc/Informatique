@@ -13,7 +13,7 @@ export const getNotifications = async (req, res) => {
     const { data: userNotifications, error: notifFetchError } = await supaClient
       .from("notifications")
       .select("*")
-      .eq("user_id", userId);
+      .eq("receiver_id", userId);
 
     if (notifFetchError) {
       return res.status(500).json({ message: "Error fetching notifications", error: notifFetchError });
@@ -26,9 +26,9 @@ export const getNotifications = async (req, res) => {
 };
 
 export const createNotification = async (req, res) => {
-  const { user_id, user_name, type, message, image_url } = req.body;
+  const { sender_id, receiver_id, user_name, type, message, image_url } = req.body;
 
-  if (!user_id || !user_name || !type || !message) {
+  if (!sender_id || !receiver_id || !user_name || !type || !message) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
@@ -43,7 +43,8 @@ export const createNotification = async (req, res) => {
       .from("notifications")
       .insert([
         {
-          user_id: user_id,
+          sender_id: sender_id,
+          receiver_id: receiver_id,
           user_name: user_name,
           image: imageUrl.publicUrl,
           type: type,

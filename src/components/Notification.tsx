@@ -70,8 +70,8 @@ const Notification = () => {
         },
         credentials: "include",
         body: JSON.stringify({
-          client_id: profile.user_id,
-          admin_id: notification.user_id,
+          client_id: notification.sender_id,
+          admin_id: profile.user_id,
         }),
       });
 
@@ -160,7 +160,7 @@ const Notification = () => {
           >
             <Paper sx={{ width: "30vw", padding: 2 }}>
               <List>
-                {notifications.length > 0 ? (
+                {notifications && notifications.length > 0 ? (
                   notifications.map((notification, index) => (
                     <ListItem key={notification.id || index} alignItems="flex-start">
                       <ListItemAvatar>

@@ -40,7 +40,8 @@ const UserList: React.FC<UserListProps> = ({ listOfUsers }) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          user_id: listOfUsers[index].user_id,
+          sender_id: profile?.user_id,
+          receiver_id: listOfUsers[index].user_id,
           user_name: `${profile?.first_name} ${profile?.last_name}`,
           image_url: profile?.image_url,
           type: "relation",
