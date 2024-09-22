@@ -28,7 +28,7 @@ const fetchRelation = async (req: Request, res: Response) => {
 
     if (!relations || relations.length === 0) {
       console.log("No relations found for this user");
-      return res.status(404).json({ message: "No relations found" });
+      return res.status(200).json([]);
     }
 
     const relationsIds = relations.map((relation) =>

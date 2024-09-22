@@ -15,7 +15,7 @@ interface UserSearchBarProps {
 
 const UserSearchBar: React.FC<UserSearchBarProps> = ({
   sx,
-  users,
+  users = [],
   setSearchQuery,
 }) => {
   return (

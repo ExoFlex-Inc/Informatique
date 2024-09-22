@@ -63,7 +63,7 @@ const Notification = () => {
     setResponseMessage((prev) => ({ ...prev, [notification.id]: "Processing..." }));
 
     try {
-      const responseRelation = await fetch(`http://localhost:3001/relation`, {
+      const responseRelation = await fetch(`http://localhost:3001/relations`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

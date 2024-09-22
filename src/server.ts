@@ -52,7 +52,7 @@ app.use(passport.session());
 
 app.use("/auth", authRoutes);
 app.use("/user", userRoutes);
-app.use("/relation", relationsRoutes);
+app.use("/relations", relationsRoutes);
 app.use("/exercise-data", exerciseDataRoute);
 app.use("/notification", notificationRoute);
 app.use("/api", serialPortRoutes);

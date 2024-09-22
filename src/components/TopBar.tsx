@@ -30,6 +30,9 @@ import { useNavigate } from "react-router-dom";
 import { useSupabaseSession } from "../hooks/use-session.ts";
 import { useUserProfile } from "../hooks/use-profile.ts";
 
+import { deleteToken } from "firebase/messaging";
+import { messaging } from "../utils/firebaseClient.ts";
+
 export default function TopBar() {
   const { session } = useSupabaseSession();
   const { profile } = useUserProfile();
@@ -67,6 +70,8 @@ export default function TopBar() {
     if (window.confirm("Are you sure you want to log out?")) {
       try {
         setIsMenuOpen(false);
+
+        await deleteToken(messaging);
 
         const response = await fetch("http://localhost:3001/auth/logout", {
           method: "POST",

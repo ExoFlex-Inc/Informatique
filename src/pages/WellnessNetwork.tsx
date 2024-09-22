@@ -12,7 +12,7 @@ export default function WellnessNetwork() {
   const { profile } = useUserProfile();
   const { relations, isLoading } = useRelations();
 
-  const [filteredRelations, setFilteredRelations] = useState([relations]);
+  const [filteredRelations, setFilteredRelations] = useState([]);
 
   useEffect(() => {
     setFilteredRelations(relations);

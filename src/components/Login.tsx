@@ -3,7 +3,7 @@ import Dialog from "./Dialog.tsx";
 import { useTheme } from "@emotion/react";
 import { useSupabaseSession } from "../hooks/use-session.ts";
 import { useUserProfile } from "../hooks/use-profile.ts";
-import { getToken } from "firebase/messaging";
+import { getToken, deleteToken } from "firebase/messaging";
 import { messaging } from "../utils/firebaseClient.ts";
 
 export default function Login() {
@@ -43,7 +43,8 @@ export default function Login() {
   
       // Register the service worker
       const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-      console.log('Service Worker registered with scope:', registration.scope);
+
+      await deleteToken(messaging);
 
       // Request permission and get FCM token
       let fcmToken = '';
