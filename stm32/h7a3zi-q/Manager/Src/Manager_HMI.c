@@ -1,3 +1,4 @@
+#include <Manager_Error.h>
 #include <Manager_HMI.h>
 #include <Manager_Motor.h>
 #include <Manager_Movement.h>
@@ -78,25 +79,27 @@ void ManagerHMI_Task()
 
 void ManagerHMI_SendJSON()
 {
-    cJSON* root = cJSON_CreateObject();
-
     autoPlanInfo_t* pPlan = ManagerMovement_GetPlanData();
 
+    // Define static buffers to avoid dynamic memory allocations
+    char jsonMessage[PUART_TX_BUF_SIZE];
     char strMode[M_HMI_STRING_LENGTH];
     char strAutoState[M_HMI_STRING_LENGTH];
     char strHomingState[M_HMI_STRING_LENGTH];
 
+    // Get the data for the JSON fields
     ManagerHMI_GetStrMode(ManagerMovement_GetState(), strMode);
     ManagerHMI_GetStrHomingState(pPlan->homingState, strHomingState);
     ManagerHMI_GetStrAutoState(pPlan->autoState, strAutoState);
-    uint8_t exerciseIdx  = pPlan->exCount;
-    uint8_t repsCount    = pPlan->repsCount;
-    char*   strErrorCode = "NoError";
+
+    uint8_t exerciseIdx = pPlan->exCount;
+    uint8_t repsCount   = pPlan->repsCount;
 
     float positions[MMOT_MOTOR_NBR];
     float torques[MMOT_MOTOR_NBR];
     float current[MMOT_MOTOR_NBR];
 
+    // Convert motor data
     for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
     {
         positions[i] = ManagerHMI_Radians2Degrees(motorsData[i]->position);
@@ -104,29 +107,20 @@ void ManagerHMI_SendJSON()
         current[i]   = motorsData[i]->current;
     }
 
-    // Add mode, exercise, repetitions, sets, and errorcode to the JSON object
-    cJSON_AddStringToObject(root, "Mode", strMode);
-    cJSON_AddStringToObject(root, "AutoState", strAutoState);
-    cJSON_AddStringToObject(root, "HomingState", strHomingState);
-    cJSON_AddNumberToObject(root, "Repetitions", repsCount);
-    cJSON_AddNumberToObject(root, "ExerciseIdx", exerciseIdx);
-    cJSON_AddStringToObject(root, "ErrorCode", strErrorCode);
-
-    cJSON* positionsArray = cJSON_CreateFloatArray(positions, 3);
-    cJSON* torquesArray   = cJSON_CreateFloatArray(torques, 3);
-    cJSON* currentArray   = cJSON_CreateFloatArray(current, 3);
-    cJSON_AddItemToObject(root, "Positions", positionsArray);
-    cJSON_AddItemToObject(root, "Torques", torquesArray);
-    cJSON_AddItemToObject(root, "Current", currentArray);
-
-    // Print the JSON object
-    char* jsonMessage = cJSON_PrintUnformatted(root);
+    // Manually build the JSON string using snprintf
+    snprintf(jsonMessage, PUART_TX_BUF_SIZE,
+             "{\"Mode\":\"%s\",\"AutoState\":\"%s\",\"HomingState\":\"%s\","
+             "\"Repetitions\":%d,\"ExerciseIdx\":%d,\"ErrorCode\":\"%lu\","
+             "\"Positions\":[%.2f,%.2f,%.2f],"
+             "\"Torques\":[%.2f,%.2f,%.2f],"
+             "\"Current\":[%.2f,%.2f,%.2f]}",
+             strMode, strAutoState, strHomingState, repsCount, exerciseIdx,
+             ManagerError_GetErrorStatus(), positions[0], positions[1],
+             positions[2], torques[0], torques[1], torques[2], current[0],
+             current[1], current[2]);
 
     // Send JSON string over UART
     PeriphUartRingBuf_Send(jsonMessage, strlen(jsonMessage));
-
-    free(jsonMessage);
-    cJSON_Delete(root);
 }
 
 void ManagerHMI_ReceiveJSON()

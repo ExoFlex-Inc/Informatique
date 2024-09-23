@@ -1,8 +1,10 @@
 
+#include <Manager_Error.h>
 #include <Manager_HMI.h>
 #include <Manager_Motor.h>
 #include <Manager_Movement.h>
 #include <Periph_Switch.h>
+#include <Periph_UartRingBuf.h>
 #include <string.h>
 
 #define MMOV_REST_POS -1
@@ -11,7 +13,7 @@
 #define MAX_MOVEMENT  3
 #define EXTREME_POS   4
 
-#define MANUAL_MAX_TRANSMIT_TIME 15  // ms
+#define MANUAL_MAX_TRANSMIT_TIME 20  // ms
 
 typedef struct
 {
@@ -172,7 +174,7 @@ void ManagerMovement_Task()
         break;
 
     case MMOV_STATE_ERROR:
-        // Wait for manual cmd or for state change
+        ManagerError_SetError(ERROR_3_MMOV);
 
         break;
     }
@@ -186,7 +188,7 @@ void ManagerMovement_WaitingSecurity()
 {
     if (managerMovement.securityPass)
     {
-        managerMovement.state = MMOV_STATE_HOMING;
+        managerMovement.state = MMOV_STATE_MANUAL;
     }
 }
 

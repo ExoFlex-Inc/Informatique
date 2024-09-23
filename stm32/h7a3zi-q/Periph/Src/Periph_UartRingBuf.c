@@ -14,6 +14,7 @@ uint16_t head, tail, peak;
 uint32_t rxTimerDelay, timerHalReset;
 bool     foundJsonStart;
 bool     foundJsonEnd;
+bool     msgSent;
 
 void PeriphUartRingBuf_AdvanceHead(uint32_t bytesReceived);
 void PeriphUartRingBuf_GetJsonStart();
@@ -31,11 +32,17 @@ void PeriphUartRingBuf_Init()
     foundJsonEnd   = false;
     rxTimerDelay   = 0;
     timerHalReset  = 0;
+    msgSent        = true;
 }
 
 void PeriphUartRingBuf_Task()
 {
     rxTimerDelay = HAL_GetTick() - timerHalReset;
+}
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef* huart)
+{
+    msgSent = true;
 }
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart, uint16_t Size)
@@ -112,9 +119,20 @@ void PeriphUartRingBuf_Read(char* buf, uint32_t* size)
     }
 }
 
-void PeriphUartRingBuf_Send(char* buf, uint32_t size)
+void PeriphUartRingBuf_Send(char* buf, uint16_t size)
 {
-    HAL_UART_Transmit(&huart3, (uint8_t*) buf, size, 50);
+    if (msgSent)
+    {
+        static char bufStat[PUART_TX_BUF_SIZE];
+
+        for (uint16_t i = 0; i < size; i++)
+        {
+            bufStat[i] = buf[i];
+        }
+
+        HAL_UART_Transmit_IT(&huart3, (uint8_t*) bufStat, size);
+        msgSent = false;
+    }
 }
 
 void PeriphUartRingBuf_ReadJson(char* buf, uint32_t* size)
