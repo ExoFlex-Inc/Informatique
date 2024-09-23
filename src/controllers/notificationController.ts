@@ -15,12 +15,10 @@ export const getNotifications = async (req, res) => {
       .eq("receiver_id", userId);
 
     if (notifFetchError) {
-      return res
-        .status(500)
-        .json({
-          message: "Error fetching notifications",
-          error: notifFetchError,
-        });
+      return res.status(500).json({
+        message: "Error fetching notifications",
+        error: notifFetchError,
+      });
     }
 
     return res.json(userNotifications);
@@ -59,12 +57,10 @@ export const createNotification = async (req, res) => {
 
     if (notifInsertError) {
       console.error("Error inserting notification:", notifInsertError.message);
-      return res
-        .status(500)
-        .json({
-          message: "Failed to create notification",
-          error: notifInsertError.message,
-        });
+      return res.status(500).json({
+        message: "Failed to create notification",
+        error: notifInsertError.message,
+      });
     }
 
     return res.status(201).json(newNotification);
@@ -95,12 +91,10 @@ export const deleteNotification = async (req, res) => {
         .json({ message: "Error deleting notification", error: deleteError });
     }
 
-    return res
-      .status(200)
-      .json({
-        message: "Notification deleted successfully",
-        deletedNotification,
-      });
+    return res.status(200).json({
+      message: "Notification deleted successfully",
+      deletedNotification,
+    });
   } catch (error) {
     return res
       .status(500)
