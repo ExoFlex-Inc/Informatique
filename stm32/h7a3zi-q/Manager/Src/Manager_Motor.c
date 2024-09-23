@@ -572,7 +572,7 @@ void ManagerMotor_MotorIncrement(uint8_t motorIndex, int8_t direction)
     {
         motors[motorIndex].nextPosition += direction * MOTOR_STEP;
     }
-    else if (motorindex == MMOT_MOTOR_1)
+    else if (motorIndex == MMOT_MOTOR_1)
 	{
     	motors[motorIndex].nextPosition -= direction * MOTOR_STEP;
 	}
