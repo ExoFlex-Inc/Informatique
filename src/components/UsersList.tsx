@@ -34,7 +34,6 @@ const UserList: React.FC<UserListProps> = ({ listOfUsers }) => {
 
   const sendInvitation = async (index: number) => {
     try {
-      
       const response = await fetch("http://localhost:3001/notification", {
         method: "POST",
         headers: {
@@ -62,16 +61,36 @@ const UserList: React.FC<UserListProps> = ({ listOfUsers }) => {
 
   return (
     <div className="grid grid-cols-4 shadow-md shadow-gray-500 pt-2 bg-gray-300 rounded-2xl mx-4">
-      <label className={"font-bold border-gray-400 text-black pl-2 pb-2" + (listOfUsers?.length > 0 ? " border-b-2" : "")}>
+      <label
+        className={
+          "font-bold border-gray-400 text-black pl-2 pb-2" +
+          (listOfUsers?.length > 0 ? " border-b-2" : "")
+        }
+      >
         First Name
       </label>
-      <label className={"font-bold border-gray-400 text-black pl-2 pb-2" + (listOfUsers?.length ? " border-b-2" : "")}>
+      <label
+        className={
+          "font-bold border-gray-400 text-black pl-2 pb-2" +
+          (listOfUsers?.length ? " border-b-2" : "")
+        }
+      >
         Last Name
       </label>
-      <label className={"font-bold border-gray-400 text-black pl-2 pb-2" + (listOfUsers?.length ? " border-b-2" : "")}>
+      <label
+        className={
+          "font-bold border-gray-400 text-black pl-2 pb-2" +
+          (listOfUsers?.length ? " border-b-2" : "")
+        }
+      >
         Email
       </label>
-      <label className={"font-bold border-gray-400 text-black pl-2 pb-2" + (listOfUsers?.length ? " border-b-2" : "")}>
+      <label
+        className={
+          "font-bold border-gray-400 text-black pl-2 pb-2" +
+          (listOfUsers?.length ? " border-b-2" : "")
+        }
+      >
         Phone Number
       </label>
 

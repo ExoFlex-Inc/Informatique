@@ -1,5 +1,5 @@
-import { initializeApp } from 'firebase/app';
-import { getMessaging, onMessage } from 'firebase/messaging';
+import { initializeApp } from "firebase/app";
+import { getMessaging, onMessage } from "firebase/messaging";
 
 // Firebase configuration object
 const firebaseConfig = {
@@ -9,7 +9,7 @@ const firebaseConfig = {
   storageBucket: "exoflex-46e22.appspot.com",
   messagingSenderId: "361171602737",
   appId: "1:361171602737:web:8c93faef025bad18bd7410",
-  measurementId: "G-R0PPB7W550"
+  measurementId: "G-R0PPB7W550",
 };
 
 // Initialize Firebase app client

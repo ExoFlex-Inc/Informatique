@@ -21,7 +21,7 @@ export function useNotification() {
         {
           method: "GET",
           credentials: "include",
-        }
+        },
       );
       if (!response.ok) throw new Error("Error fetching notification");
       return await response.json();
@@ -53,7 +53,7 @@ export function useNotification() {
       // Update the cache directly
       queryClient.setQueryData(
         ["notification", profile.user_id],
-        (old = []) => [newNotification, ...old]
+        (old = []) => [newNotification, ...old],
       );
     });
 

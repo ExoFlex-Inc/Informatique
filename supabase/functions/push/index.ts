@@ -1,29 +1,29 @@
-import { createClient } from 'npm:@supabase/supabase-js@2'
-import { JWT } from 'npm:google-auth-library@9'
-import serviceAccount from '../service-account.json' with { type: 'json' }
+import { createClient } from "npm:@supabase/supabase-js@2";
+import { JWT } from "npm:google-auth-library@9";
+import serviceAccount from "../service-account.json" with { type: "json" };
 
 interface Notification {
-  id: string
-  title: string
-  type: string
-  sender_id: string
-  receiver_id: string
-  user_name: string
-  body: string
-  image: string
+  id: string;
+  title: string;
+  type: string;
+  sender_id: string;
+  receiver_id: string;
+  user_name: string;
+  body: string;
+  image: string;
 }
 
 interface WebhookPayload {
-  type: 'INSERT'
-  table: string
-  record: Notification
-  schema: 'public'
+  type: "INSERT";
+  table: string;
+  record: Notification;
+  schema: "public";
 }
 
 const supabase = createClient(
-  Deno.env.get('SUPABASE_URL')!,
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-)
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+);
 
 Deno.serve(async (req) => {
   const payload: WebhookPayload = await req.json();
@@ -32,25 +32,30 @@ Deno.serve(async (req) => {
 
   // Fetch the fcm_token from the user_profiles table
   const { data, error } = await supabase
-    .from('user_profiles')
-    .select('fcm_token')
-    .eq('user_id', payload.record.receiver_id)
+    .from("user_profiles")
+    .select("fcm_token")
+    .eq("user_id", payload.record.receiver_id)
     .single();
 
   // Check if the fcm_token exists
   if (error || !data?.fcm_token) {
-    console.warn(`No valid FCM token found for user: ${payload.record.receiver_id}`);
-    return new Response(JSON.stringify({
-      message: "FCM token not found. Push notification canceled.",
-    }), {
-      headers: { 'Content-Type': 'application/json' },
-      status: 400,
-    });
+    console.warn(
+      `No valid FCM token found for user: ${payload.record.receiver_id}`,
+    );
+    return new Response(
+      JSON.stringify({
+        message: "FCM token not found. Push notification canceled.",
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+        status: 400,
+      },
+    );
   }
 
   const fcmToken = data.fcm_token as string;
 
-  console.log('Sending notification to', fcmToken);
+  console.log("Sending notification to", fcmToken);
 
   // Get the access token for Firebase messaging
   const accessToken = await getAccessToken({
@@ -62,9 +67,9 @@ Deno.serve(async (req) => {
   const res = await fetch(
     `https://fcm.googleapis.com/v1/projects/${serviceAccount.project_id}/messages:send`,
     {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
@@ -80,22 +85,22 @@ Deno.serve(async (req) => {
             user_name: payload.record.user_name,
             type: payload.record.type,
             sender_id: payload.record.sender_id,
-          }
+          },
         },
       }),
-    }
+    },
   );
 
   const resData = await res.json();
 
   if (res.status < 200 || res.status > 299) {
-    console.error('Error sending notification:', resData);
+    console.error("Error sending notification:", resData);
     throw resData;
   }
 
   // Return the response from FCM
   return new Response(JSON.stringify(resData), {
-    headers: { 'Content-Type': 'application/json' },
+    headers: { "Content-Type": "application/json" },
   });
 });
 
@@ -111,7 +116,7 @@ const getAccessToken = ({
     const jwtClient = new JWT({
       email: clientEmail,
       key: privateKey,
-      scopes: ['https://www.googleapis.com/auth/firebase.messaging'],
+      scopes: ["https://www.googleapis.com/auth/firebase.messaging"],
     });
     jwtClient.authorize((err, tokens) => {
       if (err) {

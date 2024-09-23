@@ -112,7 +112,6 @@ export const login = async (req: Request, res: Response, next: Function) => {
   })(req, res, next);
 };
 
-
 export const logout = async (req: Request, res: Response) => {
   try {
     const { user_id } = req.body;
@@ -122,19 +121,20 @@ export const logout = async (req: Request, res: Response) => {
     }
 
     const { error: updateError } = await supaClient
-      .from('user_profiles')
+      .from("user_profiles")
       .update({ fcm_token: null })
-      .eq('user_id', user_id);
+      .eq("user_id", user_id);
 
     if (updateError) {
-      return res.status(500).json({ error: `Failed to remove FCM token: ${updateError.message}` });
+      return res
+        .status(500)
+        .json({ error: `Failed to remove FCM token: ${updateError.message}` });
     }
 
     const { error } = await supaClient.auth.signOut();
     if (error) {
       return res.status(500).json({ error: error.message });
     }
-
 
     return res.status(200).json({ logout: true });
   } catch (err) {

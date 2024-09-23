@@ -13,5 +13,4 @@ router.post("/", postRelation);
 
 router.delete("/:relationId", removeRelation);
 
-
 export default router;

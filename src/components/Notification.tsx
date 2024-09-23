@@ -60,7 +60,10 @@ const Notification = () => {
       return;
     }
 
-    setResponseMessage((prev) => ({ ...prev, [notification.id]: "Processing..." }));
+    setResponseMessage((prev) => ({
+      ...prev,
+      [notification.id]: "Processing...",
+    }));
 
     try {
       const responseRelation = await fetch(`http://localhost:3001/relations`, {
@@ -79,55 +82,78 @@ const Notification = () => {
         throw new Error("Error accepting relation request");
       }
 
-      const response = await fetch(`http://localhost:3001/notification/${notification.id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `http://localhost:3001/notification/${notification.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
         },
-        credentials: "include"
-      });
+      );
 
       if (!response.ok) {
         throw new Error("Error deleting notification");
       }
 
-      setResponseMessage((prev) => ({ ...prev, [notification.id]: "Relation request accepted" }));
+      setResponseMessage((prev) => ({
+        ...prev,
+        [notification.id]: "Relation request accepted",
+      }));
     } catch (error) {
       console.error("Error accepting relation request:", error);
-      setResponseMessage((prev) => ({ ...prev, [notification.id]: "Error processing request" }));
+      setResponseMessage((prev) => ({
+        ...prev,
+        [notification.id]: "Error processing request",
+      }));
     }
   };
 
   const handleReject = async (notification: any) => {
-
-    setResponseMessage((prev) => ({ ...prev, [notification.id]: "Processing..." }));
+    setResponseMessage((prev) => ({
+      ...prev,
+      [notification.id]: "Processing...",
+    }));
 
     try {
-      const response = await fetch(`http://localhost:3001/notification/${notification.id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `http://localhost:3001/notification/${notification.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
         },
-        credentials: "include"
-      });
+      );
 
       if (!response.ok) {
         throw new Error("Error rejecting relation request");
       }
 
-      setResponseMessage((prev) => ({ ...prev, [notification.id]: "Relation request rejected" }));
+      setResponseMessage((prev) => ({
+        ...prev,
+        [notification.id]: "Relation request rejected",
+      }));
     } catch (error) {
       console.error("Error rejecting relation request:", error);
-      setResponseMessage((prev) => ({ ...prev, [notification.id]: "Error processing request" }));
+      setResponseMessage((prev) => ({
+        ...prev,
+        [notification.id]: "Error processing request",
+      }));
     }
   };
 
   return (
     <div>
-      <IconButton ref={buttonRef} onClick={() => { 
-        setIsOpen(!isOpen);
-        if (isNotifications) setIsNotifications(false);
-      }}>
+      <IconButton
+        ref={buttonRef}
+        onClick={() => {
+          setIsOpen(!isOpen);
+          if (isNotifications) setIsNotifications(false);
+        }}
+      >
         {isNotifications ? (
           <Badge color="error" variant="dot">
             <NotificationsOutlinedIcon />
@@ -162,12 +188,12 @@ const Notification = () => {
               <List>
                 {notifications && notifications.length > 0 ? (
                   notifications.map((notification, index) => (
-                    <ListItem key={notification.id || index} alignItems="flex-start">
+                    <ListItem
+                      key={notification.id || index}
+                      alignItems="flex-start"
+                    >
                       <ListItemAvatar>
-                        <Avatar
-                          alt="Avatar"
-                          src={notification.image}
-                        />
+                        <Avatar alt="Avatar" src={notification.image} />
                       </ListItemAvatar>
                       <Grid container>
                         <Grid item xs={12}>
@@ -195,7 +221,9 @@ const Notification = () => {
                                   display="block"
                                   color="textSecondary"
                                 >
-                                  {new Date(notification.created_at).toLocaleString()}
+                                  {new Date(
+                                    notification.created_at,
+                                  ).toLocaleString()}
                                 </Typography>
                               </>
                             }
@@ -209,7 +237,10 @@ const Notification = () => {
                               }}
                             >
                               {responseMessage[notification.id] ? (
-                                <Typography variant="body2" color="textSecondary">
+                                <Typography
+                                  variant="body2"
+                                  color="textSecondary"
+                                >
                                   {responseMessage[notification.id]}
                                 </Typography>
                               ) : (

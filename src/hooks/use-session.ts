@@ -10,9 +10,7 @@ export function useSupabaseSession() {
   } = useQuery({
     queryKey: ["session"],
     queryFn: async () => {
-
       try {
-
         const response = await fetch("http://localhost:3001/auth/session", {
           method: "GET",
           credentials: "include",

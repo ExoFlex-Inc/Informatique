@@ -8,7 +8,7 @@ const Loading = () => {
       alignItems="center"
       height="100vh"
     >
-  <CircularProgress color="secondary" />
+      <CircularProgress color="secondary" />
     </Box>
   );
 };

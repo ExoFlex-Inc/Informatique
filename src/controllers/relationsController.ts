@@ -18,12 +18,10 @@ const fetchRelation = async (req: Request, res: Response) => {
 
     if (relationsError) {
       console.error("Failed to fetch relations:", relationsError);
-      return res
-        .status(500)
-        .json({
-          message: "Failed to fetch relations",
-          error: relationsError.message,
-        });
+      return res.status(500).json({
+        message: "Failed to fetch relations",
+        error: relationsError.message,
+      });
     }
 
     if (!relations || relations.length === 0) {
