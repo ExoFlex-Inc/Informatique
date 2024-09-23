@@ -100,7 +100,7 @@ bool ManagerMotor_VerifyMotorState(uint8_t motorIndex);
 void   ManagerMotor_ApplyOriginShift(uint8_t motorIndex);
 int8_t ManagerMotor_GetMotorDirection(uint8_t motorIndex);
 void   ManagerMotor_MotorIncrement(uint8_t motorIndex, int8_t direction);
-float ManagerMotor_CalculNextKp(uint8_t motorIndex);
+void ManagerMotor_CalculNextKp(uint8_t motorIndex);
 
 /********************************************
  * Manager init and reset
@@ -738,7 +738,7 @@ void ManagerMotor_SetOriginShift(uint8_t motorIndex, float shiftValue)
     motors[motorIndex].originShift = shiftValue;
 }
 
-float ManagerMotor_CalculNextKp(uint8_t motorIndex)
+void ManagerMotor_CalculNextKp(uint8_t motorIndex)
 {
 	if (motors[motorIndex].motor.torque >= torqueMaxKp)
 	{

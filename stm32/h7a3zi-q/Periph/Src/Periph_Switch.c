@@ -1,22 +1,22 @@
 #include "Periph_Switch.h"
 
-#define PS_GPIO_LEG_LEFT          GPIOE
 #define PS_GPIO_DORSIFLEXION_DOWN GPIOE
-#define PS_GPIO_EXTENSION_UP      GPIOE
-#define PS_GPIO_EVERSION_LEFT     GPIOE
-#define PS_GPIO_DORSIFLEXION_UP   GPIOF
-#define PS_GPIO_EVERSION_RIGHT    GPIOF
-#define PS_GPIO_EXTENSION_DOWN    GPIOF
-#define PS_GPIO_LEG_RIGHT         GPIOD
+#define PS_GPIO_LEG_LEFT		  GPIOE
+#define PS_GPIO_EXTENSION_DOWN    GPIOE
+#define PS_GPIO_EVERSION_RIGHT     GPIOE
+#define PS_GPIO_LEG_RIGHT   	  GPIOF
+#define PS_GPIO_EVERSION_LEFT    GPIOF
+#define PS_GPIO_EXTENSION_UP      GPIOF
+#define PS_GPIO_DORSIFLEXION_UP   GPIOD
 
-#define PS_PIN_LEG_LEFT          GPIO_PIN_4  // D57
-#define PS_PIN_DORSIFLEXION_DOWN GPIO_PIN_5  // D58
-#define PS_PIN_EXTENSION_UP      GPIO_PIN_6  // D59
-#define PS_PIN_EVERSION_LEFT     GPIO_PIN_3  // D60
-#define PS_PIN_DORSIFLEXION_UP   GPIO_PIN_8  // D61
-#define PS_PIN_EVERSION_RIGHT    GPIO_PIN_7  // D62
-#define PS_PIN_EXTENSION_DOWN    GPIO_PIN_9  // D63
-#define PS_PIN_LEG_RIGHT         GPIO_PIN_10  // D64
+#define PS_PIN_DORSIFLEXION_DOWN GPIO_PIN_4  // D57 PS_PIN_LEG_LEFT
+#define PS_PIN_LEG_LEFT 		 GPIO_PIN_5  // D58 PS_PIN_DORSIFLEXION_DOWN
+#define PS_PIN_EXTENSION_DOWN    GPIO_PIN_6  // D59 PS_PIN_EXTENSION_UP
+#define PS_PIN_EVERSION_RIGHT    GPIO_PIN_3  // D60 PS_PIN_EVERSION_LEFT
+#define PS_PIN_LEG_RIGHT   		 GPIO_PIN_8  // D61 PS_PIN_DORSIFLEXION_UP
+#define PS_PIN_EVERSION_LEFT     GPIO_PIN_7  // D62 PS_PIN_EVERSION_RIGHT
+#define PS_PIN_EXTENSION_UP   	 GPIO_PIN_9  // D63 PS_PIN_EXTENSION_DOWN
+#define PS_PIN_DORSIFLEXION_UP   GPIO_PIN_10  // D64 PS_PIN_LEG_RIGHT
 
 #define DEBOUNCE_THRESHOLD 5
 
@@ -29,11 +29,35 @@ void PeriphSwitch_Task()
 
 bool PeriphSwitch_LegLeft()
 {
-    if (HAL_GPIO_ReadPin(PS_GPIO_LEG_LEFT, PS_PIN_LEG_LEFT) == GPIO_PIN_RESET)
-    {
-        return true;
-    }
-    return false;
+    static uint8_t debounceCounter = 0;
+	static bool    lastState       = false;
+	bool           currentState;
+
+	if (HAL_GPIO_ReadPin(PS_GPIO_LEG_LEFT, PS_PIN_LEG_LEFT) == GPIO_PIN_RESET)
+	{
+		currentState = true;  // Switch is pressed
+	}
+	else
+	{
+		currentState = false;  // Switch is not pressed
+	}
+
+	// Debouncing logic
+	if (currentState != lastState)
+	{
+		debounceCounter++;
+		if (debounceCounter >= DEBOUNCE_THRESHOLD)
+		{
+			lastState       = currentState;
+			debounceCounter = 0;
+		}
+	}
+	else
+	{
+		debounceCounter = 0;
+	}
+
+	return lastState;
 }
 
 bool PeriphSwitch_LegRight()
