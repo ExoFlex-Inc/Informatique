@@ -103,7 +103,7 @@ function Profile() {
           badgeContent={<AddAPhotoIcon padding="4px" className="h-28" />}
         >
           <Avatar
-            src={profile?.avatar_url ? profile.avatar_url : DefaultProfilePic}
+            src={profile?.avatar_blob_url ? profile.avatar_blob_url : DefaultProfilePic}
             sx={{ width: "25vw", height: "25vw" }}
           />
         </StyledBadge>

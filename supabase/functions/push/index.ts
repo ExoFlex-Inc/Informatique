@@ -26,25 +26,39 @@ const supabase = createClient(
 )
 
 Deno.serve(async (req) => {
-  const payload: WebhookPayload = await req.json()
+  const payload: WebhookPayload = await req.json();
 
-  console.log(payload)
+  console.log(payload);
 
-  const { data } = await supabase
+  // Fetch the fcm_token from the user_profiles table
+  const { data, error } = await supabase
     .from('user_profiles')
     .select('fcm_token')
     .eq('user_id', payload.record.receiver_id)
-    .single()
+    .single();
 
-  const fcmToken = data!.fcm_token as string
+  // Check if the fcm_token exists
+  if (error || !data?.fcm_token) {
+    console.warn(`No valid FCM token found for user: ${payload.record.receiver_id}`);
+    return new Response(JSON.stringify({
+      message: "FCM token not found. Push notification canceled.",
+    }), {
+      headers: { 'Content-Type': 'application/json' },
+      status: 400,
+    });
+  }
 
-  console.log('Sending notification to', fcmToken)
+  const fcmToken = data.fcm_token as string;
 
+  console.log('Sending notification to', fcmToken);
+
+  // Get the access token for Firebase messaging
   const accessToken = await getAccessToken({
     clientEmail: serviceAccount.client_email,
     privateKey: serviceAccount.private_key,
-  })
+  });
 
+  // Send the notification to Firebase Cloud Messaging (FCM)
   const res = await fetch(
     `https://fcm.googleapis.com/v1/projects/${serviceAccount.project_id}/messages:send`,
     {
@@ -70,37 +84,41 @@ Deno.serve(async (req) => {
         },
       }),
     }
-  )
+  );
 
-  const resData = await res.json()
-  if (res.status < 200 || 299 < res.status) {
-    throw resData
+  const resData = await res.json();
+
+  if (res.status < 200 || res.status > 299) {
+    console.error('Error sending notification:', resData);
+    throw resData;
   }
 
+  // Return the response from FCM
   return new Response(JSON.stringify(resData), {
     headers: { 'Content-Type': 'application/json' },
-  })
-})
+  });
+});
 
+// Function to get access token for Firebase
 const getAccessToken = ({
   clientEmail,
   privateKey,
 }: {
-  clientEmail: string
-  privateKey: string
+  clientEmail: string;
+  privateKey: string;
 }): Promise<string> => {
   return new Promise((resolve, reject) => {
     const jwtClient = new JWT({
       email: clientEmail,
       key: privateKey,
       scopes: ['https://www.googleapis.com/auth/firebase.messaging'],
-    })
+    });
     jwtClient.authorize((err, tokens) => {
       if (err) {
-        reject(err)
-        return
+        reject(err);
+        return;
       }
-      resolve(tokens!.access_token!)
-    })
-  })
-}
+      resolve(tokens!.access_token!);
+    });
+  });
+};

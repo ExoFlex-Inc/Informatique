@@ -26,10 +26,10 @@ firebase.initializeApp({
   measurementId: "G-R0PPB7W550"
 });
 
-console.log('firebase initialized');
 
 // Retrieve an instance of Firebase Messaging
 const messaging = firebase.messaging();
+console.log('Firebase Service Worker initialized');
 
 // Handle background messages
 messaging.onBackgroundMessage((payload) => {

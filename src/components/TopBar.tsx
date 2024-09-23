@@ -29,7 +29,6 @@ import Login from "./Login.tsx";
 import { useNavigate } from "react-router-dom";
 import { useSupabaseSession } from "../hooks/use-session.ts";
 import { useUserProfile } from "../hooks/use-profile.ts";
-
 import { deleteToken } from "firebase/messaging";
 import { messaging } from "../utils/firebaseClient.ts";
 
@@ -71,16 +70,22 @@ export default function TopBar() {
       try {
         setIsMenuOpen(false);
 
-        // await deleteToken(messaging);
-
         const response = await fetch("http://localhost:3001/auth/logout", {
           method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
           credentials: "include",
+          body: JSON.stringify({
+            user_id: profile?.user_id,
+          }),
         });
 
         if (!response.ok) {
           throw new Error("Failed to log out");
         }
+
+        await deleteToken(messaging);
 
         window.location.href = "/";
       } catch (error) {
@@ -114,7 +119,7 @@ export default function TopBar() {
           <IconButton className="h-14" onClick={onProfileClick}>
             <Avatar
               ref={avatarRef}
-              src={profile?.avatar_url ? profile.avatar_url : Icon}
+              src={profile?.avatar_blob_url ? profile.avatar_blob_url : Icon}
             />
           </IconButton>
         )}

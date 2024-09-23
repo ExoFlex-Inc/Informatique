@@ -148,7 +148,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
               <Box mb="25px">
                 <Box display="flex" justifyContent="center" alignItems="center">
                   <Avatar
-                    src={profile.avatar_url ? profile.avatar_url : Icon}
+                    src={profile.avatar_blob_url? profile.avatar_blob_url : Icon}
                     sx={
                       isTablet
                         ? { width: 50, height: 50 }

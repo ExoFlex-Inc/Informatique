@@ -75,7 +75,11 @@ function AppLayout() {
   }, [isSessionLoading, isProfileLoading, session, profile, navigate]);
 
   if (isSessionLoading || isProfileLoading) {
-    return <Loading />;
+    return (
+      <div className="loading-container">
+        <Loading />
+      </div>
+    );
   }
 
   return (

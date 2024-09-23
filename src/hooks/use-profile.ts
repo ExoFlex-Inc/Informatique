@@ -44,8 +44,8 @@ export function useUserProfile() {
         );
         if (avatarResponse.ok) {
           const avatarBlob = await avatarResponse.blob();
-          const avatarUrl = URL.createObjectURL(avatarBlob);
-          profileData.avatar_url = avatarUrl;
+          const avatarBlobUrl = URL.createObjectURL(avatarBlob);
+          profileData.avatar_blob_url = avatarBlobUrl;
         }
       }
 

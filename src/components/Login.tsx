@@ -39,28 +39,23 @@ export default function Login() {
         throw new Error(data.error || "Login failed");
       }
   
-      setSession(data.session.access_token, data.session.refresh_token); //TODO Add Loading page while this and user profile loads
-  
+      setSession(data.session.access_token, data.session.refresh_token);
+
       // Register the service worker
       const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-
-      await deleteToken(messaging);
 
       // Request permission and get FCM token
       let fcmToken = '';
       try {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
-          console.log('Notification permission granted.');
 
           fcmToken = await getToken(messaging, {
             vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
             serviceWorkerRegistration: registration,
           });
 
-          if (fcmToken) {
-            console.log('FCM Token:', fcmToken);
-          } else {
+          if (!fcmToken) {
             console.warn('Failed to get FCM token');
           }
         } else {

@@ -37,7 +37,7 @@ export function useNotification() {
 
     const unsubscribe = onMessage(messaging, (payload) => {
       const { title, body, image } = payload.notification;
-      const { id, type, user_id, user_name } = payload.data;
+      const { id, type, sender_id, user_name } = payload.data;
 
       const newNotification = {
         id,
@@ -46,7 +46,7 @@ export function useNotification() {
         image,
         type,
         user_name,
-        user_id,
+        sender_id,
         created_at: new Date(),
       };
 

@@ -34,6 +34,7 @@ const UserList: React.FC<UserListProps> = ({ listOfUsers }) => {
 
   const sendInvitation = async (index: number) => {
     try {
+      
       const response = await fetch("http://localhost:3001/notification", {
         method: "POST",
         headers: {
@@ -43,7 +44,7 @@ const UserList: React.FC<UserListProps> = ({ listOfUsers }) => {
           sender_id: profile?.user_id,
           receiver_id: listOfUsers[index].user_id,
           user_name: `${profile?.first_name} ${profile?.last_name}`,
-          image_url: profile?.image_url,
+          image_url: profile?.avatar_url,
           type: "relation",
           message: "sent a relation request",
         }),
@@ -53,7 +54,7 @@ const UserList: React.FC<UserListProps> = ({ listOfUsers }) => {
         throw new Error(`Failed to send invitation: ${response.statusText}`);
       }
 
-      console.log("Invitation sent successfully.");
+      window.alert("Invitation sent successfully.");
     } catch (error) {
       console.error("Error sending invitation:", error);
     }
