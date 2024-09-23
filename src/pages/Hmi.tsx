@@ -52,6 +52,11 @@ export default function HMI() {
   });
 
   useEffect(() => {
+    const message = "{Auto;ResetPlan}"
+    socket?.emit("planData", message);
+  },[])
+
+  useEffect(() => {
     if (
       stm32Data &&
       stm32Data.AutoState === "WaitingForPlan" &&
