@@ -26,7 +26,7 @@ const UserSearchBar: React.FC<UserSearchBarProps> = ({
         options={users.map((user) => user.email)}
         onChange={(event, value) => {
           const selectedUser = users.find((user) => user.email === value);
-          setSearchQuery?.(selectedUser ? [selectedUser] : []);
+          setSearchQuery?.(selectedUser ? [selectedUser] : users);
         }}
         renderInput={(params) => (
           <TextField
