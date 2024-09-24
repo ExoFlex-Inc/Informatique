@@ -207,6 +207,10 @@ void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
                         ParsedMsg[M_HMI_CONTENT_SECTION],
                         sectionNbr - M_HMI_CONTENT_SECTION);
                 }
+                else if (strcmp(ParsedMsg[M_HMI_ACTION_SECTION], "ResetPlan") == 0)
+                {
+                	ManagerMovement_ResetExercise();
+                }
                 else if (strcmp(ParsedMsg[M_HMI_ACTION_SECTION], "Control") ==
                          0)
                 {

@@ -409,9 +409,8 @@ void ManagerMovement_AddMouvement(uint8_t mvtIdx, uint8_t movementType,
     finalPos[mvtIdx]  = finalPosition;
 }
 
-bool ManagerMovement_ResetExercise()
+void ManagerMovement_ResetExercise()
 {
-    bool reset = false;
     if (managerMovement.autoState == MMOV_AUTO_STATE_READY)
     {
         for (uint8_t i = 0; i < MAX_EXERCISES; i++)
@@ -420,11 +419,11 @@ bool ManagerMovement_ResetExercise()
             exercisesTime[i] = 0.0f;
             finalPos[i]      = 0.0f;
             pauseTime[i]     = 0.0f;
+            movements[i] 	 = 0.0f;
+            mvtNbr[i] 		 = 0.0f;
         }
         managerMovement.autoState = MMOV_AUTO_STATE_WAITING4PLAN;
-        reset                     = true;
     }
-    return reset;
 }
 
 void ManagerMovement_StartExercise()
