@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useUserProfile } from "../hooks/use-profile.ts";
 
 export function useRelations() {
@@ -40,4 +40,33 @@ export function useRelations() {
     isLoading,
     error,
   };
+}
+
+export function useFetchPendingRelations () {
+  const { profile } = useUserProfile();
+
+  const {
+    data: notifications,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["pendingRelations"],
+    queryFn: async () => {
+      if (!profile?.user_id) return [];
+      const response = await fetch(
+        `http://localhost:3001/relations/notifications/${profile.user_id}`,
+        {
+          method: "GET",
+          credentials: "include",
+        },
+      );
+      if (!response.ok) throw new Error("Error fetching notification");
+      return await response.json();
+    },
+    staleTime: 1000 * 60 * 5,
+    cacheTime: 1000 * 60 * 10,
+    enabled: !!profile?.user_id,
+  });
+
+  return { notifications, isLoading, error };
 }

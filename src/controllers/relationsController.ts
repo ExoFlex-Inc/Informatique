@@ -124,4 +124,31 @@ const removeRelation = async (req: Request, res: Response) => {
   }
 };
 
-export { removeRelation, fetchRelation, postRelation };
+const getNotification = async (req: Request, res: Response) => {
+  const userId = req.params.userId;
+
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+
+  try {
+    // Fetch notifications from the database filtered by userId
+    const { data: userNotifications, error: notifFetchError } = await supaClient
+      .from("notifications")
+      .select("*")
+      .eq("sender_id", userId);
+
+    if (notifFetchError) {
+      return res.status(500).json({
+        message: "Error fetching notifications",
+        error: notifFetchError,
+      });
+    }
+
+    return res.json(userNotifications);
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error", error });
+  }
+}
+
+export { removeRelation, fetchRelation, postRelation, getNotification };

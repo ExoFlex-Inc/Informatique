@@ -7,19 +7,37 @@ import { useState, useEffect } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import { useAdminProfile } from "../hooks/use-admin.ts";
 import Loading from "../components/Loading.tsx";
+import { useRelations } from "../hooks/use-relations.ts";
+import { useFetchPendingRelations } from "../hooks/use-relations.ts";
 
 const ProfessionalNetwork = () => {
   const navigate = useNavigate();
   const { profile } = useUserProfile();
-  const { admins, isLoading } = useAdminProfile();
-
+  const { admins, isLoading: adminLoading } = useAdminProfile();
+  const { relations, isLoading: relationsLoading } = useRelations();
+  const { notifications, isLoading: notificationsLoading } = useFetchPendingRelations();
+  
   const [filteredUsers, setFilteredUsers] = useState(admins);
 
   useEffect(() => {
-    setFilteredUsers(admins);
-  }, [admins]);
+    console.log(notifications);
+    let filteredAdmin = admins;
 
-  if (isLoading) {
+    if (relations && filteredAdmin) {
+      relations.forEach((relation: {user_id: string}) => {
+        filteredAdmin = filteredAdmin.filter((admin: {user_id: string}) => relation.user_id == admin.user_id ? false : true)
+      })
+    }
+    if (notifications && filteredAdmin) {
+      notifications.forEach((notification: {receiver_id: string}) => {
+        filteredAdmin = filteredAdmin.filter((admin: {user_id: string}) => notification.receiver_id == admin.user_id ? false : true)
+      })
+    }
+    setFilteredUsers(filteredAdmin);
+
+  }, [notifications, relations]);
+
+  if (adminLoading || relationsLoading || notificationsLoading) {
     return <Loading />;
   }
 
@@ -47,7 +65,7 @@ const ProfessionalNetwork = () => {
           true
         )}
       </div>
-      <UserList listOfUsers={filteredUsers} />
+      <UserList listOfUsers={filteredUsers} setFilteredUsers={setFilteredUsers} />
     </div>
   );
 };

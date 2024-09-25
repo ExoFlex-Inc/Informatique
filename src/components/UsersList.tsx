@@ -14,9 +14,10 @@ interface UserListProps {
     phone_number: string;
     email: string;
   }>;
+  setFilteredUsers: React.Dispatch<any>;
 }
 
-const UserList: React.FC<UserListProps> = ({ listOfUsers }) => {
+const UserList: React.FC<UserListProps> = ({ listOfUsers, setFilteredUsers }) => {
   const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
   const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const { pathname } = useLocation();
@@ -53,6 +54,8 @@ const UserList: React.FC<UserListProps> = ({ listOfUsers }) => {
         throw new Error(`Failed to send invitation: ${response.statusText}`);
       }
 
+      const newList = listOfUsers.filter((_, i) => i !== index);
+      setFilteredUsers(newList);
       window.alert("Invitation sent successfully.");
     } catch (error) {
       console.error("Error sending invitation:", error);
