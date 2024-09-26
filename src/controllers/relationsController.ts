@@ -152,4 +152,9 @@ const getPendingAdminNotifications = async (req: Request, res: Response) => {
   }
 };
 
-export { removeRelation, fetchRelation, postRelation, getPendingAdminNotifications };
+export {
+  removeRelation,
+  fetchRelation,
+  postRelation,
+  getPendingAdminNotifications,
+};
