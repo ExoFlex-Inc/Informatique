@@ -17,8 +17,10 @@ interface UserListProps {
   setFilteredUsers: React.Dispatch<any>;
 }
 
-
-const UserList: React.FC<UserListProps> = ({ listOfUsers, setFilteredUsers }) => {
+const UserList: React.FC<UserListProps> = ({
+  listOfUsers,
+  setFilteredUsers,
+}) => {
   const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
   const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const { pathname } = useLocation();

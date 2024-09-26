@@ -15,8 +15,9 @@ const ProfessionalNetwork = () => {
   const { profile } = useUserProfile();
   const { admins, isLoading: adminLoading } = useAdminProfile();
   const { relations, isLoading: relationsLoading } = useRelations();
-  const { notifications, isLoading: notificationsLoading } = useFetchPendingRelations();
-  
+  const { notifications, isLoading: notificationsLoading } =
+    useFetchPendingRelations();
+
   const [filteredUsers, setFilteredUsers] = useState(admins);
 
   useEffect(() => {
@@ -24,17 +25,20 @@ const ProfessionalNetwork = () => {
     let filteredAdmin = admins;
 
     if (relations && filteredAdmin) {
-      relations.forEach((relation: {user_id: string}) => {
-        filteredAdmin = filteredAdmin.filter((admin: {user_id: string}) => relation.user_id == admin.user_id ? false : true)
-      })
+      relations.forEach((relation: { user_id: string }) => {
+        filteredAdmin = filteredAdmin.filter((admin: { user_id: string }) =>
+          relation.user_id == admin.user_id ? false : true,
+        );
+      });
     }
     if (notifications && filteredAdmin) {
-      notifications.forEach((notification: {receiver_id: string}) => {
-        filteredAdmin = filteredAdmin.filter((admin: {user_id: string}) => notification.receiver_id == admin.user_id ? false : true)
-      })
+      notifications.forEach((notification: { receiver_id: string }) => {
+        filteredAdmin = filteredAdmin.filter((admin: { user_id: string }) =>
+          notification.receiver_id == admin.user_id ? false : true,
+        );
+      });
     }
     setFilteredUsers(filteredAdmin);
-
   }, [notifications, relations]);
 
   if (adminLoading || relationsLoading || notificationsLoading) {
@@ -65,7 +69,10 @@ const ProfessionalNetwork = () => {
           true
         )}
       </div>
-      <UserList listOfUsers={filteredUsers} setFilteredUsers={setFilteredUsers} />
+      <UserList
+        listOfUsers={filteredUsers}
+        setFilteredUsers={setFilteredUsers}
+      />
     </div>
   );
 };

@@ -42,7 +42,7 @@ export function useRelations() {
   };
 }
 
-export function useFetchPendingRelations () {
+export function useFetchPendingRelations() {
   const { profile } = useUserProfile();
 
   const {
