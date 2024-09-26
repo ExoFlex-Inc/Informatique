@@ -19,6 +19,7 @@ typedef struct
 {
     uint8_t state;
     uint8_t autoState;
+    uint8_t changeSideState;
     uint8_t homingState;
 
     float motorsNextGoal[MMOT_MOTOR_NBR];
@@ -150,6 +151,7 @@ void ManagerMovement_Reset()
 
     managerMovement.state       = MMOV_STATE_WAITING_SECURITY;
     managerMovement.autoState   = MMOV_AUTO_STATE_WAITING4PLAN;
+    managerMovement.changeSideState = MMOV_CHANGESIDE_STATE;
     managerMovement.homingState = MMOV_HOMING_EXTENSION;
 }
 
@@ -173,6 +175,9 @@ void ManagerMovement_Task()
         ManagerMovement_Automatic();
         break;
 
+    case MMOV_STATE_CHANGESIDE:
+    	ManagerMovement_ChangeSide();
+
     case MMOV_STATE_ERROR:
         ManagerError_SetError(ERROR_3_MMOV);
 
@@ -192,7 +197,7 @@ void ManagerMovement_WaitingSecurity()
     }
 }
 
-void ManagerMovement_Manual()  // TODO
+void ManagerMovement_Manual()
 {
     if (PeriphUartRingBuf_GetRxTimerDelay() > MANUAL_MAX_TRANSMIT_TIME)
     {
@@ -270,6 +275,26 @@ void ManagerMovement_Automatic()
 
         break;
     }
+}
+
+void ManagerMovement_ChangeSide()
+{
+	switch (managerMovement.changeSideState)
+	{
+	case MMOV_CHANGESIDE_STATE_WAITING4CMD:
+		ManagerMovement_Waiting4cmd();
+
+		break;
+
+	case MMOV_CHANGESIDE_STATE_MOVERIGHT:
+		ManagerMovement_ChangeSideRight();
+
+		break;
+
+	case MMOV_CHANGESIDE_STATE_MOVELEFT:
+		ManagerMovement_ChangeSideRight;
+
+		break;
 }
 
 /*
