@@ -61,7 +61,6 @@ app.use("/api", wellnessNetworkRoutes);
 
 io.on("connection", (socket) => {
   console.log("A client connected");
-
   socket.on("planData", (planData) => {
     const serialPort = getSerialPort();
     if (serialPort && serialPort.isOpen) {
