@@ -25,3 +25,26 @@ export const getExerciseData = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+export const postExerciseData = async (req, res) => {
+  const { date, user_id, rated_pain } = req.body;
+
+  const {error} = await supaClient.from("exercise_data")
+    .insert({
+      date,
+      rated_pain,
+      user_id,
+    })
+
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to send exercise data",
+        error: error.message,
+      });
+    }
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Exercise data sent successfully" });
+}
