@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useRef, SetStateAction, Dispatch } from "react";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  SetStateAction,
+  Dispatch,
+} from "react";
 import Button from "../components/Button.tsx";
 import ProgressionWidget from "../components/ProgressionWidget.tsx";
 
@@ -54,17 +60,18 @@ export default function HMI() {
   });
 
   useEffect(() => {
-    if(socket &&
+    if (
+      socket &&
       stm32Data &&
       stm32Data.AutoState === "Ready" &&
       !hasExecute.current
     ) {
-      const message = "{Auto;Resetplan;}"
+      const message = "{Auto;Resetplan;}";
       socket?.emit("planData", message);
       hasExecute.current = true;
-      console.log("Reset",message)
+      console.log("Reset", message);
     }
-  },[socket, stm32Data]);
+  }, [socket, stm32Data]);
 
   useEffect(() => {
     if (
