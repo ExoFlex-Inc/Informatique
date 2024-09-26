@@ -124,7 +124,7 @@ const removeRelation = async (req: Request, res: Response) => {
   }
 };
 
-const getNotification = async (req: Request, res: Response) => {
+const getPendingAdminNotifications = async (req: Request, res: Response) => {
   const userId = req.params.userId;
 
   if (!userId) {
@@ -136,6 +136,7 @@ const getNotification = async (req: Request, res: Response) => {
     const { data: userNotifications, error: notifFetchError } = await supaClient
       .from("notifications")
       .select("*")
+      .eq("type", "relation")
       .eq("sender_id", userId);
 
     if (notifFetchError) {
@@ -151,4 +152,4 @@ const getNotification = async (req: Request, res: Response) => {
   }
 };
 
-export { removeRelation, fetchRelation, postRelation, getNotification };
+export { removeRelation, fetchRelation, postRelation, getPendingAdminNotifications };

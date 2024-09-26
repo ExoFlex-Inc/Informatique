@@ -21,7 +21,6 @@ const ProfessionalNetwork = () => {
   const [filteredUsers, setFilteredUsers] = useState(admins);
 
   useEffect(() => {
-    console.log(notifications);
     let filteredAdmin = admins;
 
     if (relations && filteredAdmin) {
