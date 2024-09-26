@@ -119,15 +119,7 @@ void ManagerMovement_Reset()
     }
 
     // Init exercises tables
-    for (uint8_t i = 0; i < MAX_EXERCISES; i++)
-    {
-        finalPos[i] = 0.0f;
-
-        repetitions[i]   = 0;
-        mvtNbr[i]        = 0;
-        exercisesTime[i] = 0.0f;
-        pauseTime[i]     = 0.0f;
-    }
+    ManagerMovement_ResetExercise();
 
     // Init Auto counters and buttons
     startButton = false;
@@ -411,19 +403,16 @@ void ManagerMovement_AddMouvement(uint8_t mvtIdx, uint8_t movementType,
 
 void ManagerMovement_ResetExercise()
 {
-    if (managerMovement.autoState == MMOV_AUTO_STATE_READY)
-    {
-        for (uint8_t i = 0; i < MAX_EXERCISES; i++)
-        {
-            repetitions[i]   = 0;
-            exercisesTime[i] = 0.0f;
-            finalPos[i]      = 0.0f;
-            pauseTime[i]     = 0.0f;
-            movements[i] 	 = 0.0f;
-            mvtNbr[i] 		 = 0.0f;
-        }
-        managerMovement.autoState = MMOV_AUTO_STATE_WAITING4PLAN;
-    }
+	for (uint8_t i = 0; i < MAX_EXERCISES; i++)
+	{
+		repetitions[i]   = 0;
+		exercisesTime[i] = 0.0f;
+		finalPos[i]      = 0.0f;
+		pauseTime[i]     = 0.0f;
+		movements[i] 	 = 0.0f;
+		mvtNbr[i] 		 = 0.0f;
+	}
+	managerMovement.autoState = MMOV_AUTO_STATE_WAITING4PLAN;
 }
 
 void ManagerMovement_StartExercise()
