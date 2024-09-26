@@ -115,8 +115,8 @@ void ManagerHMI_SendJSON()
              "\"Torques\":[%.2f,%.2f,%.2f],"
              "\"Current\":[%.2f,%.2f,%.2f]}",
              strMode, strAutoState, strHomingState, repsCount, exerciseIdx,
-             ManagerError_GetErrorStatus(), positions[0], positions[1],
-             positions[2], torques[0], torques[1], torques[2], current[0],
+             ManagerError_GetErrorStatus(), -positions[0], positions[1],
+             positions[2], -torques[0], torques[1], torques[2], current[0],
              current[1], current[2]);
 
     // Send JSON string over UART
