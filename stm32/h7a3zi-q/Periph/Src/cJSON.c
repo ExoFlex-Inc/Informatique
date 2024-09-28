@@ -574,7 +574,7 @@ static cJSON_bool print_number(const cJSON* const item,
     int            length            = 0;
     size_t         i                 = 0;
     unsigned char  number_buffer[26] = {
-         0}; /* temporary buffer to print the number into */
+        0}; /* temporary buffer to print the number into */
     unsigned char decimal_point = get_decimal_point();
     double        test          = 0.0;
 
