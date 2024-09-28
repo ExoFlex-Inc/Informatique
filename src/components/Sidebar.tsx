@@ -64,7 +64,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
     let upperCasePage;
     if (page == "hmi") {
       upperCasePage = "HMI";
-    } else if (page == "wellness_network") {
+    } else if (page == "wellness_network" || page == "professional_network") {
       upperCasePage = "Wellness Network";
     } else {
       upperCasePage = page.charAt(0).toUpperCase() + page.slice(1);
@@ -148,7 +148,9 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
               <Box mb="25px">
                 <Box display="flex" justifyContent="center" alignItems="center">
                   <Avatar
-                    src={profile.avatar_url ? profile.avatar_url : Icon}
+                    src={
+                      profile.avatar_blob_url ? profile.avatar_blob_url : Icon
+                    }
                     sx={
                       isTablet
                         ? { width: 50, height: 50 }
@@ -197,16 +199,12 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                   selected={selected}
                 />
               )}
-              {(props.permissions === "dev" ||
-                props.permissions === "admin") && (
-                <Item
-                  title="Wellness Network"
-                  to="/wellness_network"
-                  icon={<GroupIcon />}
-                  selected={selected}
-                />
-              )}
-
+              <Item
+                title="Wellness Network"
+                to="/wellness_network"
+                icon={<GroupIcon />}
+                selected={selected}
+              />
               {(props.permissions === "dev" ||
                 props.permissions === "admin") && (
                 <Item

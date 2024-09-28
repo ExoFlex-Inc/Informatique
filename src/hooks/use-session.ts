@@ -16,6 +16,12 @@ export function useSupabaseSession() {
           credentials: "include",
         });
 
+        if (response.status === 401) {
+          const data = await response.json();
+          console.warn("Session not valid, logging out:", data);
+          return null;
+        }
+
         if (!response.ok) {
           throw new Error("Error fetching session");
         }

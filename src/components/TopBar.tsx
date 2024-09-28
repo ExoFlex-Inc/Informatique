@@ -29,6 +29,8 @@ import Login from "./Login.tsx";
 import { useNavigate } from "react-router-dom";
 import { useSupabaseSession } from "../hooks/use-session.ts";
 import { useUserProfile } from "../hooks/use-profile.ts";
+import { deleteToken } from "firebase/messaging";
+import { messaging } from "../utils/firebaseClient.ts";
 
 export default function TopBar() {
   const { session } = useSupabaseSession();
@@ -70,12 +72,20 @@ export default function TopBar() {
 
         const response = await fetch("http://localhost:3001/auth/logout", {
           method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
           credentials: "include",
+          body: JSON.stringify({
+            user_id: profile?.user_id,
+          }),
         });
 
         if (!response.ok) {
           throw new Error("Failed to log out");
         }
+
+        await deleteToken(messaging);
 
         window.location.href = "/";
       } catch (error) {
@@ -106,15 +116,10 @@ export default function TopBar() {
           <Notification />
         )}
         {session && (
-          <IconButton>
-            <SettingsOutlinedIcon />
-          </IconButton>
-        )}
-        {session && (
           <IconButton className="h-14" onClick={onProfileClick}>
             <Avatar
               ref={avatarRef}
-              src={profile?.avatar_url ? profile.avatar_url : Icon}
+              src={profile?.avatar_blob_url ? profile.avatar_blob_url : Icon}
             />
           </IconButton>
         )}
@@ -149,19 +154,6 @@ export default function TopBar() {
                     <ListItemText primary="See Profile" />
                   </ListItemButton>
                 </ListItem>
-                {(profile?.permissions == "client" ||
-                  profile?.permissions == "dev") && (
-                  <ListItem>
-                    <ListItemButton
-                      onClick={() => navigate("/professional_network")}
-                    >
-                      <ListItemIcon>
-                        <People />
-                      </ListItemIcon>
-                      <ListItemText primary="Professional Network" />
-                    </ListItemButton>
-                  </ListItem>
-                )}
                 <Divider />
                 <ListItem>
                   <ListItemButton onClick={handleLogout}>

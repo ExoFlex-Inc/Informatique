@@ -3,6 +3,8 @@ import Dialog from "./Dialog.tsx";
 import { useTheme } from "@emotion/react";
 import { useSupabaseSession } from "../hooks/use-session.ts";
 import { useUserProfile } from "../hooks/use-profile.ts";
+import { getToken, deleteToken } from "firebase/messaging";
+import { messaging } from "../utils/firebaseClient.ts";
 
 export default function Login() {
   const [showModal, setShowModal] = useState(false);
@@ -30,21 +32,74 @@ export default function Login() {
           password,
         }),
       });
+
       const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data.error || "Login failed");
       }
 
-      setSession(data.session.access_token, data.session.refresh_token); //TODO Add Loading page while this and user profile loads
+      setSession(data.session.access_token, data.session.refresh_token);
 
+      // Register the service worker
+      const registration = await navigator.serviceWorker.register(
+        "/firebase-messaging-sw.js",
+      );
+
+      // Request permission and get FCM token
+      let fcmToken = "";
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+          fcmToken = await getToken(messaging, {
+            vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+            serviceWorkerRegistration: registration,
+          });
+
+          if (!fcmToken) {
+            console.warn("Failed to get FCM token");
+          }
+        } else {
+          console.warn("Notification permission not granted");
+        }
+      } catch (fcmError) {
+        console.error("Error fetching FCM token:", fcmError);
+      }
+
+      // Set user profile in your app state
       setUserProfile({
         user_id: data.user.id,
         first_name: data.user.user_metadata.first_name,
         last_name: data.user.user_metadata.last_name,
         speciality: data.user.user_metadata.speciality,
         permissions: data.user.user_metadata.permissions,
+        fcm_token: fcmToken,
       });
+
+      const updateProfileResponse = await fetch(
+        `http://localhost:3001/user/${data.user.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            fcm_token: fcmToken,
+            first_name: data.user.user_metadata.first_name,
+            last_name: data.user.user_metadata.last_name,
+            speciality: data.user.user_metadata.speciality,
+            permissions: data.user.user_metadata.permissions,
+          }),
+        },
+      );
+
+      const updatedProfile = await updateProfileResponse.json();
+
+      if (!updateProfileResponse.ok) {
+        throw new Error(
+          updatedProfile.error || "Failed to update profile with FCM token",
+        );
+      }
 
       setShowModal(false);
     } catch (error: any) {

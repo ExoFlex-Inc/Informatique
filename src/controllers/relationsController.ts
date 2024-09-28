@@ -11,60 +11,79 @@ const fetchRelation = async (req: Request, res: Response) => {
   }
 
   try {
-    const { data, error } = await supaClient
+    const { data: relations, error: relationsError } = await supaClient
       .from("relations")
-      .select("*")
-      .eq("client_id", user_id);
+      .select("admin_id, client_id")
+      .or(`admin_id.eq.${user_id},client_id.eq.${user_id}`);
 
-    if (error) {
+    if (relationsError) {
+      console.error("Failed to fetch relations:", relationsError);
       return res.status(500).json({
-        success: false,
         message: "Failed to fetch relations",
-        error: error.message,
+        error: relationsError.message,
       });
     }
 
-    return res.status(200).json({ success: true, data });
+    if (!relations || relations.length === 0) {
+      console.log("No relations found for this user");
+      return res.status(200).json([]);
+    }
+
+    const relationsIds = relations.map((relation) =>
+      relation.admin_id === user_id ? relation.client_id : relation.admin_id,
+    );
+
+    const { data: userProfiles, error: profilesError } = await supaClient
+      .from("user_profiles")
+      .select("user_id, first_name, last_name, phone_number, email")
+      .in("user_id", relationsIds);
+
+    if (profilesError) {
+      console.error("Error getting user profiles:", profilesError);
+      return res.status(500).json({ error: "Error getting user profiles" });
+    }
+
+    return res.status(200).json(userProfiles);
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Error fetching relations",
-      error: error.message,
-    });
+    console.error("Error fetching relations:", error);
+    return res
+      .status(500)
+      .json({ message: "Error fetching relations", error: error.message });
   }
 };
 
 const postRelation = async (req: Request, res: Response) => {
-  const { user_id, admin_id } = req.body;
+  const { client_id, admin_id } = req.body;
 
-  if (!user_id && !admin_id) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Profile or selected admin missing" });
+  // Validate input
+  if (!client_id || !admin_id) {
+    return res.status(400).json({
+      success: false,
+      message: "Client or admin id missing",
+    });
   }
 
   try {
     const { error } = await supaClient.from("relations").insert({
+      client_id: client_id,
       admin_id: admin_id,
-      client_id: user_id,
-      relation_status: "pending",
     });
 
     if (error) {
       return res.status(500).json({
         success: false,
-        message: "Failed to send request",
+        message: "Failed to create relation",
         error: error.message,
       });
     }
 
     return res
       .status(200)
-      .json({ success: true, message: "Request sent successfully" });
+      .json({ success: true, message: "Relation request sent successfully" });
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Error sending request",
+      message: "Error creating relation",
       error: error.message,
     });
   }
@@ -105,39 +124,37 @@ const removeRelation = async (req: Request, res: Response) => {
   }
 };
 
-const acceptRequest = async (req: Request, res: Response) => {
-  const { relationId } = req.params;
+const getPendingAdminNotifications = async (req: Request, res: Response) => {
+  const userId = req.params.userId;
 
-  if (!relationId) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Invalid relation" });
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
   }
 
   try {
-    const { error } = await supaClient
-      .from("relations")
-      .update({ relation_status: "accepted" })
-      .eq("id", relationId);
+    // Fetch notifications from the database filtered by userId
+    const { data: userNotifications, error: notifFetchError } = await supaClient
+      .from("notifications")
+      .select("*")
+      .eq("type", "relation")
+      .eq("sender_id", userId);
 
-    if (error) {
+    if (notifFetchError) {
       return res.status(500).json({
-        success: false,
-        message: "Failed to accept the relation",
-        error: error.message,
+        message: "Error fetching notifications",
+        error: notifFetchError,
       });
     }
 
-    return res
-      .status(200)
-      .json({ success: true, message: "Request accepted successfully" });
+    return res.json(userNotifications);
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Error accepting relation",
-      error: error.message,
-    });
+    return res.status(500).json({ message: "Internal server error", error });
   }
 };
 
-export { removeRelation, fetchRelation, postRelation, acceptRequest };
+export {
+  removeRelation,
+  fetchRelation,
+  postRelation,
+  getPendingAdminNotifications,
+};

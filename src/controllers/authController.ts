@@ -114,8 +114,24 @@ export const login = async (req: Request, res: Response, next: Function) => {
 
 export const logout = async (req: Request, res: Response) => {
   try {
-    const { error } = await supaClient.auth.signOut();
+    const { user_id } = req.body;
 
+    if (!user_id) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+
+    const { error: updateError } = await supaClient
+      .from("user_profiles")
+      .update({ fcm_token: null })
+      .eq("user_id", user_id);
+
+    if (updateError) {
+      return res
+        .status(500)
+        .json({ error: `Failed to remove FCM token: ${updateError.message}` });
+    }
+
+    const { error } = await supaClient.auth.signOut();
     if (error) {
       return res.status(500).json({ error: error.message });
     }

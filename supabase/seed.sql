@@ -259,14 +259,12 @@ BEGIN
     INSERT INTO relations (
         id,
         admin_id,
-        client_id,
-        relation_status
+        client_id
     )
     VALUES (
         gen_random_uuid(),
         new_id,
-        new_id,
-        'accepted'
+        new_id
     );
 
     FOR j IN 1..50 LOOP
