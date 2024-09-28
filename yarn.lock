@@ -4201,10 +4201,10 @@ sucrase@^3.32.0:
     pirates "^4.0.1"
     ts-interface-checker "^0.1.9"
 
-supabase@^1.188.4:
-  version "1.188.4"
-  resolved "https://registry.yarnpkg.com/supabase/-/supabase-1.188.4.tgz#4547a6b274b152f63159302a0bba9e3a03532ce2"
-  integrity sha512-ntOhjrBlnMdacbcmGmuv7Q2JuH6oeukc5iCHFtjZxQRmE583p02HdsALEq7KdITEMjFJOvjM4xJ5/32HAYuRQQ==
+supabase@^1.192.5:
+  version "1.192.5"
+  resolved "https://registry.yarnpkg.com/supabase/-/supabase-1.192.5.tgz#57b649923d7e5c24a8930cbcb780b3326966a513"
+  integrity sha512-xRn5wu4jtSgaPXfNrYRYv6Y1oxevxp7Ff95rJyhh1Us7WqSxjmJcpFygXG/tZx/Oxp/iD1JMhip+mFVlfcaVcw==
   dependencies:
     bin-links "^4.0.3"
     https-proxy-agent "^7.0.2"
