@@ -49,13 +49,13 @@
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.3.1",
     "react-pro-sidebar": "^1.1.0",
-    "react-router-dom": "^6.26.1",
+    "react-router-dom": "^6.26.2",
     "react-scrollbars-custom": "^4.1.1",
     "rsuite": "^5.64.1",
     "serialport": "^12.0.0",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
-    "supabase": "^1.188.4",
+    "supabase": "^1.192.5",
     "ts-node": "^10.9.2",
     "uuid": "^10.0.0"
   },
@@ -78,9 +78,9 @@
     "eslint-plugin-react-refresh": "^0.4.6",
     "postcss": "^8.4.41",
     "tailwindcss": "^3.4.10",
-    "tsx": "^4.19.0",
+    "tsx": "^4.19.1",
     "typescript": "^5.4.5",
-    "vite": "^5.4.3",
+    "vite": "^5.4.6",
     "yarn": "^1.22.22"
   }
 }
