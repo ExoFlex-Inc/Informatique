@@ -128,18 +128,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE FUNCTION get_planning(search_id UUID)
-RETURNS TABLE (plan_content jsonb) AS $$
-BEGIN
-    RAISE LOG 'Searching for plan content with user_id:%', search_id;
-    
-    RETURN QUERY
-    SELECT p.plan_content
-    FROM plans p
-    WHERE p.user_id = search_id;
-END;
-$$ LANGUAGE plpgsql;
-
 /*
 ..######..########..#######..########.....###.....#######..########
 .##....##....##....##.....##.##.....##...##.##...##.....##.##......

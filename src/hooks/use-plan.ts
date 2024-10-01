@@ -57,13 +57,7 @@ export function usePlan(userId: string | null) {
     queryKey: ["plan", userId],
     queryFn: async () => {
       const responseGetPlanning = await fetch(
-        `http://localhost:3001/api/plan`,
-        {
-          method: "GET",
-          headers: {
-            UserId: userId || "",
-          },
-        }
+        `http://localhost:3001/plan/${userId}`
       );
 
       if (!responseGetPlanning.ok) {
@@ -122,7 +116,7 @@ export function usePlan(userId: string | null) {
       }
 
       const planData = await responseGetPlanning.json();
-      return planData;
+      return planData.plan;
     },
     enabled: !!userId
   });
