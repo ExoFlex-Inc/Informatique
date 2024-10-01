@@ -1,24 +1,24 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSupabaseSession } from "../hooks/use-session";
-export interface UserProfile {
-  first_name: string;
-  last_name: string;
-  speciality: string;
-  user_id: string;
-  permissions: string;
-  avatar_url?: string;
-  fcm_token?: string;
-}
-
+import { useSupabaseSession } from "../hooks/use-session.ts";
 export function useUserProfile() {
   const queryClient = useQueryClient();
   const { session } = useSupabaseSession();
   const userId = session?.user?.id;
+  
 
   const {
     data: profile,
     isLoading,
+    fetchStatus,
+    isFetching,
+    isError,
+    isSuccess,
     error,
+    isStale,
+    refetch,
+    failureCount,
+    status,
+    dataUpdatedAt,
   } = useQuery({
     queryKey: ["userProfile", userId],
     queryFn: async () => {
@@ -51,9 +51,16 @@ export function useUserProfile() {
 
       return profileData;
     },
-    enabled: !!userId,
+    enabled: !!userId, // Only run the query if userId is available
     staleTime: 1000 * 60 * 5, // 5 minutes
-    cacheTime: 1000 * 60 * 10, // 10 minutes
+    cacheTime: 1000 * 60 * 10, // Cache the data for 10 minutes
+    retry: 3, // Retry failed requests up to 3 times
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff up to 30 seconds
+    refetchOnWindowFocus: true, // Refetch data when the window is refocused
+    refetchOnReconnect: true, // Refetch when the user reconnects
+    onError: (error) => {
+      console.error("Error fetching profile:", error.message);
+    },
   });
 
   const updateProfileMutation = useMutation({
@@ -74,13 +81,11 @@ export function useUserProfile() {
       return data;
     },
     onSuccess: (updatedProfile) => {
-      if (updatedProfile) {
-        queryClient.setQueryData(
-          ["userProfile", updatedProfile.user_id],
-          updatedProfile,
-        );
-        queryClient.invalidateQueries(["userProfile", updatedProfile.user_id]);
-      }
+      queryClient.setQueryData(
+        ["userProfile", updatedProfile.user_id],
+        updatedProfile,
+      );
+      queryClient.invalidateQueries(["userProfile", updatedProfile.user_id]);
     },
   });
 
@@ -113,9 +118,6 @@ export function useUserProfile() {
         queryClient.invalidateQueries(["userProfile", userId]);
       }
     },
-    onError: (error: any) => {
-      console.error("Error uploading avatar image:", error.message);
-    },
   });
 
   const updateProfile = (newProfile: UserProfile) => {
@@ -135,9 +137,18 @@ export function useUserProfile() {
   return {
     profile,
     isLoading,
+    fetchStatus,
+    isFetching,
+    isSuccess,
+    isError,
     error,
+    status,
+    isStale,
     updateProfile,
     setUserProfile,
     uploadAvatar,
+    refetch,
+    dataUpdatedAt,
+    failureCount,
   };
 }

@@ -10,7 +10,7 @@ export const signup = async (req: Request, res: Response) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { email, password, first_name, last_name, speciality, permissions } =
+  const { email, password, first_name, last_name, phone_number, permissions } =
     req.body;
 
   try {
@@ -39,7 +39,7 @@ export const signup = async (req: Request, res: Response) => {
           data: {
             first_name: first_name,
             last_name: last_name,
-            speciality: speciality,
+            phone_number: phone_number,
             permissions: permissions,
           },
         },
@@ -58,7 +58,7 @@ export const signup = async (req: Request, res: Response) => {
           user_id: newUserUUID,
           first_name: first_name,
           last_name: last_name,
-          speciality: speciality,
+          phone_number: phone_number,
           permissions: permissions,
           email: email,
           password: hashedPassword,

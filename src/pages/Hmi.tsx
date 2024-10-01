@@ -2,7 +2,7 @@ import React, { useEffect, useState, SetStateAction, Dispatch } from "react";
 import Button from "../components/Button.tsx";
 import ProgressionWidget from "../components/ProgressionWidget.tsx";
 
-import usePlanData from "../hooks/get-plan.ts";
+import { usePlan } from "../hooks/use-plan.ts";
 import useStm32 from "../hooks/use-stm32.ts";
 
 import { useMediaQuery, useTheme } from "@mui/material";
@@ -29,7 +29,7 @@ interface ChartData {
 
 export default function HMI() {
   const { profile } = useUserProfile();
-  const { planData } = usePlanData(profile);
+  const { planData } = usePlan();
   const { stm32Data, socket, errorFromStm32 } = useStm32();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);

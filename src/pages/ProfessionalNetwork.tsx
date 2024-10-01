@@ -41,7 +41,8 @@ const ProfessionalNetwork = () => {
   }, [notifications, relations]);
 
   if (adminLoading || relationsLoading || notificationsLoading) {
-    return <Loading />;
+    return (
+      <div className="loading-container"><Loading /></div>);
   }
 
   return (

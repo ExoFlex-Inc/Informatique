@@ -6,7 +6,11 @@ export function useSupabaseSession() {
   const {
     data: session,
     isLoading,
+    isFetching, // Fetching even after initial load (for refetches)
+    isError,
     error,
+    refetch, // Allow manual refetch of session
+    failureCount, // Track how many times the query has failed
   } = useQuery({
     queryKey: ["session"],
     queryFn: async () => {
@@ -33,8 +37,12 @@ export function useSupabaseSession() {
         return null;
       }
     },
-    staleTime: 1000 * 60 * 5,
-    cacheTime: 1000 * 60 * 10,
+    staleTime: 1000 * 60 * 5, // Consider session fresh for 5 minutes
+    cacheTime: 1000 * 60 * 10, // Cache session for 10 minutes
+    retry: 2, 
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 3000), 
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true, 
   });
 
   const setSessionMutation = useMutation({
@@ -69,11 +77,25 @@ export function useSupabaseSession() {
     onSuccess: (newSession) => {
       queryClient.setQueryData(["session"], newSession);
     },
+    onError: (error) => {
+      console.error("Error setting session:", error.message);
+      // Optionally, show a toast notification or some other UI feedback here
+    },
+    retry: 1, // Retry the mutation once if it fails
   });
 
   const setSession = (accessToken: string, refreshToken: string) => {
     setSessionMutation.mutate({ accessToken, refreshToken });
   };
 
-  return { session, isLoading, setSession, error };
+  return { 
+    session, 
+    isLoading, 
+    isFetching, 
+    isError, 
+    error, 
+    setSession, 
+    refetch, // Allow manual refetching of session
+    failureCount, // Track the number of failed fetch attempts
+  };
 }

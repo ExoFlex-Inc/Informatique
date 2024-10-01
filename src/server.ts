@@ -56,7 +56,7 @@ app.use("/relations", relationsRoutes);
 app.use("/exercise-data", exerciseDataRoute);
 app.use("/notification", notificationRoute);
 app.use("/api", serialPortRoutes);
-app.use("/api", planRoutes);
+app.use("/plan", planRoutes);
 app.use("/api", hmiRoutes);
 
 io.on("connection", (socket) => {

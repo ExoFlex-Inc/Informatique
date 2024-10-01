@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useUserProfile } from "../hooks/use-profile.ts";
-import usePlanData from "../hooks/get-plan.ts";
+import { usePlan } from "../hooks/use-plan.ts";
 
 interface ExerciseOverviewWidgetProps {
   stm32Data?: string | null;
@@ -9,8 +9,8 @@ interface ExerciseOverviewWidgetProps {
 const ExerciseOverviewWidget: React.FC<ExerciseOverviewWidgetProps> = ({
   stm32Data,
 }) => {
-  const { profile } = useUserProfile();
-  const { planData } = usePlanData(profile);
+  // const { profile } = useUserProfile();
+  const { plan:planData } = usePlan();
 
   useEffect(() => {
     console.log("planData", planData);

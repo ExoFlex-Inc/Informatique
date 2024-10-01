@@ -33,7 +33,6 @@ const Item = ({ title, to, icon, selected }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    localStorage.setItem("selected", title);
     navigate(to);
   };
   return (
@@ -182,14 +181,12 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
             )}
 
             <Box paddingLeft={isCollapsed ? undefined : "10%"}>
-              {props.permissions === ("client" || "dev") && (
                 <Item
                   title="Dashboard"
                   to="/dashboard"
                   icon={<HomeOutlinedIcon />}
                   selected={selected}
                 />
-              )}
               {(props.permissions === "dev" ||
                 props.permissions === "admin") && (
                 <Item

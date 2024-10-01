@@ -26,8 +26,6 @@ export function useNotification() {
       if (!response.ok) throw new Error("Error fetching notification");
       return await response.json();
     },
-    staleTime: 1000 * 60 * 5,
-    cacheTime: 1000 * 60 * 10,
     enabled: !!profile?.user_id,
   });
 

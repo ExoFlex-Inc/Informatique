@@ -19,7 +19,8 @@ export default function WellnessNetwork() {
   }, [relations]);
 
   if (isLoading) {
-    return <Loading />;
+    return (
+      <div className="loading-container"><Loading /></div>);
   }
 
   return (

@@ -30,9 +30,7 @@ export function useRelations() {
 
       return relationData;
     },
-    enabled: !!profile?.user_id,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    cacheTime: 1000 * 60 * 10, // 10 minutes
+    enabled: !!profile?.user_id
   });
 
   return {

@@ -1,101 +1,70 @@
-import { useEffect } from "react";
-import { Limits } from "../pages/Planning.tsx";
-import { Set, SetRest } from "../pages/Planning.tsx";
+import React, { ChangeEvent } from 'react';
+
+// Define types for better type safety
+type Side = 'Right' | 'Left';
+type LimitType = 'torque' | 'angle';
+type Stretch = 'dorsiflexion' | 'extension' | 'eversion';
+
+// Define constants for limits
+const TORQUE_LIMIT = 65;
+const ANGLE_LIMIT = 90;
+
+// Interfaces
+interface Limits {
+  torque: { dorsiflexion: number; extension: number; eversion: number };
+  angles: { dorsiflexion: number; extension: number; eversion: number };
+}
 
 interface ExercisesLimitsTableProps {
-  side: string;
+  side: Side;
   limitsLeft: Limits;
   limitsRight: Limits;
-  setLimitsLeft: React.Dispatch<React.SetStateAction<Limits>>;
-  setLimitsRight: React.Dispatch<React.SetStateAction<Limits>>;
-  plan: (Set | SetRest)[];
+  setLimitLeft: (type: LimitType, stretch: Stretch, value: number) => void;
+  setLimitRight: (type: LimitType, stretch: Stretch, value: number) => void;
 }
 
 const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
   side,
   limitsLeft,
   limitsRight,
-  setLimitsLeft,
-  setLimitsRight,
-  plan,
+  setLimitLeft,
+  setLimitRight,
 }) => {
-  const saveToLocalStorage = (data: any) => {
-    localStorage.setItem("plan", JSON.stringify(data));
+  // Define the default limits structure
+  const defaultLimits: Limits = {
+    torque: { dorsiflexion: 0, extension: 0, eversion: 0 },
+    angles: { dorsiflexion: 0, extension: 0, eversion: 0 },
   };
 
-  const handleTorqueLimitChange = (event: any, side: string) => {
-    const { name, value } = event.target;
-    let parsedValue =
-      value !== "" ? Math.min(65, Math.max(0, parseInt(value))) : 0;
+  // Define effective limits
+  const effectiveLimitsLeft: Limits = limitsLeft || defaultLimits;
+  const effectiveLimitsRight: Limits = limitsRight || defaultLimits;
 
-    if (side === "Right") {
-      setLimitsRight((prevLimits) => ({
-        ...prevLimits,
-        torque: { ...prevLimits?.torque, [name]: parsedValue },
-      }));
-      saveToLocalStorage({
-        plan,
-        limits: {
-          left: limitsLeft,
-          right: {
-            ...limitsRight,
-            torque: { ...limitsRight?.torque, [name]: parsedValue },
-          },
-        },
-      });
-    } else {
-      setLimitsLeft((prevLimits) => ({
-        ...prevLimits,
-        torque: { ...prevLimits?.torque, [name]: parsedValue },
-      }));
-      saveToLocalStorage({
-        plan,
-        limits: {
-          left: {
-            ...limitsLeft,
-            torque: { ...limitsLeft?.torque, [name]: parsedValue },
-          },
-          right: limitsRight,
-        },
-      });
+  // Unified handler function
+  const handleLimitChange = (
+    event: ChangeEvent<HTMLInputElement>,
+    limitType: LimitType,
+    side: Side
+  ) => {
+    const { name, value } = event.target;
+  
+    // Determine the maximum limit based on limit type
+    const maxLimit = limitType === 'torque' ? TORQUE_LIMIT : ANGLE_LIMIT;
+  
+    // Parse the input value
+    let parsedValue: number | null = null;
+    if (value !== '') {
+      const tempValue = parseInt(value, 10);
+      if (!isNaN(tempValue)) {
+        parsedValue = Math.min(maxLimit, Math.max(0, tempValue));
+      }
     }
-  };
-
-  const handleAngleLimitChange = (event: any, side: string) => {
-    const { name, value } = event.target;
-    let parsedValue =
-      value !== "" ? Math.min(90, Math.max(0, parseInt(value))) : 0;
-
-    if (side === "Right") {
-      setLimitsRight((prevLimits) => ({
-        ...prevLimits,
-        angles: { ...prevLimits.angles, [name]: parsedValue },
-      }));
-      saveToLocalStorage({
-        plan,
-        limits: {
-          left: limitsLeft,
-          right: {
-            ...limitsRight,
-            angles: { ...limitsRight.angles, [name]: parsedValue },
-          },
-        },
-      });
+  
+    // Update the appropriate state based on side and limit type
+    if (side === 'Right') {
+      setLimitRight(limitType, name as Stretch, parsedValue);
     } else {
-      setLimitsLeft((prevLimits) => ({
-        ...prevLimits,
-        angles: { ...prevLimits.angles, [name]: parsedValue },
-      }));
-      saveToLocalStorage({
-        plan,
-        limits: {
-          left: {
-            ...limitsLeft,
-            angles: { ...limitsLeft.angles, [name]: parsedValue },
-          },
-          right: limitsRight,
-        },
-      });
+      setLimitLeft(limitType, name as Stretch, parsedValue);
     }
   };
 
@@ -141,106 +110,100 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
 
         <tbody className="bg-white divide-y divide-gray-200">
           <tr>
+            {/* Torque Dorsiflexion */}
             <td className="px-6 py-4 whitespace-nowrap">
               <input
                 type="number"
                 name="dorsiflexion"
                 value={
-                  side === "Right"
-                    ? limitsRight.torque.dorsiflexion
-                    : limitsLeft.torque.dorsiflexion
+                  side === 'Right'
+                    ? effectiveLimitsRight.torque.dorsiflexion ?? ''
+                    : effectiveLimitsLeft.torque.dorsiflexion ?? ''
                 }
-                onChange={
-                  side === "Right"
-                    ? (event) => handleTorqueLimitChange(event, "Right")
-                    : (event) => handleTorqueLimitChange(event, "Left")
-                }
+                onChange={(event) => handleLimitChange(event, 'torque', side)}
                 className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
+                min={0}
+                max={TORQUE_LIMIT}
               />
             </td>
+            {/* Torque Extension */}
             <td className="px-6 py-4 whitespace-nowrap">
               <input
                 type="number"
                 name="extension"
                 value={
-                  side === "Right"
-                    ? limitsRight.torque.extension
-                    : limitsLeft.torque.extension
+                  side === 'Right'
+                    ? effectiveLimitsRight.torque.extension ?? ''
+                    : effectiveLimitsLeft.torque.extension ?? ''
                 }
-                onChange={
-                  side === "Right"
-                    ? (event) => handleTorqueLimitChange(event, "Right")
-                    : (event) => handleTorqueLimitChange(event, "Left")
-                }
+                onChange={(event) => handleLimitChange(event, 'torque', side)}
                 className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
+                min={0}
+                max={TORQUE_LIMIT}
               />
             </td>
+            {/* Torque Eversion */}
             <td className="px-6 py-4 whitespace-nowrap">
               <input
                 type="number"
                 name="eversion"
                 value={
-                  side === "Right"
-                    ? limitsRight.torque.eversion
-                    : limitsLeft.torque.eversion
+                  side === 'Right'
+                    ? effectiveLimitsRight.torque.eversion ?? ''
+                    : effectiveLimitsLeft.torque.eversion ?? ''
                 }
-                onChange={
-                  side === "Right"
-                    ? (event) => handleTorqueLimitChange(event, "Right")
-                    : (event) => handleTorqueLimitChange(event, "Left")
-                }
+                onChange={(event) => handleLimitChange(event, 'torque', side)}
                 className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
+                min={0}
+                max={TORQUE_LIMIT}
               />
             </td>
+            {/* Angle Dorsiflexion */}
             <td className="px-6 py-4 whitespace-nowrap">
               <input
                 type="number"
                 name="dorsiflexion"
                 value={
-                  side === "Right"
-                    ? limitsRight.angles.dorsiflexion
-                    : limitsLeft.angles.dorsiflexion
+                  side === 'Right'
+                    ? effectiveLimitsRight.angles.dorsiflexion ?? ''
+                    : effectiveLimitsLeft.angles.dorsiflexion ?? ''
                 }
-                onChange={
-                  side === "Right"
-                    ? (event) => handleAngleLimitChange(event, "Right")
-                    : (event) => handleAngleLimitChange(event, "Left")
-                }
+                onChange={(event) => handleLimitChange(event, 'angle', side)}
                 className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
+                min={0}
+                max={ANGLE_LIMIT}
               />
             </td>
+            {/* Angle Extension */}
             <td className="px-6 py-4 whitespace-nowrap">
               <input
                 type="number"
                 name="extension"
                 value={
-                  side === "Right"
-                    ? limitsRight.angles.extension
-                    : limitsLeft.angles.extension
+                  side === 'Right'
+                    ? effectiveLimitsRight.angles.extension ?? ''
+                    : effectiveLimitsLeft.angles.extension ?? ''
                 }
-                onChange={
-                  side === "Right"
-                    ? (event) => handleAngleLimitChange(event, "Right")
-                    : (event) => handleAngleLimitChange(event, "Left")
-                }
+                onChange={(event) => handleLimitChange(event, 'angle', side)}
                 className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
+                min={0}
+                max={ANGLE_LIMIT}
               />
             </td>
+            {/* Angle Eversion */}
             <td className="px-6 py-4 whitespace-nowrap">
               <input
                 type="number"
                 name="eversion"
                 value={
-                  side === "Right"
-                    ? limitsRight.angles.eversion
-                    : limitsLeft.angles.eversion
+                  side === 'Right'
+                    ? effectiveLimitsRight.angles.eversion ?? ''
+                    : effectiveLimitsLeft.angles.eversion ?? ''
                 }
-                onChange={
-                  side === "Right"
-                    ? (event) => handleAngleLimitChange(event, "Right")
-                    : (event) => handleAngleLimitChange(event, "Left")
-                }
+                onChange={(event) => handleLimitChange(event, 'angle', side)}
                 className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
+                min={0}
+                max={ANGLE_LIMIT}
               />
             </td>
           </tr>
