@@ -6,43 +6,40 @@ export function useSupabaseSession() {
   const {
     data: session,
     isLoading,
-    isFetching, // Fetching even after initial load (for refetches)
+    isFetching,
     isError,
     error,
-    refetch, // Allow manual refetch of session
-    failureCount, // Track how many times the query has failed
+    refetch,
+    failureCount,
+    status,
   } = useQuery({
     queryKey: ["session"],
     queryFn: async () => {
-      try {
-        const response = await fetch("http://localhost:3001/auth/session", {
-          method: "GET",
-          credentials: "include",
-        });
+      const response = await fetch("http://localhost:3001/auth/session", {
+        method: "GET",
+        credentials: "include",
+      });
 
-        if (response.status === 401) {
-          const data = await response.json();
-          console.warn("Session not valid, logging out:", data);
-          return null;
-        }
-
-        if (!response.ok) {
-          throw new Error("Error fetching session");
-        }
-
+      if (response.status === 401) {
         const data = await response.json();
-        return data.session;
-      } catch (error) {
-        console.error("Error fetching session:", error);
-        return null;
+        console.warn("Session not valid, logging out:", data);
+        throw new Error("Unauthorized"); // Throw an error here
       }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Error fetching session: ${response.status} ${errorText}`);
+      }
+
+      const data = await response.json();
+      return data.session;
     },
-    staleTime: 1000 * 60 * 5, // Consider session fresh for 5 minutes
-    cacheTime: 1000 * 60 * 10, // Cache session for 10 minutes
-    retry: 2, 
-    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 3000), 
+    staleTime: 1000 * 60 * 5,
+    cacheTime: 1000 * 60 * 10,
+    retry: 2,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 3000),
     refetchOnWindowFocus: true,
-    refetchOnReconnect: true, 
+    refetchOnReconnect: true,
   });
 
   const setSessionMutation = useMutation({
@@ -53,26 +50,22 @@ export function useSupabaseSession() {
       accessToken: string;
       refreshToken: string;
     }) => {
-      try {
-        const response = await fetch("http://localhost:3001/auth/session", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({ accessToken, refreshToken }),
-        });
+      const response = await fetch("http://localhost:3001/auth/session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ accessToken, refreshToken }),
+      });
 
-        if (!response.ok) {
-          throw new Error("Error setting session");
-        }
-
-        const data = await response.json();
-        return data.session;
-      } catch (error) {
-        console.error("Error setting session:", error);
-        return null;
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Error setting session: ${response.status} ${errorText}`);
       }
+
+      const data = await response.json();
+      return data.session;
     },
     onSuccess: (newSession) => {
       queryClient.setQueryData(["session"], newSession);
@@ -81,21 +74,22 @@ export function useSupabaseSession() {
       console.error("Error setting session:", error.message);
       // Optionally, show a toast notification or some other UI feedback here
     },
-    retry: 1, // Retry the mutation once if it fails
+    retry: 1,
   });
 
   const setSession = (accessToken: string, refreshToken: string) => {
     setSessionMutation.mutate({ accessToken, refreshToken });
   };
 
-  return { 
-    session, 
-    isLoading, 
-    isFetching, 
-    isError, 
-    error, 
-    setSession, 
-    refetch, // Allow manual refetching of session
-    failureCount, // Track the number of failed fetch attempts
+  return {
+    session,
+    isLoading,
+    isFetching,
+    isError,
+    error,
+    setSession,
+    refetch,
+    failureCount,
+    status,
   };
 }

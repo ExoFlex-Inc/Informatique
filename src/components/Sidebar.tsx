@@ -6,10 +6,11 @@ import {
   Typography,
   useTheme,
   useMediaQuery,
+  Avatar,
 } from "@mui/material";
 
-import { useNavigate } from "react-router-dom";
-import { tokens } from "../hooks/theme.ts";
+import { useNavigate, useLocation } from "react-router-dom";
+import { tokens } from "../hooks/theme";
 
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
@@ -19,15 +20,21 @@ import FeedOutlinedIcon from "@mui/icons-material/FeedOutlined";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import GroupIcon from "@mui/icons-material/Group";
 import Icon from "../../public/assets/user.png";
-import { Avatar } from "@mui/material";
-import { useUserProfile } from "../hooks/use-profile.ts";
-import CustomScrollbar from "./CustomScrollbars.tsx";
+import { useUserProfile } from "../hooks/use-profile";
+import CustomScrollbar from "./CustomScrollbars";
 
 interface ProSidebarProps {
   permissions: string;
 }
 
-const Item = ({ title, to, icon, selected }) => {
+interface ItemProps {
+  title: string;
+  to: string;
+  icon: React.ReactNode;
+  selected: string;
+}
+
+const Item: React.FC<ItemProps> = ({ title, to, icon, selected }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
@@ -35,6 +42,7 @@ const Item = ({ title, to, icon, selected }) => {
   const handleClick = () => {
     navigate(to);
   };
+
   return (
     <MenuItem
       active={selected === title}
@@ -49,21 +57,21 @@ const Item = ({ title, to, icon, selected }) => {
   );
 };
 
-const ProSidebar: React.FC<ProSidebarProps> = (props) => {
+const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const pageUrl = window.location.href;
-  const page = pageUrl.match(/[^/]+$/)?.[0] || "";
   const [selected, setSelected] = useState("");
   const { profile } = useUserProfile();
   const isTablet = useMediaQuery("(max-width: 768px)");
+  const location = useLocation();
+  const page = location.pathname.split("/").pop() || "";
 
   useEffect(() => {
     let upperCasePage;
-    if (page == "hmi") {
+    if (page === "hmi") {
       upperCasePage = "HMI";
-    } else if (page == "wellness_network" || page == "professional_network") {
+    } else if (page === "wellness_network" || page === "professional_network") {
       upperCasePage = "Wellness Network";
     } else {
       upperCasePage = page.charAt(0).toUpperCase() + page.slice(1);
@@ -147,9 +155,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
               <Box mb="25px">
                 <Box display="flex" justifyContent="center" alignItems="center">
                   <Avatar
-                    src={
-                      profile.avatar_blob_url ? profile.avatar_blob_url : Icon
-                    }
+                    src={profile.avatar_blob_url ? profile.avatar_blob_url : Icon}
                     sx={
                       isTablet
                         ? { width: 50, height: 50 }
@@ -161,7 +167,9 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                 <Box textAlign="center">
                   <Typography
                     className={
-                      profile?.first_name.length < 15 ? "text-4xl" : "text-xl"
+                      profile?.first_name.length < 15
+                        ? "text-4xl"
+                        : "text-xl"
                     }
                     variant={isTablet ? "h3" : "h2"}
                     color={colors.grey[100]}
@@ -181,14 +189,13 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
             )}
 
             <Box paddingLeft={isCollapsed ? undefined : "10%"}>
-                <Item
-                  title="Dashboard"
-                  to="/dashboard"
-                  icon={<HomeOutlinedIcon />}
-                  selected={selected}
-                />
-              {(props.permissions === "dev" ||
-                props.permissions === "admin") && (
+              <Item
+                title="Dashboard"
+                to="/dashboard"
+                icon={<HomeOutlinedIcon />}
+                selected={selected}
+              />
+              {(permissions === "dev" || permissions === "admin") && (
                 <Item
                   title="Planning"
                   to="/planning"
@@ -202,8 +209,7 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                 icon={<GroupIcon />}
                 selected={selected}
               />
-              {(props.permissions === "dev" ||
-                props.permissions === "admin") && (
+              {(permissions === "dev" || permissions === "admin") && (
                 <Item
                   title="Activity"
                   to="/activity"
@@ -216,15 +222,18 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
                 <Item
                   title="HMI"
                   to="/hmi"
-                  icon={<NavigateNextIcon style={{ fontSize: "small" }} />}
+                  icon={
+                    <NavigateNextIcon style={{ fontSize: "small" }} />
+                  }
                   selected={selected}
                 />
-                {(props.permissions == "dev" ||
-                  props.permissions === "admin") && (
+                {(permissions === "dev" || permissions === "admin") && (
                   <Item
                     title="Manual"
                     to="/manual"
-                    icon={<NavigateNextIcon style={{ fontSize: "small" }} />}
+                    icon={
+                      <NavigateNextIcon style={{ fontSize: "small" }} />
+                    }
                     selected={selected}
                   />
                 )}
@@ -238,9 +247,10 @@ const ProSidebar: React.FC<ProSidebarProps> = (props) => {
             >
               <img
                 alt="logo"
-                width={"250px"}
-                height={"250px"}
+                width={"200px"}
+                height={"200px"}
                 src={`../assets/logo.png`}
+                style={{ paddingTop: '50px' }}
               />
             </Box>
           </Menu>

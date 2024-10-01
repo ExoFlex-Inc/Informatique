@@ -34,6 +34,7 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import Login from "./pages/Login.tsx";
 import Loading from "./components/Loading.tsx";
+import { useSupabaseSession } from "./hooks/use-session.ts";
 
 // Create a query client with default options
 const queryClient = new QueryClient({
@@ -87,9 +88,40 @@ const router = createBrowserRouter(
   )
 );
 
-// Routes without AppLayout
 function PublicRoutes() {
-  const { profile, isLoading, isFetching, isError, error, refetch, status } = useUserProfile();
+  const {
+    profile,
+    isLoading: isProfileLoading,
+    isFetching: isProfileFetching,
+    isError: isProfileError,
+    error: profileError,
+    refetch: refetchProfile,
+    status: profileStatus,
+  } = useUserProfile();
+
+  const {
+    session,
+    isLoading: isSessionLoading,
+    isFetching: isSessionFetching,
+    isError: isSessionError,
+    error: sessionError,
+    refetch: refetchSession,
+    status: sessionStatus,
+  } = useSupabaseSession();
+
+  // Determine overall loading and error states
+  const isLoading = isProfileLoading || isSessionLoading;
+  const isFetching = isProfileFetching || isSessionFetching;
+  const isError = isProfileError || isSessionError;
+  const error = profileError || sessionError;
+  const refetchAll = () => {
+    refetchProfile();
+    refetchSession();
+  };
+  const status =
+    profileStatus === 'success' && sessionStatus === 'success'
+      ? 'success'
+      : 'pending';
 
   // Handle loading states
   if (isLoading) {
@@ -113,41 +145,62 @@ function PublicRoutes() {
   if (isError) {
     return (
       <div className="error-container">
-        <p>Error: {error.message}</p>
-        <button onClick={() => refetch()}>Retry</button>
+        <p>Error: {error?.message || 'An unexpected error occurred.'}</p>
+        <button onClick={refetchAll}>Retry</button>
       </div>
     );
   }
 
-
-  // Handle successful profile fetch
-  if (status === "success") {
-    // If profile exists, navigate to the dashboard
-    if (profile) {
-      return (
-        <>
-          <ProSideBar permissions={profile.permissions} />
-          <main className="content overflow-hidden">
-            <TopBar />
-            <Navigate to="/dashboard" />;
-          </main>
-        </>
-      );
+  // Handle successful profile and session fetch
+  if (status === 'success') {
+    // If profile and session exist, navigate to the dashboard
+    if (profile && session) {
+      return <Navigate to="/dashboard" />;
     }
 
-    // If no profile, redirect to the login page
+    // If no profile or no session, redirect to the login page
     return <Navigate to="/login" />;
   }
 
+  // If status is still pending, you can return a loading indicator or null
   return (
-    <Outlet />
+    <div className="loading-container">
+      <Loading />
+    </div>
   );
 }
 
 function AppLayout() {
-  const { profile, fetchStatus, isLoading, isFetching, isError, error, isStale, refetch, status, failureCount } = useUserProfile();
+  const {
+    profile,
+    isLoading: isProfileLoading,
+    isFetching: isProfileFetching,
+    isError: isProfileError,
+    error: profileError,
+    isStale: isProfileStale,
+    refetch: refetchProfile,
+    status: profileStatus,
+    failureCount: profileFailureCount,
+  } = useUserProfile();
 
-  if (isLoading || isFetching) {
+  const {
+    session,
+    isLoading: isSessionLoading,
+    isFetching: isSessionFetching,
+    isError: isSessionError,
+    error: sessionError,
+    refetch: refetchSession,
+    failureCount: sessionFailureCount,
+  } = useSupabaseSession();
+
+  // Determine the overall loading and error states
+  const isLoading = isProfileLoading || isSessionLoading;
+  const isFetching = isProfileFetching || isSessionFetching;
+  const isError = isProfileError || isSessionError;
+  const error = profileError || sessionError;
+  const failureCount = profileFailureCount + sessionFailureCount;
+
+  if (isLoading || isFetching || profileStatus === "pending") {
     return (
       <div className="loading-container">
         <Loading />
@@ -158,20 +211,22 @@ function AppLayout() {
   if (isError) {
     return (
       <div className="error-container">
-        <p>Error: {error.message}</p>
-        <button onClick={() => refetch()}>Retry</button> 
+        <p>Error: {error?.message || "An unexpected error occurred."}</p>
+        <button onClick={() => {
+          refetchProfile();
+          refetchSession();
+        }}>Retry</button>
         {failureCount > 1 && <p>Failed attempts: {failureCount}</p>}
       </div>
     );
   }
 
-  if (isStale) {
+  if (isProfileStale) {
     console.log("Profile data is stale.");
   }
 
-  if( status === "success" ) {
-
-    if( profile ) {
+  if (profileStatus === "success") {
+    if (profile && session) {
       return (
         <>
           <ProSideBar permissions={profile.permissions} />
@@ -184,13 +239,10 @@ function AppLayout() {
     } else {
       return <Navigate to="/login" />;
     }
-    } else {
-      return (
-        <div className="loading-container">
-          <Loading />
-        </div>
-      );
-    }
+  }
+
+  // Handle any other statuses if necessary
+  return null;
 }
 
 function App() {
