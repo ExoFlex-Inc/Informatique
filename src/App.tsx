@@ -92,48 +92,15 @@ function PublicRoutes() {
   const {
     profile,
     isLoading: isProfileLoading,
-    isFetching: isProfileFetching,
     isError: isProfileError,
     error: profileError,
-    refetch: refetchProfile,
-    status: profileStatus,
   } = useUserProfile();
 
-  const {
-    session,
-    isLoading: isSessionLoading,
-    isFetching: isSessionFetching,
-    isError: isSessionError,
-    error: sessionError,
-    refetch: refetchSession,
-    status: sessionStatus,
-  } = useSupabaseSession();
-
-  // Determine overall loading and error states
-  const isLoading = isProfileLoading || isSessionLoading;
-  const isFetching = isProfileFetching || isSessionFetching;
-  const isError = isProfileError || isSessionError;
-  const error = profileError || sessionError;
-  const refetchAll = () => {
-    refetchProfile();
-    refetchSession();
-  };
-  const status =
-    profileStatus === 'success' && sessionStatus === 'success'
-      ? 'success'
-      : 'pending';
-
-  // Handle loading states
+  const isLoading = isProfileLoading 
+  const isError = isProfileError
+  const error = profileError
+  // Handle loading state
   if (isLoading) {
-    return (
-      <div className="loading-container">
-        <Loading />
-      </div>
-    );
-  }
-
-  // Optionally handle background fetching state separately
-  if (isFetching && !isLoading) {
     return (
       <div className="loading-container">
         <Loading />
@@ -143,31 +110,19 @@ function PublicRoutes() {
 
   // Handle error state
   if (isError) {
-    return (
-      <div className="error-container">
-        <p>Error: {error?.message || 'An unexpected error occurred.'}</p>
-        <button onClick={refetchAll}>Retry</button>
-      </div>
-    );
+    // Optionally, log the error for debugging
+    console.error('Error fetching profile or session:', error);
+    // Allow public routes to render
+    return <Outlet />;
   }
 
-  // Handle successful profile and session fetch
-  if (status === 'success') {
-    // If profile and session exist, navigate to the dashboard
-    if (profile && session) {
-      return <Navigate to="/dashboard" />;
-    }
-
-    // If no profile or no session, redirect to the login page
-    return <Navigate to="/login" />;
+  // If the user is authenticated, redirect to the dashboard
+  if (profile) {
+    return <Navigate to="/dashboard" />;
   }
 
-  // If status is still pending, you can return a loading indicator or null
-  return (
-    <div className="loading-container">
-      <Loading />
-    </div>
-  );
+  // If the user is not authenticated, render the public route components
+  return <Outlet />;
 }
 
 function AppLayout() {
@@ -209,16 +164,8 @@ function AppLayout() {
   }
 
   if (isError) {
-    return (
-      <div className="error-container">
-        <p>Error: {error?.message || "An unexpected error occurred."}</p>
-        <button onClick={() => {
-          refetchProfile();
-          refetchSession();
-        }}>Retry</button>
-        {failureCount > 1 && <p>Failed attempts: {failureCount}</p>}
-      </div>
-    );
+    queryClient.clear();
+    return <Navigate to="/login" />;
   }
 
   if (isProfileStale) {

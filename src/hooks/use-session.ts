@@ -21,22 +21,27 @@ export function useSupabaseSession() {
       });
 
       if (response.status === 401) {
-        const data = await response.json();
-        console.warn("Session not valid, logging out:", data);
-        throw new Error("Unauthorized"); // Throw an error here
+        // No longer throwing an error here
+        return Promise.reject({ name: "UnauthorizedError", message: "Unauthorized" });
       }
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Error fetching session: ${response.status} ${errorText}`);
+        return Promise.reject({
+          name: "FetchError",
+          message: `Error fetching session: ${response.status} ${errorText}`,
+        });
       }
 
       const data = await response.json();
       return data.session;
     },
-    staleTime: 1000 * 60 * 5,
-    cacheTime: 1000 * 60 * 10,
-    retry: 2,
+    retry: (failureCount, error) => {
+      if (error.name === "UnauthorizedError") {
+        return false;
+      }
+      return failureCount <= 2;
+    },
     retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 3000),
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,

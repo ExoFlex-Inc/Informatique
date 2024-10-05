@@ -1,11 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useSupabaseSession } from '../hooks/use-session.ts';
 import { useUserProfile } from '../hooks/use-profile.ts';
 import { getToken } from 'firebase/messaging';
 import { messaging } from '../utils/firebaseClient.ts';
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 import Dialog from '../components/Dialog.tsx';
 import SignUp from '../components/Signup.tsx';
+import {
+  TextField,
+  IconButton,
+  InputAdornment,
+  Button,
+} from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
+
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -106,71 +114,98 @@ export default function Login() {
       alert(`Login failed: ${error.message}`);
     }
   }
+
+  const textFieldSx = {
+    "& label.Mui-focused": {
+      color: "white",
+    },
+    "& .MuiInput-underline:after": {
+      borderBottomColor: "white",
+    },
+    "& .MuiOutlinedInput-root": {
+      "&.Mui-focused fieldset": {
+        borderColor: "white",
+      },
+    },
+  };
   
     return (
       <div className="relative flex h-screen gap-8">
-
         <div className="flex flex-col justify-center w-full max-w-md px-8 mx-auto lg:w-1/2">
+          <div className="flex justify-center">
+            <img
+              src="/public/assets/logo.png"
+              alt="Logo"
+              className="object-contain"
+              style={{ width: '300px', height: '300px' }}
+            />
+          </div>
 
-        <div className="flex justify-center">
-          <img
-            src="/public/assets/logo.png"
-            alt="Logo"
-            className="object-contain"
-            style={{ width: '300px', height: '300px' }}
-          />
-        </div>
-    
           <form className="space-y-6" onSubmit={handleLogin}>
-            <div>
-              <label htmlFor="email" className="sr-only">Email</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-black"
-                placeholder="example@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="relative">
-              <label htmlFor="password" className="sr-only">Password</label>
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-black"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <button
-                type="button"
-                className="absolute inset-y-0 right-0 flex items-center px-3"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {/* Icon code */}
-              </button>
-            </div>
-            <button
-              type="button"
-              className="w-full py-3 px-6 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            <TextField
+              id="email"
+              name="email"
+              type="email"
+              required
+              fullWidth
+              variant="outlined"
+              label="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              sx={textFieldSx}
+            />
+            <TextField
+              id="password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              required
+              fullWidth
+              variant="outlined"
+              label="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              sx={textFieldSx}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
               onClick={(e) => handleLogin(e)}
+              sx={{
+                mt: 3,
+                mb: 2,
+                textTransform: 'none',
+                fontSize: '1rem',
+                backgroundColor: 'blueAccent.main',
+                '&:hover': {
+                  backgroundColor: '#1e3a8a',
+              },
+            }}
             >
               Sign In
-            </button>
+            </Button>
           </form>
           <p className="mt-4 text-center text-sm text-white">
             Don't have an account?{' '}
-            <button
-              className="font-medium text-blue-600 hover:text-blue-500"
+            <Button
+              color="secondary"
               onClick={() => setShowSignUpModal(true)}
             >
               Sign up
-            </button>
+            </Button>
           </p>
           <Dialog
             open={showSignUpModal}
@@ -182,7 +217,7 @@ export default function Login() {
             }
           />
         </div>
-    
+
         <div className="w-full lg:w-1/2">
           <img
             className="object-cover w-full h-full"

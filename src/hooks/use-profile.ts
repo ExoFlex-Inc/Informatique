@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSupabaseSession } from "../hooks/use-session.ts";
+
 export function useUserProfile() {
   const queryClient = useQueryClient();
   const { session } = useSupabaseSession();
   const userId = session?.user?.id;
-  
 
   const {
     data: profile,
@@ -40,7 +40,9 @@ export function useUserProfile() {
       // Fetch the avatar if it exists
       if (profileData.avatar_url) {
         const avatarResponse = await fetch(
-          `http://localhost:3001/user/avatar/${userId}?path=${encodeURIComponent(profileData.avatar_url)}`,
+          `http://localhost:3001/user/avatar/${userId}?path=${encodeURIComponent(
+            profileData.avatar_url,
+          )}`,
         );
         if (avatarResponse.ok) {
           const avatarBlob = await avatarResponse.blob();
@@ -55,7 +57,8 @@ export function useUserProfile() {
     staleTime: 1000 * 60 * 5, // 5 minutes
     cacheTime: 1000 * 60 * 10, // Cache the data for 10 minutes
     retry: 3, // Retry failed requests up to 3 times
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff up to 30 seconds
+    retryDelay: (attemptIndex) =>
+      Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff up to 30 seconds
     refetchOnWindowFocus: true, // Refetch data when the window is refocused
     refetchOnReconnect: true, // Refetch when the user reconnects
     onError: (error) => {
@@ -65,6 +68,10 @@ export function useUserProfile() {
 
   const updateProfileMutation = useMutation({
     mutationFn: async (newProfile: UserProfile) => {
+      if (!userId) {
+        throw new Error("No userId available");
+      }
+
       const response = await fetch(`http://localhost:3001/user/${userId}`, {
         method: "PUT",
         headers: {
@@ -91,6 +98,10 @@ export function useUserProfile() {
 
   const uploadAvatarMutation = useMutation({
     mutationFn: async (file: File) => {
+      if (!userId) {
+        throw new Error("No userId available");
+      }
+
       const formData = new FormData();
       formData.append("avatar", file);
 
@@ -103,7 +114,9 @@ export function useUserProfile() {
       );
 
       if (!response.ok) {
-        throw new Error(`Error uploading avatar image: ${response.statusText}`);
+        throw new Error(
+          `Error uploading avatar image: ${response.statusText}`,
+        );
       }
 
       const data = await response.json();

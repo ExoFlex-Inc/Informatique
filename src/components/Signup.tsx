@@ -200,7 +200,7 @@ export default function Signup({ onClose }) {
               },
             }}
           >
-            Sign Up
+            SIGN UP
           </Button>
         </Box>
       </Box>

@@ -128,66 +128,119 @@ export const themeSettings = (mode) => {
       mode: mode,
       ...(mode === "dark"
         ? {
-            // palette values for dark mode
-            primary: {
-              main: colors.primary[500],
-            },
-            secondary: {
-              main: colors.greenAccent[500],
-            },
-            neutral: {
-              dark: colors.grey[700],
-              main: colors.grey[500],
-              light: colors.grey[100],
-            },
-            background: {
-              default: colors.primary[500],
-            },
-          }
-        : {
-            // palette values for light mode
-            primary: {
-              main: colors.primary[100],
-            },
-            secondary: {
-              main: colors.greenAccent[500],
-            },
-            neutral: {
-              dark: colors.grey[700],
-              main: colors.grey[500],
-              light: colors.grey[100],
-            },
-            background: {
-              default: "#fcfcfc",
-            },
-          }),
-    },
+          // palette values for dark mode
+          primary: {
+            main: colors.primary[500],
+          },
+          secondary: {
+            main: colors.greenAccent[500],
+          },
+          blueAccent: {
+            main: colors.blueAccent[500],
+            contrastText: '#fff',
+          },
+          neutral: {
+            dark: colors.grey[700],
+            main: colors.grey[500],
+            light: colors.grey[100],
+          },
+          background: {
+            default: colors.primary[500],
+          },
+        }
+      : {
+          // palette values for light mode
+          primary: {
+            main: colors.primary[100],
+          },
+          secondary: {
+            main: colors.greenAccent[500],
+          },
+          blueAccent: {
+            main: colors.blueAccent[500],
+            contrastText: '#fff',
+          },
+          neutral: {
+            dark: colors.grey[700],
+            main: colors.grey[500],
+            light: colors.grey[100],
+          },
+          background: {
+            default: "#fcfcfc",
+          },
+        }),
+  },
     typography: {
-      fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
-      fontSize: 12,
+
+      fontFamily: ["Sofia Pro", "sans-serif"].join(","),
+      fontSize: 16,
+
       h1: {
-        fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
-        fontSize: 40,
+        fontFamily: ["Cubano", "sans-serif"].join(","),
+        fontSize: 24,
+        lineHeight: 1.3333, 
+        fontWeight: 400,
+        color: "rgb(255, 255, 255)",
       },
       h2: {
-        fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
-        fontSize: 32,
+        fontFamily: ["Cubano", "sans-serif"].join(","),
+        fontSize: 24,
+        lineHeight: 1.3333,
+        fontWeight: 400,
+        color: "rgb(255, 255, 255)",
       },
       h3: {
-        fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
+        fontFamily: ["Cubano", "sans-serif"].join(","),
         fontSize: 24,
+        lineHeight: 1.3333,
+        fontWeight: 400,
+        color: "rgb(255, 255, 255)",
       },
       h4: {
-        fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
-        fontSize: 20,
+        fontFamily: ["Cubano", "sans-serif"].join(","),
+        fontSize: 24,
+        lineHeight: 1.3333,
+        fontWeight: 400,
+        color: "rgb(255, 255, 255)",
       },
       h5: {
-        fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
-        fontSize: 16,
+        fontFamily: ["Cubano", "sans-serif"].join(","),
+        fontSize: 24,
+        lineHeight: 1.3333,
+        fontWeight: 400,
+        color: "rgb(255, 255, 255)",
       },
       h6: {
-        fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
-        fontSize: 14,
+        fontFamily: ["Cubano", "sans-serif"].join(","),
+        fontSize: 24,
+        lineHeight: 1.3333,
+        fontWeight: 400,
+        color: "rgb(255, 255, 255)",
+      },
+
+      // Body text styled with Sofia Pro font
+      body1: {
+        fontFamily: ["Sofia Pro", "sans-serif"].join(","),
+        fontSize: 16,
+        lineHeight: 1.5,
+        fontWeight: 400,
+        color: "rgb(255, 255, 255)",
+      },
+      body2: {
+        fontFamily: ["Sofia Pro", "sans-serif"].join(","),
+        fontSize: 14, 
+        lineHeight: 1.4286,
+        fontWeight: 400,
+        color: "rgb(255, 255, 255)",
+      },
+
+      // Button text styled with Cubano font
+      button: {
+        fontFamily: ["Cubano", "sans-serif"].join(","),
+        fontSize: 20,
+        lineHeight: 1.4,
+        fontWeight: 700,
+        textTransform: "none",
       },
     },
   };
