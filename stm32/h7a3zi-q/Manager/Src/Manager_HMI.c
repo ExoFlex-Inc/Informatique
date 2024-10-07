@@ -180,7 +180,7 @@ void ManagerHMI_ParseJson(char* msg, uint8_t maxlength, uint8_t* sectionNbr)
 
 void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
 {
-    if (sectionNbr >= 3)
+    if (sectionNbr >= 2)
     {
         if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "Manual") == 0)
         {
@@ -206,6 +206,11 @@ void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
                     ManagerHMI_ExecutePlanCmd(
                         ParsedMsg[M_HMI_CONTENT_SECTION],
                         sectionNbr - M_HMI_CONTENT_SECTION);
+                }
+                else if (strcmp(ParsedMsg[M_HMI_ACTION_SECTION], "Resetplan") ==
+                         0)
+                {
+                    ManagerMovement_ResetExercise();
                 }
                 else if (strcmp(ParsedMsg[M_HMI_ACTION_SECTION], "Control") ==
                          0)
