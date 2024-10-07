@@ -194,34 +194,28 @@ export const getSession = async (req: Request, res: Response) => {
           maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
         });
 
-        // Fetch the user's profile using the new access token
-        const { data: userData, error: userError } =
-          await supaClient.auth.getUser(tokenData.access_token);
-
-        if (userError) {
-          return res
-            .status(401)
-            .json({
-              error: "Unable to fetch user data",
-              details: userError.message,
-            });
-        }
-
-        // Construct a new session object
-        const newSession = {
+        // Set the session using Supabase client
+        const {
+          data: sessionData,
+          error: sessionError,
+        } = await supaClient.auth.setSession({
           access_token: tokenData.access_token,
           refresh_token: tokenData.refresh_token,
-          user: userData.user,
-        };
+        });
 
-        return res.status(200).json({ session: newSession });
-      } else {
-        return res
-          .status(401)
-          .json({
-            error: "Unable to refresh session",
-            details: tokenData.error_description,
+        if (sessionError || !sessionData.session) {
+          return res.status(401).json({
+            error: "Unable to set session",
+            details: sessionError?.message,
           });
+        }
+
+        return res.status(200).json({ session: sessionData.session });
+      } else {
+        return res.status(401).json({
+          error: "Unable to refresh session",
+          details: tokenData.error_description || tokenData.error,
+        });
       }
     }
 
