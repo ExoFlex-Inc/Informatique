@@ -15,19 +15,24 @@ import { useRelations } from "../hooks/use-relations.ts";
 import { usePlan } from "../hooks/use-plan.ts";
 import Loading from "../components/Loading.tsx";
 
-
 export default function Planning() {
-
   const [selectedUser, setSelectedUser] = useState<any[]>([]);
   const [isDisabled, setIsDisabled] = useState(true);
   const [addExerciseDisable, setAddExerciseDisable] = useState(true);
   const [side, setSide] = useState("Left");
   const [checked, setChecked] = useState(false);
   const checkboxRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const { relations, isLoading:isLoadingRelations } = useRelations();
-  const { planData, isLoading: isLoadingPlan, addExercise, addSet, addSetRest, setLimitLeft, setLimitRight, setPlan } = usePlan(
-    selectedUser.length === 1 ? selectedUser[0]?.user_id : null
-  );
+  const { relations, isLoading: isLoadingRelations } = useRelations();
+  const {
+    planData,
+    isLoading: isLoadingPlan,
+    addExercise,
+    addSet,
+    addSetRest,
+    setLimitLeft,
+    setLimitRight,
+    setPlan,
+  } = usePlan(selectedUser.length === 1 ? selectedUser[0]?.user_id : null);
 
   useEffect(() => {
     if (planData) {
@@ -59,7 +64,7 @@ export default function Planning() {
         }
       })
       .filter((element) => element !== undefined) as number[]; // Ensure it's a number[]
-  
+
     // Pass the checkbox index directly to the mutation
     addExercise(checkboxIndex);
   };
@@ -69,7 +74,6 @@ export default function Planning() {
     try {
       // Save plan to Supabase
       await savePlanToSupabase(planData);
-      
     } catch (error) {
       console.error("Error saving plan and limits:", error);
     }
@@ -109,7 +113,10 @@ export default function Planning() {
 
   if (isLoadingRelations || isLoadingPlan) {
     return (
-      <div className="loading-container"><Loading /></div>);
+      <div className="loading-container">
+        <Loading />
+      </div>
+    );
   }
 
   return (
@@ -147,32 +154,34 @@ export default function Planning() {
         />
       </div>
       <CustomScrollbar>
-      <div className="overflow-auto">
-        <ExercisesLimitsTable
-          limitsLeft={planData?.limits?.left}
-          limitsRight={planData?.limits?.right}
-          side={side}
-          setLimitLeft={setLimitLeft}
-          setLimitRight={setLimitRight}
-        />
+        <div className="overflow-auto">
+          <ExercisesLimitsTable
+            limitsLeft={planData?.limits?.left}
+            limitsRight={planData?.limits?.right}
+            side={side}
+            setLimitLeft={setLimitLeft}
+            setLimitRight={setLimitRight}
+          />
 
-        {planData && planData.plan ? (
-          planData.plan.map((set, setIndex) => (
-            <ExercisesPlanTable
-              key={setIndex}
-              setPlan={setPlan}
-              set={set}
-              setIndex={setIndex}
-              checkboxRefs={checkboxRefs} 
-              setChecked={setChecked}
-            />
-          ))
-        ) : (
-          <div className="flex justify-center items-center">
-            <p className="text-gray-500 text-lg">No plan available for the selected user.</p>
-          </div>
-        )}
-      </div>
+          {planData && planData.plan ? (
+            planData.plan.map((set, setIndex) => (
+              <ExercisesPlanTable
+                key={setIndex}
+                setPlan={setPlan}
+                set={set}
+                setIndex={setIndex}
+                checkboxRefs={checkboxRefs}
+                setChecked={setChecked}
+              />
+            ))
+          ) : (
+            <div className="flex justify-center items-center">
+              <p className="text-gray-500 text-lg">
+                No plan available for the selected user.
+              </p>
+            </div>
+          )}
+        </div>
         <div className="flex justify-center my-4">
           <button
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mr-4 rounded"

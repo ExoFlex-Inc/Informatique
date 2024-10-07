@@ -161,10 +161,16 @@ export const getSession = async (req: Request, res: Response) => {
         return res.status(401).json({ error: "No refresh token available" });
       }
 
-      const { data: sessionResponse, error: refreshError } = await supaClient.auth.refreshSession();
+      const { data: sessionResponse, error: refreshError } =
+        await supaClient.auth.refreshSession();
 
       if (refreshError) {
-        return res.status(401).json({ error: "Unable to refresh session", details: refreshError.message });
+        return res
+          .status(401)
+          .json({
+            error: "Unable to refresh session",
+            details: refreshError.message,
+          });
       }
 
       res.cookie("access_token", sessionResponse.session.access_token, {
@@ -206,7 +212,9 @@ export const setSession = async (req: Request, res: Response) => {
     });
 
     if (error || !data.session) {
-      return res.status(401).json({ error: "Unable to set session", details: error?.message });
+      return res
+        .status(401)
+        .json({ error: "Unable to set session", details: error?.message });
     }
 
     // Update cookies with new tokens

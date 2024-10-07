@@ -33,7 +33,6 @@ import { deleteToken } from "firebase/messaging";
 import { messaging } from "../utils/firebaseClient.ts";
 import { useQueryClient } from "@tanstack/react-query";
 
-
 export default function TopBar() {
   const { session } = useSupabaseSession();
   const { profile } = useUserProfile();
@@ -93,7 +92,7 @@ export default function TopBar() {
 
         await deleteToken(messaging);
 
-        navigate("/login")
+        navigate("/login");
       } catch (error) {
         console.error("Error logging out:", error.message);
 

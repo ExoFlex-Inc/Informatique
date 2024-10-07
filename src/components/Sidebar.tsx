@@ -155,7 +155,9 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
               <Box mb="25px">
                 <Box display="flex" justifyContent="center" alignItems="center">
                   <Avatar
-                    src={profile.avatar_blob_url ? profile.avatar_blob_url : Icon}
+                    src={
+                      profile.avatar_blob_url ? profile.avatar_blob_url : Icon
+                    }
                     sx={
                       isTablet
                         ? { width: 50, height: 50 }
@@ -167,9 +169,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
                 <Box textAlign="center">
                   <Typography
                     className={
-                      profile?.first_name.length < 15
-                        ? "text-4xl"
-                        : "text-xl"
+                      profile?.first_name.length < 15 ? "text-4xl" : "text-xl"
                     }
                     variant={isTablet ? "h3" : "h2"}
                     color={colors.grey[100]}
@@ -222,18 +222,14 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
                 <Item
                   title="HMI"
                   to="/hmi"
-                  icon={
-                    <NavigateNextIcon style={{ fontSize: "small" }} />
-                  }
+                  icon={<NavigateNextIcon style={{ fontSize: "small" }} />}
                   selected={selected}
                 />
                 {(permissions === "dev" || permissions === "admin") && (
                   <Item
                     title="Manual"
                     to="/manual"
-                    icon={
-                      <NavigateNextIcon style={{ fontSize: "small" }} />
-                    }
+                    icon={<NavigateNextIcon style={{ fontSize: "small" }} />}
                     selected={selected}
                   />
                 )}
@@ -250,7 +246,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
                 width={"200px"}
                 height={"200px"}
                 src={`../assets/logo.png`}
-                style={{ paddingTop: '50px' }}
+                style={{ paddingTop: "50px" }}
               />
             </Box>
           </Menu>

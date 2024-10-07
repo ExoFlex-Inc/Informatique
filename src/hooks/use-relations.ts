@@ -30,7 +30,7 @@ export function useRelations() {
 
       return relationData;
     },
-    enabled: !!profile?.user_id
+    enabled: !!profile?.user_id,
   });
 
   return {

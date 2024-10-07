@@ -21,7 +21,10 @@ export function useSupabaseSession() {
       });
 
       if (response.status === 401) {
-        return Promise.reject({ name: "UnauthorizedError", message: "Unauthorized" });
+        return Promise.reject({
+          name: "UnauthorizedError",
+          message: "Unauthorized",
+        });
       }
 
       if (!response.ok) {
@@ -65,7 +68,9 @@ export function useSupabaseSession() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Error setting session: ${response.status} ${errorText}`);
+        throw new Error(
+          `Error setting session: ${response.status} ${errorText}`,
+        );
       }
 
       const data = await response.json();

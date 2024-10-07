@@ -20,7 +20,10 @@ export default function WellnessNetwork() {
 
   if (isLoading) {
     return (
-      <div className="loading-container"><Loading /></div>);
+      <div className="loading-container">
+        <Loading />
+      </div>
+    );
   }
 
   return (

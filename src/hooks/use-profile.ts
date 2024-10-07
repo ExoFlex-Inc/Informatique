@@ -57,8 +57,7 @@ export function useUserProfile() {
     staleTime: 1000 * 60 * 5, // 5 minutes
     cacheTime: 1000 * 60 * 10, // Cache the data for 10 minutes
     retry: 3, // Retry failed requests up to 3 times
-    retryDelay: (attemptIndex) =>
-      Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff up to 30 seconds
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff up to 30 seconds
     refetchOnWindowFocus: true, // Refetch data when the window is refocused
     refetchOnReconnect: true, // Refetch when the user reconnects
     onError: (error) => {
@@ -114,9 +113,7 @@ export function useUserProfile() {
       );
 
       if (!response.ok) {
-        throw new Error(
-          `Error uploading avatar image: ${response.statusText}`,
-        );
+        throw new Error(`Error uploading avatar image: ${response.statusText}`);
       }
 
       const data = await response.json();

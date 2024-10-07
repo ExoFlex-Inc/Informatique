@@ -16,7 +16,7 @@ const postPlan = asyncHandler(async (req: Request, res: Response) => {
       .insert([
         {
           user_id,
-          plan, 
+          plan,
           created_at: new Date().toISOString(),
         },
       ])
@@ -24,7 +24,9 @@ const postPlan = asyncHandler(async (req: Request, res: Response) => {
 
     if (error) {
       console.error("Error sending plan:", error);
-      return res.status(500).json({ message: "Error sending plan", error: error.message });
+      return res
+        .status(500)
+        .json({ message: "Error sending plan", error: error.message });
     }
 
     console.log("Success sending plan:", data);
@@ -40,7 +42,9 @@ const getPlan = asyncHandler(async (req: Request, res: Response) => {
 
   // Input Validation
   if (!user_id) {
-    return res.status(400).json({ message: "User ID is required.", data: null });
+    return res
+      .status(400)
+      .json({ message: "User ID is required.", data: null });
   }
 
   try {
@@ -57,11 +61,15 @@ const getPlan = asyncHandler(async (req: Request, res: Response) => {
       // Check if the error code is PGRST116 or any other relevant code indicating a "Not Found" error
       if (error.code === "PGRST116") {
         console.warn(`Plan not found for user_id: ${user_id}`);
-        return res.status(404).json({ message: "No plan found for this user.", data: null });
+        return res
+          .status(404)
+          .json({ message: "No plan found for this user.", data: null });
       }
 
       console.error("Error getting plan:", error);
-      return res.status(500).json({ message: "Error getting plan", error: error.message });
+      return res
+        .status(500)
+        .json({ message: "Error getting plan", error: error.message });
     }
 
     return res.status(200).json({ plan: data.plan });

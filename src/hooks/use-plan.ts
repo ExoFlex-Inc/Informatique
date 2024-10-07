@@ -57,7 +57,7 @@ export function usePlan(userId: string | null) {
     queryKey: ["plan", userId],
     queryFn: async () => {
       const responseGetPlanning = await fetch(
-        `http://localhost:3001/plan/${userId}`
+        `http://localhost:3001/plan/${userId}`,
       );
 
       if (!responseGetPlanning.ok) {
@@ -118,12 +118,15 @@ export function usePlan(userId: string | null) {
       const planData = await responseGetPlanning.json();
       return planData.plan;
     },
-    enabled: !!userId
+    enabled: !!userId,
   });
 
   const addSetMutation = useMutation({
     mutationFn: async (newSet: Plan) => {
-      const previousPlan = queryClient.getQueryData<PlanWithLimits>(["plan", userId]);
+      const previousPlan = queryClient.getQueryData<PlanWithLimits>([
+        "plan",
+        userId,
+      ]);
 
       if (previousPlan) {
         queryClient.setQueryData(["plan", userId], {
@@ -136,10 +139,12 @@ export function usePlan(userId: string | null) {
     },
   });
 
-
   const addExerciseMutation = useMutation({
     mutationFn: async (checkboxIndex: number[]) => {
-      const previousPlan = queryClient.getQueryData<PlanWithLimits>(["plan", userId]);
+      const previousPlan = queryClient.getQueryData<PlanWithLimits>([
+        "plan",
+        userId,
+      ]);
 
       if (previousPlan) {
         const newPlan = [...previousPlan.plan];
@@ -173,10 +178,16 @@ export function usePlan(userId: string | null) {
 
   const addSetRestMutation = useMutation({
     mutationFn: async () => {
-      const previousPlan = queryClient.getQueryData<PlanWithLimits>(["plan", userId]);
+      const previousPlan = queryClient.getQueryData<PlanWithLimits>([
+        "plan",
+        userId,
+      ]);
 
       if (previousPlan) {
-        const newPlan = [...previousPlan.plan, { rest: 0, speed: 0, repetitions: 0, time: 0, movement: [] }];
+        const newPlan = [
+          ...previousPlan.plan,
+          { rest: 0, speed: 0, repetitions: 0, time: 0, movement: [] },
+        ];
 
         queryClient.setQueryData(["plan", userId], {
           ...previousPlan,
@@ -198,13 +209,16 @@ export function usePlan(userId: string | null) {
       stretch: string;
       value: number;
     }) => {
-      const previousPlan = queryClient.getQueryData<PlanWithLimits>(["plan", userId]);
-  
+      const previousPlan = queryClient.getQueryData<PlanWithLimits>([
+        "plan",
+        userId,
+      ]);
+
       if (previousPlan) {
         const prevLimits = previousPlan.limits;
-  
+
         let newLimits;
-  
+
         if (type === "torque") {
           newLimits = {
             ...prevLimits,
@@ -228,13 +242,13 @@ export function usePlan(userId: string | null) {
             },
           };
         }
-  
+
         queryClient.setQueryData(["plan", userId], {
           ...previousPlan,
           limits: newLimits,
         });
       }
-  
+
       return Promise.resolve();
     },
   });
@@ -249,13 +263,16 @@ export function usePlan(userId: string | null) {
       stretch: string;
       value: number;
     }) => {
-      const previousPlan = queryClient.getQueryData<PlanWithLimits>(["plan", userId]);
-  
+      const previousPlan = queryClient.getQueryData<PlanWithLimits>([
+        "plan",
+        userId,
+      ]);
+
       if (previousPlan) {
         const prevLimits = previousPlan.limits;
-  
+
         let newLimits;
-  
+
         if (type === "torque") {
           newLimits = {
             ...prevLimits,
@@ -279,13 +296,13 @@ export function usePlan(userId: string | null) {
             },
           };
         }
-  
+
         queryClient.setQueryData(["plan", userId], {
           ...previousPlan,
           limits: newLimits,
         });
       }
-  
+
       return Promise.resolve();
     },
   });
@@ -295,7 +312,7 @@ export function usePlan(userId: string | null) {
       return Promise.resolve();
     },
   });
-  
+
   const addSet = () => {
     addSetMutation.mutate({
       rest: 0,

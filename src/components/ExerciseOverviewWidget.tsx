@@ -7,7 +7,6 @@ const ExerciseOverviewWidget: React.FC<ExerciseOverviewWidgetProps> = ({
   stm32Data,
   planData,
 }) => {
-
   return (
     <div className="bg-white rounded-lg p-4 max-h-96 overflow-auto overflow-x-hidden">
       <label

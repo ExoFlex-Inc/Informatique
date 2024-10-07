@@ -25,7 +25,7 @@ export function useAdminProfile() {
       console.log("Admin data response:", adminData); // Add this log
 
       return adminData.admins; // Ensure that `admins` exists in `adminData`
-    }
+    },
   });
 
   return {

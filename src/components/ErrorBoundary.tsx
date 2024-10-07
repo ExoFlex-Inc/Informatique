@@ -1,26 +1,20 @@
 import { ErrorBoundary as ReactErrorBoundary } from "react-error-boundary";
-import { 
-  Box, 
-  Typography, 
-  Button, 
-  Paper, 
-  Container,
-} from '@mui/material';
-import { Error as ErrorIcon } from '@mui/icons-material';
+import { Box, Typography, Button, Paper, Container } from "@mui/material";
+import { Error as ErrorIcon } from "@mui/icons-material";
 
 // Fallback component to display in case of an error
 function ErrorFallback({ error, resetErrorBoundary }) {
   return (
     <Container maxWidth="sm">
-      <Paper 
-        elevation={3} 
-        sx={{ 
-          p: 4, 
-          mt: 4, 
-          display: 'flex', 
-          flexDirection: 'column', 
-          alignItems: 'center',
-          backgroundColor: 'error.light'
+      <Paper
+        elevation={3}
+        sx={{
+          p: 4,
+          mt: 4,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          backgroundColor: "error.light",
         }}
       >
         <ErrorIcon color="error" sx={{ fontSize: 60, mb: 2 }} />
@@ -31,9 +25,9 @@ function ErrorFallback({ error, resetErrorBoundary }) {
           {error.message}
         </Typography>
         <Box mt={2}>
-          <Button 
-            variant="contained" 
-            color="primary" 
+          <Button
+            variant="contained"
+            color="primary"
             onClick={resetErrorBoundary}
             sx={{ mt: 2 }}
           >
@@ -48,13 +42,13 @@ function ErrorFallback({ error, resetErrorBoundary }) {
 const ErrorBoundary = ({ children }) => {
   return (
     <ReactErrorBoundary
-    FallbackComponent={ErrorFallback}
-    onReset={() => {
+      FallbackComponent={ErrorFallback}
+      onReset={() => {
         // Perform any reset logic here
         console.log("Error boundary reset");
-    }}
+      }}
     >
-    {children}
+      {children}
     </ReactErrorBoundary>
   );
 };

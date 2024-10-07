@@ -42,7 +42,10 @@ const ProfessionalNetwork = () => {
 
   if (adminLoading || relationsLoading || notificationsLoading) {
     return (
-      <div className="loading-container"><Loading /></div>);
+      <div className="loading-container">
+        <Loading />
+      </div>
+    );
   }
 
   return (

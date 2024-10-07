@@ -241,7 +241,10 @@ export default function Activity() {
 
   if (isLoading) {
     return (
-      <div className="loading-container"><Loading /></div>);
+      <div className="loading-container">
+        <Loading />
+      </div>
+    );
   }
 
   return (

@@ -23,23 +23,23 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
     setPlan((prevPlan) => {
       // Create a shallow copy of the entire prevPlan object (which includes plan and limits)
       const updatedPlan = { ...prevPlan };
-  
+
       // Create a shallow copy of the plan array
       const updatedPlanArray = [...updatedPlan.plan];
-  
+
       if (exerciseIndex !== undefined) {
         // Create a shallow copy of the movement array to avoid mutating the original state
         const updatedMovementArray = [...updatedPlanArray[setIndex].movement];
-  
+
         // Remove the specific exercise from the movement array
         updatedMovementArray.splice(exerciseIndex, 1);
-  
+
         // Update the set with the modified movement array
         updatedPlanArray[setIndex] = {
           ...updatedPlanArray[setIndex],
           movement: updatedMovementArray,
         };
-  
+
         // Optional: If no movements are left, you could choose to remove the set
         if (updatedMovementArray.length === 0) {
           updatedPlanArray.splice(setIndex, 1);
@@ -48,10 +48,10 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
         // If no exerciseIndex is provided, remove the entire set
         updatedPlanArray.splice(setIndex, 1);
       }
-  
+
       // Update the plan in the prevPlan object
       updatedPlan.plan = updatedPlanArray;
-  
+
       return updatedPlan; // Return the updated object including plan and limits
     });
   };
@@ -59,10 +59,10 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
   const handleInputChange = (
     setIndex: number,
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-    exerciseIndex?: number
+    exerciseIndex?: number,
   ) => {
     const { name, value } = event.target;
-  
+
     // Allow empty value for number inputs to support backspace
     let parsedValue: any;
     if (name !== "exercise") {
@@ -71,27 +71,41 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
     } else {
       parsedValue = value; // For 'exercise', it's a text field so we directly take the value
     }
-  
+
     // Prevent negative numbers for specific fields
-    if (parsedValue !== "" && ["repetitions", "rest", "target_angle", "target_torque", "time", "speed"].includes(name) && parsedValue < 0) {
+    if (
+      parsedValue !== "" &&
+      [
+        "repetitions",
+        "rest",
+        "target_angle",
+        "target_torque",
+        "time",
+        "speed",
+      ].includes(name) &&
+      parsedValue < 0
+    ) {
       parsedValue = 0;
     }
-  
+
     setPlan((prevPlan) => {
       // Create a shallow copy of the entire prevPlan object (including plan and limits)
       const updatedPlan = { ...prevPlan };
-    
+
       // Create a shallow copy of the plan array, so you don't mutate prevPlan directly
       const updatedPlanArray = [...updatedPlan.plan];
-    
+
       // Now update the specific set or exercise in the plan array
-      if (exerciseIndex !== undefined && "movement" in updatedPlanArray[setIndex]) {
+      if (
+        exerciseIndex !== undefined &&
+        "movement" in updatedPlanArray[setIndex]
+      ) {
         // Create a shallow copy of the movement array to avoid mutating state directly
         const updatedMovementArray = [...updatedPlanArray[setIndex].movement];
-        
+
         // Update the specific exercise inside the movement array
         updatedMovementArray[exerciseIndex][name] = parsedValue;
-    
+
         // Update the movement array in the corresponding set
         updatedPlanArray[setIndex] = {
           ...updatedPlanArray[setIndex],
@@ -104,10 +118,10 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
           [name]: parsedValue,
         };
       }
-    
+
       // Update the plan with the new plan array, while keeping limits unchanged
       updatedPlan.plan = updatedPlanArray;
-    
+
       return updatedPlan; // Return the entire updated object, including plan and limits
     });
   };
@@ -138,16 +152,17 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
               <tr key={exerciseIndex}>
                 {/* First Column */}
                 {exerciseIndex === 0 && (
-                  <td className="px-6 py-4 text-center whitespace-nowrap"
-                      rowSpan={set.movement.length}
+                  <td
+                    className="px-6 py-4 text-center whitespace-nowrap"
+                    rowSpan={set.movement.length}
                   >
-                  <input
-                    ref={(el) => (checkboxRefs.current[setIndex] = el)}
-                    type="checkbox"
-                    className="mr-4 size-5"
-                    onChange={() => setChecked((prev) => !prev)}
-                  />
-                </td>
+                    <input
+                      ref={(el) => (checkboxRefs.current[setIndex] = el)}
+                      type="checkbox"
+                      className="mr-4 size-5"
+                      onChange={() => setChecked((prev) => !prev)}
+                    />
+                  </td>
                 )}
                 {/* Exercise Select */}
                 <td className="px-4 py-4 whitespace-nowrap">

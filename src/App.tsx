@@ -29,14 +29,14 @@ import TopBar from "./components/TopBar.tsx";
 
 import { useUserProfile } from "./hooks/use-profile.ts";
 
-import { QueryClient} from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import Login from "./pages/Login.tsx";
 import Loading from "./components/Loading.tsx";
 import { useSupabaseSession } from "./hooks/use-session.ts";
-import ErrorBoundary from "./components/ErrorBoundary.tsx"; 
+import ErrorBoundary from "./components/ErrorBoundary.tsx";
 
 // Create a query client with default options
 const queryClient = new QueryClient({
@@ -71,10 +71,15 @@ const router = createBrowserRouter(
         <Route
           element={<PrivateRoutes requiredPermissions={["dev", "client"]} />}
         >
-          <Route path="/professional_network" element={<ProfessionalNetwork />} />
+          <Route
+            path="/professional_network"
+            element={<ProfessionalNetwork />}
+          />
         </Route>
 
-        <Route element={<PrivateRoutes requiredPermissions={["dev", "admin"]} />}>
+        <Route
+          element={<PrivateRoutes requiredPermissions={["dev", "admin"]} />}
+        >
           <Route path="/activity" element={<Activity />} />
           <Route path="/manual" element={<Manual />} />
           <Route path="/planning" element={<Planning />} />
@@ -86,8 +91,8 @@ const router = createBrowserRouter(
         <Route path="/profile" element={<Profile />} />
         <Route path="/hmi" element={<HMI />} />
       </Route>
-    </>
-  )
+    </>,
+  ),
 );
 
 function PublicRoutes() {
@@ -98,9 +103,9 @@ function PublicRoutes() {
     error: profileError,
   } = useUserProfile();
 
-  const isLoading = isProfileLoading 
-  const isError = isProfileError
-  const error = profileError
+  const isLoading = isProfileLoading;
+  const isError = isProfileError;
+  const error = profileError;
 
   // Handle loading state
   if (isLoading) {
@@ -113,7 +118,7 @@ function PublicRoutes() {
 
   // Handle error state
   if (isError) {
-    console.error('Error fetching profile or session:', error);
+    console.error("Error fetching profile or session:", error);
     return <Outlet />;
   }
 
@@ -148,7 +153,7 @@ function AppLayout() {
   const isFetching = isProfileFetching || isSessionFetching;
   const isError = isProfileError || isSessionError;
 
-    if (isError) {
+  if (isError) {
     queryClient.clear();
     return <Navigate to="/login" />;
   }

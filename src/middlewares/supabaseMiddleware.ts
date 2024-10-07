@@ -1,12 +1,12 @@
 // src/middlewares/supabaseMiddleware.ts
 
-import  supaClient  from "../utils/supabaseClient.ts";
+import supaClient from "../utils/supabaseClient.ts";
 import { Request, Response, NextFunction } from "express";
 import { CookieOptions } from "express";
 
 const cookieOptions: CookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production", 
+  secure: process.env.NODE_ENV === "production",
   sameSite: "strict",
   path: "/",
 };
@@ -23,7 +23,11 @@ declare global {
 /**
  * Middleware to authenticate user based on access token from cookies.
  */
-export const supabaseMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+export const supabaseMiddleware = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const accessToken = req.cookies["access_token"] || "";
 
   if (accessToken) {
@@ -32,11 +36,16 @@ export const supabaseMiddleware = async (req: Request, res: Response, next: Next
       const { data, error } = await supaClient.auth.getUser(accessToken);
 
       if (error || !data.user) {
-        console.error("Authentication error:", error?.message || "No user found.");
+        console.error(
+          "Authentication error:",
+          error?.message || "No user found.",
+        );
 
         res.clearCookie("access_token", cookieOptions);
         res.clearCookie("refresh_token", cookieOptions);
-        return res.status(401).json({ error: "Invalid or expired access token." });
+        return res
+          .status(401)
+          .json({ error: "Invalid or expired access token." });
       }
 
       // Attach user to request object

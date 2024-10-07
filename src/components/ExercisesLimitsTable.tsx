@@ -1,9 +1,9 @@
-import React, { ChangeEvent } from 'react';
+import React, { ChangeEvent } from "react";
 
 // Define types for better type safety
-type Side = 'Right' | 'Left';
-type LimitType = 'torque' | 'angle';
-type Stretch = 'dorsiflexion' | 'extension' | 'eversion';
+type Side = "Right" | "Left";
+type LimitType = "torque" | "angle";
+type Stretch = "dorsiflexion" | "extension" | "eversion";
 
 // Define constants for limits
 const TORQUE_LIMIT = 65;
@@ -44,24 +44,24 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
   const handleLimitChange = (
     event: ChangeEvent<HTMLInputElement>,
     limitType: LimitType,
-    side: Side
+    side: Side,
   ) => {
     const { name, value } = event.target;
-  
+
     // Determine the maximum limit based on limit type
-    const maxLimit = limitType === 'torque' ? TORQUE_LIMIT : ANGLE_LIMIT;
-  
+    const maxLimit = limitType === "torque" ? TORQUE_LIMIT : ANGLE_LIMIT;
+
     // Parse the input value
     let parsedValue: number | null = null;
-    if (value !== '') {
+    if (value !== "") {
       const tempValue = parseInt(value, 10);
       if (!isNaN(tempValue)) {
         parsedValue = Math.min(maxLimit, Math.max(0, tempValue));
       }
     }
-  
+
     // Update the appropriate state based on side and limit type
-    if (side === 'Right') {
+    if (side === "Right") {
       setLimitRight(limitType, name as Stretch, parsedValue);
     } else {
       setLimitLeft(limitType, name as Stretch, parsedValue);
@@ -116,11 +116,11 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
                 type="number"
                 name="dorsiflexion"
                 value={
-                  side === 'Right'
-                    ? effectiveLimitsRight.torque.dorsiflexion ?? ''
-                    : effectiveLimitsLeft.torque.dorsiflexion ?? ''
+                  side === "Right"
+                    ? (effectiveLimitsRight.torque.dorsiflexion ?? "")
+                    : (effectiveLimitsLeft.torque.dorsiflexion ?? "")
                 }
-                onChange={(event) => handleLimitChange(event, 'torque', side)}
+                onChange={(event) => handleLimitChange(event, "torque", side)}
                 className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                 min={0}
                 max={TORQUE_LIMIT}
@@ -132,11 +132,11 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
                 type="number"
                 name="extension"
                 value={
-                  side === 'Right'
-                    ? effectiveLimitsRight.torque.extension ?? ''
-                    : effectiveLimitsLeft.torque.extension ?? ''
+                  side === "Right"
+                    ? (effectiveLimitsRight.torque.extension ?? "")
+                    : (effectiveLimitsLeft.torque.extension ?? "")
                 }
-                onChange={(event) => handleLimitChange(event, 'torque', side)}
+                onChange={(event) => handleLimitChange(event, "torque", side)}
                 className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                 min={0}
                 max={TORQUE_LIMIT}
@@ -148,11 +148,11 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
                 type="number"
                 name="eversion"
                 value={
-                  side === 'Right'
-                    ? effectiveLimitsRight.torque.eversion ?? ''
-                    : effectiveLimitsLeft.torque.eversion ?? ''
+                  side === "Right"
+                    ? (effectiveLimitsRight.torque.eversion ?? "")
+                    : (effectiveLimitsLeft.torque.eversion ?? "")
                 }
-                onChange={(event) => handleLimitChange(event, 'torque', side)}
+                onChange={(event) => handleLimitChange(event, "torque", side)}
                 className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                 min={0}
                 max={TORQUE_LIMIT}
@@ -164,11 +164,11 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
                 type="number"
                 name="dorsiflexion"
                 value={
-                  side === 'Right'
-                    ? effectiveLimitsRight.angles.dorsiflexion ?? ''
-                    : effectiveLimitsLeft.angles.dorsiflexion ?? ''
+                  side === "Right"
+                    ? (effectiveLimitsRight.angles.dorsiflexion ?? "")
+                    : (effectiveLimitsLeft.angles.dorsiflexion ?? "")
                 }
-                onChange={(event) => handleLimitChange(event, 'angle', side)}
+                onChange={(event) => handleLimitChange(event, "angle", side)}
                 className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                 min={0}
                 max={ANGLE_LIMIT}
@@ -180,11 +180,11 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
                 type="number"
                 name="extension"
                 value={
-                  side === 'Right'
-                    ? effectiveLimitsRight.angles.extension ?? ''
-                    : effectiveLimitsLeft.angles.extension ?? ''
+                  side === "Right"
+                    ? (effectiveLimitsRight.angles.extension ?? "")
+                    : (effectiveLimitsLeft.angles.extension ?? "")
                 }
-                onChange={(event) => handleLimitChange(event, 'angle', side)}
+                onChange={(event) => handleLimitChange(event, "angle", side)}
                 className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                 min={0}
                 max={ANGLE_LIMIT}
@@ -196,11 +196,11 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
                 type="number"
                 name="eversion"
                 value={
-                  side === 'Right'
-                    ? effectiveLimitsRight.angles.eversion ?? ''
-                    : effectiveLimitsLeft.angles.eversion ?? ''
+                  side === "Right"
+                    ? (effectiveLimitsRight.angles.eversion ?? "")
+                    : (effectiveLimitsLeft.angles.eversion ?? "")
                 }
-                onChange={(event) => handleLimitChange(event, 'angle', side)}
+                onChange={(event) => handleLimitChange(event, "angle", side)}
                 className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                 min={0}
                 max={ANGLE_LIMIT}

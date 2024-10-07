@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   TextField,
   Button,
@@ -6,8 +6,8 @@ import {
   Box,
   IconButton,
   InputAdornment,
-} from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+} from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 export default function Signup({ onClose }) {
   const [email, setEmail] = useState("");
@@ -50,7 +50,9 @@ export default function Signup({ onClose }) {
 
     const data = await response.json();
     if (response.ok) {
-      alert("Sign-up successful! Please check your email to verify your account.");
+      alert(
+        "Sign-up successful! Please check your email to verify your account.",
+      );
       if (onClose) onClose();
     } else {
       alert("Signup failed: " + data.error);
@@ -76,14 +78,12 @@ export default function Signup({ onClose }) {
       <Box
         sx={{
           marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
       >
-        <p className="text-center text-3xl text-white">
-          Sign up
-        </p>
+        <p className="text-center text-3xl text-white">Sign up</p>
         <Box component="form" onSubmit={handleSignUp} sx={{ mt: 1 }}>
           <TextField
             margin="normal"
@@ -139,7 +139,7 @@ export default function Signup({ onClose }) {
             fullWidth
             name="password"
             label="Password"
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             id="password"
             autoComplete="new-password"
             value={password}
@@ -165,7 +165,7 @@ export default function Signup({ onClose }) {
             fullWidth
             name="confirmPassword"
             label="Confirm password"
-            type={showConfirmPassword ? 'text' : 'password'}
+            type={showConfirmPassword ? "text" : "password"}
             id="confirmPassword"
             autoComplete="new-password"
             value={confirmPassword}
@@ -192,11 +192,11 @@ export default function Signup({ onClose }) {
             sx={{
               mt: 3,
               mb: 2,
-              textTransform: 'none',
-              fontSize: '1rem',
-              backgroundColor: '#1d4ed8',
-              '&:hover': {
-                backgroundColor: '#1e3a8a',
+              textTransform: "none",
+              fontSize: "1rem",
+              backgroundColor: "#1d4ed8",
+              "&:hover": {
+                backgroundColor: "#1e3a8a",
               },
             }}
           >
