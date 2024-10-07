@@ -21,7 +21,6 @@ export function useSupabaseSession() {
       });
 
       if (response.status === 401) {
-        // No longer throwing an error here
         return Promise.reject({ name: "UnauthorizedError", message: "Unauthorized" });
       }
 
@@ -77,7 +76,6 @@ export function useSupabaseSession() {
     },
     onError: (error) => {
       console.error("Error setting session:", error.message);
-      // Optionally, show a toast notification or some other UI feedback here
     },
     retry: 1,
   });

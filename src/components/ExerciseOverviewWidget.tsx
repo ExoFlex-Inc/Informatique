@@ -1,20 +1,12 @@
-import { useEffect, useState } from "react";
-import { useUserProfile } from "../hooks/use-profile.ts";
-import { usePlan } from "../hooks/use-plan.ts";
-
 interface ExerciseOverviewWidgetProps {
   stm32Data?: string | null;
+  planData: any;
 }
 
 const ExerciseOverviewWidget: React.FC<ExerciseOverviewWidgetProps> = ({
   stm32Data,
+  planData,
 }) => {
-  // const { profile } = useUserProfile();
-  const { plan:planData } = usePlan();
-
-  useEffect(() => {
-    console.log("planData", planData);
-  }, [planData]);
 
   return (
     <div className="bg-white rounded-lg p-4 max-h-96 overflow-auto overflow-x-hidden">

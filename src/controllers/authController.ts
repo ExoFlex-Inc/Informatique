@@ -3,6 +3,14 @@ import bcrypt from "bcryptjs";
 import passport from "passport";
 import supaClient from "../utils/supabaseClient.ts";
 import { validationResult } from "express-validator";
+import { CookieOptions } from "express";
+
+const cookieOptions: CookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "strict",
+  path: "/",
+};
 
 export const signup = async (req: Request, res: Response) => {
   const errors = validationResult(req);
@@ -153,26 +161,24 @@ export const getSession = async (req: Request, res: Response) => {
         return res.status(401).json({ error: "No refresh token available" });
       }
 
-      // Use signInWithRefreshToken to refresh the session
       const { data: sessionResponse, error: refreshError } = await supaClient.auth.refreshSession();
 
       if (refreshError) {
         return res.status(401).json({ error: "Unable to refresh session", details: refreshError.message });
       }
 
-      // Update cookies with new tokens
       res.cookie("access_token", sessionResponse.session.access_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        // maxAge: 1000 * 60 * 60, // 1 hour
+        maxAge: 1000 * 60 * 60, // 1 hour
       });
 
       res.cookie("refresh_token", sessionResponse.session.refresh_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        // maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+        maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
       });
 
       return res.status(200).json({ session: sessionResponse.session });
@@ -183,35 +189,39 @@ export const getSession = async (req: Request, res: Response) => {
     return res.status(500).json({ error: err.message });
   }
 };
-export const setSession = async (req: Request, res: Response) => {
-  const { accessToken, refreshToken } = req.body;
 
+export const setSession = async (req: Request, res: Response) => {
   try {
+    // Assuming you receive accessToken and refreshToken from the client
+    const { accessToken, refreshToken } = req.body;
+
+    if (!accessToken || !refreshToken) {
+      return res.status(400).json({ error: "Missing tokens" });
+    }
+
+    // Set the session using Supabase client
     const { data, error } = await supaClient.auth.setSession({
       access_token: accessToken,
       refresh_token: refreshToken,
     });
 
-    if (error) {
-      return res.status(500).json({ error: error.message });
+    if (error || !data.session) {
+      return res.status(401).json({ error: "Unable to set session", details: error?.message });
     }
 
+    // Update cookies with new tokens
     res.cookie("access_token", data.session.access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      ...cookieOptions,
       maxAge: 1000 * 60 * 60, // 1 hour
     });
 
     res.cookie("refresh_token", data.session.refresh_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      ...cookieOptions,
       maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
     });
 
     return res.status(200).json({ session: data.session });
-  } catch (err) {
+  } catch (err: any) {
     return res.status(500).json({ error: err.message });
   }
 };

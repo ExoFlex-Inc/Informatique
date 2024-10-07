@@ -150,6 +150,8 @@ INSERT INTO storage.buckets(id, name, public, file_size_limit) VALUES ('avatars'
 .##.........#######..########.####..######..####.########..######.
 */
 
+
+-- TODO: Review all policies and add the necessary checks
 alter table user_profiles enable row level security;
 alter table encoder enable row level security;
 alter table plans enable row level security;
@@ -247,7 +249,7 @@ USING (true);
 CREATE POLICY "users can insert plans" ON "public"."plans"
 AS PERMISSIVE FOR INSERT
 TO public
-WITH CHECK (auth.uid() IS NOT NULL);
+WITH CHECK (true);
 
 CREATE POLICY "admins_and_managers_can_assign_admin" ON public.user_profiles
 AS PERMISSIVE FOR UPDATE

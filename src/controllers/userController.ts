@@ -27,6 +27,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
 export const updateUserProfile = async (req: Request, res: Response) => {
   const userId = req.params.userId;
   const newProfile = req.body;
+  const { avatar_blob_url, ...profileToUpdate } = newProfile;
 
   const { error: authError } = await supaClient.auth.updateUser({
     data: {
@@ -47,7 +48,7 @@ export const updateUserProfile = async (req: Request, res: Response) => {
 
   const { data: profileData, error: profileError } = await supaClient
     .from("user_profiles")
-    .update(newProfile)
+    .update(profileToUpdate)
     .eq("user_id", userId)
     .select("*");
 

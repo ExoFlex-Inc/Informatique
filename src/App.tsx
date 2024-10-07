@@ -21,6 +21,7 @@ import Planning from "./pages/Planning.tsx";
 import WellnessNetwork from "./pages/WellnessNetwork.tsx";
 import Profile from "./pages/Profile.tsx";
 import Forbidden from "./pages/Forbidden.tsx";
+import HMI from "./pages/Hmi.tsx";
 
 import PrivateRoutes from "./components/PrivateRoutes.tsx";
 import ProSideBar from "./components/Sidebar.tsx";
@@ -35,6 +36,7 @@ import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persist
 import Login from "./pages/Login.tsx";
 import Loading from "./components/Loading.tsx";
 import { useSupabaseSession } from "./hooks/use-session.ts";
+import ErrorBoundary from "./components/ErrorBoundary.tsx"; 
 
 // Create a query client with default options
 const queryClient = new QueryClient({
@@ -48,9 +50,8 @@ const queryClient = new QueryClient({
 
 // Set up persistence with localStorage
 const localStoragePersister = createSyncStoragePersister({
-  storage: window.localStorage, // or use sessionStorage
+  storage: window.localStorage,
 });
-
 
 // Create the router for your app
 const router = createBrowserRouter(
@@ -83,6 +84,7 @@ const router = createBrowserRouter(
         <Route path="/wellness_network" element={<WellnessNetwork />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/hmi" element={<HMI />} />
       </Route>
     </>
   )
@@ -99,6 +101,7 @@ function PublicRoutes() {
   const isLoading = isProfileLoading 
   const isError = isProfileError
   const error = profileError
+
   // Handle loading state
   if (isLoading) {
     return (
@@ -110,9 +113,7 @@ function PublicRoutes() {
 
   // Handle error state
   if (isError) {
-    // Optionally, log the error for debugging
     console.error('Error fetching profile or session:', error);
-    // Allow public routes to render
     return <Outlet />;
   }
 
@@ -131,11 +132,8 @@ function AppLayout() {
     isLoading: isProfileLoading,
     isFetching: isProfileFetching,
     isError: isProfileError,
-    error: profileError,
     isStale: isProfileStale,
-    refetch: refetchProfile,
     status: profileStatus,
-    failureCount: profileFailureCount,
   } = useUserProfile();
 
   const {
@@ -143,17 +141,17 @@ function AppLayout() {
     isLoading: isSessionLoading,
     isFetching: isSessionFetching,
     isError: isSessionError,
-    error: sessionError,
-    refetch: refetchSession,
-    failureCount: sessionFailureCount,
   } = useSupabaseSession();
 
   // Determine the overall loading and error states
   const isLoading = isProfileLoading || isSessionLoading;
   const isFetching = isProfileFetching || isSessionFetching;
   const isError = isProfileError || isSessionError;
-  const error = profileError || sessionError;
-  const failureCount = profileFailureCount + sessionFailureCount;
+
+    if (isError) {
+    queryClient.clear();
+    return <Navigate to="/login" />;
+  }
 
   if (isLoading || isFetching || profileStatus === "pending") {
     return (
@@ -161,11 +159,6 @@ function AppLayout() {
         <Loading />
       </div>
     );
-  }
-
-  if (isError) {
-    queryClient.clear();
-    return <Navigate to="/login" />;
   }
 
   if (isProfileStale) {
@@ -203,9 +196,11 @@ function App() {
           client={queryClient}
           persistOptions={{ persister: localStoragePersister }}
         >
-          <div className="app">
-            <RouterProvider router={router} />
-          </div>
+          <ErrorBoundary>
+            <div className="app">
+              <RouterProvider router={router} />
+            </div>
+          </ErrorBoundary>
           <ReactQueryDevtools initialIsOpen={false} />
         </PersistQueryClientProvider>
       </ThemeProvider>

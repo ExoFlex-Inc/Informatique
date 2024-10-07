@@ -29,7 +29,7 @@ interface ChartData {
 
 export default function HMI() {
   const { profile } = useUserProfile();
-  const { planData } = usePlan();
+  const { planData } = usePlan(profile?.user_id);
   const { stm32Data, socket, errorFromStm32 } = useStm32();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -240,7 +240,7 @@ export default function HMI() {
           </div>
         )}
       </div>
-      <ExerciseOverviewWidget stm32Data={stm32Data} />
+      <ExerciseOverviewWidget stm32Data={stm32Data} planData={planData} />
     </div>
   );
 }

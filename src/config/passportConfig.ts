@@ -15,7 +15,7 @@ passport.use(
           .single();
 
         if (error || !user) {
-          return done(null, false, { message: "Invalid email or password." });
+          return done(null, false, { message: error?.message });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
