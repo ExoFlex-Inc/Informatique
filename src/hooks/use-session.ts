@@ -45,6 +45,8 @@ export function useSupabaseSession() {
       return failureCount <= 2;
     },
     retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 3000),
+    staleTime: 1000 * 60 * 55, // 55 minutes
+    cacheTime: 1000 * 60 * 60 * 24, // 24 hours
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   });
