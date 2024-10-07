@@ -1,181 +1,77 @@
-import {
-  TextField,
-  Autocomplete,
-  InputAdornment,
-  Button,
-  Box,
-  ThemeProvider,
-  Paper,
-  createTheme,
-  TableContainer,
-  Table,
-  TableHead,
-  TableCell,
-  TableRow,
-  TableBody,
-} from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import { useState, useEffect } from "react";
-import SendIcon from "@mui/icons-material/Send";
+import { Button } from "@mui/material";
+import UserSearchBar from "../components/UserSearchBar.tsx";
+import UserList from "../components/UsersList.tsx";
+import { useNavigate } from "react-router-dom";
 import { useUserProfile } from "../hooks/use-profile.ts";
-import { set } from "rsuite/esm/internals/utils/date/index.js";
+import { useState, useEffect } from "react";
+import CloseIcon from "@mui/icons-material/Close";
+import { useAdminProfile } from "../hooks/use-admin.ts";
+import Loading from "../components/Loading.tsx";
+import { useRelations } from "../hooks/use-relations.ts";
+import { useFetchPendingRelations } from "../hooks/use-relations.ts";
 
 const ProfessionalNetwork = () => {
-  const [admins, setAdmins] = useState<any[]>([]);
-  const [relations, setRelations] = useState<any[]>([]);
+  const navigate = useNavigate();
   const { profile } = useUserProfile();
-  const [values, setValues] = useState<string | null>(null);
-  const [selectedAdmin, setSelectedAdmin] = useState<any | null>(null);
-  const [buttonDisable, setButtonDisable] = useState(true);
+  const { admins, isLoading: adminLoading } = useAdminProfile();
+  const { relations, isLoading: relationsLoading } = useRelations();
+  const { notifications, isLoading: notificationsLoading } =
+    useFetchPendingRelations();
+
+  const [filteredUsers, setFilteredUsers] = useState(admins);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    let filteredAdmin = admins;
 
-  const fetchData = async () => {
-    try {
-      // Fetch both admins and relations
-      const adminsResponse = await fetch(
-        "http://localhost:3001/user/admin?limit=50",
-      );
-      const adminsData = await adminsResponse.json();
-      setAdmins(adminsData.admins);
-
-      const relationsResponse = await fetch(
-        `http://localhost:3001/relations/${profile.user_id}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
-      );
-      const relationsData = await relationsResponse.json();
-      setRelations(relationsData);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
-  const sendRequestToAdmin = async () => {
-    try {
-      const response = await fetch("http://localhost:3001/relations/request", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          user_id: profile.user_id,
-          admin_id: selectedAdmin.user_id,
-        }),
+    if (relations && filteredAdmin) {
+      relations.forEach((relation: { user_id: string }) => {
+        filteredAdmin = filteredAdmin.filter((admin: { user_id: string }) =>
+          relation.user_id == admin.user_id ? false : true,
+        );
       });
-      if (response.ok) {
-        setValues(null);
-        setButtonDisable(true);
-        fetchData(); // Refresh after sending request
-      } else {
-        console.error("Error sending request:", await response.text());
-      }
-    } catch (error) {
-      console.error("Error sending request:", error);
     }
-  };
+    if (notifications && filteredAdmin) {
+      notifications.forEach((notification: { receiver_id: string }) => {
+        filteredAdmin = filteredAdmin.filter((admin: { user_id: string }) =>
+          notification.receiver_id == admin.user_id ? false : true,
+        );
+      });
+    }
+    setFilteredUsers(filteredAdmin);
+  }, [notifications, relations]);
 
-  const availableAdmins =
-    Array.isArray(relations) && relations.length > 0
-      ? admins.filter(
-          (admin) =>
-            !relations.some((relation) => relation.admin_id === admin.user_id),
-        )
-      : admins;
+  if (adminLoading || relationsLoading || notificationsLoading) {
+    return <Loading />;
+  }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="justify-center flex gap-4">
-        <Autocomplete
-          disablePortal
-          id="combo-box"
-          value={values}
-          options={availableAdmins.map((admin) => admin.email)}
-          onChange={(event, newValue) => {
-            const admin = admins.find((admin) => admin.email === newValue);
-            if (admin) {
-              setSelectedAdmin(admin);
-              setValues(admin.email);
-              setButtonDisable(false);
-            }
-          }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              variant="outlined"
-              size="small"
-              sx={{ width: 500 }}
-              placeholder="Search email"
-              InputProps={{
-                ...params.InputProps,
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          )}
+    <div>
+      <div className="flex items-center gap-4 relative">
+        <UserSearchBar
+          sx={{ width: 500 }}
+          setSearchQuery={setFilteredUsers}
+          users={admins}
         />
-        <Button
-          variant="contained"
-          disabled={buttonDisable}
-          color="info"
-          endIcon={<SendIcon />}
-          onClick={sendRequestToAdmin}
-        >
-          Send request
-        </Button>
+
+        {profile?.permissions == "dev" || profile?.permissions == "client" ? (
+          <Button
+            variant="contained"
+            color="inherit"
+            endIcon={<CloseIcon color="error" />}
+            onClick={() => {
+              navigate("/wellness_network");
+            }}
+          >
+            Cancel action
+          </Button>
+        ) : (
+          true
+        )}
       </div>
-      <label className="justify-center flex">List of professionals</label>
-      <Box justifyContent="center" sx={{ display: "flex" }}>
-        <ThemeProvider
-          theme={createTheme({
-            palette: {
-              mode: "light",
-              primary: { main: "rgb(102, 157, 246)" },
-              background: { paper: "rgb(235, 235, 235)" },
-            },
-          })}
-        >
-          <Paper sx={{ width: "40vw" }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Professional Name</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Email</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {admins.map((admin) => (
-                  <TableRow key={admin.user_id}>
-                    <TableCell>
-                      {admin.first_name} {admin.last_name}
-                    </TableCell>
-                    <TableCell>
-                      {relations &&
-                      Array.isArray(relations) &&
-                      relations.length > 0
-                        ? relations.find(
-                            (relation) => relation.admin_id === admin.user_id,
-                          )?.relation_status || "Unknown"
-                        : "Unknown"}
-                    </TableCell>
-                    <TableCell>{admin.email}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Paper>
-        </ThemeProvider>
-      </Box>
+      <UserList
+        listOfUsers={filteredUsers}
+        setFilteredUsers={setFilteredUsers}
+      />
     </div>
   );
 };
