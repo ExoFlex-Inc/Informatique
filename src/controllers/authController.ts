@@ -162,16 +162,19 @@ export const getSession = async (req: Request, res: Response) => {
       }
 
       // Use fetch to refresh the session
-      const response = await fetch(`${process.env.SUPABASE_API_URL}/auth/v1/token?grant_type=refresh_token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': process.env.SUPABASE_ANON_KEY,
+      const response = await fetch(
+        `${process.env.SUPABASE_API_URL}/auth/v1/token?grant_type=refresh_token`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: process.env.SUPABASE_ANON_KEY,
+          },
+          body: JSON.stringify({
+            refresh_token: refreshToken,
+          }),
         },
-        body: JSON.stringify({
-          refresh_token: refreshToken,
-        }),
-      });
+      );
 
       const tokenData = await response.json();
 
@@ -192,10 +195,16 @@ export const getSession = async (req: Request, res: Response) => {
         });
 
         // Fetch the user's profile using the new access token
-        const { data: userData, error: userError } = await supaClient.auth.getUser(tokenData.access_token);
+        const { data: userData, error: userError } =
+          await supaClient.auth.getUser(tokenData.access_token);
 
         if (userError) {
-          return res.status(401).json({ error: "Unable to fetch user data", details: userError.message });
+          return res
+            .status(401)
+            .json({
+              error: "Unable to fetch user data",
+              details: userError.message,
+            });
         }
 
         // Construct a new session object
@@ -207,7 +216,12 @@ export const getSession = async (req: Request, res: Response) => {
 
         return res.status(200).json({ session: newSession });
       } else {
-        return res.status(401).json({ error: "Unable to refresh session", details: tokenData.error_description });
+        return res
+          .status(401)
+          .json({
+            error: "Unable to refresh session",
+            details: tokenData.error_description,
+          });
       }
     }
 
