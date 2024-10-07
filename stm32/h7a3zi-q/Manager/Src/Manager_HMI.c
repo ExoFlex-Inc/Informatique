@@ -228,11 +228,11 @@ void ManagerHMI_ExecuteManualIncrement(char* cmd)
     {
         if (strcmp(cmd, "EversionR") == 0)
         {
-            ManagerMovement_ManualCmdEversion(MMOV_RIGTH);
+            ManagerMovement_ManualCmdEversion(MMOV_OUTSIDE);
         }
         else if (strcmp(cmd, "EversionL") == 0)
         {
-            ManagerMovement_ManualCmdEversion(MMOV_LEFT);
+            ManagerMovement_ManualCmdEversion(MMOV_INSIDE);
         }
         else if (strcmp(cmd, "DorsiflexionU") == 0)
         {

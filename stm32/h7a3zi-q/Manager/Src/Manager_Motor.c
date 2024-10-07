@@ -567,13 +567,17 @@ void ManagerMotor_MotorIncrement(uint8_t motorIndex, int8_t direction)
     {
         motors[motorIndex].nextPosition += direction * MOTOR3_STEP;
     }
-    else if (motorIndex == MMOT_MOTOR_2)
-    {
-        motors[motorIndex].nextPosition += direction * MOTOR_STEP;
-    }
     else if (motorIndex == MMOT_MOTOR_1)
     {
         motors[motorIndex].nextPosition -= direction * MOTOR_STEP;
+    }
+    else if (motorIndex == MMOT_MOTOR_2 && PeriphSwitch_LegLeft())
+    {
+        motors[motorIndex].nextPosition -= direction * MOTOR_STEP;
+    }
+    else if (motorIndex == MMOT_MOTOR_2 && PeriphSwitch_LegRight())
+    {
+    	motors[motorIndex].nextPosition += direction * MOTOR_STEP;
     }
 }
 

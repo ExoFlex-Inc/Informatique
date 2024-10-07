@@ -15,6 +15,10 @@
 
 #define MANUAL_MAX_TRANSMIT_TIME 20  // ms
 
+#define MMOV_CHANGESIDE_STATE_WAITING4CMD 0
+#define MMOV_CHANGESIDE_STATE_MOVERIGHT 1
+#define MMOV_CHANGESIDE_STATE_MOVELEFT 2
+
 typedef struct
 {
     uint8_t state;
@@ -45,8 +49,8 @@ bool pos3Reached;
 // Limit switch Hit
 bool dorUpLimitHit;
 bool dorDownLimitHit;
-bool evLeftLimitHit;
-bool evRightLimitHit;
+bool evInsideLimitHit;
+bool evOutsideLimitHit;
 bool exUpLimitHit;
 
 bool buttonStartReset;
@@ -88,6 +92,15 @@ void ManagerMovement_AutoStrectching();
 void ManagerMovement_Auto2FirstPos();
 void ManagerMovement_AutoRest();
 void ManagerMovement_AutoStop();
+
+// Change side
+void ManagerMovement_ChangeSide();
+void ManagerMovement_Waiting4cmd();
+void ManagerMovement_ChangeSideRight();
+void ManagerMovement_ChangeSideLeft();
+
+bool ManagerMovement_InsideLimitSwitch();
+bool ManagerMovement_OutsideLimitSwitch();
 
 // Homing functions
 void ManagerMovement_HomingPositions();
@@ -151,7 +164,7 @@ void ManagerMovement_Reset()
 
     managerMovement.state       = MMOV_STATE_WAITING_SECURITY;
     managerMovement.autoState   = MMOV_AUTO_STATE_WAITING4PLAN;
-    managerMovement.changeSideState = MMOV_CHANGESIDE_STATE;
+    managerMovement.changeSideState = MMOV_CHANGESIDE_STATE_WAITING4CMD;
     managerMovement.homingState = MMOV_HOMING_EXTENSION;
 }
 
@@ -292,9 +305,56 @@ void ManagerMovement_ChangeSide()
 		break;
 
 	case MMOV_CHANGESIDE_STATE_MOVELEFT:
-		ManagerMovement_ChangeSideRight;
+		ManagerMovement_ChangeSideLeft();
 
 		break;
+	}
+}
+
+void ManagerMovement_Waiting4cmd()
+{
+	if (PeriphSwitch_LegLeft())
+	{
+		managerMovement.changeSideState = MMOV_CHANGESIDE_STATE_MOVERIGHT;
+	}
+	else if (PeriphSwitch_LegRight())
+	{
+		managerMovement.changeSideState = MMOV_CHANGESIDE_STATE_MOVELEFT;
+	}
+}
+
+void ManagerMovement_ChangeSideRight()
+{
+	// UNLOCK le soleinoids qui bloque le mouvement
+
+	if(PeriphSwitch_LegRight())
+	{
+		// LOCK le soleinoid pour bloquer le mouvement
+		// UNLOCK le soleinoid dans l'eversion
+
+		ManagerMovement_HomingEversion();
+	}
+	else
+	{
+		ManagerMovement_ManualCmdEversion(MMOV_INSIDE);
+	}
+}
+
+void ManagerMovement_ChangeSideLeft()
+{
+	// UNLOCK le soleinoids qui bloque le mouvement
+
+	if(PeriphSwitch_LegLeft())
+	{
+		// LOCK le soleinoid pour bloquer le mouvement
+		// UNLOCK le soleinoid dans l'eversion
+
+		ManagerMovement_HomingEversion();
+	}
+	else
+	{
+		ManagerMovement_ManualCmdEversion(MMOV_INSIDE);
+	}
 }
 
 /*
@@ -739,22 +799,22 @@ void ManagerMovement_HomingExtension()
 void ManagerMovement_HomingEversion()
 {
     // Increment until limitswitch
-    if (PeriphSwitch_EversionLeft() || evLeftLimitHit)
+    if (ManagerMovement_InsideLimitSwitch() || evInsideLimitHit)
     {
         ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
-        if (!evLeftLimitHit)
+        if (!evInsideLimitHit)
         {
             leftPos        = motorsData[MMOT_MOTOR_2]->position;
-            evLeftLimitHit = true;
+            evInsideLimitHit = true;
         }
 
-        if (PeriphSwitch_EversionRight() || evRightLimitHit)
+        if (ManagerMovement_OutsideLimitSwitch() || evOutsideLimitHit)
         {
             ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
-            if (!evRightLimitHit)
+            if (!evOutsideLimitHit)
             {
                 rightPos        = motorsData[MMOT_MOTOR_2]->position;
-                evRightLimitHit = true;
+                evOutsideLimitHit = true;
             }
 
             if (ManagerMovement_GoToPos(
@@ -763,20 +823,28 @@ void ManagerMovement_HomingEversion()
             {
                 ManagerMovement_SetOrigins(MMOT_MOTOR_2);
 
-                evLeftLimitHit  = false;
-                evRightLimitHit = false;
+                evInsideLimitHit  = false;
+                evOutsideLimitHit = false;
 
-                managerMovement.homingState = MMOV_HOMING_DORSIFLEXION;
+                if (managerMovement.state == MMOV_STATE_CHANGESIDE)
+                {
+                	managerMovement.changeSideState = MMOV_CHANGESIDE_STATE_WAITING4CMD;
+                	managerMovement.state = MMOV_STATE_AUTOMATIC;
+                }
+                else
+                {
+                	managerMovement.homingState = MMOV_HOMING_DORSIFLEXION;
+                }
             }
         }
         else
         {
-            ManagerMovement_ManualCmdEversion(MMOV_RIGTH);
+            ManagerMovement_ManualCmdEversion(MMOV_OUTSIDE);
         }
     }
     else
     {
-        ManagerMovement_ManualCmdEversion(MMOV_LEFT);
+        ManagerMovement_ManualCmdEversion(MMOV_INSIDE);
     }
 }
 
@@ -922,4 +990,36 @@ bool ManagerMovement_SetState(uint8_t newState)
     }
 
     return stateChanged;
+}
+
+bool ManagerMovement_InsideLimitSwitch()
+{
+	bool insideSwitchHit = false;
+
+	if (PeriphSwitch_LegRight())
+	{
+		insideSwitchHit = PeriphSwitch_EversionLeft();
+	}
+	else if (PeriphSwitch_LegRight())
+	{
+		insideSwitchHit = PeriphSwitch_EversionRight();
+	}
+
+	return insideSwitchHit;
+}
+
+bool ManagerMovement_OutsideLimitSwitch()
+{
+	bool outsideSwitchHit = false;
+
+	if (PeriphSwitch_LegRight())
+	{
+		outsideSwitchHit = PeriphSwitch_EversionRight();
+	}
+	else if (PeriphSwitch_LegRight())
+	{
+		outsideSwitchHit = PeriphSwitch_EversionLeft();
+	}
+
+	return outsideSwitchHit;
 }
