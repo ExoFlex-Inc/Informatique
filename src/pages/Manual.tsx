@@ -83,7 +83,7 @@ export default function Manual() {
             socket={socket}
           />
         </div>
-        
+
         <div className="flex justify-center h-80 mb-4 gap-4">
           <MotorControlWidget
             title={"Anatomical Movement"}
@@ -104,7 +104,7 @@ export default function Manual() {
           <textarea
             value={errorDescription}
             readOnly
-            rows={6}  
+            rows={6}
             cols={30}
             className="border border-gray-300 p-2 rounded text-black"
           />
