@@ -195,13 +195,11 @@ export const getSession = async (req: Request, res: Response) => {
         });
 
         // Set the session using Supabase client
-        const {
-          data: sessionData,
-          error: sessionError,
-        } = await supaClient.auth.setSession({
-          access_token: tokenData.access_token,
-          refresh_token: tokenData.refresh_token,
-        });
+        const { data: sessionData, error: sessionError } =
+          await supaClient.auth.setSession({
+            access_token: tokenData.access_token,
+            refresh_token: tokenData.refresh_token,
+          });
 
         if (sessionError || !sessionData.session) {
           return res.status(401).json({
