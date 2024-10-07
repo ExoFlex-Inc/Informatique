@@ -24,7 +24,7 @@
 #define ERROR_CAN_MAX_MSG_DELAY     -3
 #define ERROR_MOTOR_MINMAX          -4
 
-#define TIMER   10
+#define dt   10
 #define MAX_TRY 50  // 500 ms before flagging an error
 
 #define MOTOR_STEP   0.005
@@ -49,19 +49,23 @@
 typedef struct
 {
     Motor    motor;
-    uint8_t  controlType;
-    float    nextPosition;
-    float    goalPosition;
-    float    goalTorque;
-    float    goalSpeed;
-    float    kp;
-    float    kd;
+
     uint8_t  initState;
     uint8_t  initTry;
     bool     detected;
-    bool     goalReady;
-    uint32_t lastMsgTime;
 
+    uint8_t  controlType;
+    bool     goalReady;
+    float    goalPosition;
+    float    goalSpeed;
+    float    goalTorque;
+    float    cmdPosition;
+    float    cmdSpeed;
+    float    cmdTorque;
+    float    kp;
+    float    kd;
+
+    uint32_t lastMsgTime;
     float originShift;
 } MotorControl;
 
@@ -149,17 +153,22 @@ void ManagerMotor_Reset()
     // Init motor control info
     for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
     {
-        motors[i].controlType  = MMOT_CONTROL_POS_OLD;
-        motors[i].nextPosition = 0.0;
-        motors[i].goalPosition = 0.0;
-        motors[i].goalTorque   = 0.0;
-        motors[i].goalSpeed    = 0.0;
+        motors[i].initState    = MMOT_INIT_IDLE;
+        motors[i].initTry      = 0;
         motors[i].detected     = false;
+
+        motors[i].controlType  = MMOT_CONTROL_POS_OLD;
+        motors[i].goalPosition = 0.0;
+        motors[i].goalSpeed    = 0.0;
+        motors[i].goalTorque   = 0.0;
+        motors[i].cmdPosition = 0.0;
+        motors[i].cmdSpeed    = 0.0;
+        motors[i].cmdTorque   = 0.0;
+
         motors[i].goalReady    = false;
         motors[i].lastMsgTime  = 0;
         motors[i].originShift  = 0.0f;
-        motors[i].initState    = MMOT_INIT_IDLE;
-        motors[i].initTry      = 0;
+
     }
 
     // Set Kp Kd
@@ -203,7 +212,7 @@ void ManagerMotor_Task()
     ManagerMotor_ReceiveFromMotors();
     ManagerMotor_VerifyMotorsState();
 
-    if (HAL_GetTick() - timerMs >= TIMER)
+    if (HAL_GetTick() - timerMs >= dt)
     {
         switch (managerMotor.state)
         {
@@ -439,20 +448,14 @@ void ManagerMotor_NextCmdPosOld(uint8_t id)
 void ManagerMotor_NextCmdPosSpeed(uint8_t id)
 {
 
+
+
+
 }
 
 void ManagerMotor_NextCmdSpeed(uint8_t id)
 {
-    if (fabsf(motors[id].motor.position - motors[id].goalPosition) > POSITION_TOL
-    		&& motors[id].goalReady)
-    {
-        ManagerMotor_MotorIncrement(id, ManagerMotor_GetMotorDirection(id));
-    }
-    else
-    {
-        motors[id].goalReady = false;  // Motor reached his goal
-        motors[id].goalPosition = motors[id].motor.position;
-    }
+
 }
 
 
@@ -549,15 +552,15 @@ void ManagerMotor_MotorIncrement(uint8_t id, int8_t direction)
 {
     if (id == MMOT_MOTOR_3)
     {
-        motors[id].nextPosition += direction * MOTOR3_STEP;
+        motors[id].cmdPosition += direction * MOTOR3_STEP;
     }
     else if (id == MMOT_MOTOR_2)
     {
-        motors[id].nextPosition += direction * MOTOR_STEP;
+        motors[id].cmdPosition += direction * MOTOR_STEP;
     }
     else if (id == MMOT_MOTOR_1)
     {
-        motors[id].nextPosition -= direction * MOTOR_STEP;
+        motors[id].cmdPosition -= direction * MOTOR_STEP;
     }
 }
 
