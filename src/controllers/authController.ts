@@ -161,33 +161,54 @@ export const getSession = async (req: Request, res: Response) => {
         return res.status(401).json({ error: "No refresh token available" });
       }
 
-      const { data: sessionResponse, error: refreshError } =
-        await supaClient.auth.refreshSession();
+      // Use fetch to refresh the session
+      const response = await fetch(`${process.env.SUPABASE_API_URL}/auth/v1/token?grant_type=refresh_token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': process.env.SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({
+          refresh_token: refreshToken,
+        }),
+      });
 
-      if (refreshError) {
-        return res
-          .status(401)
-          .json({
-            error: "Unable to refresh session",
-            details: refreshError.message,
-          });
+      const tokenData = await response.json();
+
+      if (tokenData.access_token) {
+        // Set the new tokens in cookies
+        res.cookie("access_token", tokenData.access_token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+          maxAge: 1000 * 60 * 60, // 1 hour
+        });
+
+        res.cookie("refresh_token", tokenData.refresh_token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+          maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+        });
+
+        // Fetch the user's profile using the new access token
+        const { data: userData, error: userError } = await supaClient.auth.getUser(tokenData.access_token);
+
+        if (userError) {
+          return res.status(401).json({ error: "Unable to fetch user data", details: userError.message });
+        }
+
+        // Construct a new session object
+        const newSession = {
+          access_token: tokenData.access_token,
+          refresh_token: tokenData.refresh_token,
+          user: userData.user,
+        };
+
+        return res.status(200).json({ session: newSession });
+      } else {
+        return res.status(401).json({ error: "Unable to refresh session", details: tokenData.error_description });
       }
-
-      res.cookie("access_token", sessionResponse.session.access_token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 1000 * 60 * 60, // 1 hour
-      });
-
-      res.cookie("refresh_token", sessionResponse.session.refresh_token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
-      });
-
-      return res.status(200).json({ session: sessionResponse.session });
     }
 
     return res.status(200).json({ session: data.session });
