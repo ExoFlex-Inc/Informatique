@@ -466,7 +466,7 @@ void ManagerMotor_NextCmdPosOld(uint8_t id)
     else
     {
         motors[id].goalReady = false;  // Motor reached his goal
-        motors[id].goalPosition = motors[id].motor.position;
+        //motors[id].goalPosition = motors[id].motor.position;
     }
 }
 
@@ -683,7 +683,7 @@ void   ManagerMotor_MovePosOld(uint8_t id, float pos)
 	motors[id].goalPosition = pos;
 	motors[id].goalSpeed = 0;
 	motors[id].goalTorque = 0;
-	motors[id].cmdPosition = 0;
+	motors[id].cmdPosition = motors[id].motor.position;
 	motors[id].cmdSpeed = 0;
 	motors[id].cmdTorque = 0;
 	motors[id].goalReady    = true;
@@ -700,10 +700,10 @@ void   ManagerMotor_MovePosSpeed(uint8_t id, float pos, float speed)
 	motors[id].goalPosition = pos;
 	motors[id].goalSpeed = fabsf(speed);
 	motors[id].goalTorque = 0;
-	motors[id].cmdPosition = 0;
+	motors[id].cmdPosition = motors[id].motor.position;
 	motors[id].cmdSpeed = 0;
 	motors[id].cmdTorque = 0;
-	motors[id].goalReady    = true;
+	motors[id].goalReady = true;
 }
 
 void   ManagerMotor_MoveSpeed(uint8_t id, float speed)

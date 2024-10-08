@@ -13,7 +13,7 @@
 #define MAX_MOVEMENT  3
 #define EXTREME_POS   4
 
-#define MANUAL_MAX_TRANSMIT_TIME 20  // ms
+#define MANUAL_MAX_TRANSMIT_TIME 200  // ms
 
 typedef struct
 {
