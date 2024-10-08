@@ -24,7 +24,8 @@
 #define ERROR_CAN_MAX_MSG_DELAY     -3
 #define ERROR_MOTOR_MINMAX          -4
 
-#define MMOT_DT   10
+#define MMOT_DT_MS   10
+#define MMOT_DT_S MMOT_DT_MS / 1000
 #define MAX_TRY 50  // 500 ms before flagging an error
 
 #define MOTOR_STEP   0.005
