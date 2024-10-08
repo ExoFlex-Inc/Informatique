@@ -15,6 +15,7 @@ import relationsRoutes from "./routes/relationsRoutes.ts";
 import exerciseDataRoute from "./routes/exerciseDataRoutes.ts";
 import notificationRoute from "./routes/notificationRoutes.ts";
 import { getSerialPort } from "./managers/serialPort.ts";
+import { supabaseMiddleware } from "./middlewares/supabaseMiddleware.ts";
 import "./config/passportConfig.ts";
 
 dotenv.config();
@@ -37,6 +38,7 @@ app.use(
 );
 
 app.use(cookieParser());
+app.use(supabaseMiddleware);
 
 app.use(
   session({
@@ -56,7 +58,7 @@ app.use("/relations", relationsRoutes);
 app.use("/exercise-data", exerciseDataRoute);
 app.use("/notification", notificationRoute);
 app.use("/api", serialPortRoutes);
-app.use("/api", planRoutes);
+app.use("/plan", planRoutes);
 app.use("/api", hmiRoutes);
 
 io.on("connection", (socket) => {

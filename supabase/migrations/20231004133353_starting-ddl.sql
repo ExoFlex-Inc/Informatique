@@ -47,7 +47,7 @@ CREATE TABLE relations (
 CREATE TABLE plans (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
   user_id uuid references auth.users(id) not null,
-  plan_content JSONB,
+  plan JSONB,
   created_at DATE DEFAULT CURRENT_DATE
 );
 
@@ -128,38 +128,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION post_planning(user_id UUID, new_plan JSONB)
-RETURNS JSONB AS $$
-DECLARE
-  updated_plan JSONB;
-BEGIN
-  IF EXISTS (SELECT 1 FROM plans WHERE plans.user_id = post_planning.user_id) THEN
-    UPDATE plans
-    SET plan_content = new_plan
-    WHERE plans.user_id = post_planning.user_id
-    RETURNING new_plan INTO updated_plan;
-  ELSE
-    INSERT INTO plans(user_id, plan_content)
-    VALUES (post_planning.user_id, new_plan)
-    RETURNING new_plan INTO updated_plan;
-  END IF;
-
-  RETURN updated_plan;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE FUNCTION get_planning(search_id UUID)
-RETURNS TABLE (plan_content jsonb) AS $$
-BEGIN
-    RAISE LOG 'Searching for plan content with user_id:%', search_id;
-    
-    RETURN QUERY
-    SELECT p.plan_content
-    FROM plans p
-    WHERE p.user_id = search_id;
-END;
-$$ LANGUAGE plpgsql;
-
 /*
 ..######..########..#######..########.....###.....#######..########
 .##....##....##....##.....##.##.....##...##.##...##.....##.##......
@@ -182,6 +150,8 @@ INSERT INTO storage.buckets(id, name, public, file_size_limit) VALUES ('avatars'
 .##.........#######..########.####..######..####.########..######.
 */
 
+
+-- TODO: Review all policies and add the necessary checks
 alter table user_profiles enable row level security;
 alter table encoder enable row level security;
 alter table plans enable row level security;
@@ -279,21 +249,7 @@ USING (true);
 CREATE POLICY "users can insert plans" ON "public"."plans"
 AS PERMISSIVE FOR INSERT
 TO public
-WITH CHECK (auth.uid() IS NOT NULL);
-
-CREATE POLICY "owners can update plans" ON "public"."plans"
-AS PERMISSIVE FOR UPDATE
-TO public
-USING (EXISTS (
-  SELECT 1
-  FROM user_profiles
-  WHERE user_profiles.user_id = user_id
-))
-WITH CHECK (EXISTS (
-  SELECT 1
-  FROM user_profiles
-  WHERE user_profiles.user_id = user_id
-));
+WITH CHECK (true);
 
 CREATE POLICY "admins_and_managers_can_assign_admin" ON public.user_profiles
 AS PERMISSIVE FOR UPDATE

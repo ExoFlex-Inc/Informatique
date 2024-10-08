@@ -23,6 +23,7 @@ BEGIN
         new_id := gen_random_uuid();
         base_date := NOW() - INTERVAL '1 month'; 
 
+        -- Insert into auth.users, aligning with the structure of signUp
         INSERT INTO auth.users (
             instance_id, 
             id, 
@@ -53,7 +54,7 @@ BEGIN
             '2023-04-22 13:10:03.275387+00', 
             '2023-04-22 13:10:31.458239+00', 
             '{"provider":"email","providers":["email"]}', 
-            '{}', 
+            json_build_object('first_name', 'User', 'last_name', 'Lastname', 'speciality', 'Client', 'permissions', 'client'), -- raw_user_meta_data to store profile info
             NOW(), 
             NOW(),
             '', 
@@ -62,6 +63,7 @@ BEGIN
             ''
         );
 
+        -- Insert into user_profiles
         INSERT INTO user_profiles (
             user_id, 
             first_name, 
@@ -81,6 +83,7 @@ BEGIN
             crypt('exoflex', gen_salt('bf'))
         );
 
+        -- Loop for exercises
         FOR j IN 1..50 LOOP
             exercise_id := gen_random_uuid();
 
@@ -129,6 +132,7 @@ BEGIN
 
     END LOOP;
 
+    -- Admin user loop
     FOR i IN 1..10 LOOP
         new_email := 'admin' || i || '@exoflex.com';
         new_id := gen_random_uuid();
@@ -164,7 +168,7 @@ BEGIN
             '2023-04-22 13:10:03.275387+00', 
             '2023-04-22 13:10:31.458239+00', 
             '{"provider":"email","providers":["email"]}', 
-            '{}', 
+            json_build_object('first_name', 'Admin', 'last_name', 'Lastname', 'speciality', 'Physiotherapist', 'permissions', 'admin'), -- raw_user_meta_data to store profile info
             NOW(), 
             NOW(),
             '', 
@@ -194,6 +198,7 @@ BEGIN
 
     END LOOP;
 
+    -- Dev user
     new_email := 'dev@exoflex.com';
     new_id := '5e7f65da-6877-4bec-87b8-8abe8e90587c';
     base_date := NOW() - INTERVAL '1 month'; 
@@ -228,7 +233,7 @@ BEGIN
         '2023-04-22 13:10:03.275387+00', 
         '2023-04-22 13:10:31.458239+00', 
         '{"provider":"email","providers":["email"]}', 
-        '{}', 
+        json_build_object('first_name', 'Dev', 'last_name', 'Lastname', 'speciality', 'Developer', 'permissions', 'dev'), -- raw_user_meta_data to store profile info
         NOW(), 
         NOW(),
         '', 
@@ -267,6 +272,7 @@ BEGIN
         new_id
     );
 
+    -- Exercises for dev user
     FOR j IN 1..50 LOOP
         exercise_id := gen_random_uuid();
 
