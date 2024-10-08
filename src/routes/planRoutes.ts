@@ -3,7 +3,7 @@ import { postPlan, getPlan } from "../controllers/planController.ts";
 
 const router = express.Router();
 
-router.post("/plan", postPlan);
-router.get("/plan", getPlan);
+router.post("/", postPlan);
+router.get("/:userId", getPlan);
 
 export default router;

@@ -1547,6 +1547,14 @@ svg {
 ..######...#######...######.....##.....#######..##.....##.....######...######...######.
 */
 
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+}
+
 .custom-height {
   height: calc(100vh - 100px);
 }
@@ -1604,45 +1612,24 @@ svg {
   left: -0.125rem;
   border-radius: 0.5rem;
   background-image: linear-gradient(to right, var(--tw-gradient-stops));
-  --tw-gradient-from: #bbf7d0;
-  --tw-gradient-to: rgb(187 247 208 / 0);
+  --tw-gradient-from: rgba(43, 182, 115, 0.3);
+  --tw-gradient-to: rgba(255, 255, 255, 0);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
-  --tw-gradient-to: #16a34a;
-  opacity: 0.25;
-  --tw-blur: blur(16px);
+  --tw-gradient-to: rgba(29, 78, 216, 0.3);
+  opacity: 0.5;
+  --tw-blur: blur(8px);
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast)
     var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate)
     var(--tw-sepia) var(--tw-drop-shadow);
-  transition-property:
-    color,
-    background-color,
-    border-color,
-    text-decoration-color,
-    fill,
-    stroke,
-    opacity,
-    box-shadow,
-    transform,
-    filter,
-    -webkit-backdrop-filter;
-  transition-property: color, background-color, border-color,
-    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
-    backdrop-filter;
-  transition-property:
-    color,
-    background-color,
-    border-color,
-    text-decoration-color,
-    fill,
-    stroke,
-    opacity,
-    box-shadow,
-    transform,
-    filter,
-    backdrop-filter,
-    -webkit-backdrop-filter;
+  transition-property: opacity, filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 1000ms;
+  transition-duration: 300ms;
+  pointer-events: none;
+}
+
+.dialog-accent-border:hover {
+  opacity: 0.7;
+  --tw-blur: blur(12px);
 }
 
 .dialog-content-container {
@@ -1650,8 +1637,11 @@ svg {
   display: grid;
   place-content: center;
   border-radius: 0.5rem;
-  --tw-bg-opacity: 1;
-  background-color: rgb(0 0 0 / var(--tw-bg-opacity));
+  background-color: rgba(255, 255, 255, 0.2); /* Reduced opacity */
+  backdrop-filter: blur(10px); /* Add blur effect */
+  -webkit-backdrop-filter: blur(10px); /* For Safari support */
+  border: 1px solid rgba(255, 255, 255, 0.3); /* Subtle border */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
   padding: 1.5rem;
 }
 
@@ -1663,9 +1653,9 @@ svg {
   margin: 0 auto;
 }
 
-/* Login component styles  */
+/* signup component styles  */
 
-.login-button {
+.signup-button {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
   padding-left: 1rem;
@@ -1686,7 +1676,7 @@ svg {
   transition-duration: 300ms;
 }
 
-.login-button:hover {
+.signup-button:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(51, 102, 255);
   --tw-text-opacity: 1;
@@ -1698,18 +1688,18 @@ svg {
 }
 
 @media (min-width: 768px) {
-  .login-button {
+  .signup-button {
     display: inline-block;
   }
 }
 
-.login-form-container {
+.signup-form-container {
   display: grid !important;
   grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
   place-content: center !important;
 }
 
-.login-form-label {
+.signup-form-label {
   font-family: cubano, sans-serif !important;
   font-size: 1.25rem !important;
   line-height: 1.75rem !important;
@@ -1717,7 +1707,7 @@ svg {
   color: rgb(255 255 255 / var(--tw-text-opacity)) !important;
 }
 
-.login-form-button {
+.signup-form-button {
   font-family: cubano, sans-serif !important;
   font-size: 1.25rem !important;
   line-height: 1.75rem !important;
@@ -1726,7 +1716,7 @@ svg {
   background-color: #fff !important;
 }
 
-.login-form-input {
+.signup-form-input {
   margin: 1rem !important;
   border-radius: 0.25rem !important;
   border-width: 2px !important;
@@ -1896,69 +1886,6 @@ svg {
 
 .sidebar-no-border {
   border: none !important; /* Use !important to ensure this rule takes precedence */
-}
-
-/* Welcome component styles */
-
-.welcome-header {
-  margin: 1rem;
-  text-align: center;
-  font-size: 1.875rem;
-  line-height: 2.25rem;
-  --tw-text-opacity: 1;
-  color: rgb(74 222 128 / var(--tw-text-opacity));
-  --tw-drop-shadow: drop-shadow(0 0 9px rgba(34, 197, 94, 0.9));
-  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast)
-    var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate)
-    var(--tw-sepia) var(--tw-drop-shadow);
-}
-
-.welcome-name-form {
-  display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-  place-items: center;
-}
-
-.welcome-name-input {
-  margin: 1rem;
-  border-radius: 0.25rem;
-  border-width: 2px;
-  --tw-border-opacity: 1;
-  border-color: rgb(74 222 128 / var(--tw-border-opacity));
-  padding: 0.5rem;
-  text-align: center;
-  font-family: cubano, sans-serif;
-  font-size: 1.875rem;
-  line-height: 2.25rem;
-  --tw-text-opacity: 1;
-  color: rgb(74 222 128 / var(--tw-text-opacity));
-  --tw-drop-shadow: drop-shadow(0 0 9px rgba(34, 197, 94, 0.9));
-  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast)
-    var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate)
-    var(--tw-sepia) var(--tw-drop-shadow);
-}
-
-.welcome-form-error-message {
-  text-align: center;
-  --tw-text-opacity: 1;
-  color: rgb(248 113 113 / var(--tw-text-opacity));
-}
-
-.welcome-form-submit-button {
-  margin: 0.5rem;
-  margin-bottom: 2rem;
-  border-radius: 0.25rem;
-  --tw-bg-opacity: 1;
-  background-color: rgb(74 222 128 / var(--tw-bg-opacity)) !important;
-  padding: 0.5rem;
-  text-align: center;
-  font-family: cubano, sans-serif;
-  font-size: 1.5rem;
-  line-height: 2rem;
-}
-
-.welcome-form-submit-button:disabled {
-  background-color: rgb(156 163 175 / var(--tw-text-opacity)) !important;
 }
 
 .hover\:scale-105:hover {

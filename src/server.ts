@@ -14,7 +14,9 @@ import hmiRoutes from "./routes/hmiRoutes.ts";
 import userRoutes from "./routes/userRoutes.ts";
 import relationsRoutes from "./routes/relationsRoutes.ts";
 import exerciseDataRoute from "./routes/exerciseDataRoutes.ts";
+import notificationRoute from "./routes/notificationRoutes.ts";
 import { getSerialPort } from "./managers/serialPort.ts";
+import { supabaseMiddleware } from "./middlewares/supabaseMiddleware.ts";
 import "./config/passportConfig.ts";
 
 dotenv.config();
@@ -37,6 +39,7 @@ app.use(
 );
 
 app.use(cookieParser());
+app.use(supabaseMiddleware);
 
 app.use(
   session({
@@ -54,10 +57,10 @@ app.use("/auth", authRoutes);
 app.use("/user", userRoutes);
 app.use("/relations", relationsRoutes);
 app.use("/exercise-data", exerciseDataRoute);
+app.use("/notification", notificationRoute);
 app.use("/api", serialPortRoutes);
-app.use("/api", planRoutes);
+app.use("/plan", planRoutes);
 app.use("/api", hmiRoutes);
-app.use("/api", wellnessNetworkRoutes);
 
 io.on("connection", (socket) => {
   console.log("A client connected");

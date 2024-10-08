@@ -1,3 +1,4 @@
+#include <Manager_Error.h>
 #include <Manager_Motor.h>
 #include <Periph_Canbus.h>
 
@@ -30,7 +31,7 @@
 #define MOTOR3_STEP  0.002
 #define POSITION_TOL 0.01
 
-#define MMOT_MAX_MSG_DELAY 80
+#define MMOT_MAX_MSG_DELAY 30
 
 #define MMOT_INIT_IDLE          0
 #define MMOT_INIT_START         1
@@ -80,6 +81,9 @@ int8_t motorsMaxPos[MMOT_MOTOR_NBR];
 
 managerMotor_t managerMotor;
 
+float torqueMaxKp;
+float torqueMinKp;
+
 // Prototypes
 void ManagerMotor_Reset();
 void ManagerMotor_ReceiveFromMotors();
@@ -97,6 +101,9 @@ bool ManagerMotor_VerifyMotorState(uint8_t motorIndex);
 void   ManagerMotor_ApplyOriginShift(uint8_t motorIndex);
 int8_t ManagerMotor_GetMotorDirection(uint8_t motorIndex);
 void   ManagerMotor_MotorIncrement(uint8_t motorIndex, int8_t direction);
+void   ManagerMotor_CalculNextKp(uint8_t motorIndex);
+
+void ManagerMotor_SetMotorError(uint8_t motorIndex);
 
 /********************************************
  * Manager init and reset
@@ -175,6 +182,9 @@ void ManagerMotor_Reset()
     managerMotor.securityPass   = false;
     managerMotor.setupFirstPass = true;
     managerMotor.state          = MMOT_STATE_WAITING_SECURITY;
+
+    torqueMaxKp = 10.0;
+    torqueMinKp = 3.0;
 }
 
 void ManagerMotor_Task()
@@ -205,6 +215,7 @@ void ManagerMotor_Task()
 
         case MMOT_STATE_ERROR:
             ManagerMotor_DisableMotors();
+            ManagerError_SetError(ERROR_2_MMOT);
             break;
         }
         timerMs = HAL_GetTick();
@@ -300,6 +311,8 @@ void ManagerMotor_StartMotor(uint8_t motorIndex)
             motors[motorIndex].initState = MMOT_INIT_ERROR;
             managerMotor.state           = MMOT_STATE_ERROR;
             managerMotor.errorCode       = ERROR_CAN_CONNECTION_MOTORS;
+            ManagerError_SetError(ERROR_14_MMOT_CAN_CONNECT);
+            ManagerMotor_SetMotorError(motorIndex);
         }
 
         break;
@@ -325,6 +338,8 @@ void ManagerMotor_StartMotor(uint8_t motorIndex)
             motors[motorIndex].initState = MMOT_INIT_ERROR;
             managerMotor.state           = MMOT_STATE_ERROR;
             managerMotor.errorCode       = ERROR_CAN_CONNECTION_MOTORS;
+            ManagerError_SetError(ERROR_14_MMOT_CAN_CONNECT);
+            ManagerMotor_SetMotorError(motorIndex);
         }
         break;
 
@@ -351,8 +366,26 @@ void ManagerMotor_StartMotor(uint8_t motorIndex)
             motors[motorIndex].initState = MMOT_INIT_ERROR;
             managerMotor.state           = MMOT_STATE_ERROR;
             managerMotor.errorCode       = ERROR_SET_ORIGINES_MOTORS;
+            ManagerError_SetError(ERROR_16_MMOT_SET_ORIGIN);
+            ManagerMotor_SetMotorError(motorIndex);
         }
         break;
+    }
+}
+
+void ManagerMotor_SetMotorError(uint8_t motorIndex)
+{
+    if (motorIndex == MMOT_MOTOR_1)
+    {
+        ManagerError_SetError(ERROR_17_MOTOR_1);
+    }
+    else if (motorIndex == MMOT_MOTOR_2)
+    {
+        ManagerError_SetError(ERROR_18_MOTOR_2);
+    }
+    else if (motorIndex == MMOT_MOTOR_3)
+    {
+        ManagerError_SetError(ERROR_19_MOTOR_3);
     }
 }
 
@@ -419,6 +452,7 @@ void ManagerMotor_SendToMotors()
 #ifndef MMOT_DEV_MOTOR_1_DISABLE
     if (motors[MMOT_MOTOR_1].controlType == MMOT_CONTROL_POSITION)
     {
+        ManagerMotor_CalculNextKp(MMOT_MOTOR_1);
         PeriphMotors_Move(&motors[MMOT_MOTOR_1].motor,
                           motors[MMOT_MOTOR_1].nextPosition, 0, 0,
                           motors[MMOT_MOTOR_1].kp, motors[MMOT_MOTOR_1].kd);
@@ -439,6 +473,7 @@ void ManagerMotor_SendToMotors()
 #ifndef MMOT_DEV_MOTOR_2_DISABLE
     if (motors[MMOT_MOTOR_2].controlType == MMOT_CONTROL_POSITION)
     {
+        ManagerMotor_CalculNextKp(MMOT_MOTOR_2);
         PeriphMotors_Move(&motors[MMOT_MOTOR_2].motor,
                           motors[MMOT_MOTOR_2].nextPosition, 0, 0,
                           motors[MMOT_MOTOR_2].kp, motors[MMOT_MOTOR_2].kd);
@@ -459,6 +494,7 @@ void ManagerMotor_SendToMotors()
 #ifndef MMOT_DEV_MOTOR_3_DISABLE
     if (motors[MMOT_MOTOR_3].controlType == MMOT_CONTROL_POSITION)
     {
+        ManagerMotor_CalculNextKp(MMOT_MOTOR_3);
         PeriphMotors_Move(&motors[MMOT_MOTOR_3].motor,
                           motors[MMOT_MOTOR_3].nextPosition, 0, 0,
                           motors[MMOT_MOTOR_3].kp, motors[MMOT_MOTOR_3].kd);
@@ -531,9 +567,13 @@ void ManagerMotor_MotorIncrement(uint8_t motorIndex, int8_t direction)
     {
         motors[motorIndex].nextPosition += direction * MOTOR3_STEP;
     }
-    else
+    else if (motorIndex == MMOT_MOTOR_2)
     {
         motors[motorIndex].nextPosition += direction * MOTOR_STEP;
+    }
+    else if (motorIndex == MMOT_MOTOR_1)
+    {
+        motors[motorIndex].nextPosition -= direction * MOTOR_STEP;
     }
 }
 
@@ -566,6 +606,7 @@ void ManagerMotor_VerifyMotorsConnection()
 #ifndef MMOT_DEV_MOTOR_1_DISABLE
     if (HAL_GetTick() - motors[MMOT_MOTOR_1].lastMsgTime > MMOT_MAX_MSG_DELAY)
     {
+        ManagerMotor_SetMotorError(MMOT_MOTOR_1);
         verifM1 = false;
     }
 #endif
@@ -573,6 +614,7 @@ void ManagerMotor_VerifyMotorsConnection()
 #ifndef MMOT_DEV_MOTOR_2_DISABLE
     if (HAL_GetTick() - motors[MMOT_MOTOR_2].lastMsgTime > MMOT_MAX_MSG_DELAY)
     {
+        ManagerMotor_SetMotorError(MMOT_MOTOR_2);
         verifM2 = false;
     }
 #endif
@@ -580,6 +622,7 @@ void ManagerMotor_VerifyMotorsConnection()
 #ifndef MMOT_DEV_MOTOR_3_DISABLE
     if (HAL_GetTick() - motors[MMOT_MOTOR_3].lastMsgTime > MMOT_MAX_MSG_DELAY)
     {
+        ManagerMotor_SetMotorError(MMOT_MOTOR_3);
         verifM3 = false;
     }
 #endif
@@ -588,6 +631,7 @@ void ManagerMotor_VerifyMotorsConnection()
     {
         managerMotor.state     = MMOT_STATE_ERROR;
         managerMotor.errorCode = ERROR_CAN_MAX_MSG_DELAY;
+        ManagerError_SetError(ERROR_15_MMOT_CAN_MAX_DELAY);
     }
 }
 
@@ -625,18 +669,24 @@ bool ManagerMotor_VerifyMotorState(uint8_t motorIndex)
         if (motors[motorIndex].motor.velocity > MMOT_MOVING_MAX_SPEED ||
             motors[motorIndex].motor.velocity < -MMOT_MOVING_MAX_SPEED)
         {
+            ManagerError_SetError(ERROR_22_MMOT_MINMAX_SPEED);
+            ManagerMotor_SetMotorError(motorIndex);
             verif = false;
         }
 
         if (motors[motorIndex].motor.torque > MMOT_MOVING_MAX_TORQUE ||
             motors[motorIndex].motor.torque < -MMOT_MOVING_MAX_TORQUE)
         {
+            ManagerError_SetError(ERROR_21_MMOT_MINMAX_TORQUE);
+            ManagerMotor_SetMotorError(motorIndex);
             verif = false;
         }
 
         if (motors[motorIndex].motor.position > motorsMaxPos[motorIndex] ||
             motors[motorIndex].motor.position < motorsMinPos[motorIndex])
         {
+            ManagerError_SetError(ERROR_20_MMOT_MINMAX_POS);
+            ManagerMotor_SetMotorError(motorIndex);
             verif = false;
         }
     }
@@ -646,12 +696,16 @@ bool ManagerMotor_VerifyMotorState(uint8_t motorIndex)
         if (motors[motorIndex].motor.velocity > MMOT_IDLE_MAX_SPEED ||
             motors[motorIndex].motor.velocity < -MMOT_IDLE_MAX_SPEED)
         {
+            ManagerError_SetError(ERROR_22_MMOT_MINMAX_SPEED);
+            ManagerMotor_SetMotorError(motorIndex);
             verif = false;
         }
 
         if (motors[motorIndex].motor.torque > MMOT_IDLE_MAX_TORQUE ||
             motors[motorIndex].motor.torque < -MMOT_IDLE_MAX_TORQUE)
         {
+            ManagerError_SetError(ERROR_21_MMOT_MINMAX_TORQUE);
+            ManagerMotor_SetMotorError(motorIndex);
             verif = false;
         }
     }
@@ -725,4 +779,22 @@ void ManagerMotor_ApplyOriginShift(uint8_t motorIndex)
 void ManagerMotor_SetOriginShift(uint8_t motorIndex, float shiftValue)
 {
     motors[motorIndex].originShift = shiftValue;
+}
+
+void ManagerMotor_CalculNextKp(uint8_t motorIndex)
+{
+    if (motors[motorIndex].motor.torque >= torqueMaxKp)
+    {
+        motors[motorIndex].kp = 500.0;
+    }
+    else if (motors[motorIndex].motor.torque <= torqueMinKp)
+    {
+        motors[motorIndex].kp = 200.0;
+    }
+    else
+    {
+        motors[motorIndex].kp =
+            200.0 + (motors[motorIndex].motor.torque - torqueMinKp) *
+                        (500.0 - 200.0) / (torqueMaxKp - torqueMinKp);
+    }
 }

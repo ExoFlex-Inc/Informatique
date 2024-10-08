@@ -33,23 +33,22 @@ CREATE TABLE user_profiles (
   speciality TEXT CHECK (char_length(speciality) > 0 AND char_length(speciality) <= 50 AND speciality !~ '\d'),
   phone_number TEXT CHECK (char_length(phone_number) > 0 AND char_length(phone_number) <= 50 AND phone_number ~ '\d'),
   email TEXT CHECK (char_length(email) > 0 AND char_length(email) <= 50),
+  fcm_token TEXT,
   avatar_url TEXT,
   password TEXT CHECK (char_length(password) > 0)
 );
 
 CREATE TABLE relations (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4() not null,
-  admin_id UUID,
-  client_id UUID,
-  relation_status client_admin_status NOT NULL,
-  FOREIGN KEY (admin_id) REFERENCES user_profiles(user_id),
-  FOREIGN KEY (client_id) REFERENCES user_profiles(user_id)
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+  client_id UUID REFERENCES auth.users(id) NOT NULL,
+  admin_id UUID REFERENCES auth.users(id) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE plans (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
   user_id uuid references auth.users(id) not null,
-  plan_content JSONB,
+  plan JSONB,
   created_at DATE DEFAULT CURRENT_DATE
 );
 
@@ -75,6 +74,28 @@ CREATE TABLE exercise_data (
   rated_pain rated_pain_enum
 
 );
+
+CREATE TABLE notifications (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+  sender_id UUID REFERENCES auth.users(id) NOT NULL,
+  receiver_id UUID REFERENCES auth.users(id) NOT NULL,
+  type TEXT NOT NULL,
+  user_name TEXT NOT NULL,
+  image TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  body TEXT NOT NULL
+);
+
+create trigger "notifications" after insert
+on "public"."notifications" for each row
+execute function "supabase_functions"."http_request"(
+  'http://host.docker.internal:54326/functions/v1/push',
+  'POST',
+  '{"Content-Type":"application/json"}',
+  '{}',
+  '1000'
+);
+
 
 /*
 .########.##.....##.##....##..######..########.####..#######..##....##..######.
@@ -108,63 +129,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION post_planning(user_id UUID, new_plan JSONB)
-RETURNS JSONB AS $$
-DECLARE
-  updated_plan JSONB;
-BEGIN
-  IF EXISTS (SELECT 1 FROM plans WHERE plans.user_id = post_planning.user_id) THEN
-    UPDATE plans
-    SET plan_content = new_plan
-    WHERE plans.user_id = post_planning.user_id
-    RETURNING new_plan INTO updated_plan;
-  ELSE
-    INSERT INTO plans(user_id, plan_content)
-    VALUES (post_planning.user_id, new_plan)
-    RETURNING new_plan INTO updated_plan;
-  END IF;
-
-  RETURN updated_plan;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE FUNCTION get_planning(search_id UUID)
-RETURNS TABLE (plan_content jsonb) AS $$
-BEGIN
-    RAISE LOG 'Searching for plan content with user_id:%', search_id;
-    
-    RETURN QUERY
-    SELECT p.plan_content
-    FROM plans p
-    WHERE p.user_id = search_id;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION get_clients_for_admin(admin_id UUID)
-RETURNS TABLE (
-    user_id UUID,
-    first_name TEXT,
-    last_name TEXT,
-    phone_number TEXT,
-    email TEXT
-) AS $$
-BEGIN
-    RETURN QUERY
-    SELECT 
-        c.user_id, 
-        c.first_name, 
-        c.last_name, 
-        c.phone_number, 
-        c.email
-    FROM 
-        user_profiles c
-    JOIN 
-        relations a ON c.user_id = a.client_id
-    WHERE 
-        a.admin_id = get_clients_for_admin.admin_id AND a.relation_status = 'accepted';
-END;
-$$ LANGUAGE plpgsql;
-
 /*
 ..######..########..#######..########.....###.....#######..########
 .##....##....##....##.....##.##.....##...##.##...##.....##.##......
@@ -187,6 +151,8 @@ INSERT INTO storage.buckets(id, name, public, file_size_limit) VALUES ('avatars'
 .##.........#######..########.####..######..####.########..######.
 */
 
+
+-- TODO: Review all policies and add the necessary checks
 alter table user_profiles enable row level security;
 alter table encoder enable row level security;
 alter table plans enable row level security;
@@ -284,21 +250,7 @@ USING (true);
 CREATE POLICY "users can insert plans" ON "public"."plans"
 AS PERMISSIVE FOR INSERT
 TO public
-WITH CHECK (auth.uid() IS NOT NULL);
-
-CREATE POLICY "owners can update plans" ON "public"."plans"
-AS PERMISSIVE FOR UPDATE
-TO public
-USING (EXISTS (
-  SELECT 1
-  FROM user_profiles
-  WHERE user_profiles.user_id = user_id
-))
-WITH CHECK (EXISTS (
-  SELECT 1
-  FROM user_profiles
-  WHERE user_profiles.user_id = user_id
-));
+WITH CHECK (true);
 
 CREATE POLICY "admins_and_managers_can_assign_admin" ON public.user_profiles
 AS PERMISSIVE FOR UPDATE
