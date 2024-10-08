@@ -1,6 +1,7 @@
 #include <Manager_Error.h>
 #include <Manager_Motor.h>
 #include <Periph_Canbus.h>
+#include <Periph_Switch.h>
 
 #define MMOT_MOTOR_1_CAN_ID 1
 #define MMOT_MOTOR_2_CAN_ID 2
@@ -571,16 +572,11 @@ void ManagerMotor_MotorIncrement(uint8_t motorIndex, int8_t direction)
     {
         motors[motorIndex].nextPosition -= direction * MOTOR_STEP;
     }
-    else if (motorIndex == MMOT_MOTOR_2 && PeriphSwitch_LegLeft())
+    else if (motorIndex == MMOT_MOTOR_2)
     {
-        motors[motorIndex].nextPosition -= direction * MOTOR_STEP;
-    }
-    else if (motorIndex == MMOT_MOTOR_2 && PeriphSwitch_LegRight())
-    {
-    	motors[motorIndex].nextPosition += direction * MOTOR_STEP;
+        motors[motorIndex].nextPosition += direction * MOTOR_STEP; // The positive side changes for the inside of the leg
     }
 }
-
 /********************************************
  * Security commands and verificartions
  ********************************************/

@@ -7,8 +7,8 @@
 /***********************************************/
 // Define to disable motor and bypass security
 #define MMOT_DEV_MOTOR_1_DISABLE
-#define MMOT_DEV_MOTOR_2_DISABLE
-#define MMOT_DEV_MOTOR_3_DISABLE
+//#define MMOT_DEV_MOTOR_2_DISABLE
+//#define MMOT_DEV_MOTOR_3_DISABLE
 /***********************************************/
 
 #define MMOT_MOTOR_NBR 3

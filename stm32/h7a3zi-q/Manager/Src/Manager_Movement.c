@@ -13,7 +13,7 @@
 #define MAX_MOVEMENT  3
 #define EXTREME_POS   4
 
-#define MANUAL_MAX_TRANSMIT_TIME 20  // ms
+#define MANUAL_MAX_TRANSMIT_TIME 50  // ms
 
 #define MMOV_CHANGESIDE_STATE_WAITING4CMD 0
 #define MMOV_CHANGESIDE_STATE_MOVERIGHT 1
@@ -95,7 +95,7 @@ void ManagerMovement_AutoStop();
 
 // Change side
 void ManagerMovement_ChangeSide();
-void ManagerMovement_Waiting4cmd();
+void ManagerMovement_Waiting4Cmd();
 void ManagerMovement_ChangeSideRight();
 void ManagerMovement_ChangeSideLeft();
 
@@ -206,7 +206,7 @@ void ManagerMovement_WaitingSecurity()
 {
     if (managerMovement.securityPass)
     {
-        managerMovement.state = MMOV_STATE_MANUAL;
+        managerMovement.state = MMOV_STATE_CHANGESIDE;
     }
 }
 
@@ -295,7 +295,7 @@ void ManagerMovement_ChangeSide()
 	switch (managerMovement.changeSideState)
 	{
 	case MMOV_CHANGESIDE_STATE_WAITING4CMD:
-		ManagerMovement_Waiting4cmd();
+		ManagerMovement_Waiting4Cmd();
 
 		break;
 
@@ -311,7 +311,7 @@ void ManagerMovement_ChangeSide()
 	}
 }
 
-void ManagerMovement_Waiting4cmd()
+void ManagerMovement_Waiting4Cmd()
 {
 	if (PeriphSwitch_LegLeft())
 	{
@@ -329,6 +329,7 @@ void ManagerMovement_ChangeSideRight()
 
 	if(PeriphSwitch_LegRight())
 	{
+		ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
 		// LOCK le soleinoid pour bloquer le mouvement
 		// UNLOCK le soleinoid dans l'eversion
 
@@ -346,6 +347,7 @@ void ManagerMovement_ChangeSideLeft()
 
 	if(PeriphSwitch_LegLeft())
 	{
+		ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
 		// LOCK le soleinoid pour bloquer le mouvement
 		// UNLOCK le soleinoid dans l'eversion
 
@@ -394,9 +396,17 @@ bool ManagerMovement_InError()
 void ManagerMovement_ManualCmdEversion(int8_t direction)
 {
     if (managerMovement.state == MMOV_STATE_MANUAL ||
-        managerMovement.state == MMOV_STATE_HOMING)
+        managerMovement.state == MMOV_STATE_HOMING ||
+		managerMovement.state == MMOV_STATE_CHANGESIDE)
     {
-        ManagerMovement_ManualIncrement(MMOT_MOTOR_2, direction);
+    	if (PeriphSwitch_LegLeft())
+    	{
+    		ManagerMovement_ManualIncrement(MMOT_MOTOR_2, -direction);
+    	}
+    	else if (PeriphSwitch_LegRight())
+    	{
+    		ManagerMovement_ManualIncrement(MMOT_MOTOR_2, direction);
+    	}
     }
 }
 
@@ -416,24 +426,6 @@ void ManagerMovement_ManualCmdExtension(int8_t direction)
     {
         ManagerMovement_ManualIncrement(MMOT_MOTOR_3, direction);
     }
-}
-
-void ManagerMovement_ManualCmdHome(uint8_t motorIndex)
-{
-    if (managerMovement.state == MMOV_STATE_MANUAL &&
-        !ManagerMotor_IsGoalStateReady(motorIndex))
-    {
-        managerMovement.motorsNextGoal[motorIndex] = 0.0;
-        ManagerMotor_SetMotorGoal(motorIndex, MMOT_CONTROL_POSITION,
-                                  managerMovement.motorsNextGoal[motorIndex]);
-    }
-}
-
-void ManagerMovement_ManualCmdHomeAll()
-{
-    ManagerMovement_ManualCmdHome(MMOT_MOTOR_1);
-    ManagerMovement_ManualCmdHome(MMOT_MOTOR_2);
-    ManagerMovement_ManualCmdHome(MMOT_MOTOR_3);
 }
 
 void ManagerMovement_ManualIncrement(uint8_t motorIndex, int8_t factor)
@@ -462,7 +454,14 @@ void ManagerMovement_AutoMovement(uint8_t mouvType, float Position)
     else if (mouvType == MMOV_EVERSION)  // Set goalPosition for motor 2 and
                                          // for MMOV_EVERSION
     {
-        managerMovement.motorsNextGoal[MMOT_MOTOR_2] = Position;
+    	if (PeriphSwitch_LegLeft())
+    	{
+    		managerMovement.motorsNextGoal[MMOT_MOTOR_2] = -Position;
+    	}
+    	else if (PeriphSwitch_LegRight())
+    	{
+    		managerMovement.motorsNextGoal[MMOT_MOTOR_2] = Position;
+    	}
         ManagerMotor_SetMotorGoal(MMOT_MOTOR_2, MMOT_CONTROL_POSITION,
                                   managerMovement.motorsNextGoal[MMOT_MOTOR_2]);
     }

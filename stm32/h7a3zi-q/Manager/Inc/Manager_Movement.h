@@ -3,8 +3,8 @@
 
 #include "main.h"
 
-#define MMOV_OUTSIDE 1
-#define MMOV_INSIDE  -1
+#define MMOV_OUTSIDE -1
+#define MMOV_INSIDE  1
 #define MMOV_UP    1
 #define MMOV_DOWN  -1
 
@@ -71,8 +71,6 @@ void ManagerMovement_StopExercise();
 void ManagerMovement_ManualCmdEversion(int8_t direction);
 void ManagerMovement_ManualCmdDorsiflexion(int8_t direction);
 void ManagerMovement_ManualCmdExtension(int8_t direction);
-void ManagerMovement_ManualCmdHome(uint8_t motorIndex);
-void ManagerMovement_ManualCmdHomeAll();
 
 bool ManagerMovement_IsWaitingSecurity();
 void ManagerMovement_SecurityPassed();
