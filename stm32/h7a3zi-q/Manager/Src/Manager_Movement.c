@@ -174,7 +174,6 @@ void ManagerMovement_Task()
         break;
 
     case MMOV_STATE_ERROR:
-        ManagerError_SetError(ERROR_3_MMOV);
 
         break;
     }

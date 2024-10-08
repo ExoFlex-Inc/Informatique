@@ -75,7 +75,6 @@ void ManagerSecurity_Task()
 
     case MS_STATE_ERROR:
         ManagerSecurity_Error();
-        ManagerError_SetError(ERROR_0_MSEC);
         break;
     }
 }
