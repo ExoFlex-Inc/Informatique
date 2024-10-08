@@ -130,19 +130,19 @@ export default function HMI() {
   useEffect(() => {
     if (painScale) {
       const date = Date.now();
-      const formattedDate = new Date(date).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: 'numeric',
+      const formattedDate = new Date(date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "numeric",
       });
       const requestBody = {
         date: formattedDate,
         rated_pain: painScale,
         user_id: profile.user_id,
-      }
+      };
       const fetchData = async () => {
         try {
           const exerciseData = await fetch(
@@ -155,7 +155,7 @@ export default function HMI() {
               body: JSON.stringify(requestBody),
             },
           );
-  
+
           if (exerciseData.ok) {
             console.log("Serial port initialized successfully.");
           } else {
@@ -165,10 +165,10 @@ export default function HMI() {
           console.error("An error occurred:", error);
         }
       };
-  
+
       fetchData();
     }
-  },[painScale])
+  }, [painScale]);
 
   return (
     <div className="plan-grid grid-cols-2 grid-rows-2 gap-4 custom-height mr-10 ml-10">
@@ -176,7 +176,11 @@ export default function HMI() {
         <LineChart chartData={chartData} type="line" socket={socket} />
       </div>
       <div className="bg-white rounded-2xl content-evenly">
-        <ProgressionWidget setOpen={setOpen} stm32Data={stm32Data} planData={planData} />
+        <ProgressionWidget
+          setOpen={setOpen}
+          stm32Data={stm32Data}
+          planData={planData}
+        />
       </div>
       <div className="bg-white col-span-1 flex flex-col justify-around rounded-2xl mb-5">
         <div className="flex justify-between mt-5 ml-10 mr-10">
@@ -287,7 +291,7 @@ export default function HMI() {
         )}
       </div>
       <ExerciseOverviewWidget stm32Data={stm32Data} />
-      <RatingPopUp setOpen={setOpen} setPainScale={setPainScale} open={open}/>
+      <RatingPopUp setOpen={setOpen} setPainScale={setPainScale} open={open} />
     </div>
   );
 }

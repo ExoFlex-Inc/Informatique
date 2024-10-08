@@ -1,7 +1,10 @@
 // routes/exerciseDataRoute.js
 
 import express from "express";
-import { getExerciseData, postExerciseData } from "../controllers/exerciseDataController.js";
+import {
+  getExerciseData,
+  postExerciseData,
+} from "../controllers/exerciseDataController.js";
 
 const router = express.Router();
 

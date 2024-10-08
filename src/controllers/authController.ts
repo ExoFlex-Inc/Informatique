@@ -155,7 +155,6 @@ export const getSession = async (req: Request, res: Response) => {
       return res.status(200).json({ session: sessionData.session });
     }
 
-    
     return res.status(200).json({ session: data.session });
   } catch (err) {
     return res.status(500).json({ error: err.message });

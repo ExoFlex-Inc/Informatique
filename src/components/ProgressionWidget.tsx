@@ -47,15 +47,19 @@ interface Props {
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function ProgressionWidget({ stm32Data, planData, setOpen }: Props) {
+export default function ProgressionWidget({
+  stm32Data,
+  planData,
+  setOpen,
+}: Props) {
   const [stretchProgress, setStretchProgress] = useState(0);
   const [totalStretch, setTotalStretch] = useState(1);
   const [repetitionProgress, setRepetitionProgress] = useState(0);
   const [totalRepetition, setTotalRepetition] = useState(0);
 
   useEffect(() => {
-    repetitionProgress
-  }, [repetitionProgress])
+    repetitionProgress;
+  }, [repetitionProgress]);
 
   useEffect(() => {
     if (stm32Data?.Repetitions !== undefined) {
@@ -65,7 +69,7 @@ export default function ProgressionWidget({ stm32Data, planData, setOpen }: Prop
       setStretchProgress(stretchProgress + 1);
     }
     //Put the condition at true to make your test on hmi side.
-    if (stm32Data?.Repetitions/totalRepetition * 100 === 1) {
+    if ((stm32Data?.Repetitions / totalRepetition) * 100 === 1) {
       setOpen(true);
     }
   }, [stm32Data?.Repetitions]);
