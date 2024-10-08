@@ -70,14 +70,14 @@ const useStm32 = () => {
   if (socket) {
     // Listen for stm32Data event and update state
     socket.on("stm32Data", (message) => {
-      console.log("Received STM32 data:", message); // For debugging
+      // console.log("Received STM32 data:", message); // For debugging
       setStm32Data(message);
     });
 
     // Handle serial port closed event
     socket.on("serialPortClosed", () => {
       setErrorFromStm32(true);
-      setRetrySerial(true); // Attempt to reinitialize if the port closes
+      setRetrySerial(true);
     });
   }
 
