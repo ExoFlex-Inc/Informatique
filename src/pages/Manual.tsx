@@ -35,7 +35,7 @@ const errorMap = {
 };
 
 export default function Manual() {
-  const {stm32Data, socket, errorFromStm32 } = useStm32();
+  const { stm32Data, socket, errorFromStm32 } = useStm32();
   const [errorDescription, setErrorDescription] = useState("");
 
   useEffect(() => {
