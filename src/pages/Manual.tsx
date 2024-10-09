@@ -19,6 +19,19 @@ import LineChart from "../components/LineChart";
 import MotorControlWidget from "../components/MotorControlWidget";
 import useStm32 from "../hooks/use-stm32";
 
+const WhiteBorderCheckbox = styled(Checkbox)(({ theme }) => ({
+  color: "white",
+  "&.Mui-checked": {
+    color: "white",
+  },
+  "& .MuiSvgIcon-root": {
+    fontSize: 28,
+  },
+  "& .MuiCheckbox-root": {
+    border: "1px solid white",
+  },
+}));
+
 const errorMap = {
   0: "ERROR_0_MSEC",
   1: "ERROR_1_MHMI",
@@ -62,7 +75,7 @@ export default function Manual() {
   useEffect(() => {
     if (stm32Data?.ErrorCode !== undefined) {
       const errorNames = decodeErrorCode(stm32Data.ErrorCode);
-      setErrorDescription(errorNames.join(", ") || "");
+      setErrorDescription(errorNames.join("\n") || "");
     }
   }, [stm32Data]);
 
@@ -88,8 +101,10 @@ export default function Manual() {
     }
   }, [graphPause]);
 
+  const MAX_DATA_POINTS = 100;
+
   useEffect(() => {
-    if (stm32Data && socket && stm32Data.Positions && stm32Data.Torques) {
+    if (stm32Data && socket && stm32Data.Positions && stm32Data.Torques && !graphPause) {
       const timestamp = Date.now();
       setMotorData((prevData) => ({
         motor1: [
@@ -99,7 +114,7 @@ export default function Manual() {
             position: stm32Data.Positions[0],
             torque: stm32Data.Torques[0],
           },
-        ],
+        ].slice(-MAX_DATA_POINTS), 
         motor2: [
           ...prevData.motor2,
           {
@@ -107,7 +122,7 @@ export default function Manual() {
             position: stm32Data.Positions[1],
             torque: stm32Data.Torques[1],
           },
-        ],
+        ].slice(-MAX_DATA_POINTS),
         motor3: [
           ...prevData.motor3,
           {
@@ -115,18 +130,10 @@ export default function Manual() {
             position: stm32Data.Positions[2],
             torque: stm32Data.Torques[2],
           },
-        ],
+        ].slice(-MAX_DATA_POINTS),
       }));
     }
   }, [stm32Data, socket]);
-
-  const removeFirstPoint = () => {
-    setMotorData((prevData) => ({
-      motor1: prevData.motor1.slice(1),
-      motor2: prevData.motor2.slice(1),
-      motor3: prevData.motor3.slice(1),
-    }));
-  };
 
   const getChartData = () => ({
     datasets: [
@@ -172,9 +179,10 @@ export default function Manual() {
             >
               <PauseIcon />
             </IconButton>
+            <Box sx={{ width: 50 }} />
             <FormControlLabel
               control={
-                <Checkbox
+                <WhiteBorderCheckbox
                   checked={graphDataType === "position"}
                   onChange={() => setGraphDataType("position")}
                 />
@@ -183,7 +191,7 @@ export default function Manual() {
             />
             <FormControlLabel
               control={
-                <Checkbox
+                <WhiteBorderCheckbox
                   checked={graphDataType === "torque"}
                   onChange={() => setGraphDataType("torque")}
                 />
@@ -196,7 +204,6 @@ export default function Manual() {
             mode="Manual"
             type="realtime"
             socket={socket}
-            removeFirstPoint={removeFirstPoint}
             graphPause={graphPause}
           />
         </Grid>

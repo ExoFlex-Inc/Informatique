@@ -31,12 +31,10 @@ interface Dataset {
 
 const LineChart: React.FC<LineChartProps> = ({
   chartData,
-  mode,
   socket,
   type,
   title,
   setChartImage,
-  removeFirstPoint,
   graphPause, // Receive graphPause as a prop
 }) => {
   const chartRef = useRef<Chart<"line"> | null>(null);
@@ -69,7 +67,7 @@ const LineChart: React.FC<LineChartProps> = ({
               display: false,
             },
             realtime: {
-              refresh: 100,
+              // refresh: 2000,
               delay: 1000,
               duration: 5000,
               pause: graphPause,
@@ -89,9 +87,6 @@ const LineChart: React.FC<LineChartProps> = ({
                       });
                     },
                   );
-                  if (chart.data.datasets[0].data.length > 90) {
-                    removeFirstPoint();
-                  }
                 }
               },
             },
@@ -167,9 +162,6 @@ const LineChart: React.FC<LineChartProps> = ({
                         x: Date.now(),
                         y: yValue !== undefined ? yValue : 0,
                       });
-                      if (chart.data.datasets[0].data.length > 90) {
-                        removeFirstPoint();
-                      }
                     },
                   );
                 }
