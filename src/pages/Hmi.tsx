@@ -313,7 +313,11 @@ export default function HMI() {
         )}
       </div>
       <ExerciseOverviewWidget stm32Data={stm32Data} planData={planData} />
-      <RatingPopUp setOpenDialogPainScale={setOpenDialogPainScale} setPainScale={setPainScale} openDialogPainScale={openDialogPainScale} />
+      <RatingPopUp
+        setOpenDialogPainScale={setOpenDialogPainScale}
+        setPainScale={setPainScale}
+        openDialogPainScale={openDialogPainScale}
+      />
     </div>
   );
 }

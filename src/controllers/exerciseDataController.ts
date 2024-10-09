@@ -42,7 +42,5 @@ export const postExerciseData = async (req, res) => {
     });
   }
 
-  return res
-    .status(200)
-    .json({ message: "Exercise data sent successfully" });
+  return res.status(200).json({ message: "Exercise data sent successfully" });
 };
