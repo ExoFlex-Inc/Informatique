@@ -40,7 +40,7 @@ export default function HMI() {
   const { stm32Data, socket, errorFromStm32 } = useStm32();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [open, setOpen] = useState(false);
+  const [openDialogPainScale, setOpenDialogPainScale] = useState(false);
   const [painScale, setPainScale] = useState<number>(0);
 
   const isTablet = useMediaQuery("(max-width: 768px)");
@@ -199,7 +199,7 @@ export default function HMI() {
       </div>
       <div className="bg-white rounded-2xl content-evenly">
         <ProgressionWidget
-          setOpen={setOpen}
+          setOpenDialogPainScale={setOpenDialogPainScale}
           stm32Data={stm32Data}
           planData={planData}
         />
@@ -313,7 +313,7 @@ export default function HMI() {
         )}
       </div>
       <ExerciseOverviewWidget stm32Data={stm32Data} planData={planData} />
-      <RatingPopUp setOpen={setOpen} setPainScale={setPainScale} open={open} />
+      <RatingPopUp setOpenDialogPainScale={setOpenDialogPainScale} setPainScale={setPainScale} openDialogPainScale={openDialogPainScale} />
     </div>
   );
 }

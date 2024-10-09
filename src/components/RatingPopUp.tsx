@@ -13,8 +13,8 @@ import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt
 import SentimentVerySatisfiedIcon from "@mui/icons-material/SentimentVerySatisfied";
 
 interface RatingPopUpProps {
-  open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  openDialogPainScale: boolean;
+  setOpenDialogPainScale: React.Dispatch<React.SetStateAction<boolean>>;
   setPainScale: React.Dispatch<React.SetStateAction<number>>;
 }
 
@@ -25,8 +25,8 @@ const StyledRating = styled(Rating)(({ theme }) => ({
 }));
 
 const RatingPopUp: React.FC<RatingPopUpProps> = ({
-  open,
-  setOpen,
+  openDialogPainScale,
+  setOpenDialogPainScale,
   setPainScale,
 }) => {
   const customIcons: {
@@ -62,7 +62,7 @@ const RatingPopUp: React.FC<RatingPopUpProps> = ({
   };
 
   function onRatingChange(target: any) {
-    setOpen(false);
+    setOpenDialogPainScale(false);
     setPainScale(target.value);
   }
 
@@ -72,7 +72,7 @@ const RatingPopUp: React.FC<RatingPopUpProps> = ({
   }
 
   return (
-    <Dialog open={open}>
+    <Dialog open={openDialogPainScale}>
       <DialogTitle>
         Rate the pain scale from your exercise session from 1 to 5
       </DialogTitle>

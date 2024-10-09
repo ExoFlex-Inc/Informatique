@@ -37,7 +37,6 @@ export const postExerciseData = async (req, res) => {
 
   if (error) {
     return res.status(500).json({
-      success: false,
       message: "Failed to send exercise data",
       error: error.message,
     });
@@ -45,5 +44,5 @@ export const postExerciseData = async (req, res) => {
 
   return res
     .status(200)
-    .json({ success: true, message: "Exercise data sent successfully" });
+    .json({ message: "Exercise data sent successfully" });
 };
