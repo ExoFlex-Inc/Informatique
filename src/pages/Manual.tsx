@@ -104,7 +104,13 @@ export default function Manual() {
   const MAX_DATA_POINTS = 100;
 
   useEffect(() => {
-    if (stm32Data && socket && stm32Data.Positions && stm32Data.Torques && !graphPause) {
+    if (
+      stm32Data &&
+      socket &&
+      stm32Data.Positions &&
+      stm32Data.Torques &&
+      !graphPause
+    ) {
       const timestamp = Date.now();
       setMotorData((prevData) => ({
         motor1: [
@@ -114,7 +120,7 @@ export default function Manual() {
             position: stm32Data.Positions[0],
             torque: stm32Data.Torques[0],
           },
-        ].slice(-MAX_DATA_POINTS), 
+        ].slice(-MAX_DATA_POINTS),
         motor2: [
           ...prevData.motor2,
           {
