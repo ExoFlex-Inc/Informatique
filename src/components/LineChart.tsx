@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { Line } from "react-chartjs-2";
 import "chartjs-adapter-luxon";
-import PauseButton from "../components/PauseButton.tsx";
-import PlayButton from "../components/PlayButton.tsx";
 import Chart from "chart.js/auto";
 import { CategoryScale } from "chart.js";
 import StreamingPlugin from "chartjs-plugin-streaming";
@@ -20,13 +18,15 @@ interface LineChartProps {
   socket?: Socket | null;
   title?: string;
   setChartImage?: React.Dispatch<React.SetStateAction<string>>;
+  removeFirstPoint: () => void;
+  graphPause: boolean;
 }
+
 interface Dataset {
   data: {
     x: number;
     y: number | undefined;
   }[];
-  socket?: Socket | null;
 }
 
 const LineChart: React.FC<LineChartProps> = ({
@@ -36,47 +36,65 @@ const LineChart: React.FC<LineChartProps> = ({
   type,
   title,
   setChartImage,
+  removeFirstPoint,
+  graphPause, // Receive graphPause as a prop
 }) => {
-  const [graphPause, setGraphPause] = useState(false);
-  const [graphDataType, setGraphDataIsType] = useState("position");
-
   const chartRef = useRef<Chart<"line"> | null>(null);
 
-  const [chartOptions, setChartOptions] = useState<
+  const getYAxisLimits = (datasets: Dataset[]) => {
+    let min = -65;
+    let max = 65; // Default max is 65
+
+    datasets.forEach((dataset) => {
+      dataset.data.forEach((point) => {
+        if (point.y !== undefined) {
+          min = Math.min(min, point.y);
+          max = Math.max(max, point.y);
+        }
+      });
+    });
+
+    return { min, max };
+  };
+
+  const [chartOptions, setChartOptions] = React.useState<
     _DeepPartialObject<ChartJsOptions<"line">>
   >(() => {
     if (type === "realtime") {
       return {
         scales: {
           x: {
-            type: type,
+            type: "realtime",
             ticks: {
               display: false,
             },
             realtime: {
               refresh: 100,
-              delay: 20,
-              duration: 2000,
-              pause: false,
+              delay: 1000,
+              duration: 5000,
+              pause: graphPause,
               onRefresh: (chart: any) => {
-                chart.data.datasets.forEach((dataset: Dataset) => {
-                  dataset.data.push({
-                    x: Date.now(),
-                    y: 0,
+                if (!graphPause) {
+                  // Only update if not paused
+                  chart.data.datasets.forEach((dataset: Dataset, index: number) => {
+                    const yValue =
+                      chartData.datasets[index]?.data[
+                        chartData.datasets[index]?.data.length - 1
+                      ]?.y;
+
+                    dataset.data.push({
+                      x: Date.now(),
+                      y: yValue !== undefined ? yValue : 0,
+                    });
                   });
-                });
+                  if (chart.data.datasets[0].data.length > 90) {
+                    removeFirstPoint();
+                  }
+                }
               },
             },
           },
-          y: {
-            min: 0,
-            max:
-              graphDataType == "position"
-                ? 180
-                : graphDataType == "torque"
-                  ? 48
-                  : 15,
-          },
+          y: getYAxisLimits(chartData.datasets as Dataset[]),
         },
       };
     } else if (type === "line") {
@@ -125,75 +143,43 @@ const LineChart: React.FC<LineChartProps> = ({
 
   useEffect(() => {
     if (type === "realtime" && socket) {
-      socket.on("stm32Data", (message) => {
-        setChartOptions((prevOptions: any) => ({
-          ...prevOptions,
-          scales: {
-            x: {
-              ...prevOptions.scales?.x,
-              realtime: {
-                ...prevOptions?.scales?.x?.realtime,
-                onRefresh: (chart: any) => {
-                  chart.data.datasets.forEach(
-                    (
-                      dataset: { data: { x: number; y: number | undefined }[] },
-                      index: number,
-                    ) => {
-                      dataset.data.push({
-                        x: Date.now(),
-                        y:
-                          graphDataType == "position"
-                            ? message.Positions[index]
-                            : graphDataType == "torque"
-                              ? message.Torques[index]
-                              : message.Current[index],
-                      });
-                    },
-                  );
-                },
+      setChartOptions((prevOptions: any) => ({
+        ...prevOptions,
+        scales: {
+          x: {
+            ...prevOptions.scales?.x,
+            realtime: {
+              ...prevOptions?.scales?.x?.realtime,
+              pause: graphPause,
+              onRefresh: (chart: any) => {
+                if (!graphPause) {
+                  // Only update if not paused
+                  chart.data.datasets.forEach((dataset: Dataset, index: number) => {
+                    const yValue =
+                      chartData.datasets[index]?.data[
+                        chartData.datasets[index]?.data.length - 1
+                      ]?.y;
+
+                    dataset.data.push({
+                      x: Date.now(),
+                      y: yValue !== undefined ? yValue : 0,
+                    });
+                    if (chart.data.datasets[0].data.length > 90) {
+                      removeFirstPoint();
+                    }
+                  });
+                }
               },
             },
-            y: {
-              min:
-                graphDataType == "position"
-                  ? -65
-                  : graphDataType == "torque"
-                    ? 0
-                    : 0,
-              max:
-                graphDataType == "position"
-                  ? 65
-                  : graphDataType == "torque"
-                    ? 48
-                    : 15,
-            },
           },
-        }));
-      });
-
-      return () => {
-        socket.off("stm32Data");
-      };
+          y: {
+            ...prevOptions.scales?.y,
+            ...getYAxisLimits(chartData.datasets as Dataset[]),
+          },
+        },
+      }));
     }
-  }, [socket?.connected, graphDataType]);
-
-  useEffect(() => {
-    setChartOptions((prevOptions: any) => ({
-      ...prevOptions,
-      scales: {
-        x: {
-          ...prevOptions.scales?.x,
-        },
-        y: {
-          ...prevOptions.scales?.y,
-          title: {
-            ...prevOptions.scales?.y.title,
-            text: title,
-          },
-        },
-      },
-    }));
-  }, [title]);
+  }, [socket?.connected, chartData, graphPause]);
 
   useEffect(() => {
     if (chartRef.current) {
@@ -203,71 +189,8 @@ const LineChart: React.FC<LineChartProps> = ({
     }
   }, [chartData, chartOptions, setChartImage]);
 
-  useEffect(() => {
-    setChartOptions((prevOptions: any) => ({
-      ...prevOptions,
-      scales: {
-        x: {
-          ...prevOptions.scales?.x,
-          realtime: {
-            ...prevOptions?.scales?.x?.realtime,
-            pause: graphPause,
-          },
-        },
-        y: {
-          ...prevOptions.scales?.y,
-        },
-      },
-    }));
-  }, [graphPause]);
-
   return (
     <div className="graph-container">
-      <div className="grid grid-cols-4">
-        {type === "realtime" && (
-          <div className="flex">
-            <PlayButton setGraphPause={setGraphPause} graphPause={graphPause} />
-            <PauseButton
-              setGraphPause={setGraphPause}
-              graphPause={graphPause}
-            />
-          </div>
-        )}
-        {mode === "Manual" && (
-          <div className="flex col-span-2 justify-center">
-            <div className="flex mr-4">
-              <label>Position</label>
-              <input
-                type="checkbox"
-                checked={graphDataType == "position"}
-                onChange={() => {
-                  setGraphDataIsType("position");
-                }}
-              />
-            </div>
-            <div className="flex mr-4">
-              <label>Torque</label>
-              <input
-                type="checkbox"
-                checked={graphDataType == "torque"}
-                onChange={() => {
-                  setGraphDataIsType("torque");
-                }}
-              />
-            </div>
-            <div className="flex">
-              <label>Current</label>
-              <input
-                type="checkbox"
-                checked={graphDataType == "current"}
-                onChange={() => {
-                  setGraphDataIsType("current");
-                }}
-              />
-            </div>
-          </div>
-        )}
-      </div>
       <div className="bg-white rounded-lg">
         <Line ref={chartRef} data={chartData} options={chartOptions} />
       </div>

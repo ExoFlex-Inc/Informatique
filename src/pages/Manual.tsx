@@ -1,9 +1,13 @@
-import LineChart from "../components/LineChart.tsx";
-import AirlineSeatLegroomExtraIcon from "@mui/icons-material/AirlineSeatLegroomExtra";
-import MotorControlWidget from "../components/MotorControlWidget.tsx";
-import useStm32 from "../hooks/use-stm32.ts";
-import CustomScrollbar from "../components/CustomScrollbars.tsx";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
+import { Box, Typography, Checkbox, FormControlLabel, Grid, Paper, TextField, IconButton, createTheme, ThemeProvider } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import PauseIcon from '@mui/icons-material/Pause';
+import AirlineSeatLegroomExtraIcon from '@mui/icons-material/AirlineSeatLegroomExtra';
+import LineChart from "../components/LineChart";
+import MotorControlWidget from "../components/MotorControlWidget";
+import useStm32 from "../hooks/use-stm32";
+
 
 const errorMap = {
   0: "ERROR_0_MSEC",
@@ -37,6 +41,13 @@ const errorMap = {
 export default function Manual() {
   const { stm32Data, socket, errorFromStm32 } = useStm32();
   const [errorDescription, setErrorDescription] = useState("");
+  const [graphDataType, setGraphDataType] = useState("position");
+  const [graphPause, setGraphPause] = useState(false);
+  const [motorData, setMotorData] = useState({
+    motor1: [{ position: 0, torque: 0 }],
+    motor2: [{ position: 0, torque: 0 }],
+    motor3: [{ position: 0, torque: 0 }],
+  });
 
   useEffect(() => {
     if (stm32Data?.ErrorCode !== undefined) {
@@ -57,64 +68,108 @@ export default function Manual() {
     return errorNames;
   };
 
-  const manualData = {
+  useEffect(() => {
+    if (!graphPause) {
+      setMotorData({
+        motor1: [],
+        motor2: [],
+        motor3: [],
+      });
+    }
+  }, [graphPause]);
+
+  useEffect(() => {
+    if (stm32Data && socket && stm32Data.Positions && stm32Data.Torques) {
+      const timestamp = Date.now();
+      setMotorData((prevData) => ({
+        motor1: [...prevData.motor1, { x: timestamp, position: stm32Data.Positions[0], torque: stm32Data.Torques[0] }],
+        motor2: [...prevData.motor2, { x: timestamp, position: stm32Data.Positions[1], torque: stm32Data.Torques[1] }],
+        motor3: [...prevData.motor3, { x: timestamp, position: stm32Data.Positions[2], torque: stm32Data.Torques[2] }],
+      }));
+    }
+  }, [stm32Data, socket]);
+
+  const removeFirstPoint = () => {
+    setMotorData((prevData) => ({
+      motor1: prevData.motor1.slice(1),
+      motor2: prevData.motor2.slice(1),
+      motor3: prevData.motor3.slice(1),
+    }));
+  };
+
+  const getChartData = () => ({
     datasets: [
       {
         label: "Motor 1",
         borderColor: "rgb(255, 99, 132)",
-        data: [],
+        data: motorData.motor1.map((d) => ({ x: d.x, y: d[graphDataType] })),
       },
       {
         label: "Motor 2",
         borderColor: "rgb(99, 255, 132)",
-        data: [],
+        data: motorData.motor2.map((d) => ({ x: d.x, y: d[graphDataType] })),
       },
       {
         label: "Motor 3",
         borderColor: "rgb(99, 132, 255)",
-        data: [],
+        data: motorData.motor3.map((d) => ({ x: d.x, y: d[graphDataType] })),
       },
     ],
-  };
+  });
 
   return (
-    <div className="flex flex-col custom-height overflow-auto">
-      <CustomScrollbar>
-        <div className="justify-center flex mb-10">
-          <LineChart
-            chartData={manualData}
-            mode="Manual"
-            type="realtime"
-            socket={socket}
-          />
-        </div>
-
-        <div className="flex justify-center h-80 mb-4 gap-4">
-          <MotorControlWidget
-            title={"Anatomical Movement"}
-            icon={<AirlineSeatLegroomExtraIcon sx={{ fontSize: "56px" }} />}
-            labels={[
-              "EversionL",
-              "EversionR",
-              "DorsiflexionU",
-              "DorsiflexionD",
-              "ExtensionU",
-              "ExtensionD",
-            ]}
-            mode="Manual"
-            action="Increment"
-            disabled={errorFromStm32}
-          />
-
-          <textarea
-            value={errorDescription}
-            readOnly
-            rows={6}
-            cols={30}
-            className="border border-gray-300 p-2 rounded text-black"
-          />
-        </div>
-      </CustomScrollbar>
-    </div>
+    <Box sx={{ height: '100vh', overflow: 'auto' }}>
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 2 }}>
+              <IconButton onClick={() => setGraphPause(false)} disabled={!graphPause}>
+                <PlayArrowIcon />
+              </IconButton>
+              <IconButton onClick={() => setGraphPause(true)} disabled={graphPause}>
+                <PauseIcon />
+              </IconButton>
+              <FormControlLabel
+                control={<Checkbox checked={graphDataType === "position"} onChange={() => setGraphDataType("position")} />}
+                label="Position"
+              />
+              <FormControlLabel
+                control={<Checkbox checked={graphDataType === "torque"} onChange={() => setGraphDataType("torque")} />}
+                label="Torque"
+              />
+            </Box>
+            <LineChart
+              chartData={getChartData()}
+              mode="Manual"
+              type="realtime"
+              socket={socket}
+              removeFirstPoint={removeFirstPoint}
+              graphPause={graphPause}
+            />
+        </Grid>
+        <Grid item xs={12} md={6}>
+            <MotorControlWidget
+              title="Anatomical Movement"
+              icon={<AirlineSeatLegroomExtraIcon sx={{ fontSize: 56 }} />}
+              labels={["EversionL", "EversionR", "DorsiflexionU", "DorsiflexionD", "ExtensionU", "ExtensionD"]}
+              mode="Manual"
+              action="Increment"
+              disabled={errorFromStm32}
+            />
+        </Grid>
+        <Grid item xs={12} md={6}>
+            <Typography variant="h6" gutterBottom>Error Description</Typography>
+            <TextField
+              value={errorDescription}
+              multiline
+              rows={6}
+              fullWidth
+              variant="outlined"
+              InputProps={{
+                readOnly: true,
+              }}
+            />
+        </Grid>
+      </Grid>
+    </Box>
   );
 }

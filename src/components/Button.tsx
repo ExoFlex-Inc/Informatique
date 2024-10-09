@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { Button as MuiButton } from "@mui/material";
 
 interface ButtonProps {
   label: string;
@@ -87,13 +88,24 @@ const Button: React.FC<ButtonProps> = ({
   };
 
   return (
-    <button
-      className={`font-bold m-1 py-2 px-4 rounded ${color} flex justify-center items-center`}
-      onMouseDown={handleMouseDown}
-      disabled={disabled}
+    <MuiButton
+    fullWidth
+    variant="contained"
+    disabled={disabled}
+    sx={{
+      mt: 3,
+      mb: 2,
+      textTransform: "none",
+      fontSize: "1rem",
+      backgroundColor: "blueAccent.main",
+      "&:hover": {
+        backgroundColor: "#1e3a8a",
+      },
+    }}
+    onMouseDown={handleMouseDown}
     >
-      {icon ? icon : label}
-    </button>
+      {label}
+    </MuiButton>
   );
 };
 
