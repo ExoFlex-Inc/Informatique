@@ -1,6 +1,6 @@
-import { Paper, Typography, Grid, Box, Icon } from '@mui/material';
-import Button from './Button.tsx';
-import { ReactNode } from 'react';
+import { Paper, Typography, Grid, Box, Icon } from "@mui/material";
+import Button from "./Button.tsx";
+import { ReactNode } from "react";
 interface MotorControlWidgetProps {
   title: string;
   icon: ReactNode;
@@ -23,19 +23,19 @@ export default function MotorControlWidget({
     <Paper
       elevation={3}
       sx={{
-        width: '100%',
+        width: "100%",
         maxWidth: 400,
         m: 1,
         borderRadius: 4,
-        overflow: 'hidden',
+        overflow: "hidden",
       }}
     >
       <Box
         sx={{
-          bgcolor: 'blueAccent.main',
-          color: 'primary.contrastText',
+          bgcolor: "blueAccent.main",
+          color: "primary.contrastText",
           p: 1,
-          textAlign: 'center',
+          textAlign: "center",
         }}
       >
         <Typography variant="h5" component="h2" gutterBottom>
@@ -43,7 +43,7 @@ export default function MotorControlWidget({
         </Typography>
         {icon}
       </Box>
-      <Box sx={{ p: 2, bgcolor: 'white' }}>
+      <Box sx={{ p: 2, bgcolor: "white" }}>
         <Grid container spacing={2}>
           {labels.map((label, index) => (
             <Grid item xs={6} key={index}>

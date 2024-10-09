@@ -76,17 +76,19 @@ const LineChart: React.FC<LineChartProps> = ({
               onRefresh: (chart: any) => {
                 if (!graphPause) {
                   // Only update if not paused
-                  chart.data.datasets.forEach((dataset: Dataset, index: number) => {
-                    const yValue =
-                      chartData.datasets[index]?.data[
-                        chartData.datasets[index]?.data.length - 1
-                      ]?.y;
+                  chart.data.datasets.forEach(
+                    (dataset: Dataset, index: number) => {
+                      const yValue =
+                        chartData.datasets[index]?.data[
+                          chartData.datasets[index]?.data.length - 1
+                        ]?.y;
 
-                    dataset.data.push({
-                      x: Date.now(),
-                      y: yValue !== undefined ? yValue : 0,
-                    });
-                  });
+                      dataset.data.push({
+                        x: Date.now(),
+                        y: yValue !== undefined ? yValue : 0,
+                      });
+                    },
+                  );
                   if (chart.data.datasets[0].data.length > 90) {
                     removeFirstPoint();
                   }
@@ -154,20 +156,22 @@ const LineChart: React.FC<LineChartProps> = ({
               onRefresh: (chart: any) => {
                 if (!graphPause) {
                   // Only update if not paused
-                  chart.data.datasets.forEach((dataset: Dataset, index: number) => {
-                    const yValue =
-                      chartData.datasets[index]?.data[
-                        chartData.datasets[index]?.data.length - 1
-                      ]?.y;
+                  chart.data.datasets.forEach(
+                    (dataset: Dataset, index: number) => {
+                      const yValue =
+                        chartData.datasets[index]?.data[
+                          chartData.datasets[index]?.data.length - 1
+                        ]?.y;
 
-                    dataset.data.push({
-                      x: Date.now(),
-                      y: yValue !== undefined ? yValue : 0,
-                    });
-                    if (chart.data.datasets[0].data.length > 90) {
-                      removeFirstPoint();
-                    }
-                  });
+                      dataset.data.push({
+                        x: Date.now(),
+                        y: yValue !== undefined ? yValue : 0,
+                      });
+                      if (chart.data.datasets[0].data.length > 90) {
+                        removeFirstPoint();
+                      }
+                    },
+                  );
                 }
               },
             },

@@ -89,20 +89,20 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <MuiButton
-    fullWidth
-    variant="contained"
-    disabled={disabled}
-    sx={{
-      mt: 3,
-      mb: 2,
-      textTransform: "none",
-      fontSize: "1rem",
-      backgroundColor: "blueAccent.main",
-      "&:hover": {
-        backgroundColor: "#1e3a8a",
-      },
-    }}
-    onMouseDown={handleMouseDown}
+      fullWidth
+      variant="contained"
+      disabled={disabled}
+      sx={{
+        mt: 3,
+        mb: 2,
+        textTransform: "none",
+        fontSize: "1rem",
+        backgroundColor: "blueAccent.main",
+        "&:hover": {
+          backgroundColor: "#1e3a8a",
+        },
+      }}
+      onMouseDown={handleMouseDown}
     >
       {label}
     </MuiButton>

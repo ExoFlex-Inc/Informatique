@@ -1,13 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Typography, Checkbox, FormControlLabel, Grid, Paper, TextField, IconButton, createTheme, ThemeProvider } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import PauseIcon from '@mui/icons-material/Pause';
-import AirlineSeatLegroomExtraIcon from '@mui/icons-material/AirlineSeatLegroomExtra';
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Typography,
+  Checkbox,
+  FormControlLabel,
+  Grid,
+  Paper,
+  TextField,
+  IconButton,
+  createTheme,
+  ThemeProvider,
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import PauseIcon from "@mui/icons-material/Pause";
+import AirlineSeatLegroomExtraIcon from "@mui/icons-material/AirlineSeatLegroomExtra";
 import LineChart from "../components/LineChart";
 import MotorControlWidget from "../components/MotorControlWidget";
 import useStm32 from "../hooks/use-stm32";
-
 
 const errorMap = {
   0: "ERROR_0_MSEC",
@@ -82,9 +92,30 @@ export default function Manual() {
     if (stm32Data && socket && stm32Data.Positions && stm32Data.Torques) {
       const timestamp = Date.now();
       setMotorData((prevData) => ({
-        motor1: [...prevData.motor1, { x: timestamp, position: stm32Data.Positions[0], torque: stm32Data.Torques[0] }],
-        motor2: [...prevData.motor2, { x: timestamp, position: stm32Data.Positions[1], torque: stm32Data.Torques[1] }],
-        motor3: [...prevData.motor3, { x: timestamp, position: stm32Data.Positions[2], torque: stm32Data.Torques[2] }],
+        motor1: [
+          ...prevData.motor1,
+          {
+            x: timestamp,
+            position: stm32Data.Positions[0],
+            torque: stm32Data.Torques[0],
+          },
+        ],
+        motor2: [
+          ...prevData.motor2,
+          {
+            x: timestamp,
+            position: stm32Data.Positions[1],
+            torque: stm32Data.Torques[1],
+          },
+        ],
+        motor3: [
+          ...prevData.motor3,
+          {
+            x: timestamp,
+            position: stm32Data.Positions[2],
+            torque: stm32Data.Torques[2],
+          },
+        ],
       }));
     }
   }, [stm32Data, socket]);
@@ -118,56 +149,88 @@ export default function Manual() {
   });
 
   return (
-    <Box sx={{ height: '100vh', overflow: 'auto' }}>
+    <Box sx={{ height: "100vh", overflow: "auto" }}>
       <Grid container spacing={2}>
         <Grid item xs={12}>
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 2 }}>
-              <IconButton onClick={() => setGraphPause(false)} disabled={!graphPause}>
-                <PlayArrowIcon />
-              </IconButton>
-              <IconButton onClick={() => setGraphPause(true)} disabled={graphPause}>
-                <PauseIcon />
-              </IconButton>
-              <FormControlLabel
-                control={<Checkbox checked={graphDataType === "position"} onChange={() => setGraphDataType("position")} />}
-                label="Position"
-              />
-              <FormControlLabel
-                control={<Checkbox checked={graphDataType === "torque"} onChange={() => setGraphDataType("torque")} />}
-                label="Torque"
-              />
-            </Box>
-            <LineChart
-              chartData={getChartData()}
-              mode="Manual"
-              type="realtime"
-              socket={socket}
-              removeFirstPoint={removeFirstPoint}
-              graphPause={graphPause}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              mb: 2,
+            }}
+          >
+            <IconButton
+              onClick={() => setGraphPause(false)}
+              disabled={!graphPause}
+            >
+              <PlayArrowIcon />
+            </IconButton>
+            <IconButton
+              onClick={() => setGraphPause(true)}
+              disabled={graphPause}
+            >
+              <PauseIcon />
+            </IconButton>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={graphDataType === "position"}
+                  onChange={() => setGraphDataType("position")}
+                />
+              }
+              label="Position"
             />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={graphDataType === "torque"}
+                  onChange={() => setGraphDataType("torque")}
+                />
+              }
+              label="Torque"
+            />
+          </Box>
+          <LineChart
+            chartData={getChartData()}
+            mode="Manual"
+            type="realtime"
+            socket={socket}
+            removeFirstPoint={removeFirstPoint}
+            graphPause={graphPause}
+          />
         </Grid>
         <Grid item xs={12} md={6}>
-            <MotorControlWidget
-              title="Anatomical Movement"
-              icon={<AirlineSeatLegroomExtraIcon sx={{ fontSize: 56 }} />}
-              labels={["EversionL", "EversionR", "DorsiflexionU", "DorsiflexionD", "ExtensionU", "ExtensionD"]}
-              mode="Manual"
-              action="Increment"
-              disabled={errorFromStm32}
-            />
+          <MotorControlWidget
+            title="Anatomical Movement"
+            icon={<AirlineSeatLegroomExtraIcon sx={{ fontSize: 56 }} />}
+            labels={[
+              "EversionL",
+              "EversionR",
+              "DorsiflexionU",
+              "DorsiflexionD",
+              "ExtensionU",
+              "ExtensionD",
+            ]}
+            mode="Manual"
+            action="Increment"
+            disabled={errorFromStm32}
+          />
         </Grid>
         <Grid item xs={12} md={6}>
-            <Typography variant="h6" gutterBottom>Error Description</Typography>
-            <TextField
-              value={errorDescription}
-              multiline
-              rows={6}
-              fullWidth
-              variant="outlined"
-              InputProps={{
-                readOnly: true,
-              }}
-            />
+          <Typography variant="h6" gutterBottom>
+            Error Description
+          </Typography>
+          <TextField
+            value={errorDescription}
+            multiline
+            rows={6}
+            fullWidth
+            variant="outlined"
+            InputProps={{
+              readOnly: true,
+            }}
+          />
         </Grid>
       </Grid>
     </Box>
