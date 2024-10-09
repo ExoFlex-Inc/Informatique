@@ -183,13 +183,6 @@ void ManagerMotor_Reset()
         motors[i].cmdSpeed    = 0.0;
         motors[i].cmdTorque   = 0.0;
 
-        motors[i].cmdJerk = 0.0;
-        motors[i].cmdAcc = 0.0;
-
-        motors[i].sCurveState = MMOT_SCURVE_ACC;
-
-
-
         motors[i].goalReady    = false;
         motors[i].lastMsgTime  = 0;
         motors[i].originShift  = 0.0f;
@@ -478,7 +471,7 @@ void ManagerMotor_NextCmdSpeed(uint8_t id)
 //	//if motor has moved as planed
 //	if (fabsf(motors[id].motor.position - motors[id].cmdPosition) < tol)
 //	{
-		motors[id].kp = 200.0;
+		//motors[id].kp = 200.0;
 		//motors[id].kd = 0.1;
 		motors[id].cmdSpeed = motors[id].goalSpeed;
 		motors[id].cmdPosition = motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
@@ -523,114 +516,6 @@ void ManagerMotor_NextCmdPosSpeed(uint8_t id)
 		motors[id].goalReady = false;
 	}
 }
-
-void ManagerMotor_NextCmdPosSpeedSCurve(uint8_t id)
-{
-    // Get the remaining distance to the goal
-    float posLeft = fabsf(motors[id].motor.position - motors[id].goalPosition);
-
-    // Calculate stopping distance based on current speed and max acceleration
-    float stoppingDistance = (motors[id].cmdSpeed * motors[id].cmdSpeed) / (2 * MMOT_MAX_ACC_CMD);
-
-//    TODO : Handle case when goal position is smaller than the stopping distance
-//    // If goal position is smaller than the stopping distance
-//    if (posLeft < stoppingDistance)
-//    {
-//        // Directly manage the speed for small distance scenario
-//        motors[id].cmdAcc = 0.0f; // No acceleration needed
-//        motors[id].cmdSpeed = fminf(motors[id].goalSpeed, sqrtf(2 * MMOT_MAX_ACC_CMD * posLeft)); // Calculate a safe speed
-//
-//        // Set a state for handling small distances, but still allow for state machine progression
-//        motors[id].sCurveState = MMOT_SCURVE_DEC_TO_ZERO;
-//    }
-
-    // Standard S-curve logic
-    if (posLeft > GOAL_POS_TOL && motors[id].goalReady)
-    {
-        // Incremental position tolerance based on speed
-        float tol = motors[id].goalSpeed * MMOT_DT_S * MMOT_INCREMENT_POS_TOL_MULTIPLIER;
-
-        // Motor has moved as planned
-        if (fabsf(motors[id].motor.position - motors[id].cmdPosition) < tol)
-        {
-            switch (motors[id].sCurveState)
-            {
-                case MMOT_SCURVE_ACC:
-                    motors[id].cmdAcc += motors[id].cmdJerk * MMOT_DT_S;
-                    if (motors[id].cmdAcc > MMOT_MAX_ACC_CMD)
-                    {
-                        motors[id].cmdAcc = MMOT_MAX_ACC_CMD;
-                    }
-
-                    // If speed reached, change state
-                    if (motors[id].cmdSpeed >= motors[id].goalSpeed)
-                    {
-                        motors[id].sCurveState = MMOT_SCURVE_CONST;
-                    }
-                    break;
-
-                case MMOT_SCURVE_CONST:
-                    // Hold constant speed
-                    motors[id].cmdAcc = 0.0f;
-                    motors[id].cmdSpeed = motors[id].goalSpeed;
-
-                    // If position goal is near, change state
-                    if (posLeft < stoppingDistance)
-                    {
-                        motors[id].sCurveState = MMOT_SCURVE_DEC; // Start deceleration phase
-                    }
-                    break;
-
-                case MMOT_SCURVE_DEC:
-                    // Ramp down acceleration
-                    motors[id].cmdAcc -= motors[id].cmdJerk * MMOT_DT_S;
-                    if (motors[id].cmdAcc < -MMOT_MAX_ACC_CMD)
-                    {
-                        motors[id].cmdAcc = -MMOT_MAX_ACC_CMD;
-                    }
-
-                    // Check if position goal reached
-                    if (motors[id].motor.position >= motors[id].goalPosition)
-                    {
-                        motors[id].sCurveState = MMOT_SCURVE_DEC_TO_ZERO; // Transition to stop
-                    }
-                    break;
-
-                case MMOT_SCURVE_DEC_TO_ZERO:
-                    // Handle stopping
-                    motors[id].cmdAcc += motors[id].cmdJerk * MMOT_DT_S;
-                    if (motors[id].cmdAcc >= 0.0f)
-                    {
-                        motors[id].cmdAcc = 0.0f;
-                    }
-                    break;
-            }
-
-            // Calculate speed using the current acceleration
-            motors[id].cmdSpeed += motors[id].cmdAcc * MMOT_DT_S;
-
-            // Limit speed to the maximum defined speed
-            if (motors[id].cmdSpeed > motors[id].goalSpeed)
-            {
-                motors[id].cmdSpeed = motors[id].goalSpeed;
-            }
-
-            // Update command speed and position
-            motors[id].cmdSpeed = ManagerMotor_GetMotorDirection(id) * motors[id].cmdSpeed;
-            motors[id].cmdPosition = motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
-        }
-        else
-        {
-            // TODO: handle case where motor has not moved as expected
-        }
-    }
-    else
-    {
-        motors[id].cmdSpeed = 0; // Motor reached the goal
-        motors[id].goalReady = false;
-    }
-}
-
 
 
 void ManagerMotor_SendToMotors()
@@ -695,23 +580,6 @@ void   ManagerMotor_MovePosOld(uint8_t id, float pos)
 	motors[id].goalReady    = true;
 }
 
-void   ManagerMotor_MovePosSpeed(uint8_t id, float pos, float speed)
-{
-	if (speed > MMOT_MAX_SPEED_CMD)
-	{
-		speed = MMOT_MAX_SPEED_CMD;
-	}
-
-	motors[id].controlType  = MMOT_CONTROL_POS_SPEED;
-	motors[id].goalPosition = pos;
-	motors[id].goalSpeed = fabsf(speed);
-	motors[id].goalTorque = 0;
-	motors[id].cmdPosition = motors[id].motor.position;
-	motors[id].cmdSpeed = 0;
-	motors[id].cmdTorque = 0;
-	motors[id].goalReady = true;
-}
-
 void   ManagerMotor_MoveSpeed(uint8_t id, float speed)
 {
 	if (speed > MMOT_MAX_SPEED_CMD)
@@ -728,7 +596,7 @@ void   ManagerMotor_MoveSpeed(uint8_t id, float speed)
 	motors[id].cmdTorque = 0;
 }
 
-void   ManagerMotor_MovePosSpeedSCurve(uint8_t id, float pos, float speed)
+void   ManagerMotor_MovePosSpeed(uint8_t id, float pos, float speed)
 {
 	if (speed > MMOT_MAX_SPEED_CMD)
 	{
@@ -739,16 +607,11 @@ void   ManagerMotor_MovePosSpeedSCurve(uint8_t id, float pos, float speed)
 	motors[id].goalPosition = pos;
 	motors[id].goalSpeed = fabsf(speed);
 	motors[id].goalTorque = 0;
-	motors[id].cmdPosition = 0;
+	motors[id].cmdPosition = motors[id].motor.position;
 	motors[id].cmdSpeed = 0;
 	motors[id].cmdTorque = 0;
-	motors[id].goalReady    = true;
-
-    motors[id].cmdJerk = MMOT_MAX_JERK_CMD;
-    motors[id].cmdAcc = 0.0;
-    motors[id].sCurveState = MMOT_SCURVE_ACC;
+	motors[id].goalReady = true;
 }
-
 
 int8_t ManagerMotor_GetMotorDirection(uint8_t id)
 {
