@@ -105,7 +105,7 @@ const LineChart: React.FC<LineChartProps> = ({
                         x: xValue !== undefined ? xValue : 0,
                         y: yValue !== undefined ? yValue : 0,
                       });
-                    }
+                    },
                   );
                 }
               },
@@ -186,7 +186,7 @@ const LineChart: React.FC<LineChartProps> = ({
                         x: xValue !== undefined ? xValue : 0,
                         y: yValue !== undefined ? yValue : 0,
                       });
-                    }
+                    },
                   );
                 }
               },

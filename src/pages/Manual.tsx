@@ -67,9 +67,9 @@ export default function Manual() {
   const [graphDataType, setGraphDataType] = useState("position");
   const [graphPause, setGraphPause] = useState(false);
   const [latestMotorData, setLatestMotorData] = useState({
-    motor1: { x:0, position: 0, torque: 0, current: 0 },
-    motor2: { x:0, position: 0, torque: 0, current: 0 },
-    motor3: { x:0, position: 0, torque: 0, current: 0 },
+    motor1: { x: 0, position: 0, torque: 0, current: 0 },
+    motor2: { x: 0, position: 0, torque: 0, current: 0 },
+    motor3: { x: 0, position: 0, torque: 0, current: 0 },
   });
 
   useEffect(() => {
@@ -122,17 +122,32 @@ export default function Manual() {
       {
         label: "Motor 1",
         borderColor: "rgb(255, 99, 132)",
-        data: [{ x:latestMotorData.motor1.x, y: latestMotorData.motor1[graphDataType] }],
+        data: [
+          {
+            x: latestMotorData.motor1.x,
+            y: latestMotorData.motor1[graphDataType],
+          },
+        ],
       },
       {
         label: "Motor 2",
         borderColor: "rgb(99, 255, 132)",
-        data: [{ x:latestMotorData.motor1.x, y: latestMotorData.motor2[graphDataType] }],
+        data: [
+          {
+            x: latestMotorData.motor1.x,
+            y: latestMotorData.motor2[graphDataType],
+          },
+        ],
       },
       {
         label: "Motor 3",
         borderColor: "rgb(99, 132, 255)",
-        data: [{ x:latestMotorData.motor1.x, y: latestMotorData.motor3[graphDataType] }],
+        data: [
+          {
+            x: latestMotorData.motor1.x,
+            y: latestMotorData.motor3[graphDataType],
+          },
+        ],
       },
     ],
   });
@@ -200,10 +215,10 @@ export default function Manual() {
         <Grid item xs={12} md={6}>
           <Box
             sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: '100%',
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%",
             }}
           >
             <MotorControlWidget
@@ -224,25 +239,25 @@ export default function Manual() {
           </Box>
         </Grid>
         <Grid item xs={12} md={6}>
-        <Box
+          <Box
             sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: '100%',
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%",
             }}
           >
-          <TextField
-            value={errorDescription}
-            multiline
-            fullWidth
-            rows={10}
-            variant="outlined"
-            InputProps={{
-              readOnly: true,
-            }}
-            sx={{marginRight: 5}}
-          />
+            <TextField
+              value={errorDescription}
+              multiline
+              fullWidth
+              rows={10}
+              variant="outlined"
+              InputProps={{
+                readOnly: true,
+              }}
+              sx={{ marginRight: 5 }}
+            />
           </Box>
         </Grid>
       </Grid>
