@@ -85,7 +85,7 @@ const LineChart: React.FC<LineChartProps> = ({
               display: false,
             },
             realtime: {
-              // refresh: 2000,
+              refresh: 100,
               // delay: 1000,
               duration: 5000,
               pause: graphPause,
