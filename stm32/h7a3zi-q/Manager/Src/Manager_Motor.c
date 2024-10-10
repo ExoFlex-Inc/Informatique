@@ -47,6 +47,8 @@
 #define MMOT_CONTROL_POS_SPEED 1
 #define MMOT_CONTROL_SPEED     2
 
+#define MMOT_MAX_SPEED_CMD     2
+
 typedef struct
 {
     Motor motor;
@@ -114,7 +116,6 @@ bool ManagerMotor_VerifyMotorState(uint8_t id);
 
 void   ManagerMotor_ApplyOriginShift(uint8_t id);
 int8_t ManagerMotor_GetMotorDirection(uint8_t id);
-void   ManagerMotor_MotorIncrement(uint8_t id, int8_t direction);
 void   ManagerMotor_CalculNextKp(uint8_t id);
 
 void ManagerMotor_SetMotorError(uint8_t id);
@@ -435,7 +436,19 @@ void ManagerMotor_NextCmdPosOld(uint8_t id)
 
     if (posLeft > GOAL_POS_TOL && motors[id].goalReady)
     {
-        ManagerMotor_MotorIncrement(id, ManagerMotor_GetMotorDirection(id));
+    	int8_t dir = ManagerMotor_GetMotorDirection(id);
+    	if (id == MMOT_MOTOR_3)
+		{
+			motors[id].cmdPosition += dir * MOTOR3_STEP;
+		}
+		else if (id == MMOT_MOTOR_2)
+		{
+			motors[id].cmdPosition += dir * MOTOR_STEP;
+		}
+		else if (id == MMOT_MOTOR_1)
+		{
+			motors[id].cmdPosition += dir * MOTOR_STEP;
+		}
     }
     else
     {
@@ -447,8 +460,7 @@ void ManagerMotor_NextCmdPosOld(uint8_t id)
 void ManagerMotor_NextCmdSpeed(uint8_t id)
 {
     motors[id].cmdSpeed = motors[id].goalSpeed;
-    motors[id].cmdPosition =
-        motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
+    motors[id].cmdPosition = motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
 }
 
 void ManagerMotor_NextCmdPosSpeed(uint8_t id)
@@ -459,10 +471,10 @@ void ManagerMotor_NextCmdPosSpeed(uint8_t id)
     // Motor is not at goal
     if (posLeft > GOAL_POS_TOL && motors[id].goalReady)
     {
-        int8_t dir          = ManagerMotor_GetMotorDirection(id);
+        int8_t dir = ManagerMotor_GetMotorDirection(id);
         motors[id].cmdSpeed = dir * motors[id].goalSpeed;
         motors[id].cmdPosition =
-            motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
+        motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
     }
     // Motor reached his goal
     else
@@ -532,6 +544,10 @@ void ManagerMotor_MoveSpeed(uint8_t id, float speed)
     {
         speed = MMOT_MAX_SPEED_CMD;
     }
+    else if (speed < -MMOT_MAX_SPEED_CMD)
+    {
+        speed = -MMOT_MAX_SPEED_CMD;
+    }
 
     motors[id].controlType  = MMOT_CONTROL_SPEED;
     motors[id].goalPosition = 0;
@@ -544,7 +560,7 @@ void ManagerMotor_MoveSpeed(uint8_t id, float speed)
 
 void ManagerMotor_MovePosSpeed(uint8_t id, float pos, float speed)
 {
-    if (speed > MMOT_MAX_SPEED_CMD)
+    if (fabsf(speed) > MMOT_MAX_SPEED_CMD)
     {
         speed = MMOT_MAX_SPEED_CMD;
     }
@@ -568,22 +584,6 @@ int8_t ManagerMotor_GetMotorDirection(uint8_t id)
     else
     {
         return 1;
-    }
-}
-
-void ManagerMotor_MotorIncrement(uint8_t id, int8_t direction)
-{
-    if (id == MMOT_MOTOR_3)
-    {
-        motors[id].cmdPosition += direction * MOTOR3_STEP;
-    }
-    else if (id == MMOT_MOTOR_2)
-    {
-        motors[id].cmdPosition += direction * MOTOR_STEP;
-    }
-    else if (id == MMOT_MOTOR_1)
-    {
-        motors[id].cmdPosition -= direction * MOTOR_STEP;
     }
 }
 
