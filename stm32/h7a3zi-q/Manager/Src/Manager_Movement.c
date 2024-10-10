@@ -131,7 +131,7 @@ void ManagerMovement_Reset()
     // Get motor data (const pointer : read-only)
     for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
     {
-        motorsData[i]                     = ManagerMotor_GetMotorData(i);
+        motorsData[i]               = ManagerMotor_GetMotorData(i);
         managerMovement.mPosGoal[i] = 0.0f;
 
         firstPos[i] = 0.0f;
@@ -442,7 +442,8 @@ void ManagerMovement_ManualIncrement(uint8_t id, int8_t factor)
     if (!ManagerMotor_IsGoalStateReady(id))
     {
         managerMovement.mPosGoal[id] = factor * EXTREME_POS;
-        ManagerMotor_MovePosSpeed(id, managerMovement.mPosGoal[id], managerMovement.mSpeedGoal[id]);
+        ManagerMotor_MovePosSpeed(id, managerMovement.mPosGoal[id],
+                                  managerMovement.mSpeedGoal[id]);
     }
 
     // Else : do nothing so skip command to avoid an accumulation of
@@ -454,9 +455,10 @@ void ManagerMovement_AutoMovement(uint8_t mouvType, float Position)
     if (mouvType == MMOV_DORSIFLEXION)  // Set goalPosition for motor 1 for
                                         // MMOV_DORSIFLEXION
     {
-        managerMovement.mPosGoal[MMOT_MOTOR_1] =
-            -Position;  // Motor is inverse
-        ManagerMotor_MovePosSpeed(MMOT_MOTOR_1, managerMovement.mPosGoal[MMOT_MOTOR_1], managerMovement.mSpeedGoal[MMOT_MOTOR_1]);
+        managerMovement.mPosGoal[MMOT_MOTOR_1] = -Position;  // Motor is inverse
+        ManagerMotor_MovePosSpeed(MMOT_MOTOR_1,
+                                  managerMovement.mPosGoal[MMOT_MOTOR_1],
+                                  managerMovement.mSpeedGoal[MMOT_MOTOR_1]);
     }
     else if (mouvType == MMOV_EVERSION)  // Set goalPosition for motor 2 and
                                          // for MMOV_EVERSION
@@ -469,13 +471,17 @@ void ManagerMovement_AutoMovement(uint8_t mouvType, float Position)
         {
             managerMovement.mPosGoal[MMOT_MOTOR_2] = Position;
         }
-        ManagerMotor_MovePosSpeed(MMOT_MOTOR_2, managerMovement.mPosGoal[MMOT_MOTOR_2], managerMovement.mSpeedGoal[MMOT_MOTOR_2]);
+        ManagerMotor_MovePosSpeed(MMOT_MOTOR_2,
+                                  managerMovement.mPosGoal[MMOT_MOTOR_2],
+                                  managerMovement.mSpeedGoal[MMOT_MOTOR_2]);
     }
     else if (mouvType ==
              MMOV_EXTENSION)  // Set goalPosition for motor 3 for MMOV_EXTENSION
     {
         managerMovement.mPosGoal[MMOT_MOTOR_3] = Position;
-        ManagerMotor_MovePosSpeed(MMOT_MOTOR_3, managerMovement.mPosGoal[MMOT_MOTOR_3], managerMovement.mSpeedGoal[MMOT_MOTOR_3]);
+        ManagerMotor_MovePosSpeed(MMOT_MOTOR_3,
+                                  managerMovement.mPosGoal[MMOT_MOTOR_3],
+                                  managerMovement.mSpeedGoal[MMOT_MOTOR_3]);
     }
 }
 
@@ -914,7 +920,6 @@ void ManagerMovement_SetOrigins(uint8_t id)
     ManagerMotor_SetOriginShift(id, motorsData[id]->position);
     managerMovement.mPosGoal[id] = 0.0f;
     ManagerMotor_MovePosSpeed(id, 0.0f, 0.0f);
-
 }
 
 bool ManagerMovement_GoToPos(uint8_t exerciseId, float pos)
