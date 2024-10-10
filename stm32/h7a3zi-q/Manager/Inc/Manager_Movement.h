@@ -5,8 +5,8 @@
 
 #define MMOV_OUTSIDE -1
 #define MMOV_INSIDE  1
-#define MMOV_UP      1
-#define MMOV_DOWN    -1
+#define MMOV_UP      -1
+#define MMOV_DOWN    1
 
 // States
 #define MMOV_STATE_WAITING_SECURITY 1
