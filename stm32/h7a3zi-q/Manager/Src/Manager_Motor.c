@@ -43,12 +43,6 @@
 #define MMOT_INIT_OK            6
 #define MMOT_INIT_ERROR         7
 
-#define MMOT_SCURVE_ACC          0
-#define MMOT_SCURVE_ACC_TO_CONST 1
-#define MMOT_SCURVE_CONST        2
-#define MMOT_SCURVE_DEC          3
-#define MMOT_SCURVE_DEC_TO_ZERO  4
-
 #define MMOT_CONTROL_POS_OLD   0
 #define MMOT_CONTROL_POS_SPEED 1
 #define MMOT_CONTROL_SPEED     2
@@ -71,11 +65,6 @@ typedef struct
     float   cmdTorque;
     float   kp;
     float   kd;
-
-    float cmdJerk;
-    float cmdAcc;
-
-    uint8_t sCurveState;
 
     uint32_t lastMsgTime;
     float    originShift;
