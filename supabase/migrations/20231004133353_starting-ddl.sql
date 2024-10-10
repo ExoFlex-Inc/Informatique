@@ -13,6 +13,7 @@ CREATE EXTENSION IF NOT EXISTS ltree;
 
 CREATE TYPE permissions_enum AS ENUM ('dev', 'admin', 'client');
 CREATE TYPE client_admin_status AS ENUM ('pending', 'accepted');
+CREATE TYPE rated_pain_enum AS ENUM ('1', '2', '3', '4', '5');
 
 /*
 .########....###....########..##.......########..######.
@@ -70,7 +71,7 @@ CREATE TABLE exercise_data (
   repetitions_success_rate float,
   predicted_total_time float,
   actual_total_time float,
-  rated_pain int
+  rated_pain rated_pain_enum
 
 );
 
