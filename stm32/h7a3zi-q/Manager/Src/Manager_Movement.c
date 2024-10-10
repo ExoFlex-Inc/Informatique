@@ -13,7 +13,7 @@
 #define MAX_MOVEMENT  3
 #define EXTREME_POS   4
 
-#define MANUAL_MAX_TRANSMIT_TIME 50  // ms
+#define MANUAL_MAX_TRANSMIT_TIME 200  // ms
 
 #define MMOV_CHANGESIDE_STATE_WAITING4CMD 0
 #define MMOV_CHANGESIDE_STATE_MOVERIGHT 1
@@ -447,7 +447,7 @@ void ManagerMovement_AutoMovement(uint8_t mouvType, float Position)
     if (mouvType == MMOV_DORSIFLEXION)  // Set goalPosition for motor 1 for
                                         // MMOV_DORSIFLEXION
     {
-        managerMovement.motorsNextGoal[MMOT_MOTOR_1] = Position;
+        managerMovement.motorsNextGoal[MMOT_MOTOR_1] = -Position; //Motor is inverse
         ManagerMotor_MovePosOld(MMOT_MOTOR_1, managerMovement.motorsNextGoal[MMOT_MOTOR_1]);
     }
     else if (mouvType == MMOV_EVERSION)  // Set goalPosition for motor 2 and
