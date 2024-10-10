@@ -66,10 +66,10 @@ export default function Manual() {
   const [errorDescription, setErrorDescription] = useState("");
   const [graphDataType, setGraphDataType] = useState("position");
   const [graphPause, setGraphPause] = useState(false);
-  const [motorData, setMotorData] = useState({
-    motor1: [{ position: 0, torque: 0 }],
-    motor2: [{ position: 0, torque: 0 }],
-    motor3: [{ position: 0, torque: 0 }],
+  const [latestMotorData, setLatestMotorData] = useState({
+    motor1: { x:0, position: 0, torque: 0, current: 0 },
+    motor2: { x:0, position: 0, torque: 0, current: 0 },
+    motor3: { x:0, position: 0, torque: 0, current: 0 },
   });
 
   useEffect(() => {
@@ -92,71 +92,47 @@ export default function Manual() {
   };
 
   useEffect(() => {
-    if (!graphPause) {
-      setMotorData({
-        motor1: [],
-        motor2: [],
-        motor3: [],
+    if (stm32Data && stm32Data.Positions && stm32Data.Torques && !graphPause) {
+      const currentTime = Date.now();
+      setLatestMotorData({
+        motor1: {
+          x: currentTime,
+          position: stm32Data.Positions[0],
+          torque: stm32Data.Torques[0],
+          current: stm32Data.Current[0],
+        },
+        motor2: {
+          x: currentTime,
+          position: stm32Data.Positions[1],
+          torque: stm32Data.Torques[1],
+          current: stm32Data.Current[1],
+        },
+        motor3: {
+          x: currentTime,
+          position: stm32Data.Positions[2],
+          torque: stm32Data.Torques[2],
+          current: stm32Data.Current[2],
+        },
       });
     }
-  }, [graphPause]);
-
-  const MAX_DATA_POINTS = 100;
-
-  useEffect(() => {
-    if (
-      stm32Data &&
-      socket &&
-      stm32Data.Positions &&
-      stm32Data.Torques &&
-      !graphPause
-    ) {
-      const timestamp = Date.now();
-      setMotorData((prevData) => ({
-        motor1: [
-          ...prevData.motor1,
-          {
-            x: timestamp,
-            position: stm32Data.Positions[0],
-            torque: stm32Data.Torques[0],
-          },
-        ].slice(-MAX_DATA_POINTS),
-        motor2: [
-          ...prevData.motor2,
-          {
-            x: timestamp,
-            position: stm32Data.Positions[1],
-            torque: stm32Data.Torques[1],
-          },
-        ].slice(-MAX_DATA_POINTS),
-        motor3: [
-          ...prevData.motor3,
-          {
-            x: timestamp,
-            position: stm32Data.Positions[2],
-            torque: stm32Data.Torques[2],
-          },
-        ].slice(-MAX_DATA_POINTS),
-      }));
-    }
-  }, [stm32Data, socket]);
+  }, [stm32Data, socket, graphPause]);
 
   const getChartData = () => ({
     datasets: [
       {
         label: "Motor 1",
         borderColor: "rgb(255, 99, 132)",
-        data: motorData.motor1.map((d) => ({ x: d.x, y: d[graphDataType] })),
+        data: [{ x:latestMotorData.motor1.x, y: latestMotorData.motor1[graphDataType] }],
       },
       {
         label: "Motor 2",
         borderColor: "rgb(99, 255, 132)",
-        data: motorData.motor2.map((d) => ({ x: d.x, y: d[graphDataType] })),
+        data: [{ x:latestMotorData.motor1.x, y: latestMotorData.motor2[graphDataType] }],
       },
       {
         label: "Motor 3",
         borderColor: "rgb(99, 132, 255)",
-        data: motorData.motor3.map((d) => ({ x: d.x, y: d[graphDataType] })),
+        data: [{ x:latestMotorData.motor1.x, y: latestMotorData.motor3[graphDataType] }],
       },
     ],
   });
@@ -204,46 +180,70 @@ export default function Manual() {
               }
               label="Torque"
             />
+            <FormControlLabel
+              control={
+                <WhiteBorderCheckbox
+                  checked={graphDataType === "current"}
+                  onChange={() => setGraphDataType("current")}
+                />
+              }
+              label="Current"
+            />
           </Box>
           <LineChart
             chartData={getChartData()}
             mode="Manual"
             type="realtime"
-            socket={socket}
             graphPause={graphPause}
           />
         </Grid>
         <Grid item xs={12} md={6}>
-          <MotorControlWidget
-            title="Anatomical Movement"
-            icon={<AirlineSeatLegroomExtraIcon sx={{ fontSize: 56 }} />}
-            labels={[
-              "EversionL",
-              "EversionR",
-              "DorsiflexionU",
-              "DorsiflexionD",
-              "ExtensionU",
-              "ExtensionD",
-            ]}
-            mode="Manual"
-            action="Increment"
-            disabled={errorFromStm32}
-          />
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100%',
+            }}
+          >
+            <MotorControlWidget
+              title="Anatomical Movement"
+              icon={<AirlineSeatLegroomExtraIcon sx={{ fontSize: 56 }} />}
+              labels={[
+                "EversionL",
+                "EversionR",
+                "DorsiflexionU",
+                "DorsiflexionD",
+                "ExtensionU",
+                "ExtensionD",
+              ]}
+              mode="Manual"
+              action="Increment"
+              disabled={errorFromStm32}
+            />
+          </Box>
         </Grid>
         <Grid item xs={12} md={6}>
-          <Typography variant="h6" gutterBottom>
-            Error Description
-          </Typography>
+        <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100%',
+            }}
+          >
           <TextField
             value={errorDescription}
             multiline
-            rows={6}
             fullWidth
+            rows={10}
             variant="outlined"
             InputProps={{
               readOnly: true,
             }}
+            sx={{marginRight: 5}}
           />
+          </Box>
         </Grid>
       </Grid>
     </Box>
