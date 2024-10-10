@@ -6,29 +6,49 @@ export function useSupabaseSession() {
   const {
     data: session,
     isLoading,
+    isFetching,
+    isError,
     error,
+    refetch,
+    failureCount,
+    status,
   } = useQuery({
     queryKey: ["session"],
     queryFn: async () => {
-      try {
-        const response = await fetch("http://localhost:3001/auth/session", {
-          method: "GET",
-          credentials: "include",
+      const response = await fetch("http://localhost:3001/auth/session", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (response.status === 401) {
+        return Promise.reject({
+          name: "UnauthorizedError",
+          message: "Unauthorized",
         });
-
-        if (!response.ok) {
-          throw new Error("Error fetching session");
-        }
-
-        const data = await response.json();
-        return data.session;
-      } catch (error) {
-        console.error("Error fetching session:", error);
-        return null;
       }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        return Promise.reject({
+          name: "FetchError",
+          message: `Error fetching session: ${response.status} ${errorText}`,
+        });
+      }
+
+      const data = await response.json();
+      return data.session;
     },
-    staleTime: 1000 * 60 * 5,
-    cacheTime: 1000 * 60 * 10,
+    retry: (failureCount, error) => {
+      if (error.name === "UnauthorizedError") {
+        return false;
+      }
+      return failureCount <= 2;
+    },
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 3000),
+    staleTime: 1000 * 60 * 55, // 55 minutes
+    cacheTime: 1000 * 60 * 60 * 24, // 24 hours
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 
   const setSessionMutation = useMutation({
@@ -39,35 +59,47 @@ export function useSupabaseSession() {
       accessToken: string;
       refreshToken: string;
     }) => {
-      try {
-        const response = await fetch("http://localhost:3001/auth/session", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({ accessToken, refreshToken }),
-        });
+      const response = await fetch("http://localhost:3001/auth/session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ accessToken, refreshToken }),
+      });
 
-        if (!response.ok) {
-          throw new Error("Error setting session");
-        }
-
-        const data = await response.json();
-        return data.session;
-      } catch (error) {
-        console.error("Error setting session:", error);
-        return null;
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `Error setting session: ${response.status} ${errorText}`,
+        );
       }
+
+      const data = await response.json();
+      return data.session;
     },
     onSuccess: (newSession) => {
       queryClient.setQueryData(["session"], newSession);
     },
+    onError: (error) => {
+      console.error("Error setting session:", error.message);
+    },
+    retry: 1,
   });
 
   const setSession = (accessToken: string, refreshToken: string) => {
     setSessionMutation.mutate({ accessToken, refreshToken });
   };
 
-  return { session, isLoading, setSession, error };
+  return {
+    session,
+    isLoading,
+    isFetching,
+    isError,
+    error,
+    setSession,
+    refetch,
+    failureCount,
+    status,
+  };
 }

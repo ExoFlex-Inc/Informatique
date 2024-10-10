@@ -14,12 +14,13 @@ const GraphFilters: React.FC<GraphFiltersProps> = ({
   const dropdownRef = useDropdown(setIsGraphFilterOpen);
 
   function changeGraphType(type: string) {
+    console.log("graphType", type);
     setGraphType(type);
     setIsGraphFilterOpen(false);
   }
 
   return (
-    <div ref={dropdownRef} className="flex w-min mt-2 absolute">
+    <div ref={dropdownRef} className="flex z-30 w-min mt-2 absolute">
       <List className="bg-gray-600 rounded-md ml-4">
         <ListItem disablePadding>
           <ListItemButton onClick={() => changeGraphType("Rigidity")}>

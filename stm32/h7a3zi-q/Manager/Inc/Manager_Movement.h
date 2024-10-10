@@ -3,15 +3,16 @@
 
 #include "main.h"
 
-#define MMOV_RIGTH 1
-#define MMOV_LEFT  -1
-#define MMOV_UP    1
-#define MMOV_DOWN  -1
+#define MMOV_OUTSIDE -1
+#define MMOV_INSIDE  1
+#define MMOV_UP      -1
+#define MMOV_DOWN    1
 
 // States
 #define MMOV_STATE_WAITING_SECURITY 1
 #define MMOV_STATE_HOMING           3
 #define MMOV_STATE_MANUAL           4
+#define MMOV_STATE_CHANGESIDE       7
 #define MMOV_STATE_AUTOMATIC        5
 #define MMOV_STATE_ERROR            6
 
@@ -59,7 +60,7 @@ void ManagerMovement_AddExerciseInfo(uint8_t exerciseIdx, uint8_t moveNbr,
                                      uint8_t reps, float eTime, float pTime);
 void ManagerMovement_AddMouvement(uint8_t mvtIdx, uint8_t movementType,
                                   float finalPosition);
-bool ManagerMovement_ResetExercise();
+void ManagerMovement_ResetExercise();
 
 // Auto buttons
 void ManagerMovement_StartExercise();
@@ -70,8 +71,6 @@ void ManagerMovement_StopExercise();
 void ManagerMovement_ManualCmdEversion(int8_t direction);
 void ManagerMovement_ManualCmdDorsiflexion(int8_t direction);
 void ManagerMovement_ManualCmdExtension(int8_t direction);
-void ManagerMovement_ManualCmdHome(uint8_t motorIndex);
-void ManagerMovement_ManualCmdHomeAll();
 
 bool ManagerMovement_IsWaitingSecurity();
 void ManagerMovement_SecurityPassed();

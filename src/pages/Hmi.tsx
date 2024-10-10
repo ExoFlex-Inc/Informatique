@@ -1,8 +1,14 @@
-import React, { useEffect, useState, SetStateAction, Dispatch } from "react";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  SetStateAction,
+  Dispatch,
+} from "react";
 import Button from "../components/Button.tsx";
 import ProgressionWidget from "../components/ProgressionWidget.tsx";
 
-import usePlanData from "../hooks/get-plan.ts";
+import { usePlan } from "../hooks/use-plan.ts";
 import useStm32 from "../hooks/use-stm32.ts";
 
 import { useMediaQuery, useTheme } from "@mui/material";
@@ -29,12 +35,14 @@ interface ChartData {
 
 export default function HMI() {
   const { profile } = useUserProfile();
-  const { planData } = usePlanData(profile);
+  const { planData } = usePlan(profile?.user_id);
   const { stm32Data, socket, errorFromStm32 } = useStm32();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   const isTablet = useMediaQuery("(max-width: 768px)");
+
+  const hasExecute = useRef(false);
 
   const [chartData, setChartData] = useState<ChartData>({
     datasets: [
@@ -50,6 +58,20 @@ export default function HMI() {
       },
     ],
   });
+
+  useEffect(() => {
+    if (
+      socket &&
+      stm32Data &&
+      stm32Data.AutoState === "Ready" &&
+      !hasExecute.current
+    ) {
+      const message = "{Auto;Resetplan;}";
+      socket?.emit("planData", message);
+      hasExecute.current = true;
+      console.log("Reset", message);
+    }
+  }, [socket, stm32Data]);
 
   useEffect(() => {
     if (
@@ -240,7 +262,7 @@ export default function HMI() {
           </div>
         )}
       </div>
-      <ExerciseOverviewWidget stm32Data={stm32Data} />
+      <ExerciseOverviewWidget stm32Data={stm32Data} planData={planData} />
     </div>
   );
 }

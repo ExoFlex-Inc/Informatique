@@ -23,11 +23,14 @@
 /* USER CODE BEGIN Includes */
 
 
+#include <Periph_Switch.h>
+#include <Periph_UartRingBuf.h>
 #include <Manager_Motor.h>
 #include <Manager_HMI.h>
 #include <Manager_Movement.h>
 #include <Manager_Security.h>
-#include <Periph_Switch.h>
+#include <Manager_Error.h>
+
 
 /* USER CODE END Includes */
 
@@ -120,18 +123,26 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
+
+
+    ManagerError_Init();
 	ManagerMotor_Init();
 	ManagerHMI_Init();
 	ManagerMovement_Init();
 	ManagerSecurity_Init();
 
+
   while (1)
   {
+	PeriphUartRingBuf_Task();
+	PeriphSwitch_Task();
+
 	ManagerMotor_Task();
 	ManagerHMI_Task();
 	ManagerMovement_Task();
 	ManagerSecurity_Task();
-	PeriphSwitch_Task();
+
+
 
 
 

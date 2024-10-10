@@ -27,6 +27,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
 export const updateUserProfile = async (req: Request, res: Response) => {
   const userId = req.params.userId;
   const newProfile = req.body;
+  const { avatar_blob_url, ...profileToUpdate } = newProfile;
 
   const { error: authError } = await supaClient.auth.updateUser({
     data: {
@@ -35,6 +36,7 @@ export const updateUserProfile = async (req: Request, res: Response) => {
       speciality: newProfile.speciality,
       permissions: newProfile.permissions,
       avatar_url: newProfile.avatar_url,
+      fcm_token: newProfile.fcm_token,
     },
   });
 
@@ -46,7 +48,7 @@ export const updateUserProfile = async (req: Request, res: Response) => {
 
   const { data: profileData, error: profileError } = await supaClient
     .from("user_profiles")
-    .update(newProfile)
+    .update(profileToUpdate)
     .eq("user_id", userId)
     .select("*");
 
@@ -60,14 +62,11 @@ export const updateUserProfile = async (req: Request, res: Response) => {
 };
 
 export const getAdmins = async (req: Request, res: Response) => {
-  const limit = parseInt(req.query.limit as string) || 50;
-
   try {
     const { data, error } = await supaClient
       .from("user_profiles")
       .select("*")
-      .eq("permissions", "admin")
-      .limit(limit);
+      .eq("permissions", "admin");
 
     if (error) {
       return res.status(500).json({ error: error.message });
@@ -148,7 +147,7 @@ export const uploadAvatar = asyncHandler(
 
     await deleteOldImage(profile?.avatar_url);
 
-    const { error: uploadError } = await supaClient.storage
+    const { data: avatarUrl, error: uploadError } = await supaClient.storage
       .from("avatars")
       .upload(filePath, file.buffer, { contentType: file.mimetype });
 
@@ -169,6 +168,6 @@ export const uploadAvatar = asyncHandler(
         .json({ error: `Error updating user profile: ${updateError.message}` });
     }
 
-    res.json({ avatar_url: filePath });
+    res.json({ avatar_url: avatarUrl.path });
   },
 );

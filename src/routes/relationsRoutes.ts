@@ -3,17 +3,17 @@ import {
   removeRelation,
   fetchRelation,
   postRelation,
-  acceptRequest,
+  getPendingAdminNotifications,
 } from "../controllers/relationsController.ts";
 
 const router = express.Router();
 
 router.get("/:userId", fetchRelation);
 
-router.post("/request", postRelation);
+router.post("/", postRelation);
 
 router.delete("/:relationId", removeRelation);
 
-router.put("/accept/:relationId", acceptRequest);
+router.get("/notifications/:userId", getPendingAdminNotifications);
 
 export default router;
