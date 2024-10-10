@@ -59,7 +59,25 @@ const LineChart: React.FC<LineChartProps> = ({
     _DeepPartialObject<ChartJsOptions<"line">>
   >(() => {
     if (type === "realtime") {
+      const datasets = [
+        {
+          label: "Motor 1",
+          borderColor: "rgb(255, 99, 132)",
+          data: [],
+        },
+        {
+          label: "Motor 2",
+          borderColor: "rgb(99, 255, 132)",
+          data: [],
+        },
+        {
+          label: "Motor 3",
+          borderColor: "rgb(99, 132, 255)",
+          data: [],
+        },
+      ];
       return {
+        datasets: datasets,
         scales: {
           x: {
             type: "realtime",
@@ -68,7 +86,7 @@ const LineChart: React.FC<LineChartProps> = ({
             },
             realtime: {
               // refresh: 2000,
-              delay: 1000,
+              // delay: 1000,
               duration: 5000,
               pause: graphPause,
               onRefresh: (chart: any) => {
@@ -188,7 +206,15 @@ const LineChart: React.FC<LineChartProps> = ({
   return (
     <div className="graph-container">
       <div className="bg-white rounded-lg">
-        <Line ref={chartRef} data={chartData} options={chartOptions} />
+      <Line
+          ref={chartRef}
+          data={
+            type === "realtime"
+              ? { datasets: chartOptions.datasets || [] }
+              : chartData
+          }
+          options={chartOptions}
+        />
       </div>
     </div>
   );
