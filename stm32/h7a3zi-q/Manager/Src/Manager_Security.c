@@ -75,7 +75,6 @@ void ManagerSecurity_Task()
 
     case MS_STATE_ERROR:
         ManagerSecurity_Error();
-        ManagerError_SetError(ERROR_0_MSEC);
         break;
     }
 }
@@ -179,7 +178,8 @@ bool ManagerSecurity_VerifLimitSwitch()
 
     uint8_t managerMovementState = ManagerMovement_GetState();
 
-    if (managerMovementState != MMOV_STATE_HOMING)
+    if (managerMovementState != MMOV_STATE_HOMING &&
+        managerMovementState != MMOV_STATE_CHANGESIDE)
     {
         if (PeriphSwitch_ExtensionUp())
         {

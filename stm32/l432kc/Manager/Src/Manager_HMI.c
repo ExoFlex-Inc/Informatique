@@ -65,7 +65,7 @@ void ManagerHMI_SendJSON() {
     cJSON_AddStringToObject(root, "HomingState", "");
     cJSON_AddNumberToObject(root, "ExerciseIdx", 0);
     cJSON_AddNumberToObject(root, "Repetitions", 1);
-    cJSON_AddStringToObject(root, "ErrorCode", "");
+    cJSON_AddNumberToObject(root, "ErrorCode", 0b10101);
 
     // Example arrays containing position and torque values for each motor
     int positions[] = {10, 20, 30}; // Example position values for motors 1, 2, and 3
