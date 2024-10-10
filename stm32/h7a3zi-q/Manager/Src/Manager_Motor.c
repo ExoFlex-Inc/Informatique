@@ -24,9 +24,9 @@
 #define ERROR_CAN_MAX_MSG_DELAY     -3
 #define ERROR_MOTOR_MINMAX          -4
 
-#define MMOT_DT_MS   10
-#define MMOT_DT_S MMOT_DT_MS / 1000
-#define MAX_TRY 50  // 500 ms before flagging an error
+#define MMOT_DT_MS 10
+#define MMOT_DT_S  MMOT_DT_MS / 1000
+#define MAX_TRY    50  // 500 ms before flagging an error
 
 #define MOTOR_STEP   0.005
 #define MOTOR3_STEP  0.002
@@ -49,36 +49,36 @@
 #define MMOT_SCURVE_DEC          3
 #define MMOT_SCURVE_DEC_TO_ZERO  4
 
-#define MMOT_CONTROL_POS_OLD    0
-#define MMOT_CONTROL_POS_SPEED  1
-#define MMOT_CONTROL_SPEED      2
+#define MMOT_CONTROL_POS_OLD   0
+#define MMOT_CONTROL_POS_SPEED 1
+#define MMOT_CONTROL_SPEED     2
 
 typedef struct
 {
-    Motor    motor;
+    Motor motor;
 
-    uint8_t  initState;
-    uint8_t  initTry;
-    bool     detected;
+    uint8_t initState;
+    uint8_t initTry;
+    bool    detected;
 
-    uint8_t  controlType;
-    bool     goalReady;
-    float    goalPosition;
-    float    goalSpeed;
-    float    goalTorque;
-    float    cmdPosition;
-    float    cmdSpeed;
-    float    cmdTorque;
-    float    kp;
-    float    kd;
+    uint8_t controlType;
+    bool    goalReady;
+    float   goalPosition;
+    float   goalSpeed;
+    float   goalTorque;
+    float   cmdPosition;
+    float   cmdSpeed;
+    float   cmdTorque;
+    float   kp;
+    float   kd;
 
-    float    cmdJerk;
-    float    cmdAcc;
+    float cmdJerk;
+    float cmdAcc;
 
-    uint8_t  sCurveState;
+    uint8_t sCurveState;
 
     uint32_t lastMsgTime;
-    float originShift;
+    float    originShift;
 } MotorControl;
 
 typedef struct
@@ -165,22 +165,21 @@ void ManagerMotor_Reset()
     // Init motor control info
     for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
     {
-        motors[i].initState    = MMOT_INIT_IDLE;
-        motors[i].initTry      = 0;
-        motors[i].detected     = false;
+        motors[i].initState = MMOT_INIT_IDLE;
+        motors[i].initTry   = 0;
+        motors[i].detected  = false;
 
         motors[i].controlType  = MMOT_CONTROL_POS_OLD;
         motors[i].goalPosition = 0.0;
         motors[i].goalSpeed    = 0.0;
         motors[i].goalTorque   = 0.0;
-        motors[i].cmdPosition = 0.0;
-        motors[i].cmdSpeed    = 0.0;
-        motors[i].cmdTorque   = 0.0;
+        motors[i].cmdPosition  = 0.0;
+        motors[i].cmdSpeed     = 0.0;
+        motors[i].cmdTorque    = 0.0;
 
-        motors[i].goalReady    = false;
-        motors[i].lastMsgTime  = 0;
-        motors[i].originShift  = 0.0f;
-
+        motors[i].goalReady   = false;
+        motors[i].lastMsgTime = 0;
+        motors[i].originShift = 0.0f;
     }
 
     // Set Kp Kd
@@ -338,9 +337,9 @@ void ManagerMotor_StartMotor(uint8_t id)
         }
         else
         {
-            motors[id].initState = MMOT_INIT_ERROR;
-            managerMotor.state           = MMOT_STATE_ERROR;
-            managerMotor.errorCode       = ERROR_CAN_CONNECTION_MOTORS;
+            motors[id].initState   = MMOT_INIT_ERROR;
+            managerMotor.state     = MMOT_STATE_ERROR;
+            managerMotor.errorCode = ERROR_CAN_CONNECTION_MOTORS;
             ManagerError_SetError(ERROR_14_MMOT_CAN_CONNECT);
             ManagerMotor_SetMotorError(id);
         }
@@ -365,9 +364,9 @@ void ManagerMotor_StartMotor(uint8_t id)
         }
         else
         {
-            motors[id].initState = MMOT_INIT_ERROR;
-            managerMotor.state           = MMOT_STATE_ERROR;
-            managerMotor.errorCode       = ERROR_CAN_CONNECTION_MOTORS;
+            motors[id].initState   = MMOT_INIT_ERROR;
+            managerMotor.state     = MMOT_STATE_ERROR;
+            managerMotor.errorCode = ERROR_CAN_CONNECTION_MOTORS;
             ManagerError_SetError(ERROR_14_MMOT_CAN_CONNECT);
             ManagerMotor_SetMotorError(id);
         }
@@ -380,8 +379,7 @@ void ManagerMotor_StartMotor(uint8_t id)
         break;
 
     case MMOT_INIT_ORIGIN:
-        if (motors[id].detected &&
-            motors[id].motor.position <= 0.001 &&
+        if (motors[id].detected && motors[id].motor.position <= 0.001 &&
             motors[id].motor.position >= -0.001)
         {
             motors[id].initState = MMOT_INIT_OK;
@@ -393,9 +391,9 @@ void ManagerMotor_StartMotor(uint8_t id)
         }
         else
         {
-            motors[id].initState = MMOT_INIT_ERROR;
-            managerMotor.state           = MMOT_STATE_ERROR;
-            managerMotor.errorCode       = ERROR_SET_ORIGINES_MOTORS;
+            motors[id].initState   = MMOT_INIT_ERROR;
+            managerMotor.state     = MMOT_STATE_ERROR;
+            managerMotor.errorCode = ERROR_SET_ORIGINES_MOTORS;
             ManagerError_SetError(ERROR_16_MMOT_SET_ORIGIN);
             ManagerMotor_SetMotorError(id);
         }
@@ -425,27 +423,26 @@ void ManagerMotor_SetMotorError(uint8_t id)
 
 void ManagerMotor_NextCmd()
 {
-	for (uint8_t i=0; i < MMOT_MOTOR_NBR; i++)
-	{
-		if (motors[i].controlType == MMOT_CONTROL_POS_OLD)
-		{
-			ManagerMotor_NextCmdPosOld(i);
-		}
-		else if (motors[i].controlType == MMOT_CONTROL_POS_SPEED)
-		{
-			ManagerMotor_NextCmdPosSpeed(i);
-		}
-		else if (motors[i].controlType == MMOT_CONTROL_SPEED)
-		{
-			ManagerMotor_NextCmdSpeed(i);
-		}
-	}
+    for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
+    {
+        if (motors[i].controlType == MMOT_CONTROL_POS_OLD)
+        {
+            ManagerMotor_NextCmdPosOld(i);
+        }
+        else if (motors[i].controlType == MMOT_CONTROL_POS_SPEED)
+        {
+            ManagerMotor_NextCmdPosSpeed(i);
+        }
+        else if (motors[i].controlType == MMOT_CONTROL_SPEED)
+        {
+            ManagerMotor_NextCmdSpeed(i);
+        }
+    }
 }
-
 
 void ManagerMotor_NextCmdPosOld(uint8_t id)
 {
-	float posLeft = fabsf(motors[id].motor.position - motors[id].goalPosition);
+    float posLeft = fabsf(motors[id].motor.position - motors[id].goalPosition);
 
     if (posLeft > GOAL_POS_TOL && motors[id].goalReady)
     {
@@ -454,71 +451,64 @@ void ManagerMotor_NextCmdPosOld(uint8_t id)
     else
     {
         motors[id].goalReady = false;  // Motor reached his goal
-        //motors[id].goalPosition = motors[id].motor.position;
+        // motors[id].goalPosition = motors[id].motor.position;
     }
 }
 
 void ManagerMotor_NextCmdSpeed(uint8_t id)
 {
-		motors[id].cmdSpeed = motors[id].goalSpeed;
-		motors[id].cmdPosition = motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
+    motors[id].cmdSpeed = motors[id].goalSpeed;
+    motors[id].cmdPosition =
+        motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
 }
 
 void ManagerMotor_NextCmdPosSpeed(uint8_t id)
 {
-	// Get the remaining distance to the goal
-	float posLeft = fabsf(motors[id].motor.position - motors[id].goalPosition);
+    // Get the remaining distance to the goal
+    float posLeft = fabsf(motors[id].motor.position - motors[id].goalPosition);
 
-	// Motor is not at goal
-	if (posLeft > GOAL_POS_TOL && motors[id].goalReady)
-	{
-		int8_t dir = ManagerMotor_GetMotorDirection(id);
-		motors[id].cmdSpeed = dir * motors[id].goalSpeed;
-		motors[id].cmdPosition = motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
-	}
-	// Motor reached his goal
-	else
-	{
-		motors[id].cmdSpeed = 0;
-		motors[id].goalReady = false;
-	}
+    // Motor is not at goal
+    if (posLeft > GOAL_POS_TOL && motors[id].goalReady)
+    {
+        int8_t dir          = ManagerMotor_GetMotorDirection(id);
+        motors[id].cmdSpeed = dir * motors[id].goalSpeed;
+        motors[id].cmdPosition =
+            motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
+    }
+    // Motor reached his goal
+    else
+    {
+        motors[id].cmdSpeed  = 0;
+        motors[id].goalReady = false;
+    }
 }
-
 
 void ManagerMotor_SendToMotors()
 {
 #ifndef MMOT_DEV_MOTOR_1_DISABLE
 
-        PeriphMotors_Move(&motors[MMOT_MOTOR_1].motor,
-        				  motors[MMOT_MOTOR_1].cmdPosition,
-                          motors[MMOT_MOTOR_1].cmdSpeed,
-						  motors[MMOT_MOTOR_1].cmdTorque,
-						  motors[MMOT_MOTOR_1].kp,
-                          motors[MMOT_MOTOR_1].kd);
+    PeriphMotors_Move(
+        &motors[MMOT_MOTOR_1].motor, motors[MMOT_MOTOR_1].cmdPosition,
+        motors[MMOT_MOTOR_1].cmdSpeed, motors[MMOT_MOTOR_1].cmdTorque,
+        motors[MMOT_MOTOR_1].kp, motors[MMOT_MOTOR_1].kd);
 #endif
 
 #ifndef MMOT_DEV_MOTOR_2_DISABLE
 
-        PeriphMotors_Move(&motors[MMOT_MOTOR_2].motor,
-        				  motors[MMOT_MOTOR_2].cmdPosition,
-                          motors[MMOT_MOTOR_2].cmdSpeed,
-						  motors[MMOT_MOTOR_2].cmdTorque,
-						  motors[MMOT_MOTOR_2].kp,
-                          motors[MMOT_MOTOR_2].kd);
+    PeriphMotors_Move(
+        &motors[MMOT_MOTOR_2].motor, motors[MMOT_MOTOR_2].cmdPosition,
+        motors[MMOT_MOTOR_2].cmdSpeed, motors[MMOT_MOTOR_2].cmdTorque,
+        motors[MMOT_MOTOR_2].kp, motors[MMOT_MOTOR_2].kd);
 #endif
 
 #ifndef MMOT_DEV_MOTOR_3_DISABLE
 
-        PeriphMotors_Move(&motors[MMOT_MOTOR_3].motor,
-        				  motors[MMOT_MOTOR_3].cmdPosition,
-                          motors[MMOT_MOTOR_3].cmdSpeed,
-						  motors[MMOT_MOTOR_3].cmdTorque,
-						  motors[MMOT_MOTOR_3].kp,
-                          motors[MMOT_MOTOR_3].kd);
+    PeriphMotors_Move(
+        &motors[MMOT_MOTOR_3].motor, motors[MMOT_MOTOR_3].cmdPosition,
+        motors[MMOT_MOTOR_3].cmdSpeed, motors[MMOT_MOTOR_3].cmdTorque,
+        motors[MMOT_MOTOR_3].kp, motors[MMOT_MOTOR_3].kd);
 #endif
 }
-
-
 
 /********************************************
  * Goal and movements SET/GET
@@ -535,49 +525,49 @@ bool ManagerMotor_IsGoalStateReady(uint8_t id)
         .goalReady;  // motor is ready when it has reached it's command
 }
 
-void   ManagerMotor_MovePosOld(uint8_t id, float pos)
+void ManagerMotor_MovePosOld(uint8_t id, float pos)
 {
-	motors[id].controlType  = MMOT_CONTROL_POS_OLD;
-	motors[id].goalPosition = pos;
-	motors[id].goalSpeed = 0;
-	motors[id].goalTorque = 0;
-	motors[id].cmdPosition = motors[id].motor.position;
-	motors[id].cmdSpeed = 0;
-	motors[id].cmdTorque = 0;
-	motors[id].goalReady    = true;
+    motors[id].controlType  = MMOT_CONTROL_POS_OLD;
+    motors[id].goalPosition = pos;
+    motors[id].goalSpeed    = 0;
+    motors[id].goalTorque   = 0;
+    motors[id].cmdPosition  = motors[id].motor.position;
+    motors[id].cmdSpeed     = 0;
+    motors[id].cmdTorque    = 0;
+    motors[id].goalReady    = true;
 }
 
-void   ManagerMotor_MoveSpeed(uint8_t id, float speed)
+void ManagerMotor_MoveSpeed(uint8_t id, float speed)
 {
-	if (speed > MMOT_MAX_SPEED_CMD)
-	{
-		speed = MMOT_MAX_SPEED_CMD;
-	}
+    if (speed > MMOT_MAX_SPEED_CMD)
+    {
+        speed = MMOT_MAX_SPEED_CMD;
+    }
 
-	motors[id].controlType  = MMOT_CONTROL_SPEED;
-	motors[id].goalPosition = 0;
-	motors[id].goalSpeed = speed;
-	motors[id].goalTorque = 0;
-	motors[id].cmdPosition = motors[id].motor.position;
-	motors[id].cmdSpeed = 0;
-	motors[id].cmdTorque = 0;
+    motors[id].controlType  = MMOT_CONTROL_SPEED;
+    motors[id].goalPosition = 0;
+    motors[id].goalSpeed    = speed;
+    motors[id].goalTorque   = 0;
+    motors[id].cmdPosition  = motors[id].motor.position;
+    motors[id].cmdSpeed     = 0;
+    motors[id].cmdTorque    = 0;
 }
 
-void   ManagerMotor_MovePosSpeed(uint8_t id, float pos, float speed)
+void ManagerMotor_MovePosSpeed(uint8_t id, float pos, float speed)
 {
-	if (speed > MMOT_MAX_SPEED_CMD)
-	{
-		speed = MMOT_MAX_SPEED_CMD;
-	}
+    if (speed > MMOT_MAX_SPEED_CMD)
+    {
+        speed = MMOT_MAX_SPEED_CMD;
+    }
 
-	motors[id].controlType  = MMOT_CONTROL_POS_SPEED;
-	motors[id].goalPosition = pos;
-	motors[id].goalSpeed = fabsf(speed);
-	motors[id].goalTorque = 0;
-	motors[id].cmdPosition = motors[id].motor.position;
-	motors[id].cmdSpeed = 0;
-	motors[id].cmdTorque = 0;
-	motors[id].goalReady = true;
+    motors[id].controlType  = MMOT_CONTROL_POS_SPEED;
+    motors[id].goalPosition = pos;
+    motors[id].goalSpeed    = fabsf(speed);
+    motors[id].goalTorque   = 0;
+    motors[id].cmdPosition  = motors[id].motor.position;
+    motors[id].cmdSpeed     = 0;
+    motors[id].cmdTorque    = 0;
+    motors[id].goalReady    = true;
 }
 
 int8_t ManagerMotor_GetMotorDirection(uint8_t id)
@@ -824,8 +814,8 @@ void ManagerMotor_CalculNextKp(uint8_t id)
     }
     else
     {
-        motors[id].kp =
-            200.0 + (motors[id].motor.torque - torqueMinKp) *
-                        (500.0 - 200.0) / (torqueMaxKp - torqueMinKp);
+        motors[id].kp = 200.0 + (motors[id].motor.torque - torqueMinKp) *
+                                    (500.0 - 200.0) /
+                                    (torqueMaxKp - torqueMinKp);
     }
 }
