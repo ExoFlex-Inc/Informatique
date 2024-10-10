@@ -4,7 +4,7 @@ import SearchIcon from "@mui/icons-material/Search";
 
 interface User {
   email: string;
-  // Add other properties as needed
+  user_id: string;
 }
 
 interface UserSearchBarProps {

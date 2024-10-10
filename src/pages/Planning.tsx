@@ -12,90 +12,35 @@ import ExercisesLimitsTable from "../components/ExercisesLimitsTable.tsx";
 import ExercisesPlanTable from "../components/ExercisesPlanTable.tsx";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import { useRelations } from "../hooks/use-relations.ts";
+import { usePlan } from "../hooks/use-plan.ts";
 import Loading from "../components/Loading.tsx";
 
-export interface Limits {
-  torque: {
-    dorsiflexion: number;
-    extension: number;
-    eversion: number;
-  };
-  angles: {
-    dorsiflexion: number;
-    extension: number;
-    eversion: number;
-  };
-}
-
-export interface Set {
-  rest: number;
-  repetitions: number;
-  speed: number;
-  time: number;
-  movement: {
-    exercise: string;
-    target_angle: number;
-    target_torque: number;
-  }[];
-}
-
-export interface SetRest {
-  setRest: number;
-}
-
 export default function Planning() {
-  const [plan, setPlan] = useState<(Set | SetRest)[]>([
-    {
-      rest: 0,
-      repetitions: 0,
-      speed: 0,
-      time: 0,
-      movement: [
-        {
-          exercise: "",
-          target_angle: 0,
-          target_torque: 0,
-        },
-      ],
-    },
-  ]);
-  const [limitsRight, setLimitsRight] = useState<Limits>({
-    torque: { dorsiflexion: 0, extension: 0, eversion: 0 },
-    angles: { dorsiflexion: 0, extension: 0, eversion: 0 },
-  });
-
-  const [limitsLeft, setLimitsLeft] = useState<Limits>({
-    torque: { dorsiflexion: 0, extension: 0, eversion: 0 },
-    angles: { dorsiflexion: 0, extension: 0, eversion: 0 },
-  });
   const [selectedUser, setSelectedUser] = useState<any[]>([]);
   const [isDisabled, setIsDisabled] = useState(true);
   const [addExerciseDisable, setAddExerciseDisable] = useState(true);
   const [side, setSide] = useState("Left");
   const [checked, setChecked] = useState(false);
   const checkboxRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const { relations, isLoading } = useRelations();
+  const { relations, isLoading: isLoadingRelations } = useRelations();
+  const {
+    planData,
+    isLoading: isLoadingPlan,
+    addExercise,
+    addSet,
+    addSetRest,
+    setLimitLeft,
+    setLimitRight,
+    setPlan,
+  } = usePlan(selectedUser.length === 1 ? selectedUser[0]?.user_id : null);
 
   useEffect(() => {
-    if (plan.length < 1) {
-      setAddExerciseDisable(true);
+    if (planData) {
+      setIsDisabled(false);
+    } else {
+      setIsDisabled(true);
     }
-  }, [plan]);
-
-  useEffect(() => {
-    if (selectedUser.length != 0) {
-      async function fetchPlanData() {
-        const data = await planInit();
-        if (data.loaded && data.planData[0]) {
-          setPlan(data.planData[0].plan_content.plan);
-          setLimitsRight(data.planData[0].plan_content.limits.right);
-          setLimitsLeft(data.planData[0].plan_content.limits.left);
-        }
-      }
-      fetchPlanData();
-      selectedUser.length == 0 ? setIsDisabled(true) : setIsDisabled(false);
-    }
-  }, [selectedUser]);
+  }, [planData]);
 
   useEffect(() => {
     const filteredCheckbox = checkboxRefs.current.filter((element) => {
@@ -111,107 +56,24 @@ export default function Planning() {
     }
   }, [checked]);
 
-  async function planInit() {
-    try {
-      if (selectedUser) {
-        console.log("Getting the current plan...");
-        const responseGetPlanning = await fetch(
-          "http://localhost:3001/api/plan",
-          {
-            method: "GET",
-            headers: {
-              UserId: selectedUser[0].user_id,
-            },
-          },
-        );
-
-        if (responseGetPlanning.ok) {
-          console.log("Plan retrieved successfully.");
-          const planData = await responseGetPlanning.json();
-          return { loaded: true, planData: planData };
-        } else {
-          console.error("Failed to retrieve plan.");
-          window.alert("Failed to retrieve plan.");
-          return { loaded: false, planData: null };
-        }
-      }
-    } catch (error) {
-      console.error("An error occurred:", error);
-      window.alert("An error occurred: " + error);
-      return { loaded: false, planData: null };
-    }
-  }
-
-  const addExercise = () => {
+  const handleAddExercise = () => {
     const checkboxIndex = checkboxRefs.current
       .map((checkbox, index) => {
         if (checkbox?.checked) {
           return index;
         }
       })
-      .filter((element) => element !== undefined);
-    setPlan((prevPlan) => {
-      const newPlan = [...prevPlan];
-      checkboxIndex.forEach((index) => {
-        const item = newPlan[index];
-        if (item && "movement" in item) {
-          const setItem = item as Set;
+      .filter((element) => element !== undefined) as number[]; // Ensure it's a number[]
 
-          setItem.movement = [
-            ...setItem.movement,
-            {
-              exercise: "",
-              target_angle: 0,
-              target_torque: 0,
-            },
-          ];
-        }
-      });
-      return newPlan;
-    });
-  };
-
-  const addSet = () => {
-    setPlan((prevPlan) => [
-      ...prevPlan,
-      {
-        rest: 0,
-        speed: 0,
-        repetitions: 0,
-        time: 0,
-        movement: [
-          {
-            exercise: "",
-            target_angle: 0,
-            target_torque: 0,
-          },
-        ],
-      },
-    ]);
-  };
-
-  const addSetRest = () => {
-    setPlan((prevPlan) => [
-      ...prevPlan,
-      {
-        setRest: 0,
-      },
-    ]);
+    // Pass the checkbox index directly to the mutation
+    addExercise(checkboxIndex);
   };
 
   // Function to handle saving the plan and limits
   const savePlan = async () => {
     try {
-      const planWithLimits = {
-        plan,
-        limits: {
-          right: limitsRight,
-          left: limitsLeft,
-        },
-      };
       // Save plan to Supabase
-      await savePlanToSupabase(planWithLimits);
-      // Save plan to local storage
+      await savePlanToSupabase(planData);
     } catch (error) {
       console.error("Error saving plan and limits:", error);
     }
@@ -226,10 +88,10 @@ export default function Planning() {
     try {
       const requestBody = {
         plan: plan,
-        selectedPatient: selectedUser[0],
+        user_id: selectedUser[0].user_id,
       };
 
-      const response = await fetch("http://localhost:3001/api/plan", {
+      const response = await fetch("http://localhost:3001/plan", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -249,8 +111,12 @@ export default function Planning() {
     }
   };
 
-  if (isLoading) {
-    return <Loading />;
+  if (isLoadingRelations || isLoadingPlan) {
+    return (
+      <div className="loading-container">
+        <Loading />
+      </div>
+    );
   }
 
   return (
@@ -290,28 +156,31 @@ export default function Planning() {
       <CustomScrollbar>
         <div className="overflow-auto">
           <ExercisesLimitsTable
-            limitsLeft={limitsLeft}
-            limitsRight={limitsRight}
+            limitsLeft={planData?.limits?.left}
+            limitsRight={planData?.limits?.right}
             side={side}
-            setLimitsLeft={setLimitsLeft}
-            setLimitsRight={setLimitsRight}
-            plan={plan}
+            setLimitLeft={setLimitLeft}
+            setLimitRight={setLimitRight}
           />
 
-          {plan.map((set, setIndex) => (
-            <ExercisesPlanTable
-              key={setIndex}
-              set={set}
-              setIndex={setIndex}
-              setPlan={setPlan}
-              plan={plan}
-              checkboxRefs={checkboxRefs}
-              setChecked={setChecked}
-              checked={checked}
-              limitsLeft={limitsLeft}
-              limitsRight={limitsRight}
-            />
-          ))}
+          {planData && planData.plan ? (
+            planData.plan.map((set, setIndex) => (
+              <ExercisesPlanTable
+                key={setIndex}
+                setPlan={setPlan}
+                set={set}
+                setIndex={setIndex}
+                checkboxRefs={checkboxRefs}
+                setChecked={setChecked}
+              />
+            ))
+          ) : (
+            <div className="flex justify-center items-center">
+              <p className="text-gray-500 text-lg">
+                No plan available for the selected user.
+              </p>
+            </div>
+          )}
         </div>
         <div className="flex justify-center my-4">
           <button
@@ -335,7 +204,7 @@ export default function Planning() {
                 ? "bg-gray-500 text-white font-bold py-2 px-4 mr-4 rounded cursor-not-allowed"
                 : "bg-cyan-500 hover:bg-cyan-700 text-white font-bold py-2 px-4 mr-4 rounded"
             }
-            onClick={addExercise}
+            onClick={handleAddExercise}
           >
             Add Exercise
           </button>

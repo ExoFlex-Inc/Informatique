@@ -13,32 +13,6 @@ export default function Dashboard() {
   );
   const [title, setTitle] = useState("");
 
-  //UseEffect
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const {
-  //         data: { user },
-  //       } = await supaClient.auth.getUser();
-
-  //       if (user) {
-  //         const { data } = await supaClient
-  //           .from("exercise_data")
-  //           .select("*")
-  //           .eq("user_id", user.id);
-
-  //         if (data) {
-  //           setData(data);
-  //         }
-  //       }
-  //     } catch (error) {
-  //       console.error("Couldn't get user exercise data", error);
-  //     }
-  //   };
-  //   fetchData();
-  // }, []);
-
   useEffect(() => {
     if (data.length > 0) {
       const sortedDates = data
@@ -137,7 +111,8 @@ export default function Dashboard() {
 
   return (
     <div className="grid grid-cols-2 grid-rows-2 gap-10 mx-10">
-      <ExerciseOverviewWidget />
+      Dashboard
+      {/* <ExerciseOverviewWidget />
       <div className="bg-white rounded-lg grid grid-cols-2 grid-rows-2 items-center justify-center">
         <div className="flex justify-center">
           <label
@@ -166,7 +141,7 @@ export default function Dashboard() {
         {dataset && (
           <LineChart type="activity" title={title} chartData={dataset} />
         )}
-      </div>
+      </div> */}
     </div>
   );
 }

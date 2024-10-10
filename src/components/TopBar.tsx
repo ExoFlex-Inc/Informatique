@@ -25,12 +25,13 @@ import Icon from "../../public/assets/user.png";
 
 import Notification from "./Notification.tsx";
 
-import Login from "./Login.tsx";
+import Login from "./Signup.tsx";
 import { useNavigate } from "react-router-dom";
 import { useSupabaseSession } from "../hooks/use-session.ts";
 import { useUserProfile } from "../hooks/use-profile.ts";
 import { deleteToken } from "firebase/messaging";
 import { messaging } from "../utils/firebaseClient.ts";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function TopBar() {
   const { session } = useSupabaseSession();
@@ -42,6 +43,8 @@ export default function TopBar() {
   const menuRef = useRef(null);
   const avatarRef = useRef(null);
   const navigate = useNavigate();
+
+  const queryClient = useQueryClient();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -85,9 +88,11 @@ export default function TopBar() {
           throw new Error("Failed to log out");
         }
 
+        queryClient.clear();
+
         await deleteToken(messaging);
 
-        window.location.href = "/";
+        navigate("/login");
       } catch (error) {
         console.error("Error logging out:", error.message);
 
