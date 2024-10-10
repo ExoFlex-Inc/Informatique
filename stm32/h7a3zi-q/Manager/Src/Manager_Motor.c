@@ -47,7 +47,7 @@
 #define MMOT_CONTROL_POS_SPEED 1
 #define MMOT_CONTROL_SPEED     2
 
-#define MMOT_MAX_SPEED_CMD     2
+#define MMOT_MAX_SPEED_CMD 2
 
 typedef struct
 {
@@ -436,19 +436,19 @@ void ManagerMotor_NextCmdPosOld(uint8_t id)
 
     if (posLeft > GOAL_POS_TOL && motors[id].goalReady)
     {
-    	int8_t dir = ManagerMotor_GetMotorDirection(id);
-    	if (id == MMOT_MOTOR_3)
-		{
-			motors[id].cmdPosition += dir * MOTOR3_STEP;
-		}
-		else if (id == MMOT_MOTOR_2)
-		{
-			motors[id].cmdPosition += dir * MOTOR_STEP;
-		}
-		else if (id == MMOT_MOTOR_1)
-		{
-			motors[id].cmdPosition += dir * MOTOR_STEP;
-		}
+        int8_t dir = ManagerMotor_GetMotorDirection(id);
+        if (id == MMOT_MOTOR_3)
+        {
+            motors[id].cmdPosition += dir * MOTOR3_STEP;
+        }
+        else if (id == MMOT_MOTOR_2)
+        {
+            motors[id].cmdPosition += dir * MOTOR_STEP;
+        }
+        else if (id == MMOT_MOTOR_1)
+        {
+            motors[id].cmdPosition += dir * MOTOR_STEP;
+        }
     }
     else
     {
@@ -460,7 +460,8 @@ void ManagerMotor_NextCmdPosOld(uint8_t id)
 void ManagerMotor_NextCmdSpeed(uint8_t id)
 {
     motors[id].cmdSpeed = motors[id].goalSpeed;
-    motors[id].cmdPosition = motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
+    motors[id].cmdPosition =
+        motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
 }
 
 void ManagerMotor_NextCmdPosSpeed(uint8_t id)
@@ -471,10 +472,10 @@ void ManagerMotor_NextCmdPosSpeed(uint8_t id)
     // Motor is not at goal
     if (posLeft > GOAL_POS_TOL && motors[id].goalReady)
     {
-        int8_t dir = ManagerMotor_GetMotorDirection(id);
+        int8_t dir          = ManagerMotor_GetMotorDirection(id);
         motors[id].cmdSpeed = dir * motors[id].goalSpeed;
         motors[id].cmdPosition =
-        motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
+            motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
     }
     // Motor reached his goal
     else
