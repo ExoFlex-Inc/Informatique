@@ -206,7 +206,7 @@ const LineChart: React.FC<LineChartProps> = ({
   return (
     <div className="graph-container">
       <div className="bg-white rounded-lg">
-      <Line
+        <Line
           ref={chartRef}
           data={
             type === "realtime"
