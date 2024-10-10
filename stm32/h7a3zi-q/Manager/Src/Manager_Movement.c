@@ -192,7 +192,6 @@ void ManagerMovement_Task()
         ManagerMovement_ChangeSide();
 
     case MMOV_STATE_ERROR:
-        ManagerError_SetError(ERROR_3_MMOV);
 
         break;
     }

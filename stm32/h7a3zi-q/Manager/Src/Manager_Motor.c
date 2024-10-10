@@ -234,7 +234,6 @@ void ManagerMotor_Task()
 
         case MMOT_STATE_ERROR:
             ManagerMotor_DisableMotors();
-            ManagerError_SetError(ERROR_2_MMOT);
             break;
         }
         timerMs = HAL_GetTick();
