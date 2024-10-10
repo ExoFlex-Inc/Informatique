@@ -206,7 +206,7 @@ void ManagerMovement_WaitingSecurity()
 {
     if (managerMovement.securityPass)
     {
-        managerMovement.state = MMOV_STATE_CHANGESIDE;
+        managerMovement.state = MMOV_STATE_MANUAL;
     }
 }
 
