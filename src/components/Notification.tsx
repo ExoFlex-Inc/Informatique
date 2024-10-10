@@ -1,69 +1,42 @@
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import { useEffect, useState, useRef } from "react";
-import { useUserProfile } from "../hooks/use-profile.ts";
-
-import {
-  refuseRequest,
-  acceptRequest,
-  fetchNotifications,
-} from "../controllers/relationsController.ts";
 import {
   List,
   ListItem,
-  createTheme,
   Grid,
   Badge,
   Paper,
-  Button,
   IconButton,
   ThemeProvider,
   Box,
   ListItemText,
+  Button,
+  Typography,
   Avatar,
   ListItemAvatar,
-  Typography,
+  createTheme,
 } from "@mui/material";
+import { useNotification } from "../hooks/use-notification.ts";
+import { useUserProfile } from "../hooks/use-profile.ts";
 
 const Notification = () => {
   const [isNotifications, setIsNotifications] = useState(false);
-  const [clients, setClients] = useState<any[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [avatars, setAvatars] = useState<(string | null | undefined)[]>([]);
-  const [relations, setRelations] = useState<any[]>([]);
+  const [responseMessage, setResponseMessage] = useState({});
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
 
+  const { notifications } = useNotification();
   const { profile } = useUserProfile();
 
-  // useEffect(() => {
-  //   async function fetchAdminNotifications() {
-  //     const notificationData = await fetchNotifications(profile);
-  //     if (notificationData) {
-  //       if (notificationData.length > 0) {
-  //         setIsNotifications(true);
-  //         const clients = await Promise.all(
-  //           notificationData.map((element: any) =>
-  //             // fetchClient(element.client_id),
-  //           ),
-  //         );
-  //         setClients(clients);
-  //         setRelations(notificationData);
-  //       }
-  //     }
-  //   }
-  //   fetchAdminNotifications();
-  // }, []);
-
   useEffect(() => {
-    const paths = clients.map((client) => client.avatar_url);
-    downloadImage(paths);
-    if (clients.length == 0) {
-      setIsNotifications(false);
+    if (notifications && notifications.length > 0) {
+      setIsNotifications(true);
     }
-  }, [clients]);
+  }, [notifications]);
 
   useEffect(() => {
-    const handleClickOutside = (event: any) => {
+    const handleClickOutside = (event) => {
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node) &&
@@ -78,82 +51,109 @@ const Notification = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [dropdownRef, buttonRef, setIsOpen]);
+  }, [dropdownRef, buttonRef]);
 
-  const downloadImage = async (paths: string[]) => {
-    const images = await Promise.all(
-      paths.map(async (path) => {
-        if (path) {
-          try {
-            const { data, error } = await supaClient.storage
-              .from("avatars")
-              .download(path);
-            if (error) {
-              throw error;
-            }
-            const url = URL.createObjectURL(data);
-            return url;
-          } catch (error: any) {
-            console.error("Error downloading image: ", error.message);
-          }
-        } else {
-          return null;
-        }
-      }),
-    );
-    setAvatars(images);
+  // Handle Accept action
+  const handleAccept = async (notification: any) => {
+    if (!profile?.user_id) {
+      console.error("User profile is missing");
+      return;
+    }
+
+    setResponseMessage((prev) => ({
+      ...prev,
+      [notification.id]: "Processing...",
+    }));
+
+    try {
+      const responseRelation = await fetch(`http://localhost:3001/relations`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          client_id: notification.sender_id,
+          admin_id: profile.user_id,
+        }),
+      });
+
+      if (!responseRelation.ok) {
+        throw new Error("Error accepting relation request");
+      }
+
+      const response = await fetch(
+        `http://localhost:3001/notification/${notification.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Error deleting notification");
+      }
+
+      setResponseMessage((prev) => ({
+        ...prev,
+        [notification.id]: "Relation request accepted",
+      }));
+    } catch (error) {
+      console.error("Error accepting relation request:", error);
+      setResponseMessage((prev) => ({
+        ...prev,
+        [notification.id]: "Error processing request",
+      }));
+    }
   };
 
-  async function fetchClient(clientId: string) {
-    const { data, error } = await supaClient
-      .from("user_profiles")
-      .select()
-      .eq("user_id", clientId)
-      .single();
+  const handleReject = async (notification: any) => {
+    setResponseMessage((prev) => ({
+      ...prev,
+      [notification.id]: "Processing...",
+    }));
 
-    if (error) {
-      console.error("Error fetching client notification:", error.message);
-    } else {
-      return data;
+    try {
+      const response = await fetch(
+        `http://localhost:3001/notification/${notification.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Error rejecting relation request");
+      }
+
+      setResponseMessage((prev) => ({
+        ...prev,
+        [notification.id]: "Relation request rejected",
+      }));
+    } catch (error) {
+      console.error("Error rejecting relation request:", error);
+      setResponseMessage((prev) => ({
+        ...prev,
+        [notification.id]: "Error processing request",
+      }));
     }
-  }
-
-  // async function acceptClientRequest(relation: any) {
-  //   const requestAccepted = await acceptRequest(relation);
-  //   if (requestAccepted) {
-  //     filteringNotifications(relation);
-  //   }
-  // }
-
-  // async function refuseClientRequest(relation: any) {
-  //   const isRequestRefuse = await refuseRequest(relation);
-  //   if (isRequestRefuse) {
-  //     filteringNotifications(relation);
-  //   }
-  // }
-
-  function filteringNotifications(relation: any) {
-    const newClients = clients.filter((client) => {
-      if (client.user_id == relation.client_id) {
-        return false;
-      } else {
-        return true;
-      }
-    });
-    const newRelation = relations.filter((element) => {
-      if (relation.id === element.id) {
-        return false;
-      } else {
-        return true;
-      }
-    });
-    setRelations(newRelation);
-    setClients(newClients);
-  }
+  };
 
   return (
     <div>
-      <IconButton ref={buttonRef} onClick={() => setIsOpen(!isOpen)}>
+      <IconButton
+        ref={buttonRef}
+        onClick={() => {
+          setIsOpen(!isOpen);
+          if (isNotifications) setIsNotifications(false);
+        }}
+      >
         {isNotifications ? (
           <Badge color="error" variant="dot">
             <NotificationsOutlinedIcon />
@@ -162,6 +162,7 @@ const Notification = () => {
           <NotificationsOutlinedIcon />
         )}
       </IconButton>
+
       {isOpen && (
         <Box
           ref={dropdownRef}
@@ -171,7 +172,7 @@ const Notification = () => {
             position: "absolute",
             top: "70px",
             right: "90px",
-            zIndex: "20",
+            zIndex: 20,
           }}
         >
           <ThemeProvider
@@ -183,49 +184,88 @@ const Notification = () => {
               },
             })}
           >
-            <Paper sx={{ width: "30vw" }}>
+            <Paper sx={{ width: "30vw", padding: 2 }}>
               <List>
-                {clients.length > 0 ? (
-                  clients.map((client, index) => (
-                    <ListItem key={index}>
+                {notifications && notifications.length > 0 ? (
+                  notifications.map((notification, index) => (
+                    <ListItem
+                      key={notification.id || index}
+                      alignItems="flex-start"
+                    >
+                      <ListItemAvatar>
+                        <Avatar alt="Avatar" src={notification.image} />
+                      </ListItemAvatar>
                       <Grid container>
-                        <Grid
-                          className="content-center justify-center"
-                          item
-                          xs={4}
-                        >
-                          <ListItemAvatar>
-                            <Avatar src={avatars[index]} />
-                          </ListItemAvatar>
-                        </Grid>
-                        <Grid item xs={8}>
+                        <Grid item xs={12}>
                           <ListItemText
-                            primary="Connection request"
-                            secondary={
-                              <Typography className="text-black">
-                                {client.first_name} {client.last_name} sends a
-                                connection request
+                            primary={
+                              <Typography variant="body1" component="span">
+                                {notification.user_name}
                               </Typography>
                             }
+                            secondary={
+                              <>
+                                {notification.body && (
+                                  <Typography
+                                    variant="body2"
+                                    component="span"
+                                    className="text-black"
+                                    display="block"
+                                  >
+                                    {notification.body}
+                                  </Typography>
+                                )}
+                                <Typography
+                                  variant="caption"
+                                  component="span"
+                                  display="block"
+                                  color="textSecondary"
+                                >
+                                  {new Date(
+                                    notification.created_at,
+                                  ).toLocaleString()}
+                                </Typography>
+                              </>
+                            }
                           />
-                        </Grid>
-                        <Grid className="" item xs={12}>
-                          <Button
-                            // onClick={() =>
-                            //   acceptClientRequest(relations[index])
-                            // }
-                            color="success"
-                          >
-                            Accept
-                          </Button>
-                          <Button
-                            // onClick={() =>
-                            //   refuseClientRequest(relations[index])
-                            // }
-                            color="error"
-                          >
-                            Refuse
-                          </Button>
+                          {notification.type === "relation" && (
+                            <Box
+                              sx={{
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                marginTop: 1,
+                              }}
+                            >
+                              {responseMessage[notification.id] ? (
+                                <Typography
+                                  variant="body2"
+                                  color="textSecondary"
+                                >
+                                  {responseMessage[notification.id]}
+                                </Typography>
+                              ) : (
+                                <>
+                                  <Button
+                                    variant="contained"
+                                    color="primary"
+                                    size="small"
+                                    sx={{ marginRight: 1 }}
+                                    onClick={() => handleAccept(notification)}
+                                  >
+                                    Accept
+                                  </Button>
+                                  <Button
+                                    variant="outlined"
+                                    color="error"
+                                    size="small"
+                                    onClick={() => handleReject(notification)}
+                                  >
+                                    Reject
+                                  </Button>
+                                </>
+                              )}
+                            </Box>
+                          )}
                         </Grid>
                       </Grid>
                     </ListItem>

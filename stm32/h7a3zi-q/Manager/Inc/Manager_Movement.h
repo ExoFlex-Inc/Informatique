@@ -60,7 +60,7 @@ void ManagerMovement_AddExerciseInfo(uint8_t exerciseIdx, uint8_t moveNbr,
                                      uint8_t reps, float eTime, float pTime);
 void ManagerMovement_AddMouvement(uint8_t mvtIdx, uint8_t movementType,
                                   float finalPosition);
-bool ManagerMovement_ResetExercise();
+void ManagerMovement_ResetExercise();
 
 // Auto buttons
 void ManagerMovement_StartExercise();

@@ -21,7 +21,7 @@
 
 #define ERROR_12_CYCLEMS (1U << 12)
 
-//#define ERROR_13
+// #define ERROR_13
 
 #define ERROR_14_MMOT_CAN_CONNECT   (1U << 14)
 #define ERROR_15_MMOT_CAN_MAX_DELAY (1U << 15)
