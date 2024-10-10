@@ -16,8 +16,8 @@
 #define MANUAL_MAX_TRANSMIT_TIME 200  // ms
 
 #define MMOV_CHANGESIDE_STATE_WAITING4CMD 0
-#define MMOV_CHANGESIDE_STATE_MOVERIGHT 1
-#define MMOV_CHANGESIDE_STATE_MOVELEFT 2
+#define MMOV_CHANGESIDE_STATE_MOVERIGHT   1
+#define MMOV_CHANGESIDE_STATE_MOVELEFT    2
 
 typedef struct
 {
@@ -162,10 +162,10 @@ void ManagerMovement_Reset()
     managerMovement.reset        = false;
     managerMovement.securityPass = false;
 
-    managerMovement.state       = MMOV_STATE_WAITING_SECURITY;
-    managerMovement.autoState   = MMOV_AUTO_STATE_WAITING4PLAN;
+    managerMovement.state           = MMOV_STATE_WAITING_SECURITY;
+    managerMovement.autoState       = MMOV_AUTO_STATE_WAITING4PLAN;
     managerMovement.changeSideState = MMOV_CHANGESIDE_STATE_WAITING4CMD;
-    managerMovement.homingState = MMOV_HOMING_EXTENSION;
+    managerMovement.homingState     = MMOV_HOMING_EXTENSION;
 }
 
 void ManagerMovement_Task()
@@ -189,7 +189,7 @@ void ManagerMovement_Task()
         break;
 
     case MMOV_STATE_CHANGESIDE:
-    	ManagerMovement_ChangeSide();
+        ManagerMovement_ChangeSide();
 
     case MMOV_STATE_ERROR:
         ManagerError_SetError(ERROR_3_MMOV);
@@ -292,71 +292,71 @@ void ManagerMovement_Automatic()
 
 void ManagerMovement_ChangeSide()
 {
-	switch (managerMovement.changeSideState)
-	{
-	case MMOV_CHANGESIDE_STATE_WAITING4CMD:
-		ManagerMovement_Waiting4Cmd();
+    switch (managerMovement.changeSideState)
+    {
+    case MMOV_CHANGESIDE_STATE_WAITING4CMD:
+        ManagerMovement_Waiting4Cmd();
 
-		break;
+        break;
 
-	case MMOV_CHANGESIDE_STATE_MOVERIGHT:
-		ManagerMovement_ChangeSideRight();
+    case MMOV_CHANGESIDE_STATE_MOVERIGHT:
+        ManagerMovement_ChangeSideRight();
 
-		break;
+        break;
 
-	case MMOV_CHANGESIDE_STATE_MOVELEFT:
-		ManagerMovement_ChangeSideLeft();
+    case MMOV_CHANGESIDE_STATE_MOVELEFT:
+        ManagerMovement_ChangeSideLeft();
 
-		break;
-	}
+        break;
+    }
 }
 
 void ManagerMovement_Waiting4Cmd()
 {
-	if (PeriphSwitch_LegLeft())
-	{
-		managerMovement.changeSideState = MMOV_CHANGESIDE_STATE_MOVERIGHT;
-	}
-	else if (PeriphSwitch_LegRight())
-	{
-		managerMovement.changeSideState = MMOV_CHANGESIDE_STATE_MOVELEFT;
-	}
+    if (PeriphSwitch_LegLeft())
+    {
+        managerMovement.changeSideState = MMOV_CHANGESIDE_STATE_MOVERIGHT;
+    }
+    else if (PeriphSwitch_LegRight())
+    {
+        managerMovement.changeSideState = MMOV_CHANGESIDE_STATE_MOVELEFT;
+    }
 }
 
 void ManagerMovement_ChangeSideRight()
 {
-	// UNLOCK le soleinoids qui bloque le mouvement
+    // UNLOCK le soleinoids qui bloque le mouvement
 
-	if(PeriphSwitch_LegRight())
-	{
-		ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
-		// LOCK le soleinoid pour bloquer le mouvement
-		// UNLOCK le soleinoid dans l'eversion
+    if (PeriphSwitch_LegRight())
+    {
+        ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
+        // LOCK le soleinoid pour bloquer le mouvement
+        // UNLOCK le soleinoid dans l'eversion
 
-		ManagerMovement_HomingEversion();
-	}
-	else
-	{
-		ManagerMovement_ManualCmdEversion(MMOV_INSIDE);
-	}
+        ManagerMovement_HomingEversion();
+    }
+    else
+    {
+        ManagerMovement_ManualCmdEversion(MMOV_INSIDE);
+    }
 }
 
 void ManagerMovement_ChangeSideLeft()
 {
-	// UNLOCK le soleinoids qui bloque le mouvement
+    // UNLOCK le soleinoids qui bloque le mouvement
 
-	if(PeriphSwitch_LegLeft())
-	{
-		ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
-		// LOCK le soleinoid pour bloquer le mouvement
-		// UNLOCK le soleinoid dans l'eversion
+    if (PeriphSwitch_LegLeft())
+    {
+        ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
+        // LOCK le soleinoid pour bloquer le mouvement
+        // UNLOCK le soleinoid dans l'eversion
 
-		ManagerMovement_HomingEversion();
-	}
-	else
-	{
-		ManagerMovement_ManualCmdEversion(MMOV_INSIDE);
-	}
+        ManagerMovement_HomingEversion();
+    }
+    else
+    {
+        ManagerMovement_ManualCmdEversion(MMOV_INSIDE);
+    }
 }
 
 /*
@@ -397,16 +397,16 @@ void ManagerMovement_ManualCmdEversion(int8_t direction)
 {
     if (managerMovement.state == MMOV_STATE_MANUAL ||
         managerMovement.state == MMOV_STATE_HOMING ||
-		managerMovement.state == MMOV_STATE_CHANGESIDE)
+        managerMovement.state == MMOV_STATE_CHANGESIDE)
     {
-    	if (PeriphSwitch_LegLeft())
-    	{
-    		ManagerMovement_ManualIncrement(MMOT_MOTOR_2, -direction);
-    	}
-    	else if (PeriphSwitch_LegRight())
-    	{
-    		ManagerMovement_ManualIncrement(MMOT_MOTOR_2, direction);
-    	}
+        if (PeriphSwitch_LegLeft())
+        {
+            ManagerMovement_ManualIncrement(MMOT_MOTOR_2, -direction);
+        }
+        else if (PeriphSwitch_LegRight())
+        {
+            ManagerMovement_ManualIncrement(MMOT_MOTOR_2, direction);
+        }
     }
 }
 
@@ -435,7 +435,7 @@ void ManagerMovement_ManualIncrement(uint8_t motorIndex, int8_t factor)
     {
         managerMovement.motorsNextGoal[motorIndex] = factor * EXTREME_POS;
         ManagerMotor_MovePosOld(motorIndex,
-                                  managerMovement.motorsNextGoal[motorIndex]);
+                                managerMovement.motorsNextGoal[motorIndex]);
     }
 
     // Else : do nothing so skip command to avoid an accumulation of
@@ -447,27 +447,31 @@ void ManagerMovement_AutoMovement(uint8_t mouvType, float Position)
     if (mouvType == MMOV_DORSIFLEXION)  // Set goalPosition for motor 1 for
                                         // MMOV_DORSIFLEXION
     {
-        managerMovement.motorsNextGoal[MMOT_MOTOR_1] = -Position; //Motor is inverse
-        ManagerMotor_MovePosOld(MMOT_MOTOR_1, managerMovement.motorsNextGoal[MMOT_MOTOR_1]);
+        managerMovement.motorsNextGoal[MMOT_MOTOR_1] =
+            -Position;  // Motor is inverse
+        ManagerMotor_MovePosOld(MMOT_MOTOR_1,
+                                managerMovement.motorsNextGoal[MMOT_MOTOR_1]);
     }
     else if (mouvType == MMOV_EVERSION)  // Set goalPosition for motor 2 and
                                          // for MMOV_EVERSION
     {
-    	if (PeriphSwitch_LegLeft())
-    	{
-    		managerMovement.motorsNextGoal[MMOT_MOTOR_2] = -Position;
-    	}
-    	else if (PeriphSwitch_LegRight())
-    	{
-    		managerMovement.motorsNextGoal[MMOT_MOTOR_2] = Position;
-    	}
-    	ManagerMotor_MovePosOld(MMOT_MOTOR_2, managerMovement.motorsNextGoal[MMOT_MOTOR_2]);
+        if (PeriphSwitch_LegLeft())
+        {
+            managerMovement.motorsNextGoal[MMOT_MOTOR_2] = -Position;
+        }
+        else if (PeriphSwitch_LegRight())
+        {
+            managerMovement.motorsNextGoal[MMOT_MOTOR_2] = Position;
+        }
+        ManagerMotor_MovePosOld(MMOT_MOTOR_2,
+                                managerMovement.motorsNextGoal[MMOT_MOTOR_2]);
     }
     else if (mouvType ==
              MMOV_EXTENSION)  // Set goalPosition for motor 3 for MMOV_EXTENSION
     {
         managerMovement.motorsNextGoal[MMOT_MOTOR_3] = Position;
-        ManagerMotor_MovePosOld(MMOT_MOTOR_3, managerMovement.motorsNextGoal[MMOT_MOTOR_3]);
+        ManagerMotor_MovePosOld(MMOT_MOTOR_3,
+                                managerMovement.motorsNextGoal[MMOT_MOTOR_3]);
     }
 }
 
@@ -796,7 +800,7 @@ void ManagerMovement_HomingEversion()
         ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
         if (!evInsideLimitHit)
         {
-            leftPos        = motorsData[MMOT_MOTOR_2]->position;
+            leftPos          = motorsData[MMOT_MOTOR_2]->position;
             evInsideLimitHit = true;
         }
 
@@ -805,7 +809,7 @@ void ManagerMovement_HomingEversion()
             ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
             if (!evOutsideLimitHit)
             {
-                rightPos        = motorsData[MMOT_MOTOR_2]->position;
+                rightPos          = motorsData[MMOT_MOTOR_2]->position;
                 evOutsideLimitHit = true;
             }
 
@@ -820,12 +824,13 @@ void ManagerMovement_HomingEversion()
 
                 if (managerMovement.state == MMOV_STATE_CHANGESIDE)
                 {
-                	managerMovement.changeSideState = MMOV_CHANGESIDE_STATE_WAITING4CMD;
-                	managerMovement.state = MMOV_STATE_AUTOMATIC;
+                    managerMovement.changeSideState =
+                        MMOV_CHANGESIDE_STATE_WAITING4CMD;
+                    managerMovement.state = MMOV_STATE_AUTOMATIC;
                 }
                 else
                 {
-                	managerMovement.homingState = MMOV_HOMING_DORSIFLEXION;
+                    managerMovement.homingState = MMOV_HOMING_DORSIFLEXION;
                 }
             }
         }
@@ -903,7 +908,7 @@ float ManagerMovement_GetMiddlePos(float leftPos, float rightPos)
 void ManagerMovement_SetOrigins(uint8_t motorIndex)
 {
     ManagerMotor_SetOriginShift(motorIndex, motorsData[motorIndex]->position);
-    ManagerMotor_MovePosOld(motorIndex,  0.0f);
+    ManagerMotor_MovePosOld(motorIndex, 0.0f);
     managerMovement.motorsNextGoal[motorIndex] = 0.0f;
 }
 
@@ -986,32 +991,32 @@ bool ManagerMovement_SetState(uint8_t newState)
 
 bool ManagerMovement_InsideLimitSwitch()
 {
-	bool insideSwitchHit = false;
+    bool insideSwitchHit = false;
 
-	if (PeriphSwitch_LegRight())
-	{
-		insideSwitchHit = PeriphSwitch_EversionLeft();
-	}
-	else if (PeriphSwitch_LegRight())
-	{
-		insideSwitchHit = PeriphSwitch_EversionRight();
-	}
+    if (PeriphSwitch_LegRight())
+    {
+        insideSwitchHit = PeriphSwitch_EversionLeft();
+    }
+    else if (PeriphSwitch_LegRight())
+    {
+        insideSwitchHit = PeriphSwitch_EversionRight();
+    }
 
-	return insideSwitchHit;
+    return insideSwitchHit;
 }
 
 bool ManagerMovement_OutsideLimitSwitch()
 {
-	bool outsideSwitchHit = false;
+    bool outsideSwitchHit = false;
 
-	if (PeriphSwitch_LegRight())
-	{
-		outsideSwitchHit = PeriphSwitch_EversionRight();
-	}
-	else if (PeriphSwitch_LegRight())
-	{
-		outsideSwitchHit = PeriphSwitch_EversionLeft();
-	}
+    if (PeriphSwitch_LegRight())
+    {
+        outsideSwitchHit = PeriphSwitch_EversionRight();
+    }
+    else if (PeriphSwitch_LegRight())
+    {
+        outsideSwitchHit = PeriphSwitch_EversionLeft();
+    }
 
-	return outsideSwitchHit;
+    return outsideSwitchHit;
 }
