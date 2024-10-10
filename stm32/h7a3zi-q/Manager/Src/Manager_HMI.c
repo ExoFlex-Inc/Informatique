@@ -33,7 +33,6 @@ void ManagerHMI_SetMotorDataToString();
 void ManagerHMI_ParseJson(char* msg, uint8_t maxlength, uint8_t* sectionNbr);
 void ManagerHMI_ExecuteJson(uint8_t sectionNbr);
 void ManagerHMI_ExecuteManualIncrement(char* cmd);
-void ManagerHMI_ExecuteManualHoming(char* cmd);
 void ManagerHMI_ExecutePlanCmd(char* cmd, uint8_t size);
 void ManagerHMI_ExecuteControlCmd(char* cmd);
 
@@ -233,11 +232,11 @@ void ManagerHMI_ExecuteManualIncrement(char* cmd)
     {
         if (strcmp(cmd, "EversionR") == 0)
         {
-            ManagerMovement_ManualCmdEversion(MMOV_RIGTH);
+            ManagerMovement_ManualCmdEversion(MMOV_OUTSIDE);
         }
         else if (strcmp(cmd, "EversionL") == 0)
         {
-            ManagerMovement_ManualCmdEversion(MMOV_LEFT);
+            ManagerMovement_ManualCmdEversion(MMOV_INSIDE);
         }
         else if (strcmp(cmd, "DorsiflexionU") == 0)
         {
@@ -254,45 +253,6 @@ void ManagerHMI_ExecuteManualIncrement(char* cmd)
         else if (strcmp(cmd, "ExtensionD") == 0)
         {
             ManagerMovement_ManualCmdExtension(MMOV_DOWN);
-        }
-        else if (strcmp(cmd, "GoHome1") == 0)
-        {
-            ManagerMovement_ManualCmdHome(MMOT_MOTOR_1);
-        }
-        else if (strcmp(cmd, "GoHome2") == 0)
-        {
-            ManagerMovement_ManualCmdHome(MMOT_MOTOR_2);
-        }
-        else if (strcmp(cmd, "GoHome3") == 0)
-        {
-            ManagerMovement_ManualCmdHome(MMOT_MOTOR_3);
-        }
-        else if (strcmp(cmd, "GoHome") == 0)
-        {
-            ManagerMovement_ManualCmdHomeAll();
-        }
-    }
-}
-
-void ManagerHMI_ExecuteManualHoming(char* cmd)
-{
-    if (cmd != NULL)
-    {
-        if (strcmp(cmd, "GoHome1") == 0)
-        {
-            ManagerMovement_ManualCmdHome(MMOT_MOTOR_1);
-        }
-        else if (strcmp(cmd, "GoHome2") == 0)
-        {
-            ManagerMovement_ManualCmdHome(MMOT_MOTOR_2);
-        }
-        else if (strcmp(cmd, "GoHome3") == 0)
-        {
-            ManagerMovement_ManualCmdHome(MMOT_MOTOR_3);
-        }
-        else if (strcmp(cmd, "GoHome") == 0)
-        {
-            ManagerMovement_ManualCmdHomeAll();
         }
     }
 }

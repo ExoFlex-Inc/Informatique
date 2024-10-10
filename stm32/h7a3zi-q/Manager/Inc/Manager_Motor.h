@@ -16,10 +16,6 @@
 #define MMOT_MOTOR_2   1
 #define MMOT_MOTOR_3   2
 
-#define MMOT_CONTROL_POSITION 0
-#define MMOT_CONTROL_TORQUE   1
-#define MMOT_CONTROL_SPEED    2
-
 #define MMOT_STATE_WAITING_SECURITY 1
 #define MMOT_STATE_START_MOTORS     2
 #define MMOT_STATE_READY2MOVE       5
@@ -29,11 +25,13 @@ void ManagerMotor_Init();
 void ManagerMotor_Reset();
 void ManagerMotor_Task();
 
-Motor* ManagerMotor_GetMotorData(uint8_t motorIndex);
+Motor* ManagerMotor_GetMotorData(uint8_t id);
 bool   ManagerMotor_IsReady2Move();
-bool   ManagerMotor_IsGoalStateReady(uint8_t motorIndex);
-void   ManagerMotor_SetMotorGoal(uint8_t motorIndex, uint8_t controlType,
-                                 float goal);
+bool   ManagerMotor_IsGoalStateReady(uint8_t id);
+
+void ManagerMotor_MovePosOld(uint8_t id, float pos);
+void ManagerMotor_MoveSpeed(uint8_t id, float speed);
+void ManagerMotor_MovePosSpeed(uint8_t id, float pos, float speed);
 
 bool    ManagerMotor_IsWaitingSecurity();
 void    ManagerMotor_SecurityPassed();
@@ -42,7 +40,7 @@ bool    ManagerMotor_InError();
 uint8_t ManagerMotor_GetState();
 void    ManagerMotor_StopManualMovement(uint8_t motorindex);
 
-void ManagerMotor_SetMotorOrigin(uint8_t motorIndex);
-void ManagerMotor_SetOriginShift(uint8_t motorIndex, float shiftValue);
+void ManagerMotor_SetMotorOrigin(uint8_t id);
+void ManagerMotor_SetOriginShift(uint8_t id, float shiftValue);
 
 #endif
