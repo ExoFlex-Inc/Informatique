@@ -21,5 +21,6 @@ bool PeriphSwitch_DorsiflexionDown();
 bool PeriphSwitch_EversionLeft();
 bool PeriphSwitch_EversionRight();
 bool PeriphSwitch_AnySwitch();
+uint8_t PeriphSwitch_GetLegSide();
 
 #endif /* INC_PERIPH_SWITCH_H_ */

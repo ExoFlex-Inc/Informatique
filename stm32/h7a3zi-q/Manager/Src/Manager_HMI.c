@@ -370,9 +370,13 @@ void ManagerHMI_GetStrMode(uint8_t index, char* str)
     case MMOV_STATE_AUTOMATIC:
         strcpy(str, "Automatic");
         break;
+    case MMOV_STATE_CHANGESIDE:
+   		strcpy(str, "ChangeSide");
+   		break;
     case MMOV_STATE_ERROR:
         strcpy(str, "Error");
         break;
+
     default:
         strcpy(str, "");
         break;

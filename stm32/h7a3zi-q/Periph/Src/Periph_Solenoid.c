@@ -18,7 +18,7 @@
 #define PS_PIN_SOLENOID_EVERSION_IN3    	GPIO_PIN_5
 #define PS_PIN_SOLENOID_EVERSION_IN4    	GPIO_PIN_6
 
-#define PIN_WAIT 20 //ms
+#define LOCK_WAITING_DELAY 1000 //ms
 
 #define SOLENOID_PWM_PERCENT 50 //%
 
@@ -30,13 +30,12 @@ uint32_t PeriphSolenoid_SetDutyCycle(TIM_HandleTypeDef *htim, uint32_t channel, 
  ********************************************/
 bool PeriphSolenoid_UnlockChangeSide()
 {
-	bool isLock = false;
-	bool isEnable = false;
+	static bool isLock = false;
     uint32_t lastActivationTime = 0;
 
     uint32_t currentTime = HAL_GetTick();
 
-    if (!isEnable)
+    if (!isLock)
     {
     	uint32_t compare_value = PeriphSolenoid_SetDutyCycle(PS_SOLENOID_CHANGESIDE_PWM, PS_CHANNEL_SOLENOID_CHANGESIDE_PWM, SOLENOID_PWM_PERCENT);
 
@@ -44,103 +43,57 @@ bool PeriphSolenoid_UnlockChangeSide()
     	__HAL_TIM_SET_COMPARE(PS_SOLENOID_CHANGESIDE_PWM, PS_CHANNEL_SOLENOID_CHANGESIDE_PWM, compare_value);
     	HAL_TIM_PWM_Start(PS_SOLENOID_CHANGESIDE_PWM, PS_CHANNEL_SOLENOID_CHANGESIDE_PWM);
 
-    	lastActivationTime = currentTime;
-    	isEnable = true;
-    }
-
-	if (currentTime - lastActivationTime >= PIN_WAIT)
-	{
-		HAL_GPIO_WritePin(PS_GPIO_SOLENOID_CHANGESIDE_IN1, PS_PIN_SOLENOID_CHANGESIDE_IN1, GPIO_PIN_SET);
+    	HAL_GPIO_WritePin(PS_GPIO_SOLENOID_CHANGESIDE_IN1, PS_PIN_SOLENOID_CHANGESIDE_IN1, GPIO_PIN_SET);
 		HAL_GPIO_WritePin(PS_GPIO_SOLENOID_CHANGESIDE_IN2, PS_PIN_SOLENOID_CHANGESIDE_IN2, GPIO_PIN_RESET);
 
-		isLock = true;
+    	lastActivationTime = currentTime;
+    	isLock = true;
+    }
+
+	if (currentTime - lastActivationTime >= LOCK_WAITING_DELAY && isLock)
+	{
+		HAL_GPIO_WritePin(PS_GPIO_SOLENOID_CHANGESIDE_IN1, PS_PIN_SOLENOID_CHANGESIDE_IN1, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(PS_GPIO_SOLENOID_CHANGESIDE_IN2, PS_PIN_SOLENOID_CHANGESIDE_IN2, GPIO_PIN_RESET);
+
+		HAL_TIM_PWM_Stop(PS_SOLENOID_CHANGESIDE_PWM, PS_CHANNEL_SOLENOID_CHANGESIDE_PWM);
+		isLock = false;
 	}
+
 	return isLock;
 }
 
 bool PeriphSolenoid_UnlockEversion()
 {
-	bool isLock = false;
-	bool isEnable = false;
-    uint32_t lastActivationTime = 0;
+	static bool isLock = false;
+	uint32_t lastActivationTime = 0;
 
-    uint32_t currentTime = HAL_GetTick();
+	uint32_t currentTime = HAL_GetTick();
 
-    if (!isEnable)
-    {
-    	uint32_t compare_value = PeriphSolenoid_SetDutyCycle(PS_SOLENOID_EVERSION_PWM, PS_CHANNEL_SOLENOID_EVERSION_PWM, SOLENOID_PWM_PERCENT);
+	if (!isLock)
+	{
+		uint32_t compare_value = PeriphSolenoid_SetDutyCycle(PS_SOLENOID_EVERSION_PWM, PS_CHANNEL_SOLENOID_EVERSION_PWM, SOLENOID_PWM_PERCENT);
 
 		// Start PWM
 		__HAL_TIM_SET_COMPARE(PS_SOLENOID_EVERSION_PWM, PS_CHANNEL_SOLENOID_EVERSION_PWM, compare_value);
 		HAL_TIM_PWM_Start(PS_SOLENOID_EVERSION_PWM, PS_CHANNEL_SOLENOID_EVERSION_PWM);
 
-    	isEnable = true;
-    }
-
-	if (currentTime - lastActivationTime >= PIN_WAIT)
-	{
 		HAL_GPIO_WritePin(PS_GPIO_SOLENOID_EVERSION_IN3, PS_PIN_SOLENOID_EVERSION_IN3, GPIO_PIN_SET);
 		HAL_GPIO_WritePin(PS_GPIO_SOLENOID_EVERSION_IN4, PS_PIN_SOLENOID_EVERSION_IN4, GPIO_PIN_RESET);
 
+		lastActivationTime = currentTime;
 		isLock = true;
 	}
-	return isLock;
-}
 
-/********************************************
- * Lock the solenoids
- ********************************************/
-bool PeriphSolenoid_LockChangeSide()
-{
-	static bool isUnlock = false;
-	static bool isDisable = false;
-    uint32_t lastActivationTime = 0;
-
-    uint32_t currentTime = HAL_GetTick();
-
-    if (!isDisable)
-    {
-		// Stop PWM
-		HAL_TIM_PWM_Stop(PS_SOLENOID_CHANGESIDE_PWM, PS_CHANNEL_SOLENOID_CHANGESIDE_PWM);
-
-		lastActivationTime = currentTime;
-    	isDisable = true;
-    }
-
-	if (currentTime - lastActivationTime >= PIN_WAIT)
-	{
-		HAL_GPIO_WritePin(PS_GPIO_SOLENOID_CHANGESIDE_IN1, PS_PIN_SOLENOID_CHANGESIDE_IN1, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(PS_GPIO_SOLENOID_CHANGESIDE_IN2, PS_PIN_SOLENOID_CHANGESIDE_IN2, GPIO_PIN_RESET);
-
-		isUnlock = true;
-	}
-	return isUnlock;
-}
-
-bool PeriphSolenoid_LockEversion()
-{
-	static bool isUnlock = false;
-	static bool isDisable = false;
-    uint32_t lastActivationTime = 0;
-
-    uint32_t currentTime = HAL_GetTick();
-
-    if (!isDisable)
-    {
-    	HAL_TIM_PWM_Stop(PS_SOLENOID_EVERSION_PWM, PS_CHANNEL_SOLENOID_EVERSION_PWM);
-
-    	lastActivationTime = currentTime;
-    	isDisable = true;
-    }
-
-	if (currentTime - lastActivationTime >= PIN_WAIT)
+	if (currentTime - lastActivationTime >= 1000 && isLock)
 	{
 		HAL_GPIO_WritePin(PS_GPIO_SOLENOID_EVERSION_IN3, PS_PIN_SOLENOID_EVERSION_IN3, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(PS_GPIO_SOLENOID_EVERSION_IN4, PS_PIN_SOLENOID_EVERSION_IN4, GPIO_PIN_RESET);
 
-		isUnlock = true;
+		HAL_TIM_PWM_Stop(PS_SOLENOID_CHANGESIDE_PWM, PS_CHANNEL_SOLENOID_CHANGESIDE_PWM);
+		isLock = false;
 	}
-	return isUnlock;
+
+	return isLock;
 }
 
 uint32_t PeriphSolenoid_SetDutyCycle(TIM_HandleTypeDef *htim, uint32_t channel, float duty_cycle_percent)
