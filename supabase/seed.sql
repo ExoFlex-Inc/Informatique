@@ -16,7 +16,7 @@ DECLARE
     random_repetitions_success_rate FLOAT;
     random_predicted_total_time FLOAT;
     random_actual_total_time FLOAT;
-    random_rated_pain INT;
+    random_rated_pain rated_pain_enum;
 BEGIN
     FOR i IN 1..50 LOOP
         new_email := 'user' || i || '@exoflex.com';
@@ -98,7 +98,7 @@ BEGIN
             random_repetitions_success_rate := round((random() * 100)::numeric, 2);
             random_predicted_total_time := round((random() * 100)::numeric, 2);
             random_actual_total_time := round((random() * 120)::numeric, 2);
-            random_rated_pain := floor(random() * 10) + 1;
+            random_rated_pain := CONCAT(floor(random() * 5) + 1);
 
             INSERT INTO exercise_data (
                 id,
@@ -287,7 +287,7 @@ BEGIN
         random_repetitions_success_rate := round((random() * 100)::numeric, 2);
         random_predicted_total_time := round((random() * 100)::numeric, 2);
         random_actual_total_time := round((random() * 120)::numeric, 2);
-        random_rated_pain := floor(random() * 10) + 1;
+        random_rated_pain := CONCAT(floor(random() * 5) + 1);
 
         INSERT INTO exercise_data (
             id,
