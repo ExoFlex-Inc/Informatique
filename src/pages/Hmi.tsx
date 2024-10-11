@@ -22,6 +22,7 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import LineChart from "../components/LineChart.tsx";
 import { tokens } from "../hooks/theme.ts";
 import ExerciseOverviewWidget from "../components/ExerciseOverviewWidget.tsx";
+import RatingPopUp from "../components/RatingPopUp.tsx";
 import ToggleSide from "../components/ToggleSide.tsx";
 import { Side } from "../components/ToggleSide.tsx";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
@@ -39,6 +40,8 @@ export default function HMI() {
   const { stm32Data, socket, errorFromStm32 } = useStm32();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const [openDialogPainScale, setOpenDialogPainScale] = useState(false);
+  const [painScale, setPainScale] = useState<number>(0);
 
   const isTablet = useMediaQuery("(max-width: 768px)");
 
@@ -147,6 +150,49 @@ export default function HMI() {
     }
   }, [stm32Data?.Repetitions]);
 
+  useEffect(() => {
+    if (painScale) {
+      const date = Date.now();
+      const formattedDate = new Date(date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "numeric",
+      });
+      const requestBody = {
+        date: formattedDate,
+        rated_pain: painScale,
+        user_id: profile.user_id,
+      };
+      const fetchData = async () => {
+        try {
+          const exerciseData = await fetch(
+            `http://localhost:3001/exercise-data/${profile.user_id}`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(requestBody),
+            },
+          );
+
+          if (exerciseData.ok) {
+            console.log("Serial port initialized successfully.");
+          } else {
+            console.error("Failed to initialize the serial port.");
+          }
+        } catch (error) {
+          console.error("An error occurred:", error);
+        }
+      };
+
+      fetchData();
+    }
+  }, [painScale]);
+
   return (
     <div className="flex flex-col custom-height">
       <div className="ml-10">
@@ -158,7 +204,11 @@ export default function HMI() {
             <LineChart chartData={chartData} type="line" socket={socket} />
           </div>
           <div className="bg-white rounded-2xl content-evenly">
-            <ProgressionWidget stm32Data={stm32Data} planData={planData} />
+            <ProgressionWidget
+          setOpenDialogPainScale={setOpenDialogPainScale}
+          stm32Data={stm32Data}
+          planData={planData}
+        />
           </div>
           <div className="bg-white col-span-1 flex flex-col justify-around rounded-2xl mb-5">
             <div className="flex justify-between mt-5 ml-10 mr-10">
@@ -269,6 +319,11 @@ export default function HMI() {
             )}
           </div>
           <ExerciseOverviewWidget stm32Data={stm32Data} planData={planData} />
+      <RatingPopUp
+        setOpenDialogPainScale={setOpenDialogPainScale}
+        setPainScale={setPainScale}
+        openDialogPainScale={openDialogPainScale}
+      />
         </div>
       </CustomScrollbar>
     </div>
