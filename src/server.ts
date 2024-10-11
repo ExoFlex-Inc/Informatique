@@ -9,6 +9,7 @@ import { Server as SocketIOServer } from "socket.io";
 import authRoutes from "./routes/authRoutes.ts";
 import serialPortRoutes from "./routes/serialPortRoutes.ts";
 import planRoutes from "./routes/planRoutes.ts";
+import wellnessNetworkRoutes from "./routes/wellnessNetworkRoutes.ts";
 import hmiRoutes from "./routes/hmiRoutes.ts";
 import userRoutes from "./routes/userRoutes.ts";
 import relationsRoutes from "./routes/relationsRoutes.ts";
@@ -63,7 +64,6 @@ app.use("/api", hmiRoutes);
 
 io.on("connection", (socket) => {
   console.log("A client connected");
-
   socket.on("planData", (planData) => {
     const serialPort = getSerialPort();
     if (serialPort && serialPort.isOpen) {
