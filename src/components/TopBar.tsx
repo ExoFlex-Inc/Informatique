@@ -21,7 +21,7 @@ import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
-import Icon from "../../public/assets/user.png";
+import Icon from "../../assets/user.png";
 
 import Notification from "./Notification.tsx";
 

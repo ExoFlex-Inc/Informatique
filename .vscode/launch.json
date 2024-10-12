@@ -4,12 +4,19 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Server with Debugger",
+      "name": "Launch Server with Debugger (ts-node)",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["nodemon", "--config", "nodemon.json"],
+      "runtimeArgs": [
+        "nodemon",
+        "--config",
+        "nodemon.json"
+      ],
       "skipFiles": ["<node_internals>/**"],
       "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen"
+      "internalConsoleOptions": "neverOpen",
+      "envFile": "${workspaceFolder}/.env",  // Ensures environment variables are loaded
+      // "outFiles": ["${workspaceFolder}/dist/**/*.js"],  // In case of any compiled JS output
+      // "restart": true
     },
     {
       "name": "Launch Vite DEV server",
@@ -21,7 +28,8 @@
         "action": "debugWithChrome",
         "pattern": "Local: http://localhost:([0-9]+)",
         "uriFormat": "http://localhost:%s"
-      }
+      },
+      "skipFiles": ["<node_internals>/**"]
     },
     {
       "type": "chrome",
@@ -35,7 +43,7 @@
     {
       "name": "Launch Full Stack",
       "configurations": [
-        "Launch Server with Debugger",
+        "Launch Server with Debugger (ts-node)",
         "Launch Vite DEV server",
         "Launch Chrome against localhost"
       ]

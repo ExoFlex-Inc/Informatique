@@ -15,7 +15,7 @@ import {
   TextField,
 } from "@mui/material";
 import { styled } from "@mui/material";
-import DefaultProfilePic from "../../public/assets/user.png";
+import DefaultProfilePic from "../../assets/user.png";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from "@mui/icons-material/Check";

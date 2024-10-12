@@ -19,7 +19,7 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import FeedOutlinedIcon from "@mui/icons-material/FeedOutlined";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import GroupIcon from "@mui/icons-material/Group";
-import Icon from "../../public/assets/user.png";
+import Icon from "../../assets/user.png";
 import { useUserProfile } from "../hooks/use-profile";
 import CustomScrollbar from "./CustomScrollbars";
 

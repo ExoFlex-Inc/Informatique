@@ -1,10 +1,9 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import supaClient from "../utils/supabaseClient";
-import { PostPlanRequestBody } from "../interfaces/Plan";
+import supaClient from "../utils/supabaseClient.ts";
 
 const postPlan = asyncHandler(async (req: Request, res: Response) => {
-  const { plan, user_id }: PostPlanRequestBody = req.body;
+  const { plan, user_id } = req.body;
 
   if (!plan || !user_id) {
     return res.status(400).json({ message: "Plan and user_id are required." });

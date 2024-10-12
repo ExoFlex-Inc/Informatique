@@ -129,7 +129,7 @@ export default function Login() {
       <div className="flex flex-col justify-center w-full max-w-md px-8 mx-auto lg:w-1/2">
         <div className="flex justify-center">
           <img
-            src="/public/assets/logo.png"
+            src="/assets/logo.png"
             alt="Logo"
             className="object-contain"
             style={{ width: "300px", height: "300px" }}
@@ -215,7 +215,7 @@ export default function Login() {
       <div className="w-full lg:w-1/2">
         <img
           className="object-cover w-full h-full"
-          src="/public/assets/exoflex_team.jpg"
+          src="/assets/exoflex_team.jpg"
           alt="Team background"
         />
       </div>

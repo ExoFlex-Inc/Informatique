@@ -1,6 +1,10 @@
 {
-  "watch": ["src"],
+  "watch": [
+    "src"
+  ],
   "ext": "ts,tsx",
-  "ignore": ["dist"],
-  "exec": "npx tsx -r dotenv/config --inspect src/server.ts"
+  "exec": "node --no-warnings --enable-source-maps --loader ts-node/esm src/server.ts",
+  "ignore": [
+    "src/**/*.spec.ts"
+  ]
 }
