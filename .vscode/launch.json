@@ -2,9 +2,9 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Launch Server with Debugger (ts-node)",
       "type": "node",
       "request": "launch",
-      "name": "Launch Server with Debugger (ts-node)",
       "runtimeExecutable": "npx",
       "runtimeArgs": [
         "nodemon",
@@ -14,9 +14,6 @@
       "skipFiles": ["<node_internals>/**"],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "envFile": "${workspaceFolder}/.env",  // Ensures environment variables are loaded
-      // "outFiles": ["${workspaceFolder}/dist/**/*.js"],  // In case of any compiled JS output
-      // "restart": true
     },
     {
       "name": "Launch Vite DEV server",
