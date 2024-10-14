@@ -24,9 +24,6 @@
 #define MMOV_CHANGESIDE_STATE_MOVERIGHT   1
 #define MMOV_CHANGESIDE_STATE_MOVELEFT    2
 
-#define MMOV_LEG_IS_LEFT 1
-#define MMOV_LEG_IS_RIGHT 2
-
 typedef struct
 {
     uint8_t state;
@@ -980,6 +977,7 @@ autoPlanInfo_t* ManagerMovement_GetPlanData()
     // Copy the infos
     autoPlanInfo.autoState   = managerMovement.autoState;
     autoPlanInfo.homingState = managerMovement.homingState;
+    autoPlanInfo.legSide     = managerMovement.currentLegSide;
     autoPlanInfo.repsCount   = repsCount;
     autoPlanInfo.exCount     = exerciseIdx;
 
