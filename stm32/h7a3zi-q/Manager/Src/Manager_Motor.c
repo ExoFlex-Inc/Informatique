@@ -513,7 +513,7 @@ void ManagerMotor_NextCmdPosSpeedTorque(uint8_t id)
         	torque = -torque;
         }
 
-        float speedFromTorque = ManagerMotor_CalcSpeedFromTorque(torque, fabsf(motors[id].goalTorque), MMOT_MIN_SPEED_CMD, MMOT_MAX_SPEED_CMD);
+        float speedFromTorque = ManagerMotor_CalcSpeedFromTorque(torque, fabsf(motors[id].goalTorque), MMOT_MIN_SPEED_CMD, motors[id].goalSpeed);
 
         motors[id].cmdSpeed = motors[id].cmdSpeed * alpha + speedFromTorque * dir * (1-alpha);
         motors[id].cmdPosition = motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
