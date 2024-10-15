@@ -12,8 +12,8 @@
 /***********************************************/
 
 #define MMOT_MOTOR_NBR 3
-#define MMOT_MOTOR_1   0
-#define MMOT_MOTOR_2   1
+#define MMOT_MOTOR_1   1
+#define MMOT_MOTOR_2   0
 #define MMOT_MOTOR_3   2
 
 #define MMOT_STATE_WAITING_SECURITY 1

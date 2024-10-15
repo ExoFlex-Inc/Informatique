@@ -2,8 +2,8 @@
 #include <Manager_Motor.h>
 #include <Periph_Canbus.h>
 
-#define MMOT_MOTOR_1_CAN_ID 1
-#define MMOT_MOTOR_2_CAN_ID 2
+#define MMOT_MOTOR_1_CAN_ID 2
+#define MMOT_MOTOR_2_CAN_ID 1
 #define MMOT_MOTOR_3_CAN_ID 3
 
 #define MMOT_MOVING_MAX_SPEED  200
