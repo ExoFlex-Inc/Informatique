@@ -11,16 +11,16 @@
 
 // Define Pins
 #define PS_CHANNEL_SOLENOID_CHANGESIDE_PWM 		TIM_CHANNEL_2
-#define PS_PIN_SOLENOID_CHANGESIDE_IN1  		GPIO_PIN_3
-#define PS_PIN_SOLENOID_CHANGESIDE_IN2  		GPIO_PIN_4
+#define PS_PIN_SOLENOID_CHANGESIDE_IN1  		GPIO_PIN_4
+#define PS_PIN_SOLENOID_CHANGESIDE_IN2  		GPIO_PIN_5
 
 #define PS_CHANNEL_SOLENOID_EVERSION_PWM   	TIM_CHANNEL_3
-#define PS_PIN_SOLENOID_EVERSION_IN3    	GPIO_PIN_5
-#define PS_PIN_SOLENOID_EVERSION_IN4    	GPIO_PIN_6
+#define PS_PIN_SOLENOID_EVERSION_IN3    	GPIO_PIN_6
+#define PS_PIN_SOLENOID_EVERSION_IN4    	GPIO_PIN_7
 
 #define LOCK_WAITING_DELAY 1000 //ms
 
-#define SOLENOID_PWM_PERCENT 50 //%
+#define SOLENOID_PWM_PERCENT 80 //%
 
 
 uint32_t PeriphSolenoid_SetDutyCycle(TIM_HandleTypeDef *htim, uint32_t channel, float duty_cycle_percent);
@@ -84,7 +84,7 @@ bool PeriphSolenoid_UnlockEversion()
 		isLock = true;
 	}
 
-	if (currentTime - lastActivationTime >= 1000 && isLock)
+	if (currentTime - lastActivationTime >= LOCK_WAITING_DELAY && isLock)
 	{
 		HAL_GPIO_WritePin(PS_GPIO_SOLENOID_EVERSION_IN3, PS_PIN_SOLENOID_EVERSION_IN3, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(PS_GPIO_SOLENOID_EVERSION_IN4, PS_PIN_SOLENOID_EVERSION_IN4, GPIO_PIN_RESET);
@@ -106,9 +106,6 @@ uint32_t PeriphSolenoid_SetDutyCycle(TIM_HandleTypeDef *htim, uint32_t channel, 
 /********************************************
  * Feet motor control
  ********************************************/
-
-
-
 
 
 
