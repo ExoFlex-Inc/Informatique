@@ -21,7 +21,7 @@ export default function Planning() {
   const [selectedUser, setSelectedUser] = useState<any[]>([]);
   const [isDisabled, setIsDisabled] = useState(true);
   const [addExerciseDisable, setAddExerciseDisable] = useState(true);
-  const [side, setSide] = useState<Side>("Left");
+  const [side, setSide] = useState<Side>(null);
   const [checked, setChecked] = useState(false);
   const checkboxRefs = useRef<(HTMLInputElement | null)[]>([]);
   const { relations, isLoading: isLoadingRelations } = useRelations();
@@ -120,7 +120,7 @@ export default function Planning() {
   return (
     <div className="flex flex-col custom-height">
       <div className="flex justify-center items-center">
-        <ToggleSide side={side} setSide={setSide} />
+        <ToggleSide setSide={setSide} />
         <UserSearchBar
           sx={{ width: 500 }}
           setSearchQuery={setSelectedUser}

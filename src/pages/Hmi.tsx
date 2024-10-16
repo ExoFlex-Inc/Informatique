@@ -24,7 +24,6 @@ import { tokens } from "../hooks/theme.ts";
 import ExerciseOverviewWidget from "../components/ExerciseOverviewWidget.tsx";
 import RatingPopUp from "../components/RatingPopUp.tsx";
 import ToggleSide from "../components/ToggleSide.tsx";
-import { Side } from "../components/ToggleSide.tsx";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
 interface ChartData {
   datasets: {
@@ -46,8 +45,6 @@ export default function HMI() {
   const isTablet = useMediaQuery("(max-width: 768px)");
 
   const hasExecute = useRef(false);
-  const [side, setSide] = useState<Side>("Left");
-
   const [chartData, setChartData] = useState<ChartData>({
     datasets: [
       {
@@ -196,7 +193,7 @@ export default function HMI() {
   return (
     <div className="flex flex-col custom-height">
       <div className="ml-10">
-        <ToggleSide side={side} setSide={setSide} />
+        <ToggleSide />
       </div>
       <CustomScrollbar>
         <div className="plan-grid grid-cols-2 grid-rows-2 gap-4 mr-10 ml-10 ">
@@ -205,10 +202,10 @@ export default function HMI() {
           </div>
           <div className="bg-white rounded-2xl content-evenly">
             <ProgressionWidget
-          setOpenDialogPainScale={setOpenDialogPainScale}
-          stm32Data={stm32Data}
-          planData={planData}
-        />
+              setOpenDialogPainScale={setOpenDialogPainScale}
+              stm32Data={stm32Data}
+              planData={planData}
+            />
           </div>
           <div className="bg-white col-span-1 flex flex-col justify-around rounded-2xl mb-5">
             <div className="flex justify-between mt-5 ml-10 mr-10">
@@ -319,13 +316,14 @@ export default function HMI() {
             )}
           </div>
           <ExerciseOverviewWidget stm32Data={stm32Data} planData={planData} />
+
+        </div>
+      </CustomScrollbar>
       <RatingPopUp
         setOpenDialogPainScale={setOpenDialogPainScale}
         setPainScale={setPainScale}
         openDialogPainScale={openDialogPainScale}
       />
-        </div>
-      </CustomScrollbar>
     </div>
   );
 }

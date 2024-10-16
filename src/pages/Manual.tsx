@@ -1,15 +1,11 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
-  Typography,
   Checkbox,
   FormControlLabel,
   Grid,
-  Paper,
   TextField,
   IconButton,
-  createTheme,
-  ThemeProvider,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
@@ -18,6 +14,8 @@ import AirlineSeatLegroomExtraIcon from "@mui/icons-material/AirlineSeatLegroomE
 import LineChart from "../components/LineChart";
 import MotorControlWidget from "../components/MotorControlWidget";
 import useStm32 from "../hooks/use-stm32";
+import CustomScrollbar from "../components/CustomScrollbars.tsx";
+import ToggleSide from "../components/ToggleSide.tsx";
 
 const WhiteBorderCheckbox = styled(Checkbox)(({ theme }) => ({
   color: "white",
@@ -66,6 +64,7 @@ export default function Manual() {
   const [errorDescription, setErrorDescription] = useState("");
   const [graphDataType, setGraphDataType] = useState("position");
   const [graphPause, setGraphPause] = useState(false);
+
   const [latestMotorData, setLatestMotorData] = useState({
     motor1: { x: 0, position: 0, torque: 0, current: 0 },
     motor2: { x: 0, position: 0, torque: 0, current: 0 },
@@ -153,114 +152,120 @@ export default function Manual() {
   });
 
   return (
-    <Box sx={{ height: "100vh", overflow: "auto" }}>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              mb: 2,
-            }}
-          >
-            <IconButton
-              onClick={() => setGraphPause(false)}
-              disabled={!graphPause}
-            >
-              <PlayArrowIcon />
-            </IconButton>
-            <IconButton
-              onClick={() => setGraphPause(true)}
-              disabled={graphPause}
-            >
-              <PauseIcon />
-            </IconButton>
-            <Box sx={{ width: 50 }} />
-            <FormControlLabel
-              control={
-                <WhiteBorderCheckbox
-                  checked={graphDataType === "position"}
-                  onChange={() => setGraphDataType("position")}
+    <div className="custom-height flex flex-col">
+      <CustomScrollbar>
+        <Box>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  mb: 2,
+                }}
+              >
+                <ToggleSide />
+                <Box sx={{ width: 50 }} />
+                <IconButton
+                  onClick={() => setGraphPause(false)}
+                  disabled={!graphPause}
+                >
+                  <PlayArrowIcon />
+                </IconButton>
+                <IconButton
+                  onClick={() => setGraphPause(true)}
+                  disabled={graphPause}
+                >
+                  <PauseIcon />
+                </IconButton>
+                <Box sx={{ width: 50 }} />
+                <FormControlLabel
+                  control={
+                    <WhiteBorderCheckbox
+                      checked={graphDataType === "position"}
+                      onChange={() => setGraphDataType("position")}
+                    />
+                  }
+                  label="Position"
                 />
-              }
-              label="Position"
-            />
-            <FormControlLabel
-              control={
-                <WhiteBorderCheckbox
-                  checked={graphDataType === "torque"}
-                  onChange={() => setGraphDataType("torque")}
+                <FormControlLabel
+                  control={
+                    <WhiteBorderCheckbox
+                      checked={graphDataType === "torque"}
+                      onChange={() => setGraphDataType("torque")}
+                    />
+                  }
+                  label="Torque"
                 />
-              }
-              label="Torque"
-            />
-            <FormControlLabel
-              control={
-                <WhiteBorderCheckbox
-                  checked={graphDataType === "current"}
-                  onChange={() => setGraphDataType("current")}
+                <FormControlLabel
+                  control={
+                    <WhiteBorderCheckbox
+                      checked={graphDataType === "current"}
+                      onChange={() => setGraphDataType("current")}
+                    />
+                  }
+                  label="Current"
                 />
-              }
-              label="Current"
-            />
-          </Box>
-          <LineChart
-            chartData={getChartData()}
-            mode="Manual"
-            type="realtime"
-            graphPause={graphPause}
-          />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "100%",
-            }}
-          >
-            <MotorControlWidget
-              title="Anatomical Movement"
-              icon={<AirlineSeatLegroomExtraIcon sx={{ fontSize: 56 }} />}
-              labels={[
-                "EversionL",
-                "EversionR",
-                "DorsiflexionU",
-                "DorsiflexionD",
-                "ExtensionU",
-                "ExtensionD",
-              ]}
-              mode="Manual"
-              action="Increment"
-              disabled={errorFromStm32}
-            />
-          </Box>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "100%",
-            }}
-          >
-            <TextField
-              value={errorDescription}
-              multiline
-              fullWidth
-              rows={10}
-              variant="outlined"
-              InputProps={{
-                readOnly: true,
-              }}
-              sx={{ marginRight: 5 }}
-            />
-          </Box>
-        </Grid>
-      </Grid>
-    </Box>
+              </Box>
+              <LineChart
+                chartData={getChartData()}
+                mode="Manual"
+                type="realtime"
+                graphPause={graphPause}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "100%",
+                }}
+              >
+                <MotorControlWidget
+                  title="Anatomical Movement"
+                  icon={<AirlineSeatLegroomExtraIcon sx={{ fontSize: 56 }} />}
+                  labels={[
+                    "EversionL",
+                    "EversionR",
+                    "DorsiflexionU",
+                    "DorsiflexionD",
+                    "ExtensionU",
+                    "ExtensionD",
+                  ]}
+                  mode="Manual"
+                  action="Increment"
+                  disabled={errorFromStm32}
+                />
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "100%",
+                }}
+              >
+                <TextField
+                  value={errorDescription}
+                  multiline
+                  fullWidth
+                  rows={10}
+                  variant="outlined"
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                  sx={{ marginRight: 5 }}
+                />
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>
+      </CustomScrollbar>
+    </div>
   );
 }

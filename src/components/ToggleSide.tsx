@@ -8,26 +8,46 @@ import {
 import { blue } from "@mui/material/colors";
 import { useEffect, useState } from "react";
 import useStm32 from "../hooks/use-stm32.ts";
+import { getSerialPort } from "../managers/serialPort.ts";
 
-export type Side = "Right" | "Left";
+export type Side = "Right" | "Left" | null;
 
 interface ToggleSideProps {
-    side: Side;
-    setSide: React.Dispatch<React.SetStateAction<Side>>
+    setSide?: React.Dispatch<React.SetStateAction<Side>>
 }
 
-const ToggleSide: React.FC<ToggleSideProps> = ({side, setSide}) => {
+const ToggleSide: React.FC<ToggleSideProps> = ({setSide}) => {
+
+    const serialPort = getSerialPort();
+    const [localSide, setLocalSide] = useState<Side>(null);
 
     const handleToggleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setSide(event.target.value as Side);
+        if (serialPort && stm32Data) {
+            const message = `{${stm32Data.AutoState};${event.target.value};}`;
+            serialPort.write(message, (err: any) => {
+                if (err) {
+                    console.error("Error writing to serial port:", err);
+                } else {
+                    console.log("Data sent to serial port:", message);
+                }
+            });
+        }
     };
 
-    const [disabled, setDisabled] = useState(false);
+    const [disabled, setDisabled] = useState(true);
     const {stm32Data} = useStm32();
 
     useEffect(() => {
-        
-    }, [stm32Data])
+        if(stm32Data?.AutoState == "ready" || stm32Data?.AutoState == "waitingforplan") {
+            setLocalSide(stm32Data?.CurrentLegSide as Side)
+        }
+    }, [stm32Data?.AutoState])
+
+    useEffect(() => {
+        if (setSide) {
+            setSide(localSide);
+        }
+    }, [localSide])
 
     return (
         <FormControl>
@@ -41,7 +61,7 @@ const ToggleSide: React.FC<ToggleSideProps> = ({side, setSide}) => {
                 aria-labelledby="demo-controlled-radio-buttons-group"
                 name="controlled-radio-buttons-group"
                 onChange={handleToggleChange}
-                value={side}
+                value={localSide}
             >
                 <FormControlLabel
                     disabled = {disabled}
