@@ -2,8 +2,8 @@
 #include <Manager_Motor.h>
 #include <Periph_Canbus.h>
 
-#define MMOT_MOTOR_1_CAN_ID 1
-#define MMOT_MOTOR_2_CAN_ID 2
+#define MMOT_MOTOR_1_CAN_ID 2
+#define MMOT_MOTOR_2_CAN_ID 1
 #define MMOT_MOTOR_3_CAN_ID 3
 
 #define MMOT_MOVING_MAX_SPEED  200
@@ -44,10 +44,13 @@
 #define MMOT_INIT_ERROR         7
 
 #define MMOT_CONTROL_POS_OLD   0
-#define MMOT_CONTROL_POS_SPEED 1
-#define MMOT_CONTROL_SPEED     2
+#define MMOT_CONTROL_SPEED     1
+#define MMOT_CONTROL_POS_SPEED 2
+#define MMOT_CONTROL_POS_SPEED_TORQUE 3
 
+#define MMOT_MIN_SPEED_CMD 0.01
 #define MMOT_MAX_SPEED_CMD 2
+#define MMOT_MAX_TORQUE_CMD 15
 
 typedef struct
 {
@@ -104,8 +107,10 @@ void ManagerMotor_StartMotor(uint8_t id);
 
 void ManagerMotor_NextCmd();
 void ManagerMotor_NextCmdPosOld(uint8_t id);
-void ManagerMotor_NextCmdPosSpeed(uint8_t id);
 void ManagerMotor_NextCmdSpeed(uint8_t id);
+void ManagerMotor_NextCmdPosSpeed(uint8_t id);
+void ManagerMotor_NextCmdPosSpeedTorque(uint8_t id);
+float ManagerMotor_CalcSpeedFromTorque(float torque, float torqueGoal, float wMin, float wMax);
 
 void ManagerMotor_SendToMotors();
 void ManagerMotor_DisableMotors();
@@ -418,13 +423,17 @@ void ManagerMotor_NextCmd()
         {
             ManagerMotor_NextCmdPosOld(i);
         }
+        else if (motors[i].controlType == MMOT_CONTROL_SPEED)
+        {
+            ManagerMotor_NextCmdSpeed(i);
+        }
         else if (motors[i].controlType == MMOT_CONTROL_POS_SPEED)
         {
             ManagerMotor_NextCmdPosSpeed(i);
         }
-        else if (motors[i].controlType == MMOT_CONTROL_SPEED)
+        else if (motors[i].controlType == MMOT_CONTROL_POS_SPEED_TORQUE)
         {
-            ManagerMotor_NextCmdSpeed(i);
+            ManagerMotor_NextCmdPosSpeedTorque(i);
         }
     }
 }
@@ -484,6 +493,73 @@ void ManagerMotor_NextCmdPosSpeed(uint8_t id)
     }
 }
 
+void ManagerMotor_NextCmdPosSpeedTorque(uint8_t id)
+{
+    // Get the remaining distance to the goal
+    float posLeft = fabsf(motors[id].motor.position - motors[id].goalPosition);
+
+    //TODO Handle case when motor is going backwards
+
+    // Motor is not at goal
+    if (posLeft > GOAL_POS_TOL && motors[id].goalReady)
+    {
+    	float alpha = 0.9;
+
+        int8_t dir = ManagerMotor_GetMotorDirection(id);
+        float torque = motors[id].motor.torque;
+
+        if (dir < 0)
+        {
+        	torque = -torque;
+        }
+
+        float speedFromTorque = ManagerMotor_CalcSpeedFromTorque(torque, fabsf(motors[id].goalTorque), MMOT_MIN_SPEED_CMD, motors[id].goalSpeed);
+
+        motors[id].cmdSpeed = motors[id].cmdSpeed * alpha + speedFromTorque * dir * (1-alpha);
+        motors[id].cmdPosition = motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
+    }
+    // Motor reached his goal
+    else
+    {
+        motors[id].cmdSpeed  = 0;
+        motors[id].goalReady = false;
+    }
+}
+
+
+//Speed is always calculated as absolute value and needs to be assigned a direction afterwards
+float ManagerMotor_CalcSpeedFromTorque(float torque, float torqueGoal, float wMin, float wMax)
+{
+	float w = 0;
+	float decelFactor = 0.1;
+
+	// Définir les seuils pour 25% et 75%
+    float torque25 = 0.25f * torqueGoal;
+    float torque75 = 0.75f * torqueGoal;
+    float torque110 = 1.10f * torqueGoal;
+
+    // Calculer w en fonction de torque
+    if (torque <= torque25) {
+        w = wMax;
+    }
+    else if (torque >= torque25 && torque <= torque75) {
+        // Transition linéaire entre wMin et wMax
+        w = wMax - (wMax - wMin) * (torque - torque25) / (torque75 - torque25);
+    }
+    else if (torque >= torque75 && torque <= torque110) {
+        w = wMin;
+    }
+    else {
+        // Décélération quand torque dépasse torque110
+        w = wMin - decelFactor * (torque - torque110);
+        if (w < -wMax) {
+            w = -wMax;
+        }
+    }
+
+    return w;
+}
+
 void ManagerMotor_SendToMotors()
 {
 #ifndef MMOT_DEV_MOTOR_1_DISABLE
@@ -533,7 +609,7 @@ void ManagerMotor_MovePosOld(uint8_t id, float pos)
     motors[id].goalSpeed    = 0;
     motors[id].goalTorque   = 0;
     motors[id].cmdPosition  = motors[id].motor.position;
-    motors[id].cmdSpeed     = 0;
+    motors[id].cmdSpeed     = motors[id].motor.velocity;
     motors[id].cmdTorque    = 0;
     motors[id].goalReady    = true;
 }
@@ -554,7 +630,7 @@ void ManagerMotor_MoveSpeed(uint8_t id, float speed)
     motors[id].goalSpeed    = speed;
     motors[id].goalTorque   = 0;
     motors[id].cmdPosition  = motors[id].motor.position;
-    motors[id].cmdSpeed     = 0;
+    motors[id].cmdSpeed     = motors[id].motor.velocity;
     motors[id].cmdTorque    = 0;
 }
 
@@ -570,7 +646,29 @@ void ManagerMotor_MovePosSpeed(uint8_t id, float pos, float speed)
     motors[id].goalSpeed    = fabsf(speed);
     motors[id].goalTorque   = 0;
     motors[id].cmdPosition  = motors[id].motor.position;
-    motors[id].cmdSpeed     = 0;
+    motors[id].cmdSpeed     = motors[id].motor.velocity;
+    motors[id].cmdTorque    = 0;
+    motors[id].goalReady    = true;
+}
+
+void ManagerMotor_MovePosSpeedTorque(uint8_t id, float pos, float speed, float torque)
+{
+    if (fabsf(speed) > MMOT_MAX_SPEED_CMD)
+    {
+        speed = MMOT_MAX_SPEED_CMD;
+    }
+
+    if (fabsf(torque) > MMOT_MAX_TORQUE_CMD)
+    {
+    	torque = MMOT_MAX_TORQUE_CMD;
+    }
+
+    motors[id].controlType  = MMOT_CONTROL_POS_SPEED_TORQUE;
+    motors[id].goalPosition = pos;
+    motors[id].goalSpeed    = fabsf(speed);
+    motors[id].goalTorque   = fabsf(torque);
+    motors[id].cmdPosition  = motors[id].motor.position;
+    motors[id].cmdSpeed     = motors[id].motor.velocity;
     motors[id].cmdTorque    = 0;
     motors[id].goalReady    = true;
 }
