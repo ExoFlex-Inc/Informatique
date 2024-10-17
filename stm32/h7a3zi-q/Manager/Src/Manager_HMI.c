@@ -2,6 +2,7 @@
 #include <Manager_HMI.h>
 #include <Manager_Motor.h>
 #include <Manager_Movement.h>
+#include <Manager_Security.h>
 #include <Periph_UartRingBuf.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -179,7 +180,7 @@ void ManagerHMI_ParseJson(char* msg, uint8_t maxlength, uint8_t* sectionNbr)
 
 void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
 {
-    if (sectionNbr >= 2)
+    if (sectionNbr >= 1)
     {
         if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "Manual") == 0)
         {
@@ -222,6 +223,10 @@ void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
             {
                 // Flag error: State couldn't change
             }
+        }
+        else if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "Reset") == 0)
+        {
+            ManagerSecurity_Reset();
         }
     }
 }
