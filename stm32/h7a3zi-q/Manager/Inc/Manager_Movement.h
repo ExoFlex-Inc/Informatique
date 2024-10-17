@@ -8,6 +8,9 @@
 #define MMOV_UP      -1
 #define MMOV_DOWN    1
 
+#define MMOV_LEG_IS_LEFT 1
+#define MMOV_LEG_IS_RIGHT 2
+
 // States
 #define MMOV_STATE_WAITING_SECURITY 1
 #define MMOV_STATE_HOMING           3
@@ -43,6 +46,7 @@ typedef struct
     uint8_t homingState;
     uint8_t exCount;
     uint8_t repsCount;
+    uint8_t legSide;
 
 } autoPlanInfo_t;
 
