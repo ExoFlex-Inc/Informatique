@@ -1012,6 +1012,7 @@ bool ManagerMovement_SetState(uint8_t newState)
         {
             stateChanged = true;
         }
+        else if (newState == MMOV_STATE_CHANGESIDE && managerMovement.state != MMOV_STATE_HOMING)
 
         if (stateChanged)
         {

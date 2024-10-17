@@ -182,7 +182,7 @@ void ManagerHMI_ParseJson(char* msg, uint8_t maxlength, uint8_t* sectionNbr)
 
 void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
 {
-    if (sectionNbr >= 2)
+    if (sectionNbr >= 1)
     {
         if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "Manual") == 0)
         {
@@ -225,6 +225,17 @@ void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
             {
                 // Flag error: State couldn't change
             }
+        }
+        else if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "ChangeSide") == 0)
+        {
+        	if(ManagerMovement_SetState())
+        	{
+
+        	}
+        	else
+        	{
+        		// Flag error: State couldn't change
+        	}
         }
     }
 }
