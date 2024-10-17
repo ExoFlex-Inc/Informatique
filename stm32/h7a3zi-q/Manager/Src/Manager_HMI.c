@@ -226,7 +226,7 @@ void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
         }
         else if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "Reset") == 0)
         {
-        	ManagerSecurity_Reset();
+            ManagerSecurity_Reset();
         }
     }
 }
