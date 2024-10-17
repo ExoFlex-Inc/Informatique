@@ -32,6 +32,8 @@ typedef struct
 
     float mPosGoal[MMOT_MOTOR_NBR];
     float mSpeedGoal[MMOT_MOTOR_NBR];
+    float mTorqueGoal[MMOT_MOTOR_NBR];
+
     bool  reset;
     bool  securityPass;
 
@@ -67,9 +69,11 @@ float rightPos;
 uint8_t movements[MAX_EXERCISES];
 uint8_t repetitions[MAX_EXERCISES];
 uint8_t mvtNbr[MAX_EXERCISES];
+
 float   exercisesTime[MAX_EXERCISES];
 float   pauseTime[MAX_EXERCISES];
-float   finalPos[MAX_EXERCISES];
+float 	targetTorque[MAX_EXERCISES];
+float   targetPos[MAX_EXERCISES];
 float   firstPos[MAX_MOVEMENT];
 
 bool            commandSent;
@@ -117,6 +121,7 @@ void ManagerMovement_RestPos();
 // General movement functions
 bool  ManagerMovement_GoToPos(uint8_t exerciseId, float pos);
 void  ManagerMovement_AutoMovement(uint8_t mouvType, float Position);
+void ManagerMovement_AutoTorque(uint8_t mouvType, float posLimit, float targetTorque);
 void  ManagerMovement_SetFirstPos(uint8_t exerciseIdx);
 float ManagerMovement_GetMiddlePos(float leftPos, float rightPos);
 void  ManagerMovement_SetOrigins(uint8_t id);
@@ -141,10 +146,15 @@ void ManagerMovement_Reset()
     managerMovement.mSpeedGoal[MMOT_MOTOR_2] = MMOV_SPEED_M2;
     managerMovement.mSpeedGoal[MMOT_MOTOR_3] = MMOV_SPEED_M3;
 
+    managerMovement.mTorqueGoal[MMOT_MOTOR_1] = 0.0f;
+	managerMovement.mTorqueGoal[MMOT_MOTOR_2] = 0.0f;
+	managerMovement.mTorqueGoal[MMOT_MOTOR_3] = 0.0f;
+
     // Init exercises tables
     for (uint8_t i = 0; i < MAX_EXERCISES; i++)
     {
-        finalPos[i] = 0.0f;
+        targetPos[i] = 0.0f;
+        targetTorque[i] = 0.0f;
 
         repetitions[i]   = 0;
         mvtNbr[i]        = 0;
@@ -498,10 +508,11 @@ void ManagerMovement_AddExerciseInfo(uint8_t exerciseIdx, uint8_t moveNbr,
 }
 
 void ManagerMovement_AddMouvement(uint8_t mvtIdx, uint8_t movementType,
-                                  float finalPosition)
+                                  float targetPosition, float targetTorque)
 {
     movements[mvtIdx] = movementType;
-    finalPos[mvtIdx]  = finalPosition;
+    targetPos[mvtIdx]  = targetPosition;
+    targetTorque[mvtIdx] = targetTorque;
 }
 
 void ManagerMovement_ResetExercise()
@@ -510,10 +521,11 @@ void ManagerMovement_ResetExercise()
     {
         repetitions[i]   = 0;
         exercisesTime[i] = 0.0f;
-        finalPos[i]      = 0.0f;
+        targetPos[i]      = 0.0f;
         pauseTime[i]     = 0.0f;
         movements[i]     = 0.0f;
         mvtNbr[i]        = 0.0f;
+        targetTorque[i]	 = 0.0f;
     }
     managerMovement.autoState = MMOV_AUTO_STATE_WAITING4PLAN;
 }
@@ -610,7 +622,7 @@ void ManagerMovement_Auto2Goal()
     if (!pos1Reached && mvtNbr[exerciseIdx] >= 1)
     {
         if (ManagerMovement_GoToPos(movements[movementIdx],
-                                    finalPos[movementIdx]))
+                                    targetPos[movementIdx]))
         {
             pos1Reached = true;
             movementIdx++;
@@ -619,7 +631,7 @@ void ManagerMovement_Auto2Goal()
     else if (!pos2Reached && mvtNbr[exerciseIdx] >= 2)
     {
         if (ManagerMovement_GoToPos(movements[movementIdx],
-                                    finalPos[movementIdx]))
+                                    targetPos[movementIdx]))
         {
             pos2Reached = true;
             movementIdx++;
@@ -628,7 +640,7 @@ void ManagerMovement_Auto2Goal()
     else if (!pos3Reached && mvtNbr[exerciseIdx] >= 3)
     {
         if (ManagerMovement_GoToPos(movements[movementIdx],
-                                    finalPos[movementIdx]))
+                                    targetPos[movementIdx]))
         {
             pos3Reached = true;
             movementIdx++;
@@ -643,7 +655,7 @@ void ManagerMovement_Auto2Goal()
         pos2Reached = false;
         pos3Reached = false;
 
-        movementIdx--;
+        movementIdx -= mvtNbr[exerciseIdx];
     }
 }
 
@@ -651,6 +663,11 @@ void ManagerMovement_AutoStrectching()
 {
     // Keep the position until time is over
     // Serait la place ou mettre un commande en force
+
+	ManagerMotor_MovePosSpeedTorque(uint8_t id/*,Limit Pos*/, float speed, float torque)
+
+
+
     if (stopButton || !startButton)
     {
         managerMovement.autoState = MMOV_AUTO_STATE_STOP;
@@ -1029,4 +1046,36 @@ bool ManagerMovement_OutsideLimitSwitch()
     }
 
     return outsideSwitchHit;
+}
+
+void ManagerMovement_AutoTorque(uint8_t mouvType, float posLimit, float targetTorque)
+{
+    if (mouvType == MMOV_DORSIFLEXION)  // Set goalPosition for motor 1 for
+                                        // MMOV_DORSIFLEXION
+    {
+        managerMovement.mPosGoal[MMOT_MOTOR_1] = -posLimit;  // Motor is inverse
+        managerMovement.mTorqueGoal[MMOT_MOTOR_1] = targetTorque;
+        ManagerMotor_MovePosSpeedTorque(MMOT_MOTOR_1, managerMovement.mPosGoal[MMOT_MOTOR_1], managerMovement.mSpeedGoal[MMOT_MOTOR_1], managerMovement.mTorqueGoal[MMOT_MOTOR_1]);
+    }
+    else if (mouvType == MMOV_EVERSION)  // Set goalPosition for motor 2 and
+                                         // for MMOV_EVERSION
+    {
+        if (PeriphSwitch_LegLeft())
+        {
+            managerMovement.mPosGoal[MMOT_MOTOR_2] = -posLimit;
+        }
+        else if (PeriphSwitch_LegRight())
+        {
+            managerMovement.mPosGoal[MMOT_MOTOR_2] = posLimit;
+        }
+		managerMovement.mTorqueGoal[MMOT_MOTOR_2] = targetTorque;
+		ManagerMotor_MovePosSpeedTorque(MMOT_MOTOR_2, managerMovement.mPosGoal[MMOT_MOTOR_2], managerMovement.mSpeedGoal[MMOT_MOTOR_2], managerMovement.mTorqueGoal[MMOT_MOTOR_2]);
+    }
+    else if (mouvType ==
+             MMOV_EXTENSION)  // Set goalPosition for motor 3 for MMOV_EXTENSION
+    {
+        managerMovement.mPosGoal[MMOT_MOTOR_3] = -posLimit;  // Motor is inverse
+		managerMovement.mTorqueGoal[MMOT_MOTOR_3] = targetTorque;
+		ManagerMotor_MovePosSpeedTorque(MMOT_MOTOR_3, managerMovement.mPosGoal[MMOT_MOTOR_3], managerMovement.mSpeedGoal[MMOT_MOTOR_3], managerMovement.mTorqueGoal[MMOT_MOTOR_3]);
+    }
 }
