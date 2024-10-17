@@ -44,6 +44,14 @@ const ToggleSide: React.FC<ToggleSideProps> = ({setSide}) => {
     }, [stm32Data?.AutoState])
 
     useEffect(() => {
+        if(stm32Data?.Mode == "changeside") {
+            setDisabled(true);
+        } else {
+            setDisabled(false);
+        }
+    }, [stm32Data?.Mode])
+
+    useEffect(() => {
         if (setSide) {
             setSide(localSide);
         }
