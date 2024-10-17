@@ -91,7 +91,13 @@ export default function Manual() {
   };
 
   useEffect(() => {
-    if (stm32Data && stm32Data.Positions && stm32Data.Torques && stm32Data.Current && !graphPause) {
+    if (
+      stm32Data &&
+      stm32Data.Positions &&
+      stm32Data.Torques &&
+      stm32Data.Current &&
+      !graphPause
+    ) {
       const currentTime = Date.now();
       setLatestMotorData({
         motor1: {

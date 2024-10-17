@@ -65,7 +65,7 @@ export default function ProgressionWidget({
       setStretchProgress(stretchProgress + 1);
     }
     //Put the condition at true to make your test on hmi side.
-    if ((stm32Data?.Repetitions / totalRepetition) === 1) {
+    if (stm32Data?.Repetitions / totalRepetition === 1) {
       setOpenDialogPainScale(true);
     }
   }, [stm32Data?.Repetitions]);

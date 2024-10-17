@@ -8,7 +8,7 @@
 #define MMOV_UP      -1
 #define MMOV_DOWN    1
 
-#define MMOV_LEG_IS_LEFT 1
+#define MMOV_LEG_IS_LEFT  1
 #define MMOV_LEG_IS_RIGHT 2
 
 // States

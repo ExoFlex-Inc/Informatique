@@ -1,8 +1,4 @@
-import React, {
-  useEffect,
-  useState,
-  useRef,
-} from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Button from "../components/Button.tsx";
 import ProgressionWidget from "../components/ProgressionWidget.tsx";
 
@@ -243,7 +239,9 @@ export default function HMI() {
                 action="Control"
                 content="Stop"
                 disabled={
-                  !stm32Data || errorFromStm32 || stm32Data?.AutoState === "Ready"
+                  !stm32Data ||
+                  errorFromStm32 ||
+                  stm32Data?.AutoState === "Ready"
                 }
                 color="bg-red-500"
               />
@@ -316,7 +314,6 @@ export default function HMI() {
             )}
           </div>
           <ExerciseOverviewWidget stm32Data={stm32Data} planData={planData} />
-
         </div>
       </CustomScrollbar>
       <RatingPopUp

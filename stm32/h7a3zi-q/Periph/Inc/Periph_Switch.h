@@ -12,15 +12,15 @@
 
 void PeriphSwitch_Task();
 
-bool PeriphSwitch_LegLeft();
-bool PeriphSwitch_LegRight();
-bool PeriphSwitch_ExtensionUp();
-bool PeriphSwitch_ExtensionDown();
-bool PeriphSwitch_DorsiflexionUp();
-bool PeriphSwitch_DorsiflexionDown();
-bool PeriphSwitch_EversionLeft();
-bool PeriphSwitch_EversionRight();
-bool PeriphSwitch_AnySwitch();
+bool    PeriphSwitch_LegLeft();
+bool    PeriphSwitch_LegRight();
+bool    PeriphSwitch_ExtensionUp();
+bool    PeriphSwitch_ExtensionDown();
+bool    PeriphSwitch_DorsiflexionUp();
+bool    PeriphSwitch_DorsiflexionDown();
+bool    PeriphSwitch_EversionLeft();
+bool    PeriphSwitch_EversionRight();
+bool    PeriphSwitch_AnySwitch();
 uint8_t PeriphSwitch_GetLegSide();
 
 #endif /* INC_PERIPH_SWITCH_H_ */

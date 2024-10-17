@@ -3,10 +3,10 @@
 #include <Manager_HMI.h>
 #include <Manager_Motor.h>
 #include <Manager_Movement.h>
+#include <Periph_Solenoid.h>
 #include <Periph_Switch.h>
 #include <Periph_UartRingBuf.h>
 #include <string.h>
-#include <Periph_Solenoid.h>
 
 #define MMOV_REST_POS -1
 
@@ -31,10 +31,10 @@ typedef struct
     uint8_t changeSideState;
     uint8_t homingState;
 
-    float mPosGoal[MMOT_MOTOR_NBR];
-    float mSpeedGoal[MMOT_MOTOR_NBR];
-    bool  reset;
-    bool  securityPass;
+    float   mPosGoal[MMOT_MOTOR_NBR];
+    float   mSpeedGoal[MMOT_MOTOR_NBR];
+    bool    reset;
+    bool    securityPass;
     uint8_t currentLegSide;
 
 } ManagerMovement_t;
@@ -169,15 +169,15 @@ void ManagerMovement_Reset()
     buttonStartReset = false;
 
     changeSideFree = false;
-    eversionFree = false;
+    eversionFree   = false;
 
     pos1Reached = false;
     pos2Reached = false;
     pos3Reached = false;
 
     // Init modes' states
-    managerMovement.reset        = false;
-    managerMovement.securityPass = false;
+    managerMovement.reset          = false;
+    managerMovement.securityPass   = false;
     managerMovement.currentLegSide = PeriphSwitch_GetLegSide();
 
     managerMovement.state           = MMOV_STATE_WAITING_SECURITY;
@@ -330,7 +330,6 @@ void ManagerMovement_ChangeSide()
 
 void ManagerMovement_Waiting4Cmd()
 {
-
     if (managerMovement.currentLegSide == MMOV_LEG_IS_LEFT)
     {
         managerMovement.changeSideState = MMOV_CHANGESIDE_STATE_MOVERIGHT;
@@ -341,26 +340,30 @@ void ManagerMovement_Waiting4Cmd()
     }
     else
     {
-    	managerMovement.currentLegSide = PeriphSwitch_GetLegSide();
+        managerMovement.currentLegSide = PeriphSwitch_GetLegSide();
     }
 }
 
 void ManagerMovement_ChangeSideRight()
 {
-    if (PeriphSwitch_GetLegSide() == MMOV_LEG_IS_RIGHT || managerMovement.currentLegSide == MMOV_LEG_IS_RIGHT)
+    if (PeriphSwitch_GetLegSide() == MMOV_LEG_IS_RIGHT ||
+        managerMovement.currentLegSide == MMOV_LEG_IS_RIGHT)
     {
-    	if (PeriphSolenoid_UnlockChangeSide() || changeSideFree) // UNLOCK the soleinoid to allow changing side motion
-    	{
-    		ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
-    		changeSideFree = true;
-			managerMovement.currentLegSide = MMOV_LEG_IS_RIGHT;
+        if (PeriphSolenoid_UnlockChangeSide() ||
+            changeSideFree)  // UNLOCK the soleinoid to allow changing side
+                             // motion
+        {
+            ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
+            changeSideFree                 = true;
+            managerMovement.currentLegSide = MMOV_LEG_IS_RIGHT;
 
-			if (PeriphSolenoid_UnlockEversion() || eversionFree)// UNLOCK the soleinoid to allow eversion motion
-			{
-				eversionFree = true;
-				ManagerMovement_HomingEversion();
-			}
-    	}
+            if (PeriphSolenoid_UnlockEversion() ||
+                eversionFree)  // UNLOCK the soleinoid to allow eversion motion
+            {
+                eversionFree = true;
+                ManagerMovement_HomingEversion();
+            }
+        }
     }
     else
     {
@@ -370,20 +373,24 @@ void ManagerMovement_ChangeSideRight()
 
 void ManagerMovement_ChangeSideLeft()
 {
-    if (PeriphSwitch_GetLegSide() == MMOV_LEG_IS_LEFT || managerMovement.currentLegSide == MMOV_LEG_IS_LEFT)
+    if (PeriphSwitch_GetLegSide() == MMOV_LEG_IS_LEFT ||
+        managerMovement.currentLegSide == MMOV_LEG_IS_LEFT)
     {
-    	if (PeriphSolenoid_UnlockChangeSide() || changeSideFree) // UNLOCK the soleinoid to allow changing side motion
-    	{
-    		ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
-    		changeSideFree = true;
-			managerMovement.currentLegSide = MMOV_LEG_IS_LEFT;
+        if (PeriphSolenoid_UnlockChangeSide() ||
+            changeSideFree)  // UNLOCK the soleinoid to allow changing side
+                             // motion
+        {
+            ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
+            changeSideFree                 = true;
+            managerMovement.currentLegSide = MMOV_LEG_IS_LEFT;
 
-			if (PeriphSolenoid_UnlockEversion() || eversionFree)// UNLOCK the soleinoid to allow eversion motion
-			{
-				eversionFree = true;
-				ManagerMovement_HomingEversion();
-			}
-    	}
+            if (PeriphSolenoid_UnlockEversion() ||
+                eversionFree)  // UNLOCK the soleinoid to allow eversion motion
+            {
+                eversionFree = true;
+                ManagerMovement_HomingEversion();
+            }
+        }
     }
     else
     {
@@ -861,8 +868,8 @@ void ManagerMovement_HomingEversion()
                     managerMovement.changeSideState =
                         MMOV_CHANGESIDE_STATE_WAITING4CMD;
                     managerMovement.state = MMOV_STATE_MANUAL;
-                    changeSideFree = false;
-                    eversionFree = false;
+                    changeSideFree        = false;
+                    eversionFree          = false;
                 }
                 else
                 {

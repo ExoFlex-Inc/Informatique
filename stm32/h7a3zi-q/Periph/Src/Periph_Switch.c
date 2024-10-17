@@ -307,13 +307,13 @@ bool PeriphSwitch_AnySwitch()
 
 uint8_t PeriphSwitch_GetLegSide()
 {
-	if (PeriphSwitch_LegLeft())
-	{
-		return 1;
-	}
-	else if (PeriphSwitch_LegRight())
-	{
-		return 2;
-	}
-	return 0;
+    if (PeriphSwitch_LegLeft())
+    {
+        return 1;
+    }
+    else if (PeriphSwitch_LegRight())
+    {
+        return 2;
+    }
+    return 0;
 }
