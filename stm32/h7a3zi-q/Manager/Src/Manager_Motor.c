@@ -144,17 +144,17 @@ void ManagerMotor_Reset()
     // Init motors
 #ifndef MMOT_DEV_MOTOR_1_DISABLE
     PeriphMotors_InitMotor(&motors[MMOT_MOTOR_1].motor, MMOT_MOTOR_1_CAN_ID,
-                           MOTOR_AK10_9);
+                           MOTOR_AK10_9, 1);
 #endif
 
 #ifndef MMOT_DEV_MOTOR_2_DISABLE
     PeriphMotors_InitMotor(&motors[MMOT_MOTOR_2].motor, MMOT_MOTOR_2_CAN_ID,
-                           MOTOR_AK10_9);
+                           MOTOR_AK10_9, 1);
 #endif
 
 #ifndef MMOT_DEV_MOTOR_3_DISABLE
     PeriphMotors_InitMotor(&motors[MMOT_MOTOR_3].motor, MMOT_MOTOR_3_CAN_ID,
-                           MOTOR_AK80_64);
+                           MOTOR_AK80_64, 1);
 #endif
 
     // Init motor control info
