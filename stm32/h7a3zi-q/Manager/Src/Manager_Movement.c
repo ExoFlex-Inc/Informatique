@@ -1047,11 +1047,11 @@ bool ManagerMovement_OutsideLimitSwitch()
 {
     bool outsideSwitchHit = false;
 
-    if (PeriphSwitch_LegRight())
+    if (managerMovement.currentLegSide == MMOV_LEG_IS_RIGHT)
     {
         outsideSwitchHit = PeriphSwitch_EversionRight();
     }
-    else if (PeriphSwitch_LegRight())
+    else if (managerMovement.currentLegSide == MMOV_LEG_IS_LEFT)
     {
         outsideSwitchHit = PeriphSwitch_EversionLeft();
     }
