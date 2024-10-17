@@ -48,7 +48,8 @@ typedef struct
 } Motor;
 
 void PeriphMotors_Init(SendCanDataFunction sendCanFunc);
-bool PeriphMotors_InitMotor(Motor* pMotor, uint8_t id, uint8_t model, float ratio);
+bool PeriphMotors_InitMotor(Motor* pMotor, uint8_t id, uint8_t model,
+                            float ratio);
 void PeriphMotors_Enable(Motor* pMotor);
 void PeriphMotors_SubscribeToRx(Motor* pMotor);
 void PeriphMotors_Disable(Motor* pMotor);

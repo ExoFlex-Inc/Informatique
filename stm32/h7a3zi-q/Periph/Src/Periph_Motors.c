@@ -7,12 +7,12 @@ float   PeriphMotors_ConvUintToFloat(int32_t val, float min, float max,
 
 /// @brief AK10-9
 // AmpPerNm = 1/R/Kt/expermientalFactor = 1/9/0.16/18 = 0.0385 A/Nm
-const MotorParameters ak10_9 = {-12.5, 12.5, -50, 50, -65,   65,
+const MotorParameters ak10_9 = {-12.5, 12.5, -50, 50, -65,    65,
                                 0,     500,  0,   5,  0.0385, 1};
 
 /// @brief AK80-64 (AK80-80/64)
 // AmpPerNm = 1/R/Kt/expermientalFactor = 1/64/0.119/???(18) = ???(0.0073) A/Nm
-const MotorParameters ak80_64 = {-12.5, 12.5, -8, 8, -144,  144,
+const MotorParameters ak80_64 = {-12.5, 12.5, -8, 8, -144,   144,
                                  0,     500,  0,  5, 0.0073, 1};
 
 SendCanDataFunction PeriphMotors_SendCanData;
@@ -22,7 +22,8 @@ void PeriphMotors_Init(SendCanDataFunction sendCanFunc)
     PeriphMotors_SendCanData = sendCanFunc;
 }
 
-bool PeriphMotors_InitMotor(Motor* pMotor, uint8_t id, uint8_t model, float ratio)
+bool PeriphMotors_InitMotor(Motor* pMotor, uint8_t id, uint8_t model,
+                            float ratio)
 {
     pMotor->id = id;
 
@@ -73,12 +74,10 @@ void PeriphMotors_SetZeroPosition(Motor* pMotor)
 void PeriphMotors_Move(Motor* pMotor, float position, float velocity,
                        float torque, float kp, float kd)
 {
-	//Apply ratio
-	position *= pMotor->parameters.ratio;
-	velocity *= pMotor->parameters.ratio;
-	torque /= pMotor->parameters.ratio;
-
-
+    // Apply ratio
+    position *= pMotor->parameters.ratio;
+    velocity *= pMotor->parameters.ratio;
+    torque /= pMotor->parameters.ratio;
 
     int32_t pInt =
         PeriphMotors_ConvFloatToUint(position, pMotor->parameters.positionMin,
@@ -125,13 +124,13 @@ void PeriphMotors_ParseMotorState(Motor* pMotor, uint8_t* canData)
 
     if (current < 0)
     {
-    	current *= -1;
+        current *= -1;
     }
 
-	//Apply ratio
+    // Apply ratio
     pMotor->position = position / pMotor->parameters.ratio;
     pMotor->velocity = velocity / pMotor->parameters.ratio;
-    pMotor->torque = torque * pMotor->parameters.ratio;
+    pMotor->torque   = torque * pMotor->parameters.ratio;
 
     pMotor->current = current;
 }
