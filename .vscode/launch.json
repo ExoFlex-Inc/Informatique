@@ -21,11 +21,6 @@
       "runtimeExecutable": "yarn",
       "runtimeArgs": ["dev"],
       "type": "node",
-      "serverReadyAction": {
-        "action": "debugWithChrome",
-        "pattern": "Local: http://localhost:([0-9]+)",
-        "uriFormat": "http://localhost:%s"
-      },
       "skipFiles": ["<node_internals>/**"]
     },
     {

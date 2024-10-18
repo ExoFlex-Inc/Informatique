@@ -1,11 +1,10 @@
 import UserSearchBar from "../components/UserSearchBar.tsx";
 import { useEffect, useState } from "react";
 import LineChart from "../components/LineChart.tsx";
-import FilterAltIcon from "@mui/icons-material/FilterAlt";
+import { FilterAlt } from "@mui/icons-material";
 import GraphFilters from "../components/GraphFilters.tsx";
 import { DateRangePicker } from "rsuite";
 import "rsuite/DateRangePicker/styles/index.css";
-import { DateRange } from "rsuite/esm/DateRangePicker/types.js";
 import { ChartData } from "chart.js";
 import {
   Button,
@@ -18,8 +17,6 @@ import {
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import { useRelations } from "../hooks/use-relations.ts";
 import Loading from "../components/Loading.tsx";
-// import { PDFDownloadLink } from "@react-pdf/renderer";
-// import Report from "../components/Report.tsx";
 
 export interface dataStructure {
   angle_max: number;
@@ -35,6 +32,72 @@ export interface dataStructure {
   actual_total_time: number;
   rated_pain: number;
 }
+interface AngleMaxAverages {
+  dorsiflexion: number;
+  eversion: number;
+  extension: number;
+}
+
+function onGraphTypeChange(
+  show_points: boolean,
+  labels: string[],
+  titles: string[],
+  colors: string[],
+  dates: string[],
+  ...args: number[][][]
+) {
+  const mappedArgs = args.map((arg: number[][], index: number) => {
+    const dataPoints = [];
+    let cumulativeIndex = 0;
+
+    for (let index = 0; index < arg.length;index++) {
+      const value = arg[index];
+      const date = dates[index];
+
+      for (let i = 0; i < value.length; i++) {
+        dataPoints.push({
+          x: cumulativeIndex + 1,
+          y: value[i],
+          recorded_date: date,
+        });
+        cumulativeIndex++;
+      }
+    }
+
+    if (show_points) {
+      return {
+        label: labels[index],
+        data: dataPoints,
+        borderColor: colors[index],
+        fill: false,
+        tension: 0.1,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+      };
+    } else {
+      return {
+        label: labels[index],
+        data: dataPoints,
+        borderColor: colors[index],
+        fill: false,
+        tension: 0.1,
+        pointRadius: 0,
+        pointHoverRadius: 7,
+      };
+    }
+  });
+  // Update x-axis labels based on the cumulative data points
+  const xAxisLabels = mappedArgs[0].data.map((point) => point.x);
+
+  return {
+    chartData: {
+      labels: xAxisLabels,
+      datasets: mappedArgs,
+    },
+    title: titles[0],
+  };
+}
+
 
 export default function Activity() {
   const [selectedUser, setSelectedUser] = useState<any[]>([]);
@@ -52,7 +115,7 @@ export default function Activity() {
   const [title1, setTitle1] = useState("");
   const [title2, setTitle2] = useState("");
   const [missingDates, setMissingDates] = useState<string[]>([]);
-  const [averageAmplitude, setAverageAmplitude] = useState<string>();
+  const [averageAmplitude, setAverageAmplitude] = useState<AngleMaxAverages | null>(null);
   const { relations, isLoading } = useRelations();
 
   useEffect(() => {
@@ -60,8 +123,8 @@ export default function Activity() {
       if (!selectedUser || selectedUser.length === 0 || !date) return;
 
       const userId = selectedUser[0].user_id;
-      const startDate = date[0].toISOString();
-      const endDate = date[1].toISOString();
+      const startDate = date[0].toLocaleDateString('en-CA');
+      const endDate = date[1].toLocaleDateString('en-CA');
 
       const url = `http://localhost:3001/exercise-data/${userId}?start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`;
 
@@ -90,152 +153,176 @@ export default function Activity() {
 
   useEffect(() => {
     if (data.length > 0) {
-      const xElement = data?.map((element) => element.date);
+      const dates = data.map((item) => item.data.recorded_date);
+      getAverageAmplitude(data);
+      getMissingDates(data);
       const colors = [
         "rgb(99, 255, 132)",
         "rgb(255, 99, 132)",
         "rgb(99, 132, 255)",
       ];
 
-      function onGraphTypeChange(
-        labels: string[],
-        titles: string[],
-        colors: string[],
-        ...args: number[[]]
-      ) {
-        const mappedArgs = args.map((arg: number[], index: number) => {
-          return {
-            animation: false,
-            label: labels[index],
-            data: arg,
-            fill: false,
-            borderColor: colors[index],
-            tension: 0.1,
-          };
-        });
-
-        if (graphType === "Number of repetitions") {
-          setDataset1({
-            labels: xElement,
-            datasets: [mappedArgs[0]],
-          });
-          setTitle1(titles[0]);
-          setDataset2({
-            labels: xElement,
-            datasets: [mappedArgs[1]],
-          });
-          setTitle2(titles[1]);
-        } else {
-          setDataset1({
-            labels: xElement,
-            datasets: mappedArgs,
-          });
-          setTitle1(titles[0]);
-          setDataset2(undefined);
-          setTitle2("");
-        }
-      }
-
-      const force_avg = data?.map((element) => element.force_avg);
-      const force_max = data?.map((element) => element.force_max);
-      const angle_max = data?.map((element) => element.angle_max);
-      const angle_target = data?.map((element) => element.angle_target);
-      const repetitions_done = data?.map((element) => element.repetitions_done);
-      const repetitions_success_rate = data?.map(
-        (element) => element.repetitions_success_rate,
-      );
-      const predicted_total_time = data?.map(
-        (element) => element.predicted_total_time,
-      );
-      const actual_total_time = data?.map(
-        (element) => element.actual_total_time,
-      );
+      const angle_stretch = {
+        dorsiflexion: data.map((item) => item.data.angles.dorsiflexion.map((angle) => angle)),
+        eversion: data.map((item) => item.data.angles.eversion.map((angle) => angle)),
+        extension: data.map((item) => item.data.angles.extension.map((angle) => angle)),
+      };
+      
+      const force_stretch = {
+        dorsiflexion: data.map((item) => item.data.torques.dorsiflexion.map((torque) => torque)),
+        eversion: data.map((item) => item.data.torques.eversion.map((torque) => torque)),
+        extension: data.map((item) => item.data.torques.extension.map((torque) => torque)),
+      };
+      
+      const repetitions_done = data?.map((item) => item.data.repetitions_done);
+      const repetitions_target = data?.map((item) => item.data.repetitions_target);
+      // const predicted_total_time = data?.map(
+      //   (element) => element.predicted_total_time,
+      // );
+      // const actual_total_time = data?.map(
+      //   (element) => element.actual_total_time,
+      // );
       const rated_pain = data?.map((element) => element.rated_pain);
 
       switch (graphType) {
-        case "Rigidity":
-          onGraphTypeChange(
-            ["average force", "maximum force"],
-            ["Force in Nm"],
-            colors,
-            force_avg,
-            force_max,
-          );
-          break;
         case "Amplitude":
-          onGraphTypeChange(
-            ["maximum angle", "target angle"],
-            ["Angle in degrees"],
-            colors,
-            angle_max,
-            angle_target,
-          );
+          {
+            const { chartData, title } = onGraphTypeChange(
+              true,
+              ["Dorsiflexion", "Extension", "Eversion"],
+              ["Angle in degrees"],
+              colors,
+              dates,
+              angle_stretch.dorsiflexion,
+              angle_stretch.extension,
+              angle_stretch.eversion
+            );
+      
+      
+            setDataset1(chartData);
+            setTitle1(title);
+          }
           break;
+
+        case "Rigidity":
+          {
+            const { chartData, title } = onGraphTypeChange(
+              false,
+              ["Dorsiflexion", "Extension", "Eversion"],
+              ["Force in Nm"],
+              colors,
+              dates,
+              force_stretch.dorsiflexion,
+              force_stretch.extension,
+              force_stretch.eversion,
+            );
+            setDataset1(chartData);
+            setTitle1(title);
+          }
+          break;
+      
+      
         case "Number of repetitions":
-          onGraphTypeChange(
-            ["repetitions done", "repetitions success rate"],
-            ["Number of repetitions", "success rate in %"],
-            colors,
-            repetitions_done,
-            repetitions_success_rate,
-          );
+          {
+            const { chartData, title } = onGraphTypeChange(
+              true,
+              ["Repetitions Done", "Repetitions Target"],
+              ["Number of Repetitions", "Success Rate (%)"],
+              colors,
+              dates,
+              [repetitions_done],
+              [repetitions_target],
+            );
+            setDataset1(chartData);
+            setTitle1(title);
+          }
           break;
-        case "Total seance time":
-          onGraphTypeChange(
-            ["predicted total time", "actual total time"],
-            ["Time is seconds"],
-            colors,
-            predicted_total_time,
-            actual_total_time,
-          );
-          break;
+      
+        // case "Total seance time":
+        //   {
+        //     const { chartData, title } = onGraphTypeChange(
+        //       true,
+        //       ["Predicted Total Time", "Actual Total Time"],
+        //       ["Time in Seconds"],
+        //       colors,
+        //       dates,
+        //       predicted_total_time,
+        //       actual_total_time,
+        //     );
+        //     setDataset1(chartData);
+        //     setTitle1(title);
+        //   }
+        //   break;
+      
         case "Feedback":
-          onGraphTypeChange(
-            ["pain scale"],
-            ["Pain scale from 1 to 10"],
-            colors,
-            rated_pain,
-          );
+          {
+            const { chartData, title } = onGraphTypeChange(
+              true,
+              ["Pain Scale"],
+              ["Pain Scale from 1 to 10"],
+              colors,
+              dates,
+              rated_pain,
+            );
+            setDataset1(chartData);
+            setTitle1(title);
+          }
+          break;
+      
+        default:
           break;
       }
     }
   }, [data, graphType]);
 
-  useEffect(() => {
-    if (data.length > 0) {
-      getMissingDates(data);
-      getAverageAmplitude(data);
-    }
-  }, [data]);
-
   function getAverageAmplitude(data: dataStructure[]) {
-    const amplitudes: number[] = data.map((element) => element.angle_max);
-    let amplitudeSum: number = 0;
-
-    amplitudes.forEach((element) => {
-      amplitudeSum = element + amplitudeSum;
-    });
-    setAverageAmplitude((amplitudeSum / amplitudes.length).toFixed(2));
+    // Extract angle_max values
+    const angle_max = {
+      dorsiflexion: data.map((item) => item.data.angle_max.dorsiflexion),
+      eversion: data.map((item) => item.data.angle_max.eversion),
+      extension: data.map((item) => item.data.angle_max.extension),
+    };
+  
+    // Helper function to calculate the average
+    const calculateAverage = (values: number[]) => {
+      const sum = values.reduce((sum, value) => sum + value, 0);
+      return values.length > 0 ? sum / values.length : 0;
+    };
+  
+    // Calculate the average for each movement
+    const angleMaxAverages: AngleMaxAverages = {
+      dorsiflexion: calculateAverage(angle_max.dorsiflexion),
+      eversion: calculateAverage(angle_max.eversion),
+      extension: calculateAverage(angle_max.extension),
+    };
+  
+    setAverageAmplitude(angleMaxAverages);
   }
 
   function getMissingDates(data: dataStructure[]) {
-    const oneDay = 24 * 60 * 60 * 1000;
+    const dates = data.map((item) => {
+      const recordedDate = new Date(item.created_at);
+      return recordedDate.toISOString().split("T")[0];
+    });
+  
+  
     const missingDates: string[] = [];
-
-    for (let i = 0; i < data.length - 1; i++) {
-      const currentDate = new Date(data[i].date);
-      const nextDate = new Date(data[i + 1].date);
-
-      currentDate.setHours(0, 0, 0, 0);
-      nextDate.setHours(0, 0, 0, 0);
-
-      const diffInDays = (nextDate.getTime() - currentDate.getTime()) / oneDay;
-
-      for (let j = 1; j < diffInDays; j++) {
-        const missingDate = new Date(currentDate.getTime() + j * oneDay);
-        missingDates.push(missingDate.toISOString().split("T")[0]);
+    const dateRange = date as DateRange;
+  
+    const startDate = new Date(dateRange[0]);
+    const endDate = new Date(dateRange[1]);
+  
+    for (
+      let currentDate = new Date(startDate);
+      currentDate <= endDate;
+      currentDate.setDate(currentDate.getDate() + 1)
+    ) {
+      const formattedDate = currentDate.toLocaleDateString("en-CA");
+      if (!dates.includes(formattedDate)) {
+        missingDates.push(formattedDate);
       }
     }
+  
     setMissingDates(missingDates);
   }
 
@@ -248,141 +335,85 @@ export default function Activity() {
   }
 
   return (
-    <div className="pb-4 mx-auto">
-      <div className="flex justify-center">
+    <div className=" mx-auto max-w-7xl">
+      <div className="mb-4">
         <UserSearchBar
-          sx={{ width: 500 }}
+          sx={{ width: "100%", maxWidth: 500 }}
           setSearchQuery={setSelectedUser}
           users={relations}
         />
       </div>
-      <div className="grid grid-cols-5 items-center">
-        <div className=" flex col-span-2">
+      <div className="relative flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
           <button
-            className="rounded-full ml-2 hover:bg-slate-700 p-1"
+            className="p-2 rounded-full hover:bg-gray-700"
             onClick={() => setIsGraphFilterOpen(!isGraphFilterOpen)}
           >
-            <FilterAltIcon />
+            <FilterAlt />
           </button>
-          <div>
-            <DateRangePicker
-              className="ml-2"
-              onChange={(value: any) => setDate(value)}
+          <DateRangePicker onChange={setDate} />
+
+          {isGraphFilterOpen && (
+            <div className="absolute top-full mt-2 left-0 z-50">
+              <GraphFilters
+                setGraphType={setGraphType}
+                setIsGraphFilterOpen={setIsGraphFilterOpen}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="flex items-center justify-center mb-4">
+      <Typography variant="h6" className="text-white">
+          {graphType}
+        </Typography>
+      </div>
+      {/* <CustomScrollbar> */}
+        {dataset1 && selectedUser.length > 0 && date && graphType && (
+          <div className="mb-4 basis-full">
+            <LineChart
+              type="activity"
+              setChartImage={setChartImage1}
+              chartData={dataset1}
+              title={title1}
             />
           </div>
-        </div>
-        <label className="text-white text-center">{graphType}</label>
-      </div>
-      {isGraphFilterOpen && (
-        <GraphFilters
-          setGraphType={setGraphType}
-          setIsGraphFilterOpen={setIsGraphFilterOpen}
-        />
-      )}
-      <div className="overflow-auto h-screen max-h-[calc(100vh-190px)]">
-        <CustomScrollbar>
-          <div className="flex justify-center">
-            {dataset1 && selectedUser?.length !== 0 && date && graphType && (
-              <div className="mt-4 basis-full">
-                <LineChart
-                  type="activity"
-                  setChartImage={setChartImage1}
-                  chartData={dataset1}
-                  title={title1}
-                />
-              </div>
-            )}
-            {dataset2 && selectedUser?.length !== 0 && date && graphType && (
-              <div className="mt-4 basis-full">
-                <LineChart
-                  type="activity"
-                  chartData={dataset2}
-                  title={title2}
-                />
-              </div>
-            )}
-          </div>
-
-          {selectedUser.length !== 0 && date && graphType && (
-            <Box
-              justifyContent="center"
-              sx={{ display: "flex", margin: "15px", gap: "15px" }}
-            >
-              <ThemeProvider
-                theme={createTheme({
-                  palette: {
-                    mode: "light",
-                    primary: { main: "rgb(102, 157, 246)" },
-                    background: { paper: "rgb(235, 235, 235)" },
-                  },
-                })}
-              >
-                <Paper sx={{ width: "25vw" }}>
-                  <div className="divide-x-2 flex divide-solid divide-gray-500 h-full">
-                    <Typography
-                      className="text-gray-500 p-2 content-center"
-                      variant="h5"
-                    >
-                      Missing exercise days
+        )}
+        {selectedUser.length > 0 && date && graphType && (
+          <ThemeProvider theme={createTheme({ palette: { mode: "light" } })}>
+            <Box className="flex justify-center gap-4">
+              <Paper className="p-4 w-1/3">
+                <Typography variant="h6" className="mb-2 text-black">
+                  Missing exercise days
+                </Typography>
+                <div className="flex flex-wrap gap-2">
+                  {missingDates.map((date) => (
+                    <Typography key={date} variant="body2" className="text-black">
+                      {date}
                     </Typography>
-                    {missingDates.map((element, index) => (
-                      <Typography
-                        key={index}
-                        variant="body1"
-                        className="text-black p-3 content-center text-nowrap"
-                      >
-                        {element}
-                      </Typography>
-                    ))}
-                  </div>
+                  ))}
+                </div>
+              </Paper>
+              {averageAmplitude && (
+                <Paper className="p-4 w-1/3">
+                  <Typography variant="h6" className="mb-2 text-black">
+                    Maximum Amplitude Averages
+                  </Typography>
+                  <Typography variant="body1" className="text-black">
+                    Dorsiflexion: {averageAmplitude.dorsiflexion.toFixed(2)} degrees
+                  </Typography>
+                  <Typography variant="body1" className="text-black">
+                    Eversion: {averageAmplitude.eversion.toFixed(2)} degrees
+                  </Typography>
+                  <Typography variant="body1" className="text-black">
+                    Extension: {averageAmplitude.extension.toFixed(2)} degrees
+                  </Typography>
                 </Paper>
-              </ThemeProvider>
-              <ThemeProvider
-                theme={createTheme({
-                  palette: {
-                    mode: "light",
-                    primary: { main: "rgb(102, 157, 246)" },
-                    background: { paper: "rgb(235, 235, 235)" },
-                  },
-                })}
-              >
-                <Paper sx={{ width: "25vw" }}>
-                  <div className="divide-x-2 flex divide-solid divide-gray-500">
-                    <Typography className="text-gray-500 p-2" variant="h5">
-                      Maximum amplitude average in dates selection
-                    </Typography>
-                    <Typography
-                      className="text-black p-3 content-center"
-                      variant="body1"
-                    >
-                      {averageAmplitude} degrees
-                    </Typography>
-                  </div>
-                </Paper>
-              </ThemeProvider>
+              )}
             </Box>
-          )}
-        </CustomScrollbar>
-        {/* {selectedPatient?.length !== 0 && date && graphType && (
-            <div className="flex mr-4 justify-end">
-              <Button className="!bg-blue-600" variant="contained">
-                <PDFDownloadLink
-                  document={
-                    <Report
-                      selectedPatient={selectedPatient}
-                      chartImage1={chartImage1}
-                      data={data}
-                      date={date}
-                    />
-                  }
-                  fileName={`report_${selectedPatient?.[0].email}_${Date.now()}.pdf`}
-                >
-                  Download Report
-                </PDFDownloadLink>
-              </Button>
-            </div>
-          )} */}
-      </div>
+          </ThemeProvider>
+        )}
+      {/* </CustomScrollbar> */}
     </div>
   );
 }

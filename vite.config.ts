@@ -44,7 +44,8 @@ export default defineConfig({
   ],
   // Server settings
   server: {
-    hmr: {}, // Hot module replacement settings (defaults are fine here)
+    hmr: {},
+    // open: true,
     port: 1337, // Set the server port to 1337
   },
 });

@@ -7,9 +7,8 @@ import cookieParser from "cookie-parser";
 import { createServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
 import authRoutes from "./routes/authRoutes.ts";
-import serialPortRoutes from "./routes/serialPortRoutes.ts";
+import serialPortRoutes from "./routes/stm32Routes.ts";
 import planRoutes from "./routes/planRoutes.ts";
-import hmiRoutes from "./routes/hmiRoutes.ts";
 import userRoutes from "./routes/userRoutes.ts";
 import relationsRoutes from "./routes/relationsRoutes.ts";
 import exerciseDataRoute from "./routes/exerciseDataRoutes.ts";
@@ -57,9 +56,8 @@ app.use("/user", userRoutes);
 app.use("/relations", relationsRoutes);
 app.use("/exercise-data", exerciseDataRoute);
 app.use("/notification", notificationRoute);
-app.use("/api", serialPortRoutes);
+app.use("/stm32", serialPortRoutes);
 app.use("/plan", planRoutes);
-app.use("/api", hmiRoutes);
 
 io.on("connection", (socket) => {
   console.log("A client connected");

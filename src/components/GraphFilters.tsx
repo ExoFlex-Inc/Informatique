@@ -14,7 +14,6 @@ const GraphFilters: React.FC<GraphFiltersProps> = ({
   const dropdownRef = useDropdown(setIsGraphFilterOpen);
 
   function changeGraphType(type: string) {
-    console.log("graphType", type);
     setGraphType(type);
     setIsGraphFilterOpen(false);
   }
@@ -49,12 +48,12 @@ const GraphFilters: React.FC<GraphFiltersProps> = ({
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
-          <ListItemButton onClick={() => changeGraphType("Total seance time")}>
+          {/* <ListItemButton onClick={() => changeGraphType("Total seance time")}>
             <ListItemText
               className="w-max"
               primary="Total seance time Graph"
             ></ListItemText>
-          </ListItemButton>
+          </ListItemButton> */}
         </ListItem>
         <ListItem disablePadding>
           <ListItemButton onClick={() => changeGraphType("Feedback")}>

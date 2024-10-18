@@ -1,4 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+import supaClient from "../utils/supabaseClient.ts";
 
 export function useSupabaseSession() {
   const queryClient = useQueryClient();
@@ -90,6 +92,22 @@ export function useSupabaseSession() {
   const setSession = (accessToken: string, refreshToken: string) => {
     setSessionMutation.mutate({ accessToken, refreshToken });
   };
+
+  useEffect(() => {
+    const { data: authListener } = supaClient.auth.onAuthStateChange(async (event, _) => {
+      if (!session) {
+        queryClient.invalidateQueries(["session"]);
+      }
+    });
+  
+    // Cleanup the listener on component unmount
+    return () => {
+      if (authListener?.unsubscribe) {
+        authListener.unsubscribe();
+      }
+    };
+  }, [queryClient, session]);
+
 
   return {
     session,

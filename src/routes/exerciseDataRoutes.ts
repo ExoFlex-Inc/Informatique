@@ -1,5 +1,3 @@
-// routes/exerciseDataRoute.js
-
 import express from "express";
 import { getExerciseData } from "../controllers/exerciseDataController.js";
 

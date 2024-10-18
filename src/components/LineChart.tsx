@@ -135,20 +135,30 @@ const LineChart: React.FC<LineChartProps> = ({
       return {
         scales: {
           x: {
+            type: 'category',
+            display: false,
             title: {
-              text: "Date",
               display: true,
-            },
-            type: "time",
-
-            time: {
-              unit: "day",
             },
           },
           y: {
             title: {
               text: title,
               display: true,
+            },
+          },
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                const dataPoint = context.raw as any; 
+                const label = context.dataset.label || '';
+                const value = context.formattedValue;
+                const recordedDate = dataPoint?.recorded_date || "N/A";
+
+                return `${label}: ${value}\nRecorded Date: ${recordedDate}`;
+              },
             },
           },
         },

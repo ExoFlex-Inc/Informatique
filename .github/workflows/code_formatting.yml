@@ -37,6 +37,7 @@ jobs:
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: Apply Formatting changes
+          commit_message: |
+            Format: $(git log -1 --pretty=%B)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
