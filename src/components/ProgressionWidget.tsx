@@ -44,9 +44,14 @@ function CircularProgressWithLabel(
 interface Props {
   stm32Data: any | null;
   planData: any;
+  setOpenDialogPainScale: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function ProgressionWidget({ stm32Data, planData }: Props) {
+export default function ProgressionWidget({
+  stm32Data,
+  planData,
+  setOpenDialogPainScale,
+}: Props) {
   const [stretchProgress, setStretchProgress] = useState(0);
   const [totalStretch, setTotalStretch] = useState(1);
   const [repetitionProgress, setRepetitionProgress] = useState(0);
@@ -58,6 +63,10 @@ export default function ProgressionWidget({ stm32Data, planData }: Props) {
     }
     if (stm32Data?.Repetitions !== 0 && stm32Data?.Repetitions !== undefined) {
       setStretchProgress(stretchProgress + 1);
+    }
+    //Put the condition at true to make your test on hmi side.
+    if (stm32Data?.Repetitions / totalRepetition === 1) {
+      setOpenDialogPainScale(true);
     }
   }, [stm32Data?.Repetitions]);
 

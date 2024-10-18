@@ -15,7 +15,7 @@
 
 #define MMOV_SPEED_M1 0.5
 #define MMOV_SPEED_M2 0.5
-#define MMOV_SPEED_M3 0.5
+#define MMOV_SPEED_M3 0.2
 
 #define MANUAL_MAX_TRANSMIT_TIME 200  // ms
 
@@ -432,7 +432,7 @@ void ManagerMovement_ManualCmdExtension(int8_t direction)
     if (managerMovement.state == MMOV_STATE_MANUAL ||
         managerMovement.state == MMOV_STATE_HOMING)
     {
-        ManagerMovement_ManualIncrement(MMOT_MOTOR_3, direction);
+        ManagerMovement_ManualIncrement(MMOT_MOTOR_3, -direction);
     }
 }
 

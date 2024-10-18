@@ -13,6 +13,7 @@ CREATE EXTENSION IF NOT EXISTS ltree;
 
 CREATE TYPE permissions_enum AS ENUM ('dev', 'admin', 'client');
 CREATE TYPE client_admin_status AS ENUM ('pending', 'accepted');
+CREATE TYPE rated_pain_enum AS ENUM ('1', '2', '3', '4', '5');
 
 /*
 .########....###....########..##.......########..######.
@@ -55,6 +56,7 @@ CREATE TABLE exercise_data (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
   user_id uuid REFERENCES user_profiles(user_id),
   data JSONB,
+  rated_pain rated_pain_enum,
   created_at DATE DEFAULT CURRENT_DATE
 );
 -- CREATE TABLE exercise_data (
