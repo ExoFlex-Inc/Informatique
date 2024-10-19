@@ -20,8 +20,8 @@ import FeedOutlinedIcon from "@mui/icons-material/FeedOutlined";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import GroupIcon from "@mui/icons-material/Group";
 import Icon from "../../assets/user.png";
-import { useUserProfile } from "../hooks/use-profile";
 import CustomScrollbar from "./CustomScrollbars";
+import { useUser } from "../hooks/use-user";
 
 interface ProSidebarProps {
   permissions: string;
@@ -62,7 +62,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected, setSelected] = useState("");
-  const { profile } = useUserProfile();
+  const { user } = useUser();
   const isTablet = useMediaQuery("(max-width: 768px)");
   const location = useLocation();
   const page = location.pathname.split("/").pop() || "";
@@ -156,7 +156,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
                 <Box display="flex" justifyContent="center" alignItems="center">
                   <Avatar
                     src={
-                      profile.avatar_blob_url ? profile.avatar_blob_url : Icon
+                      user.avatar_blob_url ? user.avatar_blob_url : Icon
                     }
                     sx={
                       isTablet
@@ -169,20 +169,20 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
                 <Box textAlign="center">
                   <Typography
                     className={
-                      profile?.first_name.length < 15 ? "text-4xl" : "text-xl"
+                      user?.first_name.length < 15 ? "text-4xl" : "text-xl"
                     }
                     variant={isTablet ? "h3" : "h2"}
                     color={colors.grey[100]}
                     fontWeight="bold"
                     sx={{ m: "10px 0 0 0" }}
                   >
-                    {profile?.first_name || "Client"}
+                    {user?.first_name || "Client"}
                   </Typography>
                   <Typography
                     variant={isTablet ? "h6" : "h5"}
                     color={colors.greenAccent[500]}
                   >
-                    {profile?.speciality || "Speciality"}
+                    {user?.speciality || "Speciality"}
                   </Typography>
                 </Box>
               </Box>

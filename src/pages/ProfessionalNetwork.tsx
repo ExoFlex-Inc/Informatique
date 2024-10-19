@@ -2,17 +2,17 @@ import { Button } from "@mui/material";
 import UserSearchBar from "../components/UserSearchBar.tsx";
 import UserList from "../components/UsersList.tsx";
 import { useNavigate } from "react-router-dom";
-import { useUserProfile } from "../hooks/use-profile.ts";
 import { useState, useEffect } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import { useAdminProfile } from "../hooks/use-admin.ts";
 import Loading from "../components/Loading.tsx";
 import { useRelations } from "../hooks/use-relations.ts";
 import { useFetchPendingRelations } from "../hooks/use-relations.ts";
+import { useUser } from "../hooks/use-user.ts";
 
 const ProfessionalNetwork = () => {
   const navigate = useNavigate();
-  const { profile } = useUserProfile();
+  const { user } = useUser();
   const { admins, isLoading: adminLoading } = useAdminProfile();
   const { relations, isLoading: relationsLoading } = useRelations();
   const { notifications, isLoading: notificationsLoading } =
@@ -57,7 +57,7 @@ const ProfessionalNetwork = () => {
           users={admins}
         />
 
-        {profile?.permissions == "dev" || profile?.permissions == "client" ? (
+        {user?.permissions == "dev" || user?.permissions == "client" ? (
           <Button
             variant="contained"
             color="inherit"

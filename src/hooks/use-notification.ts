@@ -1,10 +1,10 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useUserProfile } from "./use-profile.ts";
 import { messaging, onMessage } from "../utils/firebaseClient.ts";
 import { useEffect } from "react";
+import { useUser } from "./use-user.ts";
 
 export function useNotification() {
-  const { profile } = useUserProfile();
+  const { user } = useUser();
   const queryClient = useQueryClient();
 
   // Fetch notifications from the server
@@ -13,11 +13,11 @@ export function useNotification() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["notification", profile?.user_id],
+    queryKey: ["notification", user?.user_id],
     queryFn: async () => {
-      if (!profile?.user_id) return [];
+      if (!user?.user_id) return [];
       const response = await fetch(
-        `http://localhost:3001/notification/${profile.user_id}`,
+        `http://localhost:3001/notification/${user.user_id}`,
         {
           method: "GET",
           credentials: "include",
@@ -26,12 +26,12 @@ export function useNotification() {
       if (!response.ok) throw new Error("Error fetching notification");
       return await response.json();
     },
-    enabled: !!profile?.user_id,
+    enabled: !!user?.user_id,
   });
 
   // Listen for live FCM notifications and update cache directly
   useEffect(() => {
-    if (!profile?.user_id) return;
+    if (!user?.user_id) return;
 
     const unsubscribe = onMessage(messaging, (payload) => {
       const { title, body, image } = payload.notification;
@@ -50,7 +50,7 @@ export function useNotification() {
 
       // Update the cache directly
       queryClient.setQueryData(
-        ["notification", profile.user_id],
+        ["notification", user.user_id],
         (old = []) => [newNotification, ...old],
       );
     });
@@ -58,7 +58,7 @@ export function useNotification() {
     return () => {
       unsubscribe();
     };
-  }, [queryClient, profile?.user_id]);
+  }, [queryClient, user?.user_id]);
 
   return { notifications, isLoading, error };
 }

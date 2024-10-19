@@ -5,8 +5,7 @@ import Chart from "chart.js/auto";
 import { CategoryScale } from "chart.js";
 import StreamingPlugin from "chartjs-plugin-streaming";
 import { Socket } from "socket.io-client";
-import { _DeepPartialObject } from "chart.js/types/utils";
-import { ChartData, ChartOptions as ChartJsOptions } from "chart.js";
+import { ChartData, ChartOptions, ScatterDataPoint, ChartDataset } from "chart.js";
 
 Chart.register(CategoryScale);
 Chart.register(StreamingPlugin);
@@ -18,33 +17,25 @@ interface LineChartProps {
   socket?: Socket | null;
   title?: string;
   setChartImage?: React.Dispatch<React.SetStateAction<string>>;
-  removeFirstPoint: () => void;
-  graphPause: boolean;
-}
-
-interface Dataset {
-  data: {
-    x: number;
-    y: number | undefined;
-  }[];
+  removeFirstPoint?: () => void;
+  graphPause?: boolean;
 }
 
 const LineChart: React.FC<LineChartProps> = ({
   chartData,
   type,
   title,
-  setChartImage,
   graphPause,
 }) => {
   const chartRef = useRef<Chart<"line"> | null>(null);
 
-  const getYAxisLimits = (datasets: Dataset[]) => {
+  const getYAxisLimits = (datasets: ChartDataset<"line", (number | ScatterDataPoint | null)[]>[]) => {
     let min = -65;
     let max = 65;
 
     datasets.forEach((dataset) => {
       dataset.data.forEach((point) => {
-        if (point.y !== undefined) {
+        if (typeof point === "object" && point?.y !== undefined) {
           min = Math.min(min, point.y);
           max = Math.max(max, point.y);
         }
@@ -54,11 +45,9 @@ const LineChart: React.FC<LineChartProps> = ({
     return { min, max };
   };
 
-  const [chartOptions, setChartOptions] = React.useState<
-    _DeepPartialObject<ChartJsOptions<"line">>
-  >(() => {
+  const [chartOptions, setChartOptions] = React.useState<ChartOptions<"line">>(() => {
     if (type === "realtime") {
-      const datasets = [
+      const datasets: ChartDataset<"line", (number | ScatterDataPoint | null)[]>[] = [
         {
           label: "Motor 1",
           borderColor: "rgb(255, 99, 132)",
@@ -89,30 +78,31 @@ const LineChart: React.FC<LineChartProps> = ({
               pause: graphPause,
               onRefresh: (chart: any) => {
                 if (!graphPause) {
-                  // Only update if not paused
                   chart.data.datasets.forEach(
-                    (dataset: Dataset, index: number) => {
+                    (dataset: ChartDataset<"line", (number | ScatterDataPoint | null)[]>[], index: number) => {
                       const xValue =
                         chartData.datasets[index]?.data[
                           chartData.datasets[index]?.data.length - 1
-                        ]?.x;
+                        ] as ScatterDataPoint;
                       const yValue =
                         chartData.datasets[index]?.data[
                           chartData.datasets[index]?.data.length - 1
-                        ]?.y;
+                        ] as ScatterDataPoint;
 
                       dataset.data.push({
-                        x: xValue !== undefined ? xValue : 0,
-                        y: yValue !== undefined ? yValue : 0,
+                        x: xValue ? xValue.x : 0,
+                        y: yValue ? yValue.y : 0,
                       });
-                    },
+                    }
                   );
                 }
               },
             },
           },
-          y: getYAxisLimits(chartData.datasets as Dataset[]),
+          y: getYAxisLimits(chartData.datasets as ChartDataset<"line", (number | ScatterDataPoint | null)[]>[]),
         },
+        pointRadius: 2,
+        pointHoverRadius: 7,
       };
     } else if (type === "line") {
       return {
@@ -152,7 +142,7 @@ const LineChart: React.FC<LineChartProps> = ({
           tooltip: {
             callbacks: {
               label: function (context) {
-                const dataPoint = context.raw as any; 
+                const dataPoint = context.raw as ScatterDataPoint; 
                 const label = context.dataset.label || '';
                 const value = context.formattedValue;
                 const recordedDate = dataPoint?.recorded_date || "N/A";
@@ -170,7 +160,7 @@ const LineChart: React.FC<LineChartProps> = ({
 
   useEffect(() => {
     if (type === "realtime") {
-      setChartOptions((prevOptions: any) => ({
+      setChartOptions((prevOptions: ChartOptions<"line">) => ({
         ...prevOptions,
         scales: {
           x: {
@@ -180,23 +170,22 @@ const LineChart: React.FC<LineChartProps> = ({
               pause: graphPause,
               onRefresh: (chart: any) => {
                 if (!graphPause) {
-                  // Only update if not paused
                   chart.data.datasets.forEach(
-                    (dataset: Dataset, index: number) => {
+                    (dataset: ChartDataset<"line", (number | ScatterDataPoint | null)[]>, index: number) => {
                       const xValue =
                         chartData.datasets[index]?.data[
                           chartData.datasets[index]?.data.length - 1
-                        ]?.x;
+                        ] as ScatterDataPoint;
                       const yValue =
                         chartData.datasets[index]?.data[
                           chartData.datasets[index]?.data.length - 1
-                        ]?.y;
+                        ] as ScatterDataPoint;
 
                       dataset.data.push({
-                        x: xValue !== undefined ? xValue : 0,
-                        y: yValue !== undefined ? yValue : 0,
+                        x: xValue ? xValue.x : 0,
+                        y: yValue ? yValue.y : 0,
                       });
-                    },
+                    }
                   );
                 }
               },
@@ -204,7 +193,7 @@ const LineChart: React.FC<LineChartProps> = ({
           },
           y: {
             ...prevOptions.scales?.y,
-            ...getYAxisLimits(chartData.datasets as Dataset[]),
+            ...getYAxisLimits(chartData.datasets as ChartDataset<"line", (number | ScatterDataPoint | null)[]>[]),
           },
         },
       }));
@@ -212,12 +201,20 @@ const LineChart: React.FC<LineChartProps> = ({
   }, [chartData, graphPause]);
 
   useEffect(() => {
-    if (chartRef.current) {
-      const chartInstance = chartRef.current;
-      const chartImage = chartInstance.toBase64Image();
-      setChartImage?.(chartImage);
-    }
-  }, [chartData, chartOptions, setChartImage]);
+    setChartOptions((prevOptions: ChartOptions<"line">) => ({
+      ...prevOptions,
+      scales: {
+        ...prevOptions.scales,
+        y: {
+          ...prevOptions.scales?.y,
+          title: {
+            display: true,
+            text: title,
+          },
+        },
+      },
+    }));
+  }, [title]);
 
   return (
     <div className="graph-container">

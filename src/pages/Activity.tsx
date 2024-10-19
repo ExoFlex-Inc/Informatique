@@ -7,7 +7,6 @@ import { DateRangePicker } from "rsuite";
 import "rsuite/DateRangePicker/styles/index.css";
 import { ChartData } from "chart.js";
 import {
-  Button,
   Box,
   ThemeProvider,
   createTheme,
@@ -19,18 +18,30 @@ import { useRelations } from "../hooks/use-relations.ts";
 import Loading from "../components/Loading.tsx";
 
 export interface dataStructure {
-  angle_max: number;
-  angle_target: number;
-  date: Date;
-  force_avg: number;
-  force_max: number;
+  data: {
+    angle_max: {
+      dorsiflexion: number[];
+      eversion: number[];
+      extension: number[];
+    };
+    angles: {
+      dorsiflexion: number[];
+      eversion: number[];
+      extension: number[];
+    };
+    torques: {
+      dorsiflexion: number[];
+      eversion: number[];
+      extension: number[];
+    };
+    repetitions_done: number;
+    repetitions_target: number;
+    recorded_date: string;
+  };
   id: string;
-  repetitions_done: number;
+  created_at: string;
   user_id: string;
-  repetitions_success_rate: number;
-  predicted_total_time: number;
-  actual_total_time: number;
-  rated_pain: number;
+  rated_pain?: number;
 }
 interface AngleMaxAverages {
   dorsiflexion: number;
@@ -38,56 +49,50 @@ interface AngleMaxAverages {
   extension: number;
 }
 
+type DateRange = [Date, Date];
+
 function onGraphTypeChange(
   show_points: boolean,
   labels: string[],
   titles: string[],
   colors: string[],
   dates: string[],
-  ...args: number[][][]
+  ...args: (number[][] | undefined)[][]
 ) {
-  const mappedArgs = args.map((arg: number[][], index: number) => {
+  const mappedArgs = args.map((arg: (number[][] | undefined)[], index: number) => {
     const dataPoints = [];
     let cumulativeIndex = 0;
 
-    for (let index = 0; index < arg.length;index++) {
-      const value = arg[index];
-      const date = dates[index];
+    for (let i = 0; i < arg.length; i++) {
+      const valueArray = arg[i] ?? [];
+      const date = dates[i];
 
-      for (let i = 0; i < value.length; i++) {
-        dataPoints.push({
-          x: cumulativeIndex + 1,
-          y: value[i],
-          recorded_date: date,
-        });
+      for (let j = 0; j < valueArray.length; j++) {
+        const yValue = valueArray[j];
+        if (yValue !== undefined && yValue !== null) {
+          dataPoints.push({
+            x: cumulativeIndex + 1,
+            y: yValue,
+            recorded_date: date,
+          });
+        }
         cumulativeIndex++;
       }
     }
 
-    if (show_points) {
-      return {
-        label: labels[index],
-        data: dataPoints,
-        borderColor: colors[index],
-        fill: false,
-        tension: 0.1,
-        pointRadius: 5,
-        pointHoverRadius: 7,
-      };
-    } else {
-      return {
-        label: labels[index],
-        data: dataPoints,
-        borderColor: colors[index],
-        fill: false,
-        tension: 0.1,
-        pointRadius: 0,
-        pointHoverRadius: 7,
-      };
-    }
+    return {
+      label: labels[index],
+      data: dataPoints,
+      borderColor: colors[index],
+      fill: false,
+      tension: 0.1,
+      pointRadius: show_points ? 5 : 2,
+      pointHoverRadius: 7,
+    };
   });
+
   // Update x-axis labels based on the cumulative data points
-  const xAxisLabels = mappedArgs[0].data.map((point) => point.x);
+  const xAxisLabels = mappedArgs[0]?.data?.map((point) => point.x) ?? [];
 
   return {
     chartData: {
@@ -98,24 +103,20 @@ function onGraphTypeChange(
   };
 }
 
-
 export default function Activity() {
   const [selectedUser, setSelectedUser] = useState<any[]>([]);
   const [isGraphFilterOpen, setIsGraphFilterOpen] = useState(false);
-  const [graphType, setGraphType] = useState("");
+  const [graphType, setGraphType] = useState("Amplitude");
   const [date, setDate] = useState<DateRange | null>();
   const [data, setData] = useState<dataStructure[]>([]);
-  const [dataset1, setDataset1] = useState<ChartData<"line"> | undefined>(
-    undefined,
-  );
-  const [dataset2, setDataset2] = useState<ChartData<"line"> | undefined>(
-    undefined,
-  );
-  const [chartImage1, setChartImage1] = useState<string>("");
+  const [dataset1, setDataset1] = useState<ChartData<"line">>({
+    labels: [],
+    datasets: [],
+  });
+  
+  const [averageData, setAverageData] = useState<any>({});
   const [title1, setTitle1] = useState("");
-  const [title2, setTitle2] = useState("");
   const [missingDates, setMissingDates] = useState<string[]>([]);
-  const [averageAmplitude, setAverageAmplitude] = useState<AngleMaxAverages | null>(null);
   const { relations, isLoading } = useRelations();
 
   useEffect(() => {
@@ -152,178 +153,297 @@ export default function Activity() {
   }, [selectedUser, date]);
 
   useEffect(() => {
-    if (data.length > 0) {
-      const dates = data.map((item) => item.data.recorded_date);
-      getAverageAmplitude(data);
-      getMissingDates(data);
-      const colors = [
-        "rgb(99, 255, 132)",
-        "rgb(255, 99, 132)",
-        "rgb(99, 132, 255)",
-      ];
+    if (graphType && date !== null) {
+      if (data.length > 0) {
+        const dates = data.map((item) => item.data.recorded_date);
+        const colors = [
+          "rgb(99, 255, 132)",
+          "rgb(255, 99, 132)",
+          "rgb(99, 132, 255)",
+        ];
 
-      const angle_stretch = {
-        dorsiflexion: data.map((item) => item.data.angles.dorsiflexion.map((angle) => angle)),
-        eversion: data.map((item) => item.data.angles.eversion.map((angle) => angle)),
-        extension: data.map((item) => item.data.angles.extension.map((angle) => angle)),
-      };
-      
-      const force_stretch = {
-        dorsiflexion: data.map((item) => item.data.torques.dorsiflexion.map((torque) => torque)),
-        eversion: data.map((item) => item.data.torques.eversion.map((torque) => torque)),
-        extension: data.map((item) => item.data.torques.extension.map((torque) => torque)),
-      };
-      
-      const repetitions_done = data?.map((item) => item.data.repetitions_done);
-      const repetitions_target = data?.map((item) => item.data.repetitions_target);
-      // const predicted_total_time = data?.map(
-      //   (element) => element.predicted_total_time,
-      // );
-      // const actual_total_time = data?.map(
-      //   (element) => element.actual_total_time,
-      // );
-      const rated_pain = data?.map((element) => element.rated_pain);
+        const angle_stretch = {
+          dorsiflexion: data.map((item) => item.data.angles.dorsiflexion.map((angle) => angle)),
+          eversion: data.map((item) => item.data.angles.eversion.map((angle) => angle)),
+          extension: data.map((item) => item.data.angles.extension.map((angle) => angle)),
+        };
+        
+        const force_stretch = {
+          dorsiflexion: data.map((item) => item.data.torques.dorsiflexion.map((torque) => torque)),
+          eversion: data.map((item) => item.data.torques.eversion.map((torque) => torque)),
+          extension: data.map((item) => item.data.torques.extension.map((torque) => torque)),
+        };
+        
+        const repetitions_done = data?.map((item) => item.data.repetitions_done);
+        const repetitions_target = data?.map((item) => item.data.repetitions_target);
+        const rated_pain = data?.map((element) => element.rated_pain);
 
-      switch (graphType) {
-        case "Amplitude":
-          {
-            const { chartData, title } = onGraphTypeChange(
-              true,
-              ["Dorsiflexion", "Extension", "Eversion"],
-              ["Angle in degrees"],
-              colors,
-              dates,
-              angle_stretch.dorsiflexion,
-              angle_stretch.extension,
-              angle_stretch.eversion
-            );
-      
-      
-            setDataset1(chartData);
-            setTitle1(title);
-          }
-          break;
+        switch (graphType) {
+          case "Amplitude":
+            {
+              const { chartData, title } = onGraphTypeChange(
+                false,
+                ["Dorsiflexion", "Extension", "Eversion"],
+                ["Angle in degrees"],
+                colors,
+                dates,
+                angle_stretch.dorsiflexion,
+                angle_stretch.extension,
+                angle_stretch.eversion
+              );
+        
+        
+              setDataset1(chartData);
+              setTitle1(title);
+            }
+            break;
 
-        case "Rigidity":
-          {
-            const { chartData, title } = onGraphTypeChange(
-              false,
-              ["Dorsiflexion", "Extension", "Eversion"],
-              ["Force in Nm"],
-              colors,
-              dates,
-              force_stretch.dorsiflexion,
-              force_stretch.extension,
-              force_stretch.eversion,
-            );
-            setDataset1(chartData);
-            setTitle1(title);
-          }
-          break;
-      
-      
-        case "Number of repetitions":
-          {
-            const { chartData, title } = onGraphTypeChange(
-              true,
-              ["Repetitions Done", "Repetitions Target"],
-              ["Number of Repetitions", "Success Rate (%)"],
-              colors,
-              dates,
-              [repetitions_done],
-              [repetitions_target],
-            );
-            setDataset1(chartData);
-            setTitle1(title);
-          }
-          break;
-      
-        // case "Total seance time":
-        //   {
-        //     const { chartData, title } = onGraphTypeChange(
-        //       true,
-        //       ["Predicted Total Time", "Actual Total Time"],
-        //       ["Time in Seconds"],
-        //       colors,
-        //       dates,
-        //       predicted_total_time,
-        //       actual_total_time,
-        //     );
-        //     setDataset1(chartData);
-        //     setTitle1(title);
-        //   }
-        //   break;
-      
-        case "Feedback":
-          {
-            const { chartData, title } = onGraphTypeChange(
-              true,
-              ["Pain Scale"],
-              ["Pain Scale from 1 to 10"],
-              colors,
-              dates,
-              rated_pain,
-            );
-            setDataset1(chartData);
-            setTitle1(title);
-          }
-          break;
-      
-        default:
-          break;
+          case "Rigidity":
+            {
+              const { chartData, title } = onGraphTypeChange(
+                false,
+                ["Dorsiflexion", "Extension", "Eversion"],
+                ["Force in Nm"],
+                colors,
+                dates,
+                force_stretch.dorsiflexion,
+                force_stretch.extension,
+                force_stretch.eversion,
+              );
+              setDataset1(chartData);
+              setTitle1(title);
+            }
+            break;
+        
+        
+          case "Number of repetitions":
+            {
+              const { chartData, title } = onGraphTypeChange(
+                true,
+                ["Repetitions Done", "Repetitions Target"],
+                ["Number of Repetitions"],
+                colors,
+                dates,
+                [repetitions_done],
+                [repetitions_target],
+              );
+              setDataset1(chartData);
+              setTitle1(title);
+            }
+            break;
+        
+          case "Feedback":
+            {
+              const { chartData, title } = onGraphTypeChange(
+                true,
+                ["Pain Scale"],
+                ["Pain Scale from 1 to 5"],
+                colors,
+                dates,
+                [rated_pain],
+              );
+              setDataset1(chartData);
+              setTitle1(title);
+            }
+            break;
+        
+          default:
+            break;
+        }
+      } else {
+        setDataset1({
+          labels: [],
+          datasets: [],
+        });
+        setTitle1("");
       }
+    } else {
+      setDataset1({
+        labels: [],
+        datasets: [],
+      });
+      setTitle1("");
     }
-  }, [data, graphType]);
+  }, [data, date, graphType]);
 
-  function getAverageAmplitude(data: dataStructure[]) {
-    // Extract angle_max values
-    const angle_max = {
-      dorsiflexion: data.map((item) => item.data.angle_max.dorsiflexion),
-      eversion: data.map((item) => item.data.angle_max.eversion),
-      extension: data.map((item) => item.data.angle_max.extension),
-    };
-  
+  useEffect(() => {
+    if (data && date !== null && date !== undefined) {
+      getMissingDates(data, date);
+      getAverage(data, graphType);
+    } else {
+      setMissingDates([]);
+      setAverageData(null);
+    }
+  }, [data, date, graphType]);
+
+
+  function getAverage(data: dataStructure[], graphType: string) {
     // Helper function to calculate the average
-    const calculateAverage = (values: number[]) => {
-      const sum = values.reduce((sum, value) => sum + value, 0);
-      return values.length > 0 ? sum / values.length : 0;
+    const calculateAverage = (values: (number | undefined)[]) => {
+      const validValues = values.filter((value): value is number => value !== undefined);
+      const sum = validValues.reduce((sum, value) => sum + value, 0);
+      return validValues.length > 0 ? sum / validValues.length : 0;
     };
   
-    // Calculate the average for each movement
-    const angleMaxAverages: AngleMaxAverages = {
-      dorsiflexion: calculateAverage(angle_max.dorsiflexion),
-      eversion: calculateAverage(angle_max.eversion),
-      extension: calculateAverage(angle_max.extension),
-    };
+    switch (graphType) {
+      case "Amplitude":
+        // Compute average of angles
+        const angles = {
+          dorsiflexion: data.flatMap((item) => item.data.angles.dorsiflexion),
+          eversion: data.flatMap((item) => item.data.angles.eversion),
+          extension: data.flatMap((item) => item.data.angles.extension),
+        };
+        const angleAverages: AngleMaxAverages = {
+          dorsiflexion: calculateAverage(angles.dorsiflexion),
+          eversion: calculateAverage(angles.eversion),
+          extension: calculateAverage(angles.extension),
+        };
+        setAverageData(angleAverages);
+        break;
   
-    setAverageAmplitude(angleMaxAverages);
+      case "Rigidity":
+        // Compute average of torques
+        const torques = {
+          dorsiflexion: data.flatMap((item) => item.data.torques.dorsiflexion),
+          eversion: data.flatMap((item) => item.data.torques.eversion),
+          extension: data.flatMap((item) => item.data.torques.extension),
+        };
+        const torqueAverages: AngleMaxAverages = {
+          dorsiflexion: calculateAverage(torques.dorsiflexion),
+          eversion: calculateAverage(torques.eversion),
+          extension: calculateAverage(torques.extension),
+        };
+        setAverageData(torqueAverages);
+        break;
+  
+      case "Number of repetitions":
+        // Compute average of repetitions
+        const repetitionsDone = data.map((item) => item.data.repetitions_done);
+        const repetitionsTarget = data.map((item) => item.data.repetitions_target);
+        const averageRepetitionsDone = calculateAverage(repetitionsDone);
+        const averageRepetitionsTarget = calculateAverage(repetitionsTarget);
+        const repetitionsAverages = {
+          repetitionsDone: averageRepetitionsDone,
+          repetitionsTarget: averageRepetitionsTarget,
+        };
+        setAverageData(repetitionsAverages);
+        break;
+  
+      case "Feedback":
+        // Compute average of rated_pain
+        const ratedPain = data.map((item) => item.rated_pain);
+        const averagePain = calculateAverage(ratedPain);
+        setAverageData({ averagePain });
+        break;
+  
+      default:
+        setAverageData(null);
+        break;
+    }
   }
 
-  function getMissingDates(data: dataStructure[]) {
+  function getMissingDates(data: dataStructure[], dateRange: DateRange) {
+    // Extract dates from data, formatted as 'YYYY-MM-DD'
     const dates = data.map((item) => {
-      const recordedDate = new Date(item.created_at);
-      return recordedDate.toISOString().split("T")[0];
+      const recordedDate = new Date(item.data.recorded_date ?? item.created_at);
+      return recordedDate.toISOString().split('T')[0];
     });
   
-  
     const missingDates: string[] = [];
-    const dateRange = date as DateRange;
   
     const startDate = new Date(dateRange[0]);
     const endDate = new Date(dateRange[1]);
   
+    // Generate all dates in the date range
     for (
       let currentDate = new Date(startDate);
       currentDate <= endDate;
       currentDate.setDate(currentDate.getDate() + 1)
     ) {
-      const formattedDate = currentDate.toLocaleDateString("en-CA");
+      const formattedDate = currentDate.toISOString().split('T')[0];
       if (!dates.includes(formattedDate)) {
         missingDates.push(formattedDate);
       }
     }
   
     setMissingDates(missingDates);
+  }
+
+  function getAverageTitle(graphType: string): string {
+    switch (graphType) {
+      case "Amplitude":
+        return "Average Angles";
+      case "Rigidity":
+        return "Average Torques";
+      case "Number of repetitions":
+        return "Average Repetitions";
+      case "Feedback":
+        return "Average Pain";
+      default:
+        return "";
+    }
+  }
+  
+  function renderAverageData(averageData: any, graphType: string) {
+    if (!averageData) {
+      return null;
+    }
+    switch (graphType) {
+      case "Amplitude":
+      case "Rigidity":
+        return (
+          <>
+            {averageData.dorsiflexion !== undefined && (
+              <Typography variant="body1" className="text-black">
+                Dorsiflexion: {averageData.dorsiflexion.toFixed(2)}{" "}
+                {graphType === "Amplitude" ? "degrees" : "Nm"}
+              </Typography>
+            )}
+            {averageData.eversion !== undefined && (
+              <Typography variant="body1" className="text-black">
+                Eversion: {averageData.eversion.toFixed(2)}{" "}
+                {graphType === "Amplitude" ? "degrees" : "Nm"}
+              </Typography>
+            )}
+            {averageData.extension !== undefined && (
+              <Typography variant="body1" className="text-black">
+                Extension: {averageData.extension.toFixed(2)}{" "}
+                {graphType === "Amplitude" ? "degrees" : "Nm"}
+              </Typography>
+            )}
+          </>
+        );
+  
+      case "Number of repetitions":
+        return (
+          <>
+            {averageData.repetitionsDone !== undefined && (
+              <Typography variant="body1" className="text-black">
+                Repetitions Done: {averageData.repetitionsDone.toFixed(2)}
+              </Typography>
+            )}
+            {averageData.repetitionsTarget !== undefined && (
+              <Typography variant="body1" className="text-black">
+                Repetitions Target: {averageData.repetitionsTarget.toFixed(2)}
+              </Typography>
+            )}
+          </>
+        );
+  
+      case "Feedback":
+        return (
+          <>
+            {averageData.averagePain !== undefined && (
+              <Typography variant="body1" className="text-black">
+                Average Pain: {averageData.averagePain.toFixed(2)} / 5
+              </Typography>
+            )}
+          </>
+        );
+  
+      default:
+        return null;
+    }
   }
 
   if (isLoading) {
@@ -369,17 +489,10 @@ export default function Activity() {
         </Typography>
       </div>
       {/* <CustomScrollbar> */}
-        {dataset1 && selectedUser.length > 0 && date && graphType && (
+        <>
           <div className="mb-4 basis-full">
-            <LineChart
-              type="activity"
-              setChartImage={setChartImage1}
-              chartData={dataset1}
-              title={title1}
-            />
+            <LineChart type="activity" chartData={dataset1} title={title1} />
           </div>
-        )}
-        {selectedUser.length > 0 && date && graphType && (
           <ThemeProvider theme={createTheme({ palette: { mode: "light" } })}>
             <Box className="flex justify-center gap-4">
               <Paper className="p-4 w-1/3">
@@ -394,25 +507,16 @@ export default function Activity() {
                   ))}
                 </div>
               </Paper>
-              {averageAmplitude && (
-                <Paper className="p-4 w-1/3">
-                  <Typography variant="h6" className="mb-2 text-black">
-                    Maximum Amplitude Averages
-                  </Typography>
-                  <Typography variant="body1" className="text-black">
-                    Dorsiflexion: {averageAmplitude.dorsiflexion.toFixed(2)} degrees
-                  </Typography>
-                  <Typography variant="body1" className="text-black">
-                    Eversion: {averageAmplitude.eversion.toFixed(2)} degrees
-                  </Typography>
-                  <Typography variant="body1" className="text-black">
-                    Extension: {averageAmplitude.extension.toFixed(2)} degrees
-                  </Typography>
-                </Paper>
-              )}
+
+              <Paper className="p-4 w-1/3">
+                <Typography variant="h6" className="mb-2 text-black">
+                  {getAverageTitle(graphType)}
+                </Typography>
+                {renderAverageData(averageData, graphType)}
+              </Paper>
             </Box>
           </ThemeProvider>
-        )}
+        </>
       {/* </CustomScrollbar> */}
     </div>
   );

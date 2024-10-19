@@ -27,16 +27,14 @@ import PrivateRoutes from "./components/PrivateRoutes.tsx";
 import ProSideBar from "./components/Sidebar.tsx";
 import TopBar from "./components/TopBar.tsx";
 
-import { useUserProfile } from "./hooks/use-profile.ts";
-
 import { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import Login from "./pages/Login.tsx";
 import Loading from "./components/Loading.tsx";
-import { useSupabaseSession } from "./hooks/use-session.ts";
 import ErrorBoundary from "./components/ErrorBoundary.tsx";
+import { useUser } from "./hooks/use-user.ts";
 
 // Create a query client with default options
 const queryClient = new QueryClient({
@@ -96,16 +94,7 @@ const router = createBrowserRouter(
 );
 
 function PublicRoutes() {
-  const {
-    profile,
-    isLoading: isProfileLoading,
-    isError: isProfileError,
-    error: profileError,
-  } = useUserProfile();
-
-  const isLoading = isProfileLoading;
-  const isError = isProfileError;
-  const error = profileError;
+  const { user, isLoading, isError, error } = useUser({ fetchOnDemand: true });
 
   // Handle loading state
   if (isLoading) {
@@ -123,42 +112,30 @@ function PublicRoutes() {
   }
 
   // If the user is authenticated, redirect to the dashboard
-  if (profile) {
+  if (user?.session_status === "active") {
     return <Navigate to="/dashboard" />;
   }
 
-  // If the user is not authenticated, render the public route components
+  // Return the Outlet component to render child routes
   return <Outlet />;
 }
 
 function AppLayout() {
   const {
-    profile,
-    isLoading: isProfileLoading,
-    isFetching: isProfileFetching,
-    isError: isProfileError,
-    isStale: isProfileStale,
-    status: profileStatus,
-  } = useUserProfile();
-
-  const {
-    session,
-    isLoading: isSessionLoading,
-    isFetching: isSessionFetching,
-    isError: isSessionError,
-  } = useSupabaseSession();
-
-  // Determine the overall loading and error states
-  const isLoading = isProfileLoading || isSessionLoading;
-  const isFetching = isProfileFetching || isSessionFetching;
-  const isError = isProfileError || isSessionError;
+    user,
+    isLoading,
+    isFetching,
+    isError,
+    isStale,
+    status: userStatus,
+  } = useUser();
 
   if (isError) {
     queryClient.clear();
     return <Navigate to="/login" />;
   }
 
-  if (isLoading || isFetching || profileStatus === "pending") {
+  if (isLoading || isFetching || userStatus === "pending") {
     return (
       <div className="loading-container">
         <Loading />
@@ -166,15 +143,15 @@ function AppLayout() {
     );
   }
 
-  if (isProfileStale) {
+  if (isStale) {
     console.log("Profile data is stale.");
   }
 
-  if (profileStatus === "success") {
-    if (profile && session) {
+  if (userStatus === "success") {
+    if (user) {
       return (
         <>
-          <ProSideBar permissions={profile.permissions} />
+          <ProSideBar permissions={user.permissions} />
           <main className="content overflow-hidden">
             <TopBar />
             <Outlet />

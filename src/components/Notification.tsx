@@ -17,7 +17,7 @@ import {
   createTheme,
 } from "@mui/material";
 import { useNotification } from "../hooks/use-notification.ts";
-import { useUserProfile } from "../hooks/use-profile.ts";
+import { useUser } from "../hooks/use-user.ts";
 
 const Notification = () => {
   const [isNotifications, setIsNotifications] = useState(false);
@@ -27,7 +27,7 @@ const Notification = () => {
   const buttonRef = useRef(null);
 
   const { notifications } = useNotification();
-  const { profile } = useUserProfile();
+  const { user } = useUser();
 
   useEffect(() => {
     if (notifications && notifications.length > 0) {
@@ -55,7 +55,7 @@ const Notification = () => {
 
   // Handle Accept action
   const handleAccept = async (notification: any) => {
-    if (!profile?.user_id) {
+    if (!user?.user_id) {
       console.error("User profile is missing");
       return;
     }
@@ -74,7 +74,7 @@ const Notification = () => {
         credentials: "include",
         body: JSON.stringify({
           client_id: notification.sender_id,
-          admin_id: profile.user_id,
+          admin_id: user.user_id,
         }),
       });
 

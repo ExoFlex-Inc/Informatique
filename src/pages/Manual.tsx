@@ -1,15 +1,11 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
-  Typography,
   Checkbox,
   FormControlLabel,
   Grid,
-  Paper,
   TextField,
   IconButton,
-  createTheme,
-  ThemeProvider,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
@@ -19,7 +15,7 @@ import LineChart from "../components/LineChart";
 import MotorControlWidget from "../components/MotorControlWidget";
 import useStm32 from "../hooks/use-stm32";
 
-const WhiteBorderCheckbox = styled(Checkbox)(({ theme }) => ({
+const WhiteBorderCheckbox = styled(Checkbox)(() => ({
   color: "white",
   "&.Mui-checked": {
     color: "white",

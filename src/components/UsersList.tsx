@@ -4,7 +4,7 @@ import UserMenuDropdown from "./UserMenuDropdown.tsx";
 import { useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { Box, IconButton } from "@mui/material";
-import { useUserProfile } from "../hooks/use-profile.ts";
+import { useUser } from "../hooks/use-user.ts";
 
 interface UserListProps {
   listOfUsers: Array<{
@@ -24,7 +24,7 @@ const UserList: React.FC<UserListProps> = ({
   const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
   const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const { pathname } = useLocation();
-  const { profile } = useUserProfile();
+  const { user } = useUser();
 
   const addToButtonRefs = (el: HTMLButtonElement | null, index: number) => {
     if (el) {
@@ -44,10 +44,10 @@ const UserList: React.FC<UserListProps> = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          sender_id: profile?.user_id,
+          sender_id: user?.user_id,
           receiver_id: listOfUsers[index].user_id,
-          user_name: `${profile?.first_name} ${profile?.last_name}`,
-          image_url: profile?.avatar_url,
+          user_name: `${user?.first_name} ${user?.last_name}`,
+          image_url: user?.avatar_url,
           type: "relation",
           message: "sent a relation request",
         }),

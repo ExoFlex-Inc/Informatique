@@ -56,23 +56,9 @@ CREATE TABLE exercise_data (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
   user_id uuid REFERENCES user_profiles(user_id),
   data JSONB,
-  rated_pain rated_pain_enum,
+  rated_pain INTEGER CHECK (rated_pain >= 1 AND rated_pain <= 5),
   created_at DATE DEFAULT CURRENT_DATE
 );
--- CREATE TABLE exercise_data (
---   id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
---   user_id uuid REFERENCES user_profiles(user_id),
---   date timestamptz NOT NULL,
---   force_avg float,
---   force_max float,
---   angle_max float,
---   angle_target float,
---   repetitions_done int,
---   repetitions_success_rate float,
---   predicted_total_time float,
---   actual_total_time float,
---   rated_pain int
--- );
 
 CREATE TABLE notifications (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,

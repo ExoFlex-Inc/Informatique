@@ -4,19 +4,10 @@ DECLARE
     j INTEGER;
     new_email TEXT;
     new_id UUID;
-    exercise_id UUID;
     base_date TIMESTAMP;
-    random_increment INTEGER;
-    new_date TIMESTAMP;
-    random_force_avg FLOAT;
-    random_force_max FLOAT;
-    random_angle_max FLOAT;
-    random_angle_target FLOAT;
-    random_repetitions_done INTEGER;
-    random_repetitions_success_rate FLOAT;
-    random_predicted_total_time FLOAT;
-    random_actual_total_time FLOAT;
-    random_rated_pain rated_pain_enum;
+    exercise_data JSONB;
+    rated_pain INTEGER;
+    repetitions_done INTEGER;
 BEGIN
     FOR i IN 1..50 LOOP
         new_email := 'user' || i || '@exoflex.com';
@@ -84,9 +75,95 @@ BEGIN
         );
 
         -- Loop for exercises
-        -- FOR j IN 1..50 LOOP
-        -- END LOOP;
+        FOR j IN 1..50 LOOP
 
+            repetitions_done := round(random() * 10);
+            -- Generate random exercise data
+            exercise_data := jsonb_build_object(
+                'recorded_date', to_char(base_date + (j * INTERVAL '1 day'), 'YYYY-MM-DD'),
+                'angles', jsonb_build_object(
+                    'dorsiflexion', ARRAY[
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2)
+                    ],
+                    'eversion', ARRAY[
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2)
+                    ],
+                    'extension', ARRAY[
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2)
+                    ]
+                ),
+                'angle_max', jsonb_build_object(
+                    'dorsiflexion', round((random()*90)::numeric, 2),
+                    'eversion', round((random()*90)::numeric, 2),
+                    'extension', round((random()*90)::numeric, 2)
+                ),
+                'torques', jsonb_build_object(
+                    'dorsiflexion', ARRAY[
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2)
+                    ],
+                    'eversion', ARRAY[
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2)
+                    ],
+                    'extension', ARRAY[
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2)
+                    ]
+                ),
+                'torque_max', jsonb_build_object(
+                    'dorsiflexion', round((random()*150)::numeric, 2),
+                    'eversion', round((random()*150)::numeric, 2),
+                    'extension', round((random()*150)::numeric, 2)
+                ),
+                'repetitions_done', repetitions_done,
+                'repetitions_target', repetitions_done + round(random() * 10)
+            );
+
+            -- Random pain level
+            rated_pain := floor(random() * 5) + 1;
+
+            -- Insert exercise data into exercise_data table
+            INSERT INTO exercise_data (
+                user_id,
+                data,
+                rated_pain,
+                created_at
+            )
+            VALUES (
+                new_id,
+                exercise_data,
+                rated_pain,
+                base_date + (j * INTERVAL '1 day')
+            );
+        END LOOP;
     END LOOP;
 
     -- Admin user loop
@@ -230,7 +307,94 @@ BEGIN
     );
 
     -- Exercises for dev user
-    -- FOR j IN 1..50 LOOP
-    -- END LOOP;
+        FOR j IN 1..50 LOOP
+
+            repetitions_done := round(random() * 10);
+            -- Generate random exercise data
+            exercise_data := jsonb_build_object(
+                'recorded_date', to_char(base_date + (j * INTERVAL '1 day'), 'YYYY-MM-DD'),
+                'angles', jsonb_build_object(
+                    'dorsiflexion', ARRAY[
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2)
+                    ],
+                    'eversion', ARRAY[
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2)
+                    ],
+                    'extension', ARRAY[
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2), 
+                        round((random() * 90 * (CASE WHEN random() < 0.5 THEN -1 ELSE 1 END))::numeric, 2)
+                    ]
+                ),
+                'angle_max', jsonb_build_object(
+                    'dorsiflexion', round((random()*90)::numeric, 2),
+                    'eversion', round((random()*90)::numeric, 2),
+                    'extension', round((random()*90)::numeric, 2)
+                ),
+                'torques', jsonb_build_object(
+                    'dorsiflexion', ARRAY[
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2)
+                    ],
+                    'eversion', ARRAY[
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2)
+                    ],
+                    'extension', ARRAY[
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2), 
+                        round((random()*150)::numeric, 2)
+                    ]
+                ),
+                'torque_max', jsonb_build_object(
+                    'dorsiflexion', round((random()*150)::numeric, 2),
+                    'eversion', round((random()*150)::numeric, 2),
+                    'extension', round((random()*150)::numeric, 2)
+                ),
+                'repetitions_done', repetitions_done,
+                'repetitions_target', repetitions_done + round(random() * 10)
+            );
+
+            -- Random pain level
+            rated_pain := CONCAT(floor(random() * 5) + 1);
+
+            -- Insert exercise data into exercise_data table
+            INSERT INTO exercise_data (
+                user_id,
+                data,
+                rated_pain,
+                created_at
+            )
+            VALUES (
+                new_id,
+                exercise_data,
+                rated_pain,
+                base_date + (j * INTERVAL '1 day')
+            );
+        END LOOP;
 
 END $$;

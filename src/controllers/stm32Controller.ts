@@ -96,7 +96,11 @@ const insertInitialDataToSupabase = async (): Promise<boolean> => {
       return true; 
     }
   } catch (err) {
-    console.error("Error during insert operation:", err.message);
+    if (err instanceof Error) {
+      console.error("Error during insert operation:", err.message);
+    } else {
+      console.error("An unknown error occurred.");
+    }
     return false;
   }
 };
@@ -109,7 +113,7 @@ const updateDataToSupabase = async () => {
   }
 
   // Only update modified fields using the stored exerciseId
-  const {data, error } = await supaClient
+  const { error } = await supaClient
     .from("exercise_data")
     .update({
       data: saveData, // Update the jsonb column
@@ -144,26 +148,41 @@ const togglePushInterval = (start: boolean) => {
 
 // Function to handle recording start/stop
 const recordingStm32Data = async (req: Request, res: Response) => {
-  const { start } = req.body;
-  if (typeof start !== "boolean") {
-    return res
-      .status(400)
-      .send("Invalid request. Please provide a 'start' field with a boolean value.");
-  }
-
-  if (start) {
-    clearPreviousData(); // Reset accumulated data if needed
-    const initialInsertSuccess = await insertInitialDataToSupabase(); // Insert the initial JSON data
+  try {
+    const { start } = req.body;
     
-    if (initialInsertSuccess) {
-      togglePushInterval(true); // Only start the interval if the insert was successful
-      res.status(200).send("Recording started.");
-    } else {
-      res.status(500).send("Failed to start recording. Initial data insert failed.");
+    // Validate request body
+    if (typeof start !== "boolean") {
+      return res
+        .status(400)
+        .send("Invalid request. Please provide a 'start' field with a boolean value.");
     }
-  } else {
-    togglePushInterval(false);
-    res.status(200).send("Recording stopped.");
+
+    if (start) {
+      // Clear previous data if needed
+      const clearSuccess = await clearPreviousData();
+      if (!clearSuccess) {
+        return res.status(500).send("Failed to clear previous data.");
+      }
+
+      // Insert initial JSON data
+      const initialInsertSuccess = await insertInitialDataToSupabase(); 
+      if (!initialInsertSuccess) {
+        return res.status(500).send("Failed to start recording. Initial data insert failed.");
+      }
+
+      // Start recording
+      togglePushInterval(true); 
+      return res.status(200).send("Recording started.");
+    } else {
+      // Stop recording
+      togglePushInterval(false);
+      return res.status(200).send("Recording stopped.");
+    }
+  } catch (error) {
+    // Handle unexpected errors
+    console.error("Error in recordingStm32Data:", error);
+    return res.status(500).send("An unexpected error occurred.");
   }
 };
 
@@ -179,10 +198,12 @@ const clearPreviousData = () => {
     eversion: [],
     extension: [],
   };
+
+  return true;
 };
 
 // Function to initialize serial port
-const initializeSerialPort = asyncHandler(async (req: Request, res: Response) => {
+const initializeSerialPort = asyncHandler(async (_, res: Response) => {
   const serialPort = getSerialPort();
   let receivedDataBuffer = getReceivedDataBuffer();
 

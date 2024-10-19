@@ -27,15 +27,13 @@ import Notification from "./Notification.tsx";
 
 import Login from "./Signup.tsx";
 import { useNavigate } from "react-router-dom";
-import { useSupabaseSession } from "../hooks/use-session.ts";
-import { useUserProfile } from "../hooks/use-profile.ts";
 import { deleteToken } from "firebase/messaging";
 import { messaging } from "../utils/firebaseClient.ts";
 import { useQueryClient } from "@tanstack/react-query";
+import { useUser } from "../hooks/use-user.ts";
 
 export default function TopBar() {
-  const { session } = useSupabaseSession();
-  const { profile } = useUserProfile();
+  const { user } = useUser();
   const theme = useTheme();
   // const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
@@ -80,7 +78,7 @@ export default function TopBar() {
           },
           credentials: "include",
           body: JSON.stringify({
-            user_id: profile?.user_id,
+            user_id: user?.user_id,
           }),
         });
 
@@ -108,7 +106,7 @@ export default function TopBar() {
   return (
     <Box className="nav-bar relative justify-end">
       <Box className="flex items-center">
-        {session && (
+        {user && (
           <IconButton onClick={colorMode.toggleColorMode}>
             {theme.palette.mode === "dark" ? (
               <DarkModeOutlinedIcon />
@@ -117,20 +115,20 @@ export default function TopBar() {
             )}
           </IconButton>
         )}
-        {session && ( // Check if session exists
+        {user && ( // Check if session exists
           <Notification />
         )}
-        {session && (
+        {user && (
           <IconButton className="h-14" onClick={onProfileClick}>
             <Avatar
               ref={avatarRef}
-              src={profile?.avatar_blob_url ? profile.avatar_blob_url : Icon}
+              src={user?.avatar_blob_url ? user.avatar_blob_url : Icon}
             />
           </IconButton>
         )}
       </Box>
 
-      {session && session.user ? (
+      {user ? (
         isMenuOpen && (
           <Box
             ref={menuRef}
