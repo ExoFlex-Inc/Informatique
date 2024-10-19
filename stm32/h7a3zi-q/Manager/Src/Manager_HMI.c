@@ -19,6 +19,7 @@
 #define M_HMI_CONTENT_SECTION                2
 #define M_HMI_EXERCISE_SECTION_NBR           14
 #define M_HMI_CONTENT_FIRST_EXERCISE_SECTION 12
+#define M_HMI_LIMIT_SECTION_LENGHT			 12
 #define MVT_MAX                              3
 
 #define PI 3.1415926535
@@ -270,7 +271,24 @@ void ManagerHMI_ExecutePlanCmd(char* cmd, uint8_t size)
         if (size > M_HMI_CONTENT_FIRST_EXERCISE_SECTION)
         {
             // Get max torque and pos (skip for now)
-            cmd += M_HMI_CONTENT_FIRST_EXERCISE_SECTION * M_HMI_STRING_LENGTH;
+        	for (uint8_t i = 0; i < 2*MAX_MOVEMENT; i++)
+        	{
+        		float posLimit = atof(cmd);
+				cmd += M_HMI_STRING_LENGTH;
+
+				float torqueLimit = atof(cmd);
+				cmd += M_HMI_STRING_LENGTH;
+
+        		if (i < MAX_MOVEMENT-1)//Left leg limit
+        		{
+        			ManagerMovement_AddLimits(i, posLimit, torqueLimit, 0);
+        		}
+        		else //Right leg limits
+        		{
+        			ManagerMovement_AddLimits(i-3, posLimit, torqueLimit, 1);
+        		}
+        	}
+            //cmd += M_HMI_CONTENT_FIRST_EXERCISE_SECTION * M_HMI_STRING_LENGTH;
             size -= M_HMI_CONTENT_FIRST_EXERCISE_SECTION;
 
             // Verif if exercise plan is ok
@@ -312,7 +330,7 @@ void ManagerHMI_ExecutePlanCmd(char* cmd, uint8_t size)
                         }
 
                         ManagerMovement_AddMouvement(
-                            mvtIdx, movements, ManagerHMI_Degrees2Radians(pos));
+                            mvtIdx, movements, ManagerHMI_Degrees2Radians(pos), torque);
                         mvtIdx++;
 
                         if (j == mvtNbr - 1)

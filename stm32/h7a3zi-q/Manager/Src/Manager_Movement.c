@@ -10,7 +10,6 @@
 #define MMOV_REST_POS -1
 
 #define MAX_EXERCISES 10
-#define MAX_MOVEMENT  3
 #define EXTREME_POS   4
 
 #define MMOV_SPEED_M1 0.5
@@ -39,8 +38,18 @@ typedef struct
 
 } ManagerMovement_t;
 
+typedef struct
+{
+    float maxAngle;
+    float maxTorque;
+
+} movementLimits_t;
+
 ManagerMovement_t managerMovement;
 autoPlanInfo_t    autoPlanInfo;
+
+movementLimits_t legRightLimits[MAX_MOVEMENT];
+movementLimits_t legLeftLimits[MAX_MOVEMENT];
 
 static const Motor* motorsData[MMOT_MOTOR_NBR];
 
@@ -72,7 +81,7 @@ uint8_t mvtNbr[MAX_EXERCISES];
 
 float   exercisesTime[MAX_EXERCISES];
 float   pauseTime[MAX_EXERCISES];
-float 	targetTorque[MAX_EXERCISES];
+float 	targetTorques[MAX_EXERCISES];
 float   targetPos[MAX_EXERCISES];
 float   firstPos[MAX_MOVEMENT];
 
@@ -121,7 +130,7 @@ void ManagerMovement_RestPos();
 // General movement functions
 bool  ManagerMovement_GoToPos(uint8_t exerciseId, float pos);
 void  ManagerMovement_AutoMovement(uint8_t mouvType, float Position);
-void ManagerMovement_AutoTorque(uint8_t mouvType, float posLimit, float targetTorque);
+void  ManagerMovement_AutoTorque(uint8_t mouvType, float posLimit, float targetTorque);
 void  ManagerMovement_SetFirstPos(uint8_t exerciseIdx);
 float ManagerMovement_GetMiddlePos(float leftPos, float rightPos);
 void  ManagerMovement_SetOrigins(uint8_t id);
@@ -154,7 +163,7 @@ void ManagerMovement_Reset()
     for (uint8_t i = 0; i < MAX_EXERCISES; i++)
     {
         targetPos[i] = 0.0f;
-        targetTorque[i] = 0.0f;
+        targetTorques[i] = 0.0f;
 
         repetitions[i]   = 0;
         mvtNbr[i]        = 0;
@@ -209,6 +218,7 @@ void ManagerMovement_Task()
 
     case MMOV_STATE_CHANGESIDE:
         ManagerMovement_ChangeSide();
+        break;
 
     case MMOV_STATE_ERROR:
 
@@ -512,7 +522,21 @@ void ManagerMovement_AddMouvement(uint8_t mvtIdx, uint8_t movementType,
 {
     movements[mvtIdx] = movementType;
     targetPos[mvtIdx]  = targetPosition;
-    targetTorque[mvtIdx] = targetTorque;
+    targetTorques[mvtIdx] = targetTorque;
+}
+
+void ManagerMovement_AddLimits(uint8_t idx, float maxPos, float maxTorque, uint8_t side)
+{
+	if (side == 0)
+	{
+		legLeftLimits[idx].maxAngle = maxPos;
+		legLeftLimits[idx].maxTorque = maxTorque;
+	}
+	else if (side == 1)
+	{
+		legRightLimits[idx].maxAngle = maxPos;
+		legRightLimits[idx].maxTorque = maxTorque;
+	}
 }
 
 void ManagerMovement_ResetExercise()
@@ -525,7 +549,7 @@ void ManagerMovement_ResetExercise()
         pauseTime[i]     = 0.0f;
         movements[i]     = 0.0f;
         mvtNbr[i]        = 0.0f;
-        targetTorque[i]	 = 0.0f;
+        targetTorques[i]	 = 0.0f;
     }
     managerMovement.autoState = MMOV_AUTO_STATE_WAITING4PLAN;
 }
@@ -664,9 +688,34 @@ void ManagerMovement_AutoStrectching()
     // Keep the position until time is over
     // Serait la place ou mettre un commande en force
 
-	ManagerMotor_MovePosSpeedTorque(uint8_t id/*,Limit Pos*/, float speed, float torque)
+	//TODO: ajouter gestion du cote de la jambe (Changement de limit)
 
+	static bool cmd1Sent = false;
+	static bool cmd2Sent = false;
+	static bool cmd3Sent = false;
 
+	uint8_t currentMovement = movements[movementIdx];
+
+	if (!cmd1Sent && mvtNbr[exerciseIdx] >= 1)
+	{
+		ManagerMovement_AutoTorque(currentMovement, legRightLimits[currentMovement-1].maxAngle, targetTorques[movementIdx]);
+		cmd1Sent = true;
+		movementIdx++;
+	}
+	else if (!cmd2Sent && mvtNbr[exerciseIdx] >= 2)
+	{
+		ManagerMovement_AutoTorque(movements[movementIdx], legRightLimits[currentMovement-1].maxAngle, targetTorques[movementIdx]);
+		cmd2Sent = true;
+		movementIdx++;
+	}
+	else if (!cmd3Sent && mvtNbr[exerciseIdx] >= 3)
+	{
+		ManagerMovement_AutoTorque(movements[movementIdx], legRightLimits[currentMovement-1].maxAngle, targetTorques[movementIdx]);
+		cmd3Sent = true;
+		movementIdx++;
+	}
+
+	//TODO: Faite arreter letirement si le torque ressentit depasse la limit de couple
 
     if (stopButton || !startButton)
     {
@@ -674,6 +723,10 @@ void ManagerMovement_AutoStrectching()
     }
     else if (HAL_GetTick() - exerciseTimer >= exercisesTime[exerciseIdx])
     {
+    	movementIdx--;
+    	cmd1Sent = false;
+    	cmd2Sent = false;
+    	cmd3Sent = false;
         managerMovement.autoState = MMOV_AUTO_STATE_2FIRST_POS;
     }
 }
