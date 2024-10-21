@@ -125,6 +125,7 @@ function AppLayout() {
     isLoading,
     isError,
     status: userStatus,
+    error,
   } = useUser();
 
   if (isError) {
