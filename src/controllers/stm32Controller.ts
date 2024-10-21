@@ -26,7 +26,16 @@ let prevTorques = {
 };
 
 let saveData = {
-  recorded_date: new Date().toISOString(),
+  recorded_date: new Date().toLocaleString('en-CA', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+    timeZoneName: 'short',
+  }),
   angles: {
     dorsiflexion: [] as number[],
     eversion: [] as number[],
@@ -53,7 +62,6 @@ let saveData = {
 
 let exerciseId: number | null = null;
 
-// Insert the initial JSON data into Supabase (for the first recording)
 const insertInitialDataToSupabase = async (): Promise<boolean> => {
   try {
     // Fetch the authenticated user
@@ -66,10 +74,10 @@ const insertInitialDataToSupabase = async (): Promise<boolean> => {
     const profile = authData.user;
 
     const { data: planData, error: planError } = await supaClient
-    .from("plans")
-    .select("*")
-    .eq("user_id", profile.id)
-    .single();
+      .from("plans")
+      .select("*")
+      .eq("user_id", profile.id)
+      .single();
 
     if (planError) {
       console.error("Error fetching plan data from Supabase:", planError);
@@ -77,13 +85,13 @@ const insertInitialDataToSupabase = async (): Promise<boolean> => {
     }
 
     const repetitions_target = planData.plan.plan.map((set: any) => set.repetitions).reduce((a: number, b: number) => a + b, 0);
-
     saveData.repetitions_target = repetitions_target;
+
 
     // Insert the data into Supabase
     const { data, error } = await supaClient
       .from("exercise_data")
-      .insert([{ data: saveData, user_id: profile.id }])
+      .insert([{ data: saveData, user_id: profile.id}])
       .select("id")
       .single();
 

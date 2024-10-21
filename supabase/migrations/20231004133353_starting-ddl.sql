@@ -35,7 +35,8 @@ CREATE TABLE user_profiles (
   email TEXT CHECK (char_length(email) > 0 AND char_length(email) <= 50),
   fcm_token TEXT,
   avatar_url TEXT,
-  password TEXT CHECK (char_length(password) > 0)
+  password TEXT CHECK (char_length(password) > 0),
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE relations (
@@ -51,13 +52,12 @@ CREATE TABLE plans (
   plan JSONB,
   created_at DATE DEFAULT CURRENT_DATE
 );
-
 CREATE TABLE exercise_data (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
   user_id uuid REFERENCES user_profiles(user_id),
   data JSONB,
   rated_pain INTEGER CHECK (rated_pain >= 1 AND rated_pain <= 5),
-  created_at DATE DEFAULT CURRENT_DATE
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE notifications (

@@ -12,6 +12,10 @@ import {
   createTheme,
   Paper,
   Typography,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import { useRelations } from "../hooks/use-relations.ts";
@@ -118,17 +122,19 @@ export default function Activity() {
   const [title1, setTitle1] = useState("");
   const [missingDates, setMissingDates] = useState<string[]>([]);
   const { relations, isLoading } = useRelations();
+  const [availableSessions, setAvailableSessions] = useState<string[]>([]);
+  const [selectedSession, setSelectedSession] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       if (!selectedUser || selectedUser.length === 0 || !date) return;
-
+  
       const userId = selectedUser[0].user_id;
-      const startDate = date[0].toLocaleDateString('en-CA');
-      const endDate = date[1].toLocaleDateString('en-CA');
-
+      const startDate = date[0].toISOString();
+      const endDate = date[1].toISOString(); 
+  
       const url = `http://localhost:3001/exercise-data/${userId}?start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`;
-
+  
       try {
         const response = await fetch(url, {
           method: "GET",
@@ -136,11 +142,26 @@ export default function Activity() {
             "Content-Type": "application/json",
           },
         });
-
+  
         const result = await response.json();
-
+  
         if (response.ok) {
           setData(result);
+
+          // Put the date in the client timezone
+          const startDate = date[0].toLocaleDateString('en-CA');
+          const endDate = date[1].toLocaleDateString('en-CA');
+    
+          // Check if the selected date range is only one day
+          if (startDate === endDate) {
+            // Extract available sessions for this day
+            const sessionTimes = result.map((item: any) => item.data.recorded_date);
+            setAvailableSessions(sessionTimes); // Set available sessions for dropdown
+            setSelectedSession(sessionTimes.length > 0 ? sessionTimes[0] : null); // Default to the first session
+          } else {
+            setAvailableSessions([]); // Reset available sessions if date range is more than one day
+            setSelectedSession(null); // Reset the selected session
+          }
         } else {
           console.error(result.message);
         }
@@ -148,36 +169,46 @@ export default function Activity() {
         console.error(error.message);
       }
     };
-
+  
     fetchData();
   }, [selectedUser, date]);
 
   useEffect(() => {
     if (graphType && date !== null) {
       if (data.length > 0) {
-        const dates = data.map((item) => item.data.recorded_date);
+        // Filter the data based on the selected session (if any)
+        const filteredData = selectedSession
+          ? data.filter((item) => item.data.recorded_date === selectedSession)
+          : data;
+          
+        const dates = filteredData.map((item) => item.data.recorded_date);
         const colors = [
           "rgb(99, 255, 132)",
           "rgb(255, 99, 132)",
           "rgb(99, 132, 255)",
         ];
-
+  
         const angle_stretch = {
-          dorsiflexion: data.map((item) => item.data.angles.dorsiflexion.map((angle) => angle)),
-          eversion: data.map((item) => item.data.angles.eversion.map((angle) => angle)),
-          extension: data.map((item) => item.data.angles.extension.map((angle) => angle)),
+          dorsiflexion: filteredData.map((item) => item.data.angles.dorsiflexion.map((angle) => angle)),
+          eversion: filteredData.map((item) => item.data.angles.eversion.map((angle) => angle)),
+          extension: filteredData.map((item) => item.data.angles.extension.map((angle) => angle)),
         };
-        
+  
         const force_stretch = {
-          dorsiflexion: data.map((item) => item.data.torques.dorsiflexion.map((torque) => torque)),
-          eversion: data.map((item) => item.data.torques.eversion.map((torque) => torque)),
-          extension: data.map((item) => item.data.torques.extension.map((torque) => torque)),
+          dorsiflexion: filteredData.map((item) => item.data.torques.dorsiflexion.map((torque) => torque)),
+          eversion: filteredData.map((item) => item.data.torques.eversion.map((torque) => torque)),
+          extension: filteredData.map((item) => item.data.torques.extension.map((torque) => torque)),
         };
-        
-        const repetitions_done = data?.map((item) => item.data.repetitions_done);
-        const repetitions_target = data?.map((item) => item.data.repetitions_target);
-        const rated_pain = data?.map((element) => element.rated_pain);
+  
+        const repetitions_done = filteredData?.map((item) => item.data.repetitions_done);
+        const repetitions_target = filteredData?.map((item) => item.data.repetitions_target);
+        // Wrap the repetitions data in an array for the graph
+        const repetitions_done_wrapped = repetitions_done.map((item) => [item]);
+        const repetitions_target_wrapped = repetitions_target.map((item) => [item]);
 
+        const rated_pain = filteredData?.map((element) => [element.rated_pain]); 
+        const rated_pain_wrapped = rated_pain.map((item) => [item]);
+  
         switch (graphType) {
           case "Amplitude":
             {
@@ -191,13 +222,12 @@ export default function Activity() {
                 angle_stretch.extension,
                 angle_stretch.eversion
               );
-        
-        
+  
               setDataset1(chartData);
               setTitle1(title);
             }
             break;
-
+  
           case "Rigidity":
             {
               const { chartData, title } = onGraphTypeChange(
@@ -214,8 +244,7 @@ export default function Activity() {
               setTitle1(title);
             }
             break;
-        
-        
+  
           case "Number of repetitions":
             {
               const { chartData, title } = onGraphTypeChange(
@@ -224,14 +253,14 @@ export default function Activity() {
                 ["Number of Repetitions"],
                 colors,
                 dates,
-                [repetitions_done],
-                [repetitions_target],
+                repetitions_done_wrapped,
+                repetitions_target_wrapped,
               );
               setDataset1(chartData);
               setTitle1(title);
             }
             break;
-        
+  
           case "Feedback":
             {
               const { chartData, title } = onGraphTypeChange(
@@ -240,13 +269,13 @@ export default function Activity() {
                 ["Pain Scale from 1 to 5"],
                 colors,
                 dates,
-                [rated_pain],
+                rated_pain_wrapped,
               );
               setDataset1(chartData);
               setTitle1(title);
             }
             break;
-        
+  
           default:
             break;
         }
@@ -264,7 +293,11 @@ export default function Activity() {
       });
       setTitle1("");
     }
-  }, [data, date, graphType]);
+  }, [data, date, graphType, selectedSession]);
+
+  function handleSessionChange(event: any) {
+    setSelectedSession(event.target.value);
+  }
 
   useEffect(() => {
     if (data && date !== null && date !== undefined) {
@@ -274,7 +307,7 @@ export default function Activity() {
       setMissingDates([]);
       setAverageData(null);
     }
-  }, [data, date, graphType]);
+  }, [data, graphType]);
 
 
   function getAverage(data: dataStructure[], graphType: string) {
@@ -345,8 +378,7 @@ export default function Activity() {
   function getMissingDates(data: dataStructure[], dateRange: DateRange) {
     // Extract dates from data, formatted as 'YYYY-MM-DD'
     const dates = data.map((item) => {
-      const recordedDate = new Date(item.data.recorded_date ?? item.created_at);
-      return recordedDate.toISOString().split('T')[0];
+      return new Date(item.data.recorded_date).toISOString().split('T')[0];
     });
   
     const missingDates: string[] = [];
@@ -358,7 +390,7 @@ export default function Activity() {
     for (
       let currentDate = new Date(startDate);
       currentDate <= endDate;
-      currentDate.setDate(currentDate.getDate() + 1)
+      currentDate = new Date(currentDate.setDate(currentDate.getDate() + 1)) // Fix: Create new Date object for each iteration
     ) {
       const formattedDate = currentDate.toISOString().split('T')[0];
       if (!dates.includes(formattedDate)) {
@@ -456,12 +488,35 @@ export default function Activity() {
 
   return (
     <div className=" mx-auto max-w-7xl">
-      <div className="mb-4">
-        <UserSearchBar
-          sx={{ width: "100%", maxWidth: 500 }}
-          setSearchQuery={setSelectedUser}
-          users={relations}
-        />
+      <div className="mb-4 flex flex-wrap items-center gap-4">
+        {/* User Search Bar */}
+        <div className="flex-grow max-w-md">
+          <UserSearchBar
+            sx={{ width: "100%" }}
+            setSearchQuery={setSelectedUser}
+            users={relations}
+          />
+        </div>
+
+        {/* Conditional Form Control */}
+        {date && date[0].toLocaleDateString() === date[1].toLocaleDateString() && availableSessions.length > 1 && (
+          <FormControl sx={{ minWidth: 200 }}>
+            <InputLabel id="session-select-label">Select Session</InputLabel>
+            <Select
+              labelId="session-select-label"
+              id="session-select"
+              value={selectedSession}
+              label="Select Session"
+              onChange={handleSessionChange}
+            >
+              {availableSessions.map((session) => (
+                <MenuItem key={session} value={session}>
+                  {session}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
       </div>
       <div className="relative flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">

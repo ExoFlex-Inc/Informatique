@@ -14,7 +14,8 @@ export const getExerciseData = async (req, res) => {
       .select("*")
       .eq("user_id", userId)
       .gte("created_at", start_date)
-      .lte("created_at", end_date);
+      .lte("created_at", end_date)
+      .order("created_at", { ascending: true });
 
     if (error) {
       return res.status(500).json({ message: error.message });

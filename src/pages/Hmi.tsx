@@ -148,29 +148,32 @@ export default function HMI() {
   }, [stm32Data, planData, socket]);
 
   useEffect(() => {
-    if (
-      stm32Data &&
-      stm32Data.AutoState === "Stop" &&
-      socket
-    ) {
-      let message = `{Auto;Plan;${planData.limits.left.angles.eversion};${planData.limits.right.angles.eversion};${planData.limits.left.angles.extension};${planData.limits.right.angles.extension};${planData.limits.left.angles.dorsiflexion};${planData.limits.right.angles.dorsiflexion};${planData.limits.left.torque.eversion};${planData.limits.right.torque.eversion};${planData.limits.left.torque.extension};${planData.limits.right.torque.extension};${planData.limits.left.torque.dorsiflexion};${planData.limits.right.torque.dorsiflexion}`;
-
-      planData.plan.forEach((set) => {
-        message += `;${set.movement.length}`;
-        for (let i = 0; i < 3; i++) {
-          if (i <= set.movement.length - 1) {
-            message += `;${set.movement[i].exercise};${set.movement[i].target_angle};${set.movement[i].target_torque}`;
+    const stopRecording = async () => {
+      if (stm32Data?.AutoState === "Stop" && socket) {
+        try {
+          const response = await fetch("http://localhost:3001/stm32/record", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              start: false,
+            }),
+          });
+  
+          if (response.ok) {
+            console.log("Recording stopped successfully.");
           } else {
-            message += `;${0};${0};${0}`;
+            console.error("Failed to stop recording.");
           }
+        } catch (error) {
+          console.error("An error occurred:", error);
         }
-        message += `;${set.repetitions};${set.rest};${set.time};${set.speed}`;
-      });
-      message += "}";
-      console.log("plan", message);
-      socket.emit("planData", message);
-    }
-  }, [stm32Data]);
+      }
+    };
+  
+    stopRecording();
+  }, [stm32Data, socket]);
 
   useEffect(() => {
     if (

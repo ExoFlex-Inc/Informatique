@@ -35,15 +35,13 @@ export function useUser() {
       });
 
       if (response.status === 401) {
+        // User is not authenticated
         return null;
       }
 
       if (!response.ok) {
         const errorText = await response.text();
-        return Promise.reject({
-          name: "FetchError",
-          message: `Error fetching session: ${response.status} ${errorText}`,
-        });
+        throw new Error(`Error fetching session: ${response.status} ${errorText}`);
       }
 
       const data = await response.json();
@@ -53,21 +51,32 @@ export function useUser() {
         // Fetch the profile data
         const profileResponse = await fetch(
           `http://localhost:3001/user/${data.user.id}`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
         );
+
         if (!profileResponse.ok) {
           throw new Error(
-            `Error fetching user profile: ${profileResponse.statusText}`,
+            `Error fetching user profile: ${profileResponse.statusText}`
           );
         }
+
         const profileData = await profileResponse.json();
-  
+
         // Fetch the avatar if it exists
         if (profileData.avatar_url) {
           const avatarResponse = await fetch(
             `http://localhost:3001/user/avatar/${data.user.id}?path=${encodeURIComponent(
               profileData.avatar_url,
             )}`,
+            {
+              method: "GET",
+              credentials: "include",
+            }
           );
+
           if (avatarResponse.ok) {
             const avatarBlob = await avatarResponse.blob();
             const avatarBlobUrl = URL.createObjectURL(avatarBlob);
@@ -76,18 +85,19 @@ export function useUser() {
             }
           }
         }
+
         return { session_status, ...profileData };
       }
 
-      return data.session_status;
+      return null;
     },
     retry: false,
-    // retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 3000),
-    staleTime: 1000 * 60 * 55, // 55 minutes
+    staleTime: 1000 * 60 * 5, // 5 minutes
     cacheTime: 1000 * 60 * 60 * 24, // 24 hours
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   });
+
 
   const userId = user?.id;
 

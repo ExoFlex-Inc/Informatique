@@ -26,7 +26,6 @@ export function useRelations() {
       }
 
       const relationData = await responseRelations.json();
-      console.log("Relations data response:", relationData);
 
       return relationData;
     },

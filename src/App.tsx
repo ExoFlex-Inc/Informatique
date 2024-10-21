@@ -94,7 +94,7 @@ const router = createBrowserRouter(
 );
 
 function PublicRoutes() {
-  const { user, isLoading, isError, error } = useUser({ fetchOnDemand: true });
+  const { user, isLoading, isError, error } = useUser();
 
   // Handle loading state
   if (isLoading) {
@@ -124,9 +124,7 @@ function AppLayout() {
   const {
     user,
     isLoading,
-    isFetching,
     isError,
-    isStale,
     status: userStatus,
   } = useUser();
 
@@ -135,16 +133,12 @@ function AppLayout() {
     return <Navigate to="/login" />;
   }
 
-  if (isLoading || isFetching || userStatus === "pending") {
+  if (isLoading) {
     return (
       <div className="loading-container">
         <Loading />
       </div>
     );
-  }
-
-  if (isStale) {
-    console.log("Profile data is stale.");
   }
 
   if (userStatus === "success") {
