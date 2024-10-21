@@ -99,23 +99,6 @@ const LineChart: React.FC<LineChartProps> = ({
         pointRadius: 2,
         pointHoverRadius: 7,
       };
-    } else if (type === "line") {
-      return {
-        scales: {
-          x: {
-            type: "linear",
-            min: 0,
-            max: 10,
-            border: {
-              color: "red",
-            },
-          },
-          y: {
-            min: -65,
-            max: 65,
-          },
-        },
-      };
     } else if (type === "activity") {
       return {
         scales: {

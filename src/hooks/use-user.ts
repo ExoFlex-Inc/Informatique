@@ -29,6 +29,7 @@ export function useUser() {
   } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
+
       const response = await fetch("http://localhost:3001/auth/session", {
         method: "GET",
         credentials: "include",
@@ -91,15 +92,13 @@ export function useUser() {
 
       return null;
     },
-    retry: false,
+    // retry: false,
     staleTime: 1000 * 60 * 5, // 5 minutes
     cacheTime: 1000 * 60 * 60 * 24, // 24 hours
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
   });
 
 
-  const userId = user?.id;
+  const userId = user?.user_id;
 
   const updateProfileMutation = useMutation({
     mutationFn: async (newProfile: UserProfile) => {
@@ -174,20 +173,20 @@ export function useUser() {
     uploadAvatarMutation.mutate(file);
   };
 
-  useEffect(() => {
-    const { data: authListener } = supaClient.auth.onAuthStateChange(async (event, _) => {
-      if (!user) {
-        queryClient.invalidateQueries(["user"]);
-      }
-    });
+  // useEffect(() => {
+  //   const { data: authListener } = supaClient.auth.onAuthStateChange(async (event, _) => {
+  //     if (!user) {
+  //       queryClient.invalidateQueries(["user"]);
+  //     }
+  //   });
   
-    // Cleanup the listener on component unmount
-    return () => {
-      if (authListener?.unsubscribe) {
-        authListener.unsubscribe();
-      }
-    };
-  }, [queryClient]);
+  //   // Cleanup the listener on component unmount
+  //   return () => {
+  //     if (authListener?.unsubscribe) {
+  //       authListener.unsubscribe();
+  //     }
+  //   };
+  // }, [queryClient]);
 
   return {
     user,

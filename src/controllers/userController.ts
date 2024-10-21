@@ -27,7 +27,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
 export const updateUserProfile = async (req: Request, res: Response) => {
   const userId = req.params.userId;
   const newProfile = req.body;
-  const { avatar_blob_url, ...profileToUpdate } = newProfile;
+  const { avatar_blob_url, session_status, ...profileToUpdate } = newProfile;
 
   const { error: authError } = await supaClient.auth.updateUser({
     data: {
