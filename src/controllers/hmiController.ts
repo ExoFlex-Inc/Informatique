@@ -7,11 +7,11 @@ const handleButtonClick = asyncHandler(async (req: Request, res: Response) => {
 
   Object.values(req.body).forEach((value) => {
     if (value) {
-      dataToSend += value + ";"
+      dataToSend += value + ";";
     }
-  })
+  });
 
-  dataToSend += "}"
+  dataToSend += "}";
 
   console.log(`Button clicked:${dataToSend}`);
   const serialPort = getSerialPort();

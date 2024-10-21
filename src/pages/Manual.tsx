@@ -93,7 +93,13 @@ export default function Manual() {
   };
 
   useEffect(() => {
-    if (stm32Data && stm32Data.Positions && stm32Data.Torques && stm32Data.Current && !graphPause) {
+    if (
+      stm32Data &&
+      stm32Data.Positions &&
+      stm32Data.Torques &&
+      stm32Data.Current &&
+      !graphPause
+    ) {
       const currentTime = Date.now();
       setLatestMotorData({
         motor1: {
@@ -170,8 +176,7 @@ export default function Manual() {
                 label="Reset"
                 mode="Reset"
                 color="blueAccent.main hover:bg-blue-700 text-white"
-              >
-              </Button>
+              ></Button>
             </div>
             <IconButton
               onClick={() => setGraphPause(false)}
