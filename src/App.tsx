@@ -106,7 +106,7 @@ function PublicRoutes() {
 
   // Handle error state
   if (isError) {
-    console.error("Error fetching profile or session:", error);
+    console.error("Error fetching user in PublicRoutes:", error);
     return <Outlet />;
   }
 
@@ -128,6 +128,7 @@ function AppLayout() {
   } = useUser();
 
   if (isError) {
+    console.error("Error fetching user in AppLayout:", error);
     queryClient.clear();
     return <Navigate to="/login" />;
   }

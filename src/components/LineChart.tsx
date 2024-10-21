@@ -4,7 +4,6 @@ import "chartjs-adapter-luxon";
 import Chart from "chart.js/auto";
 import { CategoryScale } from "chart.js";
 import StreamingPlugin from "chartjs-plugin-streaming";
-import { Socket } from "socket.io-client";
 import { ChartData, ChartOptions, ScatterDataPoint, ChartDataset } from "chart.js";
 
 Chart.register(CategoryScale);
@@ -12,13 +11,9 @@ Chart.register(StreamingPlugin);
 
 interface LineChartProps {
   chartData: ChartData<"line">;
-  mode?: string;
   type: string;
-  socket?: Socket | null;
-  title?: string;
-  setChartImage?: React.Dispatch<React.SetStateAction<string>>;
-  removeFirstPoint?: () => void;
-  graphPause?: boolean;
+  title: string;
+  graphPause: boolean;
 }
 
 const LineChart: React.FC<LineChartProps> = ({
