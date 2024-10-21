@@ -5,7 +5,6 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
   RouterProvider,
-  useNavigate,
 } from "react-router-dom";
 import { ColorModeContext, useMode } from "./hooks/theme.ts";
 import { CssBaseline, ThemeProvider } from "@mui/material";

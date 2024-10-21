@@ -52,6 +52,7 @@ CREATE TABLE plans (
   plan JSONB,
   created_at DATE DEFAULT CURRENT_DATE
 );
+
 CREATE TABLE exercise_data (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
   user_id uuid REFERENCES user_profiles(user_id),

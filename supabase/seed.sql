@@ -214,7 +214,7 @@ BEGIN
                 new_id,
                 exercise_data,
                 rated_pain,
-                (base_date + (j * INTERVAL '1 day')) AT TIME ZONE 'UTC'
+                (base_date + (j * INTERVAL '1 day'))
             );
         END LOOP;
     END LOOP;
@@ -497,7 +497,7 @@ BEGIN
                 new_id,
                 exercise_data,
                 rated_pain,
-                (base_date + (j * INTERVAL '1 day')) AT TIME ZONE 'UTC'
+                (base_date + (j * INTERVAL '1 day'))
             );
         END LOOP;
 
