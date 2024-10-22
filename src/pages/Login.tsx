@@ -35,7 +35,7 @@ export default function Login() {
   const [showSignUpModal, setShowSignUpModal] = useState(false);
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const { isLoading, updateProfile } = useUser();
+  const { user, updateProfile } = useUser();
   
   async function handleLogin(event: React.FormEvent) {
     event.preventDefault();
@@ -65,6 +65,8 @@ export default function Login() {
         permissions: data.user.user_metadata.permissions,
         fcm_token: fcmToken,
       });
+
+      navigate("/dashboard");
   
     } catch (error: any) {
       console.error("Login error:", error.message);

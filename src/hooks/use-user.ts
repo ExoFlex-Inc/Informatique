@@ -47,10 +47,10 @@ export function useUser() {
 
       // If the user is authenticated, fetch the user profile
 
-      // const cachedUser = queryClient.getQueryData(["user"]);
-      // if (cachedUser) {
-      //   return cachedUser;
-      // }
+      const cachedUser = queryClient.getQueryData(["user"]);
+      if (cachedUser) {
+        return cachedUser;
+      }
 
       if (data.user) {
         // Fetch the profile data
@@ -173,11 +173,11 @@ export function useUser() {
   });
 
   const updateProfile = (newProfile: UserProfile) => {
-    updateProfileMutation.mutate(newProfile);
+    updateProfileMutation.mutateAsync(newProfile);
   };
 
   const uploadAvatar = (file: File) => {
-    uploadAvatarMutation.mutate(file);
+    uploadAvatarMutation.mutateAsync(file);
   };
 
   return {

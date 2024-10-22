@@ -35,7 +35,7 @@ let saveData = {
     second: '2-digit',
     hour12: false,
     timeZoneName: 'short',
-  }),
+  }).replace(' 24:', ' 00:'),
   angles: {
     dorsiflexion: [] as number[],
     eversion: [] as number[],

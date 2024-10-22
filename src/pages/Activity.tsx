@@ -376,21 +376,21 @@ export default function Activity() {
   }
 
   function getMissingDates(data: dataStructure[], dateRange: DateRange) {
-    // Extract dates from data, formatted as 'YYYY-MM-DD'
+    const startDate = new Date(dateRange[0]);
+    const endDate = new Date(dateRange[1]);
+  
     const dates = data.map((item) => {
-      return new Date(item.data.recorded_date).toISOString().split('T')[0];
+      const date = new Date(item.data.recorded_date);
+      return date.toISOString().split('T')[0];
     });
   
     const missingDates: string[] = [];
-  
-    const startDate = new Date(dateRange[0]);
-    const endDate = new Date(dateRange[1]);
   
     // Generate all dates in the date range
     for (
       let currentDate = new Date(startDate);
       currentDate <= endDate;
-      currentDate = new Date(currentDate.setDate(currentDate.getDate() + 1)) // Fix: Create new Date object for each iteration
+      currentDate.setUTCDate(currentDate.getUTCDate() + 1)
     ) {
       const formattedDate = currentDate.toISOString().split('T')[0];
       if (!dates.includes(formattedDate)) {

@@ -94,20 +94,6 @@ const router = createBrowserRouter(
 );
 
 function PublicRoutes() {
-  const { user, isError, error } = useUser();
-
-  // Handle error state
-  if (isError) {
-    console.error("Error fetching user in PublicRoutes:", error);
-    return <Outlet />;
-  }
-
-  // If the user is authenticated, redirect to the dashboard
-  if (user) {
-    return <Navigate to="/dashboard" />;
-  }
-
-  // Return the Outlet component to render child routes
   return <Outlet />;
 }
 
@@ -115,7 +101,6 @@ function AppLayout() {
   const {
     user,
     isLoading,
-    status: userStatus,
     isError,
     error,
   } = useUser();
@@ -127,15 +112,14 @@ function AppLayout() {
     const fetchAvatar = async () => {
       if (user?.avatar_url) {
         setAvatarLoading(true);
-
         try {
           const avatarResponse = await fetch(
             `http://localhost:3001/user/avatar/${user.user_id}?path=${encodeURIComponent(
-              user.avatar_url,
+              user.avatar_url
             )}`,
             {
-              method: "GET",
-              credentials: "include",
+              method: 'GET',
+              credentials: 'include',
             }
           );
 
@@ -144,31 +128,32 @@ function AppLayout() {
             const avatarBlobUrl = URL.createObjectURL(avatarBlob);
 
             // Update the user data with the avatar blob URL
-            queryClient.setQueryData(["user"], {
-              ...user,
+            queryClient.setQueryData(['user'], (oldData) => ({
+              ...oldData,
               avatar_blob_url: avatarBlobUrl,
-            });
+            }));
+          } else {
+            console.error('Failed to fetch avatar:', avatarResponse.statusText);
           }
         } catch (err) {
-          console.error("Error fetching avatar:", err);
+          console.error('Error fetching avatar:', err);
         } finally {
           setAvatarLoading(false);
         }
       }
     };
 
-    if (user && userStatus === "success") {
-      fetchAvatar();
-    }
-  }, [queryClient]);
+    fetchAvatar();
+  }, [user?.avatar_url]);
 
-  if (isLoading || avatarLoading) {
-    return (
-      <div className="loading-container">
-        <Loading />
-      </div>
-    );
-  }
+    // Handle loading state
+    if (isLoading || avatarLoading) {
+      return (
+        <div className="loading-container">
+          <Loading />
+        </div>
+      );
+    }
 
   // Handle errors
   if (isError) {
@@ -178,7 +163,7 @@ function AppLayout() {
   }
 
   // Render the app layout only when user exists and avatar is fetched
-  if (userStatus === "success") {
+  if (user) {
     return (
       <>
         <ProSideBar permissions={user.permissions} />
@@ -190,8 +175,11 @@ function AppLayout() {
     );
   }
 
-  // If no user, navigate to login
-  return <Navigate to="/login" />;
+  return (
+    <div className="loading-container">
+      <Loading />
+    </div>
+  );
 }
 
 function App() {
