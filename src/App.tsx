@@ -98,12 +98,7 @@ function PublicRoutes() {
 }
 
 function AppLayout() {
-  const {
-    user,
-    isLoading,
-    isError,
-    error,
-  } = useUser();
+  const { user, isLoading, isError, error } = useUser();
   const queryClient = useQueryClient();
 
   const [avatarLoading, setAvatarLoading] = useState(false);
@@ -115,12 +110,12 @@ function AppLayout() {
         try {
           const avatarResponse = await fetch(
             `http://localhost:3001/user/avatar/${user.user_id}?path=${encodeURIComponent(
-              user.avatar_url
+              user.avatar_url,
             )}`,
             {
-              method: 'GET',
-              credentials: 'include',
-            }
+              method: "GET",
+              credentials: "include",
+            },
           );
 
           if (avatarResponse.ok) {
@@ -128,15 +123,15 @@ function AppLayout() {
             const avatarBlobUrl = URL.createObjectURL(avatarBlob);
 
             // Update the user data with the avatar blob URL
-            queryClient.setQueryData(['user'], (oldData) => ({
+            queryClient.setQueryData(["user"], (oldData) => ({
               ...oldData,
               avatar_blob_url: avatarBlobUrl,
             }));
           } else {
-            console.error('Failed to fetch avatar:', avatarResponse.statusText);
+            console.error("Failed to fetch avatar:", avatarResponse.statusText);
           }
         } catch (err) {
-          console.error('Error fetching avatar:', err);
+          console.error("Error fetching avatar:", err);
         } finally {
           setAvatarLoading(false);
         }
@@ -146,14 +141,14 @@ function AppLayout() {
     fetchAvatar();
   }, [user?.avatar_url]);
 
-    // Handle loading state
-    if (isLoading || avatarLoading) {
-      return (
-        <div className="loading-container">
-          <Loading />
-        </div>
-      );
-    }
+  // Handle loading state
+  if (isLoading || avatarLoading) {
+    return (
+      <div className="loading-container">
+        <Loading />
+      </div>
+    );
+  }
 
   // Handle errors
   if (isError) {

@@ -14,7 +14,7 @@ async function registerFCMToken() {
     const permission = await Notification.requestPermission();
     if (permission === "granted") {
       const registration = await navigator.serviceWorker.register(
-        "/firebase-messaging-sw.js"
+        "/firebase-messaging-sw.js",
       );
       fcmToken = await getToken(messaging, {
         vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
@@ -36,7 +36,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const { user, updateProfile } = useUser();
-  
+
   async function handleLogin(event: React.FormEvent) {
     event.preventDefault();
     try {
@@ -48,14 +48,14 @@ export default function Login() {
         credentials: "include",
         body: JSON.stringify({ email, password }),
       });
-  
+
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.error || "Login failed");
       }
-  
+
       const fcmToken = await registerFCMToken();
-      
+
       // Update the profile with the FCM token and user metadata
       await updateProfile({
         user_id: data.user.id,
@@ -67,7 +67,6 @@ export default function Login() {
       });
 
       navigate("/dashboard");
-  
     } catch (error: any) {
       console.error("Login error:", error.message);
       alert(`Login failed: ${error.message}`);

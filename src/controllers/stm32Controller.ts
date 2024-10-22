@@ -26,16 +26,18 @@ let prevTorques = {
 };
 
 let saveData = {
-  recorded_date: new Date().toLocaleString('en-CA', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-    timeZoneName: 'short',
-  }).replace(' 24:', ' 00:'),
+  recorded_date: new Date()
+    .toLocaleString("en-CA", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+      timeZoneName: "short",
+    })
+    .replace(" 24:", " 00:"),
   angles: {
     dorsiflexion: [] as number[],
     eversion: [] as number[],
@@ -65,8 +67,9 @@ let exerciseId: number | null = null;
 const insertInitialDataToSupabase = async (): Promise<boolean> => {
   try {
     // Fetch the authenticated user
-    const { data: authData, error: authError } = await supaClient.auth.getUser();
-    
+    const { data: authData, error: authError } =
+      await supaClient.auth.getUser();
+
     if (authError || !authData?.user) {
       throw new Error("User not authenticated or error fetching user.");
     }
@@ -84,24 +87,28 @@ const insertInitialDataToSupabase = async (): Promise<boolean> => {
       return false;
     }
 
-    const repetitions_target = planData.plan.plan.map((set: any) => set.repetitions).reduce((a: number, b: number) => a + b, 0);
+    const repetitions_target = planData.plan.plan
+      .map((set: any) => set.repetitions)
+      .reduce((a: number, b: number) => a + b, 0);
     saveData.repetitions_target = repetitions_target;
-
 
     // Insert the data into Supabase
     const { data, error } = await supaClient
       .from("exercise_data")
-      .insert([{ data: saveData, user_id: profile.id}])
+      .insert([{ data: saveData, user_id: profile.id }])
       .select("id")
       .single();
 
     if (error) {
       console.error("Error inserting initial data into Supabase:", error);
-      return false; 
+      return false;
     } else {
-      console.log("Initial data successfully inserted to Supabase with ID:", data.id);
+      console.log(
+        "Initial data successfully inserted to Supabase with ID:",
+        data.id,
+      );
       exerciseId = data.id;
-      return true; 
+      return true;
     }
   } catch (err) {
     if (err instanceof Error) {
@@ -139,7 +146,9 @@ const updateDataToSupabase = async () => {
 const togglePushInterval = (start: boolean) => {
   if (start && !pushInterval) {
     if (!exerciseId) {
-      console.error("Cannot start push interval. Initial data has not been inserted.");
+      console.error(
+        "Cannot start push interval. Initial data has not been inserted.",
+      );
       return;
     }
 
@@ -158,12 +167,14 @@ const togglePushInterval = (start: boolean) => {
 const recordingStm32Data = async (req: Request, res: Response) => {
   try {
     const { start } = req.body;
-    
+
     // Validate request body
     if (typeof start !== "boolean") {
       return res
         .status(400)
-        .send("Invalid request. Please provide a 'start' field with a boolean value.");
+        .send(
+          "Invalid request. Please provide a 'start' field with a boolean value.",
+        );
     }
 
     if (start) {
@@ -174,13 +185,15 @@ const recordingStm32Data = async (req: Request, res: Response) => {
       }
 
       // Insert initial JSON data
-      const initialInsertSuccess = await insertInitialDataToSupabase(); 
+      const initialInsertSuccess = await insertInitialDataToSupabase();
       if (!initialInsertSuccess) {
-        return res.status(500).send("Failed to start recording. Initial data insert failed.");
+        return res
+          .status(500)
+          .send("Failed to start recording. Initial data insert failed.");
       }
 
       // Start recording
-      togglePushInterval(true); 
+      togglePushInterval(true);
       return res.status(200).send("Recording started.");
     } else {
       // Stop recording
@@ -223,7 +236,7 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
 
   const ports = await SerialPort.list();
   const scannerPort = ports.find(
-    (port) => port.manufacturer === "STMicroelectronics"
+    (port) => port.manufacturer === "STMicroelectronics",
   );
 
   if (scannerPort) {
@@ -254,7 +267,10 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
       receivedDataBuffer += data.toString();
       setReceivedDataBuffer(receivedDataBuffer);
 
-      while (receivedDataBuffer.includes("{") && receivedDataBuffer.includes("}")) {
+      while (
+        receivedDataBuffer.includes("{") &&
+        receivedDataBuffer.includes("}")
+      ) {
         const startIdx = receivedDataBuffer.indexOf("{");
         const endIdx = receivedDataBuffer.indexOf("}") + 1;
         const jsonDataString = receivedDataBuffer.substring(startIdx, endIdx);
@@ -297,7 +313,6 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
             },
             repetitions_done: parsedData.Repetitions,
           };
-
         } catch (err) {
           console.error("Error parsing JSON:", err);
         }

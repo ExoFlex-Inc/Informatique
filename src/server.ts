@@ -18,7 +18,6 @@ import { supabaseMiddleware } from "./middlewares/supabaseMiddleware.ts";
 import "./config/passportConfig.ts";
 import rateLimit from "express-rate-limit";
 
-
 dotenv.config();
 
 const app: Application = express();

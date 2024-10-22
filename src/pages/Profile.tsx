@@ -108,9 +108,7 @@ function Profile() {
         >
           <Avatar
             src={
-              user?.avatar_blob_url
-                ? user.avatar_blob_url
-                : DefaultProfilePic
+              user?.avatar_blob_url ? user.avatar_blob_url : DefaultProfilePic
             }
             sx={{ width: "25vw", height: "25vw" }}
           />

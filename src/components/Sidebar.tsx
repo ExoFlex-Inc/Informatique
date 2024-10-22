@@ -50,8 +50,7 @@ const Item: React.FC<ItemProps> = ({ title, to, icon, selected }) => {
       onClick={handleClick}
       icon={icon}
       prefix={title}
-    >
-    </MenuItem>
+    ></MenuItem>
   );
 };
 
@@ -106,8 +105,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
                       : `${colors.primary[400]}`,
                     transition: "background-color 0.3s",
                     "&:hover": {
-                      backgroundColor:
-                        `${colors.blueAccent[400]}`,
+                      backgroundColor: `${colors.blueAccent[400]}`,
                       color: "white !important",
                       fontWeight: "bold !important",
                     },
@@ -159,9 +157,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
               <Box mb="25px">
                 <Box display="flex" justifyContent="center" alignItems="center">
                   <Avatar
-                    src={
-                      user.avatar_blob_url ? user.avatar_blob_url : Icon
-                    }
+                    src={user.avatar_blob_url ? user.avatar_blob_url : Icon}
                     sx={
                       isTablet
                         ? { width: 50, height: 50 }

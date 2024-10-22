@@ -79,7 +79,9 @@ interface Movement {
 
 export default function HMI() {
   const { user } = useUser();
-  const { planData } = usePlan(user?.user_id) as { planData: PlanData | undefined };
+  const { planData } = usePlan(user?.user_id) as {
+    planData: PlanData | undefined;
+  };
   const { stm32Data, socket, errorFromStm32 } = useStm32() as {
     stm32Data: Stm32Data | null | undefined;
     socket: any;
@@ -87,9 +89,10 @@ export default function HMI() {
   };
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [openDialogPainScale, setOpenDialogPainScale] = useState<boolean>(false);
+  const [openDialogPainScale, setOpenDialogPainScale] =
+    useState<boolean>(false);
   const [painScale, setPainScale] = useState<number>(0);
-  
+
   const hasExecute = useRef<boolean>(false);
 
   const [chartData, setChartData] = useState<ChartData>({
@@ -160,7 +163,7 @@ export default function HMI() {
               start: false,
             }),
           });
-  
+
           if (response.ok) {
             console.log("Recording stopped successfully.");
           } else {
@@ -171,7 +174,7 @@ export default function HMI() {
         }
       }
     };
-  
+
     stopRecording();
   }, [stm32Data, socket]);
 
@@ -184,7 +187,10 @@ export default function HMI() {
       const currentSet = planData.plan[stm32Data.ExerciseIdx];
       const currentExercise = currentSet.movement[0]?.exercise;
 
-      if (currentExercise === "Dorsiflexion" || currentExercise === "Eversion") {
+      if (
+        currentExercise === "Dorsiflexion" ||
+        currentExercise === "Eversion"
+      ) {
         setChartData((prevChartData) => {
           const newData = [...prevChartData.datasets];
           newData[0].data.push({
@@ -251,7 +257,7 @@ export default function HMI() {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify(requestBody),
-            }
+            },
           );
 
           if (exerciseData.ok) {

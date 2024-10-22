@@ -63,37 +63,39 @@ function onGraphTypeChange(
   dates: string[],
   ...args: (number[][] | undefined)[][]
 ) {
-  const mappedArgs = args.map((arg: (number[][] | undefined)[], index: number) => {
-    const dataPoints = [];
-    let cumulativeIndex = 0;
+  const mappedArgs = args.map(
+    (arg: (number[][] | undefined)[], index: number) => {
+      const dataPoints = [];
+      let cumulativeIndex = 0;
 
-    for (let i = 0; i < arg.length; i++) {
-      const valueArray = arg[i] ?? [];
-      const date = dates[i];
+      for (let i = 0; i < arg.length; i++) {
+        const valueArray = arg[i] ?? [];
+        const date = dates[i];
 
-      for (let j = 0; j < valueArray.length; j++) {
-        const yValue = valueArray[j];
-        if (yValue !== undefined && yValue !== null) {
-          dataPoints.push({
-            x: cumulativeIndex + 1,
-            y: yValue,
-            recorded_date: date,
-          });
+        for (let j = 0; j < valueArray.length; j++) {
+          const yValue = valueArray[j];
+          if (yValue !== undefined && yValue !== null) {
+            dataPoints.push({
+              x: cumulativeIndex + 1,
+              y: yValue,
+              recorded_date: date,
+            });
+          }
+          cumulativeIndex++;
         }
-        cumulativeIndex++;
       }
-    }
 
-    return {
-      label: labels[index],
-      data: dataPoints,
-      borderColor: colors[index],
-      fill: false,
-      tension: 0.1,
-      pointRadius: show_points ? 5 : 2,
-      pointHoverRadius: 7,
-    };
-  });
+      return {
+        label: labels[index],
+        data: dataPoints,
+        borderColor: colors[index],
+        fill: false,
+        tension: 0.1,
+        pointRadius: show_points ? 5 : 2,
+        pointHoverRadius: 7,
+      };
+    },
+  );
 
   // Update x-axis labels based on the cumulative data points
   const xAxisLabels = mappedArgs[0]?.data?.map((point) => point.x) ?? [];
@@ -117,7 +119,7 @@ export default function Activity() {
     labels: [],
     datasets: [],
   });
-  
+
   const [averageData, setAverageData] = useState<any>({});
   const [title1, setTitle1] = useState("");
   const [missingDates, setMissingDates] = useState<string[]>([]);
@@ -128,13 +130,13 @@ export default function Activity() {
   useEffect(() => {
     const fetchData = async () => {
       if (!selectedUser || selectedUser.length === 0 || !date) return;
-  
+
       const userId = selectedUser[0].user_id;
       const startDate = date[0].toISOString();
-      const endDate = date[1].toISOString(); 
-  
+      const endDate = date[1].toISOString();
+
       const url = `http://localhost:3001/exercise-data/${userId}?start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`;
-  
+
       try {
         const response = await fetch(url, {
           method: "GET",
@@ -142,22 +144,26 @@ export default function Activity() {
             "Content-Type": "application/json",
           },
         });
-  
+
         const result = await response.json();
-  
+
         if (response.ok) {
           setData(result);
 
           // Put the date in the client timezone
-          const startDate = date[0].toLocaleDateString('en-CA');
-          const endDate = date[1].toLocaleDateString('en-CA');
-    
+          const startDate = date[0].toLocaleDateString("en-CA");
+          const endDate = date[1].toLocaleDateString("en-CA");
+
           // Check if the selected date range is only one day
           if (startDate === endDate) {
             // Extract available sessions for this day
-            const sessionTimes = result.map((item: any) => item.data.recorded_date);
+            const sessionTimes = result.map(
+              (item: any) => item.data.recorded_date,
+            );
             setAvailableSessions(sessionTimes); // Set available sessions for dropdown
-            setSelectedSession(sessionTimes.length > 0 ? sessionTimes[0] : null); // Default to the first session
+            setSelectedSession(
+              sessionTimes.length > 0 ? sessionTimes[0] : null,
+            ); // Default to the first session
           } else {
             setAvailableSessions([]); // Reset available sessions if date range is more than one day
             setSelectedSession(null); // Reset the selected session
@@ -169,7 +175,7 @@ export default function Activity() {
         console.error(error.message);
       }
     };
-  
+
     fetchData();
   }, [selectedUser, date]);
 
@@ -180,35 +186,53 @@ export default function Activity() {
         const filteredData = selectedSession
           ? data.filter((item) => item.data.recorded_date === selectedSession)
           : data;
-          
+
         const dates = filteredData.map((item) => item.data.recorded_date);
         const colors = [
           "rgb(99, 255, 132)",
           "rgb(255, 99, 132)",
           "rgb(99, 132, 255)",
         ];
-  
+
         const angle_stretch = {
-          dorsiflexion: filteredData.map((item) => item.data.angles.dorsiflexion.map((angle) => angle)),
-          eversion: filteredData.map((item) => item.data.angles.eversion.map((angle) => angle)),
-          extension: filteredData.map((item) => item.data.angles.extension.map((angle) => angle)),
+          dorsiflexion: filteredData.map((item) =>
+            item.data.angles.dorsiflexion.map((angle) => angle),
+          ),
+          eversion: filteredData.map((item) =>
+            item.data.angles.eversion.map((angle) => angle),
+          ),
+          extension: filteredData.map((item) =>
+            item.data.angles.extension.map((angle) => angle),
+          ),
         };
-  
+
         const force_stretch = {
-          dorsiflexion: filteredData.map((item) => item.data.torques.dorsiflexion.map((torque) => torque)),
-          eversion: filteredData.map((item) => item.data.torques.eversion.map((torque) => torque)),
-          extension: filteredData.map((item) => item.data.torques.extension.map((torque) => torque)),
+          dorsiflexion: filteredData.map((item) =>
+            item.data.torques.dorsiflexion.map((torque) => torque),
+          ),
+          eversion: filteredData.map((item) =>
+            item.data.torques.eversion.map((torque) => torque),
+          ),
+          extension: filteredData.map((item) =>
+            item.data.torques.extension.map((torque) => torque),
+          ),
         };
-  
-        const repetitions_done = filteredData?.map((item) => item.data.repetitions_done);
-        const repetitions_target = filteredData?.map((item) => item.data.repetitions_target);
+
+        const repetitions_done = filteredData?.map(
+          (item) => item.data.repetitions_done,
+        );
+        const repetitions_target = filteredData?.map(
+          (item) => item.data.repetitions_target,
+        );
         // Wrap the repetitions data in an array for the graph
         const repetitions_done_wrapped = repetitions_done.map((item) => [item]);
-        const repetitions_target_wrapped = repetitions_target.map((item) => [item]);
+        const repetitions_target_wrapped = repetitions_target.map((item) => [
+          item,
+        ]);
 
-        const rated_pain = filteredData?.map((element) => [element.rated_pain]); 
+        const rated_pain = filteredData?.map((element) => [element.rated_pain]);
         const rated_pain_wrapped = rated_pain.map((item) => [item]);
-  
+
         switch (graphType) {
           case "Amplitude":
             {
@@ -220,14 +244,14 @@ export default function Activity() {
                 dates,
                 angle_stretch.dorsiflexion,
                 angle_stretch.extension,
-                angle_stretch.eversion
+                angle_stretch.eversion,
               );
-  
+
               setDataset1(chartData);
               setTitle1(title);
             }
             break;
-  
+
           case "Rigidity":
             {
               const { chartData, title } = onGraphTypeChange(
@@ -244,7 +268,7 @@ export default function Activity() {
               setTitle1(title);
             }
             break;
-  
+
           case "Number of repetitions":
             {
               const { chartData, title } = onGraphTypeChange(
@@ -260,7 +284,7 @@ export default function Activity() {
               setTitle1(title);
             }
             break;
-  
+
           case "Feedback":
             {
               const { chartData, title } = onGraphTypeChange(
@@ -275,7 +299,7 @@ export default function Activity() {
               setTitle1(title);
             }
             break;
-  
+
           default:
             break;
         }
@@ -309,15 +333,16 @@ export default function Activity() {
     }
   }, [data, graphType]);
 
-
   function getAverage(data: dataStructure[], graphType: string) {
     // Helper function to calculate the average
     const calculateAverage = (values: (number | undefined)[]) => {
-      const validValues = values.filter((value): value is number => value !== undefined);
+      const validValues = values.filter(
+        (value): value is number => value !== undefined,
+      );
       const sum = validValues.reduce((sum, value) => sum + value, 0);
       return validValues.length > 0 ? sum / validValues.length : 0;
     };
-  
+
     switch (graphType) {
       case "Amplitude":
         // Compute average of angles
@@ -333,7 +358,7 @@ export default function Activity() {
         };
         setAverageData(angleAverages);
         break;
-  
+
       case "Rigidity":
         // Compute average of torques
         const torques = {
@@ -348,11 +373,13 @@ export default function Activity() {
         };
         setAverageData(torqueAverages);
         break;
-  
+
       case "Number of repetitions":
         // Compute average of repetitions
         const repetitionsDone = data.map((item) => item.data.repetitions_done);
-        const repetitionsTarget = data.map((item) => item.data.repetitions_target);
+        const repetitionsTarget = data.map(
+          (item) => item.data.repetitions_target,
+        );
         const averageRepetitionsDone = calculateAverage(repetitionsDone);
         const averageRepetitionsTarget = calculateAverage(repetitionsTarget);
         const repetitionsAverages = {
@@ -361,14 +388,14 @@ export default function Activity() {
         };
         setAverageData(repetitionsAverages);
         break;
-  
+
       case "Feedback":
         // Compute average of rated_pain
         const ratedPain = data.map((item) => item.rated_pain);
         const averagePain = calculateAverage(ratedPain);
         setAverageData({ averagePain });
         break;
-  
+
       default:
         setAverageData(null);
         break;
@@ -378,26 +405,26 @@ export default function Activity() {
   function getMissingDates(data: dataStructure[], dateRange: DateRange) {
     const startDate = new Date(dateRange[0]);
     const endDate = new Date(dateRange[1]);
-  
+
     const dates = data.map((item) => {
       const date = new Date(item.data.recorded_date);
-      return date.toISOString().split('T')[0];
+      return date.toISOString().split("T")[0];
     });
-  
+
     const missingDates: string[] = [];
-  
+
     // Generate all dates in the date range
     for (
       let currentDate = new Date(startDate);
       currentDate <= endDate;
       currentDate.setUTCDate(currentDate.getUTCDate() + 1)
     ) {
-      const formattedDate = currentDate.toISOString().split('T')[0];
+      const formattedDate = currentDate.toISOString().split("T")[0];
       if (!dates.includes(formattedDate)) {
         missingDates.push(formattedDate);
       }
     }
-  
+
     setMissingDates(missingDates);
   }
 
@@ -415,7 +442,7 @@ export default function Activity() {
         return "";
     }
   }
-  
+
   function renderAverageData(averageData: any, graphType: string) {
     if (!averageData) {
       return null;
@@ -445,7 +472,7 @@ export default function Activity() {
             )}
           </>
         );
-  
+
       case "Number of repetitions":
         return (
           <>
@@ -461,7 +488,7 @@ export default function Activity() {
             )}
           </>
         );
-  
+
       case "Feedback":
         return (
           <>
@@ -472,7 +499,7 @@ export default function Activity() {
             )}
           </>
         );
-  
+
       default:
         return null;
     }
@@ -499,24 +526,26 @@ export default function Activity() {
         </div>
 
         {/* Conditional Form Control */}
-        {date && date[0].toLocaleDateString() === date[1].toLocaleDateString() && availableSessions.length > 1 && (
-          <FormControl sx={{ minWidth: 200 }}>
-            <InputLabel id="session-select-label">Select Session</InputLabel>
-            <Select
-              labelId="session-select-label"
-              id="session-select"
-              value={selectedSession}
-              label="Select Session"
-              onChange={handleSessionChange}
-            >
-              {availableSessions.map((session) => (
-                <MenuItem key={session} value={session}>
-                  {session}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        )}
+        {date &&
+          date[0].toLocaleDateString() === date[1].toLocaleDateString() &&
+          availableSessions.length > 1 && (
+            <FormControl sx={{ minWidth: 200 }}>
+              <InputLabel id="session-select-label">Select Session</InputLabel>
+              <Select
+                labelId="session-select-label"
+                id="session-select"
+                value={selectedSession}
+                label="Select Session"
+                onChange={handleSessionChange}
+              >
+                {availableSessions.map((session) => (
+                  <MenuItem key={session} value={session}>
+                    {session}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
       </div>
       <div className="relative flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
@@ -539,39 +568,39 @@ export default function Activity() {
         </div>
       </div>
       <div className="flex items-center justify-center mb-4">
-      <Typography variant="h6" className="text-white">
+        <Typography variant="h6" className="text-white">
           {graphType}
         </Typography>
       </div>
       {/* <CustomScrollbar> */}
-        <>
-          <div className="mb-4 basis-full">
-            <LineChart type="activity" chartData={dataset1} title={title1} />
-          </div>
-          <ThemeProvider theme={createTheme({ palette: { mode: "light" } })}>
-            <Box className="flex justify-center gap-4">
-              <Paper className="p-4 w-1/3">
-                <Typography variant="h6" className="mb-2 text-black">
-                  Missing exercise days
-                </Typography>
-                <div className="flex flex-wrap gap-2">
-                  {missingDates.map((date) => (
-                    <Typography key={date} variant="body2" className="text-black">
-                      {date}
-                    </Typography>
-                  ))}
-                </div>
-              </Paper>
+      <>
+        <div className="mb-4 basis-full">
+          <LineChart type="activity" chartData={dataset1} title={title1} />
+        </div>
+        <ThemeProvider theme={createTheme({ palette: { mode: "light" } })}>
+          <Box className="flex justify-center gap-4">
+            <Paper className="p-4 w-1/3">
+              <Typography variant="h6" className="mb-2 text-black">
+                Missing exercise days
+              </Typography>
+              <div className="flex flex-wrap gap-2">
+                {missingDates.map((date) => (
+                  <Typography key={date} variant="body2" className="text-black">
+                    {date}
+                  </Typography>
+                ))}
+              </div>
+            </Paper>
 
-              <Paper className="p-4 w-1/3">
-                <Typography variant="h6" className="mb-2 text-black">
-                  {getAverageTitle(graphType)}
-                </Typography>
-                {renderAverageData(averageData, graphType)}
-              </Paper>
-            </Box>
-          </ThemeProvider>
-        </>
+            <Paper className="p-4 w-1/3">
+              <Typography variant="h6" className="mb-2 text-black">
+                {getAverageTitle(graphType)}
+              </Typography>
+              {renderAverageData(averageData, graphType)}
+            </Paper>
+          </Box>
+        </ThemeProvider>
+      </>
       {/* </CustomScrollbar> */}
     </div>
   );

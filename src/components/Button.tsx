@@ -111,7 +111,6 @@ const Button: React.FC<ButtonProps> = ({
     }
 
     if (e.button === 0) {
-
       if (action === "Increment") {
         intervalRef.current = setInterval(sendingRequests, 20);
         window.addEventListener("mouseup", handleMouseUp);

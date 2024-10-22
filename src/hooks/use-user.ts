@@ -1,13 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 export interface UserProfile {
-  user_id: string;           
-  first_name: string;           
-  last_name: string;           
-  speciality?: string;         
-  permissions?: string[];         
-  fcm_token?: string | null;     
-  avatar_url?: string;           
-  avatar_blob_url?: string;       
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  speciality?: string;
+  permissions?: string[];
+  fcm_token?: string | null;
+  avatar_url?: string;
+  avatar_blob_url?: string;
 }
 
 export function useUser() {
@@ -26,7 +26,6 @@ export function useUser() {
   } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
-
       // Check if the user is authenticated
       const response = await fetch("http://localhost:3001/auth/session", {
         method: "POST",
@@ -40,7 +39,9 @@ export function useUser() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Error fetching session: ${response.status} ${errorText}`);
+        throw new Error(
+          `Error fetching session: ${response.status} ${errorText}`,
+        );
       }
 
       const data = await response.json();
@@ -59,12 +60,12 @@ export function useUser() {
           {
             method: "GET",
             credentials: "include",
-          }
+          },
         );
 
         if (!profileResponse.ok) {
           throw new Error(
-            `Error fetching user profile: ${profileResponse.statusText}`
+            `Error fetching user profile: ${profileResponse.statusText}`,
           );
         }
 
@@ -79,7 +80,7 @@ export function useUser() {
             {
               method: "GET",
               credentials: "include",
-            }
+            },
           );
 
           if (avatarResponse.ok) {
@@ -104,7 +105,6 @@ export function useUser() {
     refetchOnMount: true,
   });
 
-
   const userId = user?.user_id;
 
   const updateProfileMutation = useMutation({
@@ -113,13 +113,16 @@ export function useUser() {
         throw new Error("No userId available");
       }
 
-      const response = await fetch(`http://localhost:3001/user/${newProfile.user_id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `http://localhost:3001/user/${newProfile.user_id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newProfile),
         },
-        body: JSON.stringify(newProfile),
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`Error updating user profile: ${response.statusText}`);

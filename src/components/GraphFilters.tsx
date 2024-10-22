@@ -47,8 +47,7 @@ const GraphFilters: React.FC<GraphFiltersProps> = ({
             ></ListItemText>
           </ListItemButton>
         </ListItem>
-        <ListItem disablePadding>
-        </ListItem>
+        <ListItem disablePadding></ListItem>
         <ListItem disablePadding>
           <ListItemButton onClick={() => changeGraphType("Feedback")}>
             <ListItemText

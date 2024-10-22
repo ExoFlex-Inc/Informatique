@@ -34,8 +34,7 @@ export default function Network() {
           setSearchQuery={setFilteredRelations}
           users={relations}
         />
-        {(user?.permissions === "dev" ||
-          user?.permissions === "client") && (
+        {(user?.permissions === "dev" || user?.permissions === "client") && (
           <Button
             variant="contained"
             color="info"

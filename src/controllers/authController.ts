@@ -7,7 +7,7 @@ import { CookieOptions } from "express";
 const cookieOptions: CookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+  sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
   path: "/",
 };
 
@@ -17,7 +17,8 @@ export const signup = async (req: Request, res: Response) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { email, password, first_name, last_name, phone_number, permissions } = req.body;
+  const { email, password, first_name, last_name, phone_number, permissions } =
+    req.body;
 
   try {
     // Check if the user already exists
@@ -28,25 +29,28 @@ export const signup = async (req: Request, res: Response) => {
       .single();
 
     if (existingUser) {
-      return res.status(400).json({ error: "User with this email already exists." });
+      return res
+        .status(400)
+        .json({ error: "User with this email already exists." });
     }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Sign up the user in Supabase Auth
-    const { data: newUserProfile, error: authInsertError } = await supaClient.auth.signUp({
-      email: email,
-      password: password,
-      options: {
-        data: {
-          first_name: first_name,
-          last_name: last_name,
-          phone_number: phone_number,
-          permissions: permissions,
+    const { data: newUserProfile, error: authInsertError } =
+      await supaClient.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            first_name: first_name,
+            last_name: last_name,
+            phone_number: phone_number,
+            permissions: permissions,
+          },
         },
-      },
-    });
+      });
 
     if (authInsertError) {
       return res.status(400).json({ error: authInsertError.message });
@@ -106,13 +110,16 @@ export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
-    const { data: supabaseUser, error } = await supaClient.auth.signInWithPassword({
-      email: email,
-      password: password,
-    });
+    const { data: supabaseUser, error } =
+      await supaClient.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
 
     if (error || !supabaseUser.session) {
-      return res.status(401).json({ error: error ? error.message : "Login failed" });
+      return res
+        .status(401)
+        .json({ error: error ? error.message : "Login failed" });
     }
 
     // Set the access_token and refresh_token in cookies
@@ -147,7 +154,9 @@ export const logout = async (req: Request, res: Response) => {
       .eq("user_id", user_id);
 
     if (updateError) {
-      return res.status(500).json({ error: `Failed to remove FCM token: ${updateError.message}` });
+      return res
+        .status(500)
+        .json({ error: `Failed to remove FCM token: ${updateError.message}` });
     }
 
     const { error } = await supaClient.auth.signOut();
@@ -197,7 +206,7 @@ export const setSession = async (req: Request, res: Response) => {
         body: JSON.stringify({
           refresh_token: refreshToken,
         }),
-      }
+      },
     );
 
     const tokenData = await response.json();
@@ -215,10 +224,11 @@ export const setSession = async (req: Request, res: Response) => {
       });
 
       // Set the session using Supabase client
-      const { data: sessionData, error: sessionError } = await supaClient.auth.setSession({
-        access_token: tokenData.access_token,
-        refresh_token: tokenData.refresh_token,
-      });
+      const { data: sessionData, error: sessionError } =
+        await supaClient.auth.setSession({
+          access_token: tokenData.access_token,
+          refresh_token: tokenData.refresh_token,
+        });
 
       if (sessionError || !sessionData.session) {
         return res.status(401).json({
@@ -249,7 +259,9 @@ export const getSession = async (req: Request, res: Response) => {
 
     if (error || !data?.session) {
       // If there's an error or no active session, return a 401 response
-      return res.status(401).json({ error: error?.message || "No user session" });
+      return res
+        .status(401)
+        .json({ error: error?.message || "No user session" });
     }
 
     // Return session and user data

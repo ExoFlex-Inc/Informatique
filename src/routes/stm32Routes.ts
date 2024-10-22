@@ -1,5 +1,9 @@
 import express from "express";
-import { initializeSerialPort, recordingStm32Data, handleButtonClick } from "../controllers/stm32Controller.ts";
+import {
+  initializeSerialPort,
+  recordingStm32Data,
+  handleButtonClick,
+} from "../controllers/stm32Controller.ts";
 
 const router = express.Router();
 

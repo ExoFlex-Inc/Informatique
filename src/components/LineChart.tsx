@@ -4,7 +4,12 @@ import "chartjs-adapter-luxon";
 import Chart from "chart.js/auto";
 import { CategoryScale } from "chart.js";
 import StreamingPlugin from "chartjs-plugin-streaming";
-import { ChartData, ChartOptions, ScatterDataPoint, ChartDataset } from "chart.js";
+import {
+  ChartData,
+  ChartOptions,
+  ScatterDataPoint,
+  ChartDataset,
+} from "chart.js";
 
 Chart.register(CategoryScale);
 Chart.register(StreamingPlugin);
@@ -24,7 +29,9 @@ const LineChart: React.FC<LineChartProps> = ({
 }) => {
   const chartRef = useRef<Chart<"line"> | null>(null);
 
-  const getYAxisLimits = (datasets: ChartDataset<"line", (number | ScatterDataPoint | null)[]>[]) => {
+  const getYAxisLimits = (
+    datasets: ChartDataset<"line", (number | ScatterDataPoint | null)[]>[],
+  ) => {
     let min = -65;
     let max = 65;
 
@@ -40,101 +47,115 @@ const LineChart: React.FC<LineChartProps> = ({
     return { min, max };
   };
 
-  const [chartOptions, setChartOptions] = React.useState<ChartOptions<"line">>(() => {
-    if (type === "realtime") {
-      const datasets: ChartDataset<"line", (number | ScatterDataPoint | null)[]>[] = [
-        {
-          label: "Motor 1",
-          borderColor: "rgb(255, 99, 132)",
-          data: [],
-        },
-        {
-          label: "Motor 2",
-          borderColor: "rgb(99, 255, 132)",
-          data: [],
-        },
-        {
-          label: "Motor 3",
-          borderColor: "rgb(99, 132, 255)",
-          data: [],
-        },
-      ];
-      return {
-        datasets: datasets,
-        scales: {
-          x: {
-            type: "realtime",
-            ticks: {
+  const [chartOptions, setChartOptions] = React.useState<ChartOptions<"line">>(
+    () => {
+      if (type === "realtime") {
+        const datasets: ChartDataset<
+          "line",
+          (number | ScatterDataPoint | null)[]
+        >[] = [
+          {
+            label: "Motor 1",
+            borderColor: "rgb(255, 99, 132)",
+            data: [],
+          },
+          {
+            label: "Motor 2",
+            borderColor: "rgb(99, 255, 132)",
+            data: [],
+          },
+          {
+            label: "Motor 3",
+            borderColor: "rgb(99, 132, 255)",
+            data: [],
+          },
+        ];
+        return {
+          datasets: datasets,
+          scales: {
+            x: {
+              type: "realtime",
+              ticks: {
+                display: false,
+              },
+              realtime: {
+                refresh: 100,
+                duration: 5000,
+                pause: graphPause,
+                onRefresh: (chart: any) => {
+                  if (!graphPause) {
+                    chart.data.datasets.forEach(
+                      (
+                        dataset: ChartDataset<
+                          "line",
+                          (number | ScatterDataPoint | null)[]
+                        >[],
+                        index: number,
+                      ) => {
+                        const xValue = chartData.datasets[index]?.data[
+                          chartData.datasets[index]?.data.length - 1
+                        ] as ScatterDataPoint;
+                        const yValue = chartData.datasets[index]?.data[
+                          chartData.datasets[index]?.data.length - 1
+                        ] as ScatterDataPoint;
+
+                        dataset.data.push({
+                          x: xValue ? xValue.x : 0,
+                          y: yValue ? yValue.y : 0,
+                        });
+                      },
+                    );
+                  }
+                },
+              },
+            },
+            y: getYAxisLimits(
+              chartData.datasets as ChartDataset<
+                "line",
+                (number | ScatterDataPoint | null)[]
+              >[],
+            ),
+          },
+          pointRadius: 2,
+          pointHoverRadius: 7,
+        };
+      } else if (type === "activity") {
+        return {
+          scales: {
+            x: {
+              type: "category",
               display: false,
+              title: {
+                display: true,
+              },
             },
-            realtime: {
-              refresh: 100,
-              duration: 5000,
-              pause: graphPause,
-              onRefresh: (chart: any) => {
-                if (!graphPause) {
-                  chart.data.datasets.forEach(
-                    (dataset: ChartDataset<"line", (number | ScatterDataPoint | null)[]>[], index: number) => {
-                      const xValue =
-                        chartData.datasets[index]?.data[
-                          chartData.datasets[index]?.data.length - 1
-                        ] as ScatterDataPoint;
-                      const yValue =
-                        chartData.datasets[index]?.data[
-                          chartData.datasets[index]?.data.length - 1
-                        ] as ScatterDataPoint;
-
-                      dataset.data.push({
-                        x: xValue ? xValue.x : 0,
-                        y: yValue ? yValue.y : 0,
-                      });
-                    }
-                  );
-                }
+            y: {
+              title: {
+                text: title,
+                display: true,
               },
             },
           },
-          y: getYAxisLimits(chartData.datasets as ChartDataset<"line", (number | ScatterDataPoint | null)[]>[]),
-        },
-        pointRadius: 2,
-        pointHoverRadius: 7,
-      };
-    } else if (type === "activity") {
-      return {
-        scales: {
-          x: {
-            type: 'category',
-            display: false,
-            title: {
-              display: true,
-            },
-          },
-          y: {
-            title: {
-              text: title,
-              display: true,
-            },
-          },
-        },
-        plugins: {
-          tooltip: {
-            callbacks: {
-              label: function (context) {
-                const dataPoint = context.raw as ScatterDataPoint; 
-                const label = context.dataset.label || '';
-                const value = context.formattedValue;
-                const recordedDate = dataPoint?.recorded_date || "N/A";
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  const dataPoint = context.raw as ScatterDataPoint;
+                  const label = context.dataset.label || "";
+                  const value = context.formattedValue;
+                  const recordedDate = dataPoint?.recorded_date || "N/A";
 
-                return `${label}: ${value}\nRecorded Date: ${recordedDate}`;
+                  return `${label}: ${value}\nRecorded Date: ${recordedDate}`;
+                },
               },
             },
           },
-        },
-      };
-    } else {
-      return {};
-    }
-  });
+        };
+      } else {
+        return {};
+      }
+    },
+  );
 
   useEffect(() => {
     if (type === "realtime") {
@@ -149,21 +170,25 @@ const LineChart: React.FC<LineChartProps> = ({
               onRefresh: (chart: any) => {
                 if (!graphPause) {
                   chart.data.datasets.forEach(
-                    (dataset: ChartDataset<"line", (number | ScatterDataPoint | null)[]>, index: number) => {
-                      const xValue =
-                        chartData.datasets[index]?.data[
-                          chartData.datasets[index]?.data.length - 1
-                        ] as ScatterDataPoint;
-                      const yValue =
-                        chartData.datasets[index]?.data[
-                          chartData.datasets[index]?.data.length - 1
-                        ] as ScatterDataPoint;
+                    (
+                      dataset: ChartDataset<
+                        "line",
+                        (number | ScatterDataPoint | null)[]
+                      >,
+                      index: number,
+                    ) => {
+                      const xValue = chartData.datasets[index]?.data[
+                        chartData.datasets[index]?.data.length - 1
+                      ] as ScatterDataPoint;
+                      const yValue = chartData.datasets[index]?.data[
+                        chartData.datasets[index]?.data.length - 1
+                      ] as ScatterDataPoint;
 
                       dataset.data.push({
                         x: xValue ? xValue.x : 0,
                         y: yValue ? yValue.y : 0,
                       });
-                    }
+                    },
                   );
                 }
               },
@@ -171,7 +196,12 @@ const LineChart: React.FC<LineChartProps> = ({
           },
           y: {
             ...prevOptions.scales?.y,
-            ...getYAxisLimits(chartData.datasets as ChartDataset<"line", (number | ScatterDataPoint | null)[]>[]),
+            ...getYAxisLimits(
+              chartData.datasets as ChartDataset<
+                "line",
+                (number | ScatterDataPoint | null)[]
+              >[],
+            ),
           },
         },
       }));

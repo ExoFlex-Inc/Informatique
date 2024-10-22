@@ -11,17 +11,22 @@ export default defineConfig({
   css: {
     devSourcemap: false,
   },
-  logLevel: 'warn',
+  logLevel: "warn",
   // Define environment variables for Vite
   define: {
-    "process.env.SUPABASE_API_URL": JSON.stringify(process.env.SUPABASE_API_URL),
-    "process.env.SUPABASE_ANON_KEY": JSON.stringify(process.env.SUPABASE_ANON_KEY),
+    "process.env.SUPABASE_API_URL": JSON.stringify(
+      process.env.SUPABASE_API_URL,
+    ),
+    "process.env.SUPABASE_ANON_KEY": JSON.stringify(
+      process.env.SUPABASE_ANON_KEY,
+    ),
   },
   // Plugins
   plugins: [
     react(),
     VitePWA({
-      mode: process.env.NODE_ENV === "production" ? "production" : "development",
+      mode:
+        process.env.NODE_ENV === "production" ? "production" : "development",
       strategies: "injectManifest", // Caching strategy
       injectManifest: {
         globPatterns: ["**/*.{js,css,html,png,svg,jpg}"], // Cache all relevant assets

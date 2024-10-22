@@ -6,14 +6,10 @@
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "npx",
-      "runtimeArgs": [
-        "nodemon",
-        "--config",
-        "nodemon.json"
-      ],
+      "runtimeArgs": ["nodemon", "--config", "nodemon.json"],
       "skipFiles": ["<node_internals>/**"],
       "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
+      "internalConsoleOptions": "neverOpen"
     },
     {
       "name": "Launch Vite DEV server",
