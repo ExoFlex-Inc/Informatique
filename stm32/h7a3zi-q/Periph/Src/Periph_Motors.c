@@ -42,6 +42,7 @@ bool PeriphMotors_InitMotor(Motor* pMotor, uint8_t id, uint8_t model,
 
     pMotor->parameters.ratio = ratio;
 
+    PeriphMotors_Move(pMotor, 0, 0, 0, 0, 0);
     PeriphMotors_Disable(pMotor);
 
     return true;
