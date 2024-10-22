@@ -17,7 +17,7 @@ import Manual from "./pages/Manual.tsx";
 import TermsAndConditions from "./pages/TermsAndConditions.tsx";
 import Settings from "./pages/Settings.tsx";
 import Planning from "./pages/Planning.tsx";
-import WellnessNetwork from "./pages/WellnessNetwork.tsx";
+import Network from "./pages/Network.tsx";
 import Profile from "./pages/Profile.tsx";
 import Forbidden from "./pages/Forbidden.tsx";
 import HMI from "./pages/Hmi.tsx";
@@ -26,7 +26,7 @@ import PrivateRoutes from "./components/PrivateRoutes.tsx";
 import ProSideBar from "./components/Sidebar.tsx";
 import TopBar from "./components/TopBar.tsx";
 
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, useQueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
@@ -34,6 +34,7 @@ import Login from "./pages/Login.tsx";
 import Loading from "./components/Loading.tsx";
 import ErrorBoundary from "./components/ErrorBoundary.tsx";
 import { useUser } from "./hooks/use-user.ts";
+import { useEffect, useState } from "react";
 
 // Create a query client with default options
 const queryClient = new QueryClient({
@@ -83,7 +84,7 @@ const router = createBrowserRouter(
         </Route>
 
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/wellness_network" element={<WellnessNetwork />} />
+        <Route path="/network" element={<Network />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/hmi" element={<HMI />} />
@@ -93,16 +94,7 @@ const router = createBrowserRouter(
 );
 
 function PublicRoutes() {
-  const { user, isLoading, isError, error } = useUser();
-
-  // Handle loading state
-  if (isLoading) {
-    return (
-      <div className="loading-container">
-        <Loading />
-      </div>
-    );
-  }
+  const { user, isError, error } = useUser();
 
   // Handle error state
   if (isError) {
@@ -111,7 +103,7 @@ function PublicRoutes() {
   }
 
   // If the user is authenticated, redirect to the dashboard
-  if (user?.session_status === "active") {
+  if (user) {
     return <Navigate to="/dashboard" />;
   }
 
@@ -123,18 +115,54 @@ function AppLayout() {
   const {
     user,
     isLoading,
-    isError,
     status: userStatus,
+    isError,
     error,
   } = useUser();
+  const queryClient = useQueryClient();
 
-  if (isError) {
-    console.error("Error fetching user in AppLayout:", error);
-    queryClient.clear();
-    return <Navigate to="/login" />;
-  }
+  const [avatarLoading, setAvatarLoading] = useState(false);
 
-  if (isLoading) {
+  useEffect(() => {
+    const fetchAvatar = async () => {
+      if (user?.avatar_url) {
+        setAvatarLoading(true);
+
+        try {
+          const avatarResponse = await fetch(
+            `http://localhost:3001/user/avatar/${user.user_id}?path=${encodeURIComponent(
+              user.avatar_url,
+            )}`,
+            {
+              method: "GET",
+              credentials: "include",
+            }
+          );
+
+          if (avatarResponse.ok) {
+            const avatarBlob = await avatarResponse.blob();
+            const avatarBlobUrl = URL.createObjectURL(avatarBlob);
+
+            // Update the user data with the avatar blob URL
+            queryClient.setQueryData(["user"], {
+              ...user,
+              avatar_blob_url: avatarBlobUrl,
+            });
+          }
+        } catch (err) {
+          console.error("Error fetching avatar:", err);
+        } finally {
+          setAvatarLoading(false);
+        }
+      }
+    };
+
+    if (user && userStatus === "success") {
+      fetchAvatar();
+    }
+  }, [queryClient]);
+
+  if (isLoading || avatarLoading) {
     return (
       <div className="loading-container">
         <Loading />
@@ -142,24 +170,28 @@ function AppLayout() {
     );
   }
 
-  if (userStatus === "success") {
-    if (user) {
-      return (
-        <>
-          <ProSideBar permissions={user.permissions} />
-          <main className="content overflow-hidden">
-            <TopBar />
-            <Outlet />
-          </main>
-        </>
-      );
-    } else {
-      return <Navigate to="/login" />;
-    }
+  // Handle errors
+  if (isError) {
+    console.error("Error fetching user in AppLayout:", error);
+    queryClient.clear();
+    return <Navigate to="/login" />;
   }
 
-  // Handle any other statuses if necessary
-  return null;
+  // Render the app layout only when user exists and avatar is fetched
+  if (userStatus === "success") {
+    return (
+      <>
+        <ProSideBar permissions={user.permissions} />
+        <main className="content overflow-hidden">
+          <TopBar />
+          <Outlet />
+        </main>
+      </>
+    );
+  }
+
+  // If no user, navigate to login
+  return <Navigate to="/login" />;
 }
 
 function App() {

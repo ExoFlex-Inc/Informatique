@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { useNotification } from "../hooks/use-notification.ts";
 import { useUser } from "../hooks/use-user.ts";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Notification = () => {
   const [isNotifications, setIsNotifications] = useState(false);
@@ -25,6 +26,8 @@ const Notification = () => {
   const [responseMessage, setResponseMessage] = useState({});
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
+
+  const queryClient = useQueryClient();
 
   const { notifications } = useNotification();
   const { user } = useUser();
@@ -81,6 +84,9 @@ const Notification = () => {
       if (!responseRelation.ok) {
         throw new Error("Error accepting relation request");
       }
+
+      //Invalidate relation query to refetch the updated data
+      queryClient.invalidateQueries(["relations"]);
 
       const response = await fetch(
         `http://localhost:3001/notification/${notification.id}`,

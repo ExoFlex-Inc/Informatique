@@ -14,7 +14,7 @@ const cookieOptions: CookieOptions = {
 export const signup = async (req: Request, res: Response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ session_status: "inactive", errors: errors.array() });
+    return res.status(400).json({ errors: errors.array() });
   }
 
   const { email, password, first_name, last_name, phone_number, permissions } = req.body;
@@ -28,9 +28,7 @@ export const signup = async (req: Request, res: Response) => {
       .single();
 
     if (existingUser) {
-      return res
-        .status(400)
-        .json({ session_status: "inactive", error: "User with this email already exists." });
+      return res.status(400).json({ error: "User with this email already exists." });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -51,7 +49,7 @@ export const signup = async (req: Request, res: Response) => {
     });
 
     if (authInsertError) {
-      return res.status(400).json({ session_status: "inactive", error: authInsertError.message });
+      return res.status(400).json({ error: authInsertError.message });
     }
 
     const newUserUUID = newUserProfile.user.id;
@@ -73,7 +71,7 @@ export const signup = async (req: Request, res: Response) => {
       .single();
 
     if (profileInsertError) {
-      return res.status(400).json({ session_status: "inactive", error: profileInsertError.message });
+      return res.status(400).json({ error: profileInsertError.message });
     }
 
     // Set the access_token and refresh_token in cookies if session exists
@@ -88,21 +86,21 @@ export const signup = async (req: Request, res: Response) => {
         maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
       });
 
-      // Return session_status as active and include user data
-      return res.status(201).json({ session_status: "active", user: newUserProfile.user });
+      // Return user data
+      return res.status(201).json({ user: newUserProfile.user });
     } else {
-      // If no session, return session_status as inactive
-      return res.status(201).json({ session_status: "inactive", user: newUserProfile.user });
+      // If no session, return user data without tokens
+      return res.status(201).json({ user: newUserProfile.user });
     }
   } catch (err: any) {
-    return res.status(500).json({ session_status: "inactive", error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 };
 
 export const login = async (req: Request, res: Response) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ session_status: "inactive", errors: errors.array() });
+    return res.status(400).json({ errors: errors.array() });
   }
 
   try {
@@ -114,10 +112,7 @@ export const login = async (req: Request, res: Response) => {
     });
 
     if (error || !supabaseUser.session) {
-      return res.status(401).json({
-        session_status: "inactive",
-        error: error ? error.message : "Login failed",
-      });
+      return res.status(401).json({ error: error ? error.message : "Login failed" });
     }
 
     // Set the access_token and refresh_token in cookies
@@ -131,10 +126,10 @@ export const login = async (req: Request, res: Response) => {
       maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
     });
 
-    // Return session_status as active and include user data
-    return res.status(200).json({ session_status: "active", user: supabaseUser.user });
+    // Return user data
+    return res.status(200).json({ user: supabaseUser.user });
   } catch (err: any) {
-    return res.status(500).json({ session_status: "inactive", error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 };
 
@@ -143,7 +138,7 @@ export const logout = async (req: Request, res: Response) => {
     const { user_id } = req.body;
 
     if (!user_id) {
-      return res.status(400).json({ session_status: "inactive", error: "User ID is required" });
+      return res.status(400).json({ error: "User ID is required" });
     }
 
     const { error: updateError } = await supaClient
@@ -152,36 +147,32 @@ export const logout = async (req: Request, res: Response) => {
       .eq("user_id", user_id);
 
     if (updateError) {
-      return res.status(500).json({
-        session_status: "inactive",
-        error: `Failed to remove FCM token: ${updateError.message}`,
-      });
+      return res.status(500).json({ error: `Failed to remove FCM token: ${updateError.message}` });
     }
 
     const { error } = await supaClient.auth.signOut();
     if (error) {
-      return res.status(500).json({ session_status: "inactive", error: error.message });
+      return res.status(500).json({ error: error.message });
     }
 
     // Clear cookies
     res.clearCookie("access_token", { path: "/" });
     res.clearCookie("refresh_token", { path: "/" });
 
-    // Return session_status as inactive
-    return res.status(200).json({ session_status: "inactive", logout: true });
+    // Return success response
+    return res.status(200).json({ logout: true });
   } catch (err: any) {
-    return res.status(500).json({ session_status: "inactive", error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 };
 
-export const getSession = async (req: Request, res: Response) => {
+export const setSession = async (req: Request, res: Response) => {
   try {
     const { data, error } = await supaClient.auth.getSession();
 
     if (data?.session) {
       // Session is active
       return res.status(200).json({
-        session_status: "active",
         user: data.session.user,
         message: "Session is active",
       });
@@ -191,7 +182,7 @@ export const getSession = async (req: Request, res: Response) => {
     const refreshToken = req.cookies["refresh_token"];
 
     if (!refreshToken) {
-      return res.status(401).json({ session_status: "inactive", error: "No refresh token available" });
+      return res.status(401).json({ error: "No refresh token available" });
     }
 
     // Use fetch to refresh the session
@@ -231,26 +222,40 @@ export const getSession = async (req: Request, res: Response) => {
 
       if (sessionError || !sessionData.session) {
         return res.status(401).json({
-          session_status: "inactive",
           error: "Unable to set session",
           details: sessionError?.message,
         });
       }
 
-      // Return session_status as active and include user data
+      // Return session and user data
       return res.status(200).json({
-        session_status: "active",
         user: sessionData.session.user,
         message: "Session refreshed successfully",
       });
     } else {
       return res.status(401).json({
-        session_status: "inactive",
         error: "Unable to refresh session",
         details: tokenData.error_description || tokenData.error,
       });
     }
   } catch (err: any) {
-    return res.status(500).json({ session_status: "inactive", error: err.message });
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+export const getSession = async (req: Request, res: Response) => {
+  try {
+    const { data, error } = await supaClient.auth.getSession();
+
+    if (error || !data?.session) {
+      // If there's an error or no active session, return a 401 response
+      return res.status(401).json({ error: error?.message || "No user session" });
+    }
+
+    // Return session and user data
+    return res.status(200).json({ user: data.session.user });
+  } catch (err: any) {
+    // Catch any unexpected errors and return a 500 response
+    return res.status(500).json({ error: err.message });
   }
 };

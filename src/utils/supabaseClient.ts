@@ -6,6 +6,8 @@ const supabaseKey = process.env.SUPABASE_ANON_KEY;
 const supaClient = createClient(supabaseUrl, supabaseKey, {
   auth: {
     persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
   },
 });
 

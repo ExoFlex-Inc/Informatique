@@ -13,7 +13,7 @@ export function useNotification() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["notification", user?.user_id],
+    queryKey: ["notification"],
     queryFn: async () => {
       if (!user?.user_id) return [];
       const response = await fetch(

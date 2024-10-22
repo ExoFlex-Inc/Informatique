@@ -4,6 +4,7 @@ import {
   signup,
   login,
   logout,
+  setSession,
   getSession,
 } from "../controllers/authController.ts";
 
@@ -30,6 +31,7 @@ router.post(
 );
 
 router.post("/logout", logout);
+router.post("/session", setSession);
 router.get("/session", getSession);
 
 export default router;

@@ -7,7 +7,7 @@ import { useRelations } from "../hooks/use-relations.ts";
 import Loading from "../components/Loading.tsx";
 import { useUser } from "../hooks/use-user.ts";
 
-export default function WellnessNetwork() {
+export default function Network() {
   const navigate = useNavigate();
   const { user } = useUser();
   const { relations, isLoading } = useRelations();

@@ -66,10 +66,6 @@ export default function Login() {
         fcm_token: fcmToken,
       });
   
-      // Navigate only after profile update completes
-      if (!isLoading) {
-        navigate("/dashboard");
-      }
     } catch (error: any) {
       console.error("Login error:", error.message);
       alert(`Login failed: ${error.message}`);

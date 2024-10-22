@@ -1,16 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
-import supaClient from "../utils/supabaseClient.ts";
-
 export interface UserProfile {
-  user_id: string;                // Unique user ID from Supabase
-  first_name: string;             // First name from user metadata
-  last_name: string;              // Last name from user metadata
-  speciality?: string;            // Optional speciality field from user metadata
-  permissions?: string[];         // Optional permissions array from user metadata
-  fcm_token?: string | null;      // Optional FCM token, if applicable
-  avatar_url?: string;            // Optional avatar URL for the user
-  avatar_blob_url?: string;       // Optional local URL for the avatar blob
+  user_id: string;           
+  first_name: string;           
+  last_name: string;           
+  speciality?: string;         
+  permissions?: string[];         
+  fcm_token?: string | null;     
+  avatar_url?: string;           
+  avatar_blob_url?: string;       
 }
 
 export function useUser() {
@@ -30,8 +27,9 @@ export function useUser() {
     queryKey: ["user"],
     queryFn: async () => {
 
+      // Check if the user is authenticated
       const response = await fetch("http://localhost:3001/auth/session", {
-        method: "GET",
+        method: "POST",
         credentials: "include",
       });
 
@@ -46,7 +44,13 @@ export function useUser() {
       }
 
       const data = await response.json();
-      const session_status = data.session_status;
+
+      // If the user is authenticated, fetch the user profile
+
+      // const cachedUser = queryClient.getQueryData(["user"]);
+      // if (cachedUser) {
+      //   return cachedUser;
+      // }
 
       if (data.user) {
         // Fetch the profile data
@@ -83,18 +87,21 @@ export function useUser() {
             const avatarBlobUrl = URL.createObjectURL(avatarBlob);
             if (avatarBlobUrl) {
               profileData.avatar_blob_url = avatarBlobUrl;
+            } else {
+              profileData.avatar_blob_url = null;
             }
           }
         }
 
-        return { session_status, ...profileData };
+        return profileData;
       }
 
       return null;
     },
     // retry: false,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 0, // 5 minutes
     cacheTime: 1000 * 60 * 60 * 24, // 24 hours
+    refetchOnMount: true,
   });
 
 
@@ -119,7 +126,7 @@ export function useUser() {
       }
 
       const data = await response.json();
-      return data;
+      return data[0];
     },
     onSuccess: (updatedProfile) => {
       queryClient.setQueryData(["user"], {
@@ -172,21 +179,6 @@ export function useUser() {
   const uploadAvatar = (file: File) => {
     uploadAvatarMutation.mutate(file);
   };
-
-  // useEffect(() => {
-  //   const { data: authListener } = supaClient.auth.onAuthStateChange(async (event, _) => {
-  //     if (!user) {
-  //       queryClient.invalidateQueries(["user"]);
-  //     }
-  //   });
-  
-  //   // Cleanup the listener on component unmount
-  //   return () => {
-  //     if (authListener?.unsubscribe) {
-  //       authListener.unsubscribe();
-  //     }
-  //   };
-  // }, [queryClient]);
 
   return {
     user,

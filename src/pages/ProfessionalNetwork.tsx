@@ -38,7 +38,7 @@ const ProfessionalNetwork = () => {
       });
     }
     setFilteredUsers(filteredAdmin);
-  }, [notifications, relations]);
+  }, [admins, notifications, relations]);
 
   if (adminLoading || relationsLoading || notificationsLoading) {
     return (
@@ -63,7 +63,7 @@ const ProfessionalNetwork = () => {
             color="inherit"
             endIcon={<CloseIcon color="error" />}
             onClick={() => {
-              navigate("/wellness_network");
+              navigate("/network");
             }}
           >
             Cancel action

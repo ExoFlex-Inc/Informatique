@@ -8,6 +8,7 @@ DECLARE
     exercise_data JSONB;
     rated_pain INTEGER;
     repetitions_done INTEGER;
+    new_phone_number TEXT;
 BEGIN
 
     SET LOCAL TIME ZONE 'America/Toronto';
@@ -15,7 +16,10 @@ BEGIN
     FOR i IN 1..50 LOOP
         new_email := 'user' || i || '@exoflex.com';
         new_id := gen_random_uuid();
-        base_date := NOW() - INTERVAL '1 month'; 
+        base_date := NOW() - INTERVAL '1 month';
+        new_phone_number := '(' || floor(random() * 900 + 100)::text || ')' ||
+                    floor(random() * 900 + 100)::text || '-' ||
+                    floor(random() * 10000)::text;
 
         -- Insert into auth.users
         INSERT INTO auth.users (
@@ -66,6 +70,7 @@ BEGIN
             permissions,
             email,
             password,
+            phone_number,
             created_at
         ) 
         VALUES (
@@ -76,7 +81,8 @@ BEGIN
             'client',
             new_email,
             crypt('exoflex', gen_salt('bf')),
-            NOW() AT TIME ZONE 'America/Toronto'
+            new_phone_number,
+            NOW()
         );
 
 
@@ -223,6 +229,9 @@ BEGIN
     FOR i IN 1..10 LOOP
         new_email := 'admin' || i || '@exoflex.com';
         new_id := gen_random_uuid();
+        new_phone_number := '(' || floor(random() * 900 + 100)::text || ')' ||
+            floor(random() * 900 + 100)::text || '-' ||
+            floor(random() * 10000)::text;
 
         INSERT INTO auth.users (
             instance_id, 
@@ -271,6 +280,7 @@ BEGIN
             permissions,
             email,
             password,
+            phone_number,
             created_at
         ) 
         VALUES (
@@ -281,7 +291,8 @@ BEGIN
             'admin',
             new_email,
             crypt('exoflex', gen_salt('bf')),
-            NOW() AT TIME ZONE 'America/Toronto'
+            new_phone_number,
+            NOW()
         );
 
     END LOOP;
@@ -290,6 +301,9 @@ BEGIN
     new_email := 'dev@exoflex.com';
     new_id := '5e7f65da-6877-4bec-87b8-8abe8e90587c';
     base_date := NOW() - INTERVAL '1 month';
+    new_phone_number := '(' || floor(random() * 900 + 100)::text || ')' ||
+            floor(random() * 900 + 100)::text || '-' ||
+            floor(random() * 10000)::text;
 
     INSERT INTO auth.users (
         instance_id, 
@@ -338,6 +352,7 @@ BEGIN
         permissions,
         email,
         password,
+        phone_number,
         created_at
     ) 
     VALUES (
@@ -348,7 +363,8 @@ BEGIN
         'dev',
         new_email,
         crypt('exoflex', gen_salt('bf')),
-        NOW() AT TIME ZONE 'America/Toronto'
+        new_phone_number,
+        NOW()
     );
 
 
@@ -487,18 +503,18 @@ BEGIN
             rated_pain := floor(random() * 5) + 1;
 
             -- Insert exercise data into exercise_data table
-            INSERT INTO exercise_data (
-                user_id,
-                data,
-                rated_pain,
-                created_at
-            )
-            VALUES (
-                new_id,
-                exercise_data,
-                rated_pain,
-                (base_date + (j * INTERVAL '1 day'))
-            );
+            -- INSERT INTO exercise_data (
+            --     user_id,
+            --     data,
+            --     rated_pain,
+            --     created_at
+            -- )
+            -- VALUES (
+            --     new_id,
+            --     exercise_data,
+            --     rated_pain,
+            --     (base_date + (j * INTERVAL '1 day'))
+            -- );
         END LOOP;
 
 END $$;

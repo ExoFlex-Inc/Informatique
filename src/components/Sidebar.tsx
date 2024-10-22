@@ -35,8 +35,6 @@ interface ItemProps {
 }
 
 const Item: React.FC<ItemProps> = ({ title, to, icon, selected }) => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -47,12 +45,12 @@ const Item: React.FC<ItemProps> = ({ title, to, icon, selected }) => {
     <MenuItem
       active={selected === title}
       style={{
-        color: colors.grey[100],
+        color: "white",
       }}
       onClick={handleClick}
       icon={icon}
+      prefix={title}
     >
-      <Typography color={colors.grey[100]}>{title}</Typography>
     </MenuItem>
   );
 };
@@ -71,8 +69,8 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
     let upperCasePage;
     if (page === "hmi") {
       upperCasePage = "HMI";
-    } else if (page === "wellness_network" || page === "professional_network") {
-      upperCasePage = "Wellness Network";
+    } else if (page === "network" || page === "professional_network") {
+      upperCasePage = "Network";
     } else {
       upperCasePage = page.charAt(0).toUpperCase() + page.slice(1);
     }
@@ -109,7 +107,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
                     transition: "background-color 0.3s",
                     "&:hover": {
                       backgroundColor:
-                        `${colors.blueAccent[400]}` + " !important",
+                        `${colors.blueAccent[400]}`,
                       color: "white !important",
                       fontWeight: "bold !important",
                     },
@@ -135,6 +133,12 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
               style={{
                 margin: "10px 0 20px 0",
                 color: colors.grey[100],
+                backgroundColor: "transparent",
+              }}
+              rootStyles={{
+                "&:hover": {
+                  backgroundColor: "transparent !important",
+                },
               }}
             >
               {!isCollapsed && (
@@ -204,8 +208,8 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
                 />
               )}
               <Item
-                title="Wellness Network"
-                to="/wellness_network"
+                title="Network"
+                to="/network"
                 icon={<GroupIcon />}
                 selected={selected}
               />

@@ -9,7 +9,7 @@ export function useRelations() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["relations", user?.user_id],
+    queryKey: ["relations"],
     queryFn: async () => {
       const responseRelations = await fetch(
         `http://localhost:3001/relations/${user.user_id}`,
