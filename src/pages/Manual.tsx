@@ -14,6 +14,7 @@ import AirlineSeatLegroomExtraIcon from "@mui/icons-material/AirlineSeatLegroomE
 import LineChart from "../components/LineChart";
 import MotorControlWidget from "../components/MotorControlWidget";
 import useStm32 from "../hooks/use-stm32";
+import Button from "../components/Button.tsx";
 
 const WhiteBorderCheckbox = styled(Checkbox)(() => ({
   color: "white",
@@ -88,7 +89,13 @@ export default function Manual() {
   };
 
   useEffect(() => {
-    if (stm32Data && stm32Data.Positions && stm32Data.Torques && !graphPause) {
+    if (
+      stm32Data &&
+      stm32Data.Positions &&
+      stm32Data.Torques &&
+      stm32Data.Current &&
+      !graphPause
+    ) {
       const currentTime = Date.now();
       setLatestMotorData({
         motor1: {
@@ -160,6 +167,13 @@ export default function Manual() {
               mb: 2,
             }}
           >
+            <div className="max-w-36">
+              <Button
+                label="Reset"
+                mode="Reset"
+                color="blueAccent.main hover:bg-blue-700 text-white"
+              ></Button>
+            </div>
             <IconButton
               onClick={() => setGraphPause(false)}
               disabled={!graphPause}

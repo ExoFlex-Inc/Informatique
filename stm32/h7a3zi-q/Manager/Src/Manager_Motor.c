@@ -115,6 +115,7 @@ float ManagerMotor_CalcSpeedFromTorque(float torque, float torqueGoal,
 
 void ManagerMotor_SendToMotors();
 void ManagerMotor_DisableMotors();
+void ManagerMotor_DisableMotorsMovement();
 
 void ManagerMotor_VerifyMotorsConnection();
 void ManagerMotor_VerifyMotorsState();
@@ -239,7 +240,7 @@ void ManagerMotor_Task()
             break;
 
         case MMOT_STATE_ERROR:
-            ManagerMotor_DisableMotors();
+            ManagerMotor_DisableMotorsMovement();
             break;
         }
         timerMs = HAL_GetTick();
@@ -462,7 +463,6 @@ void ManagerMotor_NextCmdPosOld(uint8_t id)
     else
     {
         motors[id].goalReady = false;  // Motor reached his goal
-        // motors[id].goalPosition = motors[id].motor.position;
     }
 }
 
@@ -848,6 +848,19 @@ void ManagerMotor_DisableMotors()
 #endif
 #ifndef MMOT_DEV_MOTOR_3_DISABLE
     PeriphMotors_Disable(&motors[MMOT_MOTOR_3].motor);
+#endif
+}
+
+void ManagerMotor_DisableMotorsMovement()
+{
+#ifndef MMOT_DEV_MOTOR_1_DISABLE
+	PeriphMotors_Move(&motors[MMOT_MOTOR_1].motor, 0, 0, 0, 0, 0);
+#endif
+#ifndef MMOT_DEV_MOTOR_2_DISABLE
+	PeriphMotors_Move(&motors[MMOT_MOTOR_2].motor, 0, 0, 0, 0, 0);
+#endif
+#ifndef MMOT_DEV_MOTOR_3_DISABLE
+	PeriphMotors_Move(&motors[MMOT_MOTOR_3].motor, 0, 0, 0, 0, 0);
 #endif
 }
 
