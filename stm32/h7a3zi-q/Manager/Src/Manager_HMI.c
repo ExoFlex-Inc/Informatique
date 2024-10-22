@@ -228,7 +228,7 @@ void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
         }
         else if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "ChangeSide") == 0)
         {
-        	if(ManagerMovement_SetState())
+        	if(ManagerMovement_SetState(MMOV_STATE_CHANGESIDE))
         	{
 
         	}

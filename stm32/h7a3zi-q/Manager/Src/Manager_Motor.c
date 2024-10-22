@@ -144,7 +144,7 @@ void ManagerMotor_Reset()
     // Init motors
 #ifndef MMOT_DEV_MOTOR_1_DISABLE
     PeriphMotors_InitMotor(&motors[MMOT_MOTOR_1].motor, MMOT_MOTOR_1_CAN_ID,
-                           MOTOR_AK10_9, 1);
+                           MOTOR_AK10_9, -1);
 #endif
 
 #ifndef MMOT_DEV_MOTOR_2_DISABLE
@@ -154,7 +154,7 @@ void ManagerMotor_Reset()
 
 #ifndef MMOT_DEV_MOTOR_3_DISABLE
     PeriphMotors_InitMotor(&motors[MMOT_MOTOR_3].motor, MMOT_MOTOR_3_CAN_ID,
-                           MOTOR_AK80_64, 1);
+                           MOTOR_AK80_64, -1);
 #endif
 
     // Init motor control info
@@ -164,7 +164,7 @@ void ManagerMotor_Reset()
         motors[i].initTry   = 0;
         motors[i].detected  = false;
 
-        motors[i].controlType  = MMOT_CONTROL_POS_OLD;
+        motors[i].controlType  = MMOT_CONTROL_POS_SPEED;
         motors[i].goalPosition = 0.0;
         motors[i].goalSpeed    = 0.0;
         motors[i].goalTorque   = 0.0;
