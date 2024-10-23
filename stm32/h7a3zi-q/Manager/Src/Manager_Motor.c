@@ -887,6 +887,7 @@ void ManagerMotor_ApplyOriginShift(uint8_t id)
 void ManagerMotor_SetOriginShift(uint8_t id, float shiftValue)
 {
     motors[id].originShift = shiftValue;
+    motors[id].cmdPosition -= motors[id].originShift;
 }
 
 void ManagerMotor_CalculNextKp(uint8_t id)

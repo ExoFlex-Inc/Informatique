@@ -144,10 +144,6 @@ int main(void)
 	ManagerMovement_Task();
 	ManagerSecurity_Task();
 
-	PeriphSolenoid_UnlockChangeSide();
-
-
-
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

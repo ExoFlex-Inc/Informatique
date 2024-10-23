@@ -183,7 +183,7 @@ void ManagerMovement_Reset()
     managerMovement.state           = MMOV_STATE_WAITING_SECURITY;
     managerMovement.autoState       = MMOV_AUTO_STATE_WAITING4PLAN;
     managerMovement.changeSideState = MMOV_CHANGESIDE_STATE_WAITING4CMD;
-    managerMovement.homingState     = MMOV_HOMING_EVERSION;
+    managerMovement.homingState     = MMOV_HOMING_EXTENSION;
 }
 
 void ManagerMovement_Task()
@@ -224,7 +224,7 @@ void ManagerMovement_WaitingSecurity()
 	managerMovement.currentLegSide = PeriphSwitch_GetLegSide();
     if (managerMovement.securityPass && managerMovement.currentLegSide != 0)
     {
-        managerMovement.state = MMOV_STATE_MANUAL;
+        managerMovement.state = MMOV_STATE_HOMING;
     }
 }
 
@@ -802,10 +802,10 @@ void ManagerMovement_HomingExtension()
 
     if (PeriphSwitch_ExtensionUp() || exUpLimitHit)
     {
-        ManagerMotor_StopManualMovement(MMOT_MOTOR_3);
         if (!exUpLimitHit)
         {
             exUpLimitHit = true;
+            ManagerMotor_StopManualMovement(MMOT_MOTOR_3);
         }
 
         if (!PeriphSwitch_ExtensionUp())
@@ -832,20 +832,20 @@ void ManagerMovement_HomingEversion()
     // Increment until limitswitch
     if (ManagerMovement_InsideLimitSwitch() || evInsideLimitHit)
     {
-        ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
         if (!evInsideLimitHit)
         {
             leftPos          = motorsData[MMOT_MOTOR_2]->position;
             evInsideLimitHit = true;
+            ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
         }
 
         if (ManagerMovement_OutsideLimitSwitch() || evOutsideLimitHit)
         {
-            ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
             if (!evOutsideLimitHit)
             {
                 rightPos          = motorsData[MMOT_MOTOR_2]->position;
                 evOutsideLimitHit = true;
+                ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
             }
 
             if (ManagerMovement_GoToPos(MMOV_EVERSION, ManagerMovement_GetMiddlePos(leftPos, rightPos)))
@@ -885,20 +885,20 @@ void ManagerMovement_HomingDorsiflexion()
     // Increment until limitswitch
     if (PeriphSwitch_DorsiflexionUp() || dorUpLimitHit)
     {
-        ManagerMotor_StopManualMovement(MMOT_MOTOR_1);
         if (!dorUpLimitHit)
         {
             leftPos       = motorsData[MMOT_MOTOR_1]->position;
             dorUpLimitHit = true;
+            ManagerMotor_StopManualMovement(MMOT_MOTOR_1);
         }
 
         if (PeriphSwitch_DorsiflexionDown() || dorDownLimitHit)
         {
-            ManagerMotor_StopManualMovement(MMOT_MOTOR_1);
             if (!dorDownLimitHit)
             {
                 rightPos        = motorsData[MMOT_MOTOR_1]->position;
                 dorDownLimitHit = true;
+                ManagerMotor_StopManualMovement(MMOT_MOTOR_1);
             }
 
             if (ManagerMovement_GoToPos(
