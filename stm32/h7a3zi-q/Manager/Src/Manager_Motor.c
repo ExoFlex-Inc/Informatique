@@ -261,7 +261,6 @@ void ManagerMotor_ReceiveFromMotors()
             if (lastMsgTime < motors[i].lastMsgTime)
             {
                 PeriphMotors_ParseMotorState(&motors[i].motor, data);
-                ManagerMotor_ApplyOriginShift(i);
                 motors[i].detected = true;
             }
         }
@@ -878,6 +877,12 @@ void ManagerMotor_StopManualMovement(uint8_t motorindex)
 /********************************************
  * Origin shift
  ********************************************/
+void ManagerMotor_SoftwareOrigin(uint8_t id)
+{
+	PeriphMotors_SoftwareOrigin(&motors[id].motor);
+    motors[id].cmdPosition = 0;
+}
+
 
 void ManagerMotor_ApplyOriginShift(uint8_t id)
 {

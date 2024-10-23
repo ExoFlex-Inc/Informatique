@@ -8,12 +8,12 @@ float   PeriphMotors_ConvUintToFloat(int32_t val, float min, float max,
 /// @brief AK10-9
 // AmpPerNm = 1/R/Kt/expermientalFactor = 1/9/0.16/18 = 0.0385 A/Nm
 const MotorParameters ak10_9 = {-12.5, 12.5, -50, 50, -65,    65,
-                                0,     500,  0,   5,  0.0385, 1};
+                                0,     500,  0,   5,  0.0385, 1, 0};
 
 /// @brief AK80-64 (AK80-80/64)
 // AmpPerNm = 1/R/Kt/expermientalFactor = 1/64/0.119/???(18) = ???(0.0073) A/Nm
 const MotorParameters ak80_64 = {-12.5, 12.5, -8, 8, -144,   144,
-                                 0,     500,  0,  5, 0.0073, 1};
+                                 0,     500,  0,  5, 0.0073, 1, 0};
 
 SendCanDataFunction PeriphMotors_SendCanData;
 
@@ -47,6 +47,8 @@ bool PeriphMotors_InitMotor(Motor* pMotor, uint8_t id, uint8_t model,
     return true;
 }
 
+
+
 void PeriphMotors_Enable(Motor* pMotor)
 {
     uint8_t data[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFC};
@@ -71,9 +73,18 @@ void PeriphMotors_SetZeroPosition(Motor* pMotor)
     PeriphMotors_SendCanData(pMotor->id, data);
 }
 
+void PeriphMotors_SoftwareOrigin(Motor* pMotor)
+{
+	pMotor->parameters.offset += pMotor->position;
+	pMotor->position = 0;
+}
+
 void PeriphMotors_Move(Motor* pMotor, float position, float velocity,
                        float torque, float kp, float kd)
 {
+	//Apply offset
+	position = position + pMotor->parameters.offset;
+
     // Apply ratio
     position *= pMotor->parameters.ratio;
     velocity *= pMotor->parameters.ratio;
@@ -128,9 +139,12 @@ void PeriphMotors_ParseMotorState(Motor* pMotor, uint8_t* canData)
     }
 
     // Apply ratio
-    pMotor->position = position / pMotor->parameters.ratio;
+    position = position / pMotor->parameters.ratio;
     pMotor->velocity = velocity / pMotor->parameters.ratio;
     pMotor->torque   = torque * pMotor->parameters.ratio;
+
+    //Apply offset
+    pMotor->position = position - pMotor->parameters.offset;
 
     pMotor->current = current;
 }
