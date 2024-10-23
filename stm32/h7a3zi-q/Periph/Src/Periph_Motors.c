@@ -75,7 +75,7 @@ void PeriphMotors_SetZeroPosition(Motor* pMotor)
 
 void PeriphMotors_SoftwareOrigin(Motor* pMotor)
 {
-	pMotor->parameters.offset = pMotor->position;
+	pMotor->parameters.offset += pMotor->position;
 	pMotor->position = 0;
 }
 

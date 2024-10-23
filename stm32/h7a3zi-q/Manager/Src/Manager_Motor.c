@@ -261,7 +261,6 @@ void ManagerMotor_ReceiveFromMotors()
             if (lastMsgTime < motors[i].lastMsgTime)
             {
                 PeriphMotors_ParseMotorState(&motors[i].motor, data);
-                ManagerMotor_ApplyOriginShift(i);
                 motors[i].detected = true;
             }
         }

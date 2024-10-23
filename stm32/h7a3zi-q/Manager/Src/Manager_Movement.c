@@ -942,9 +942,7 @@ float ManagerMovement_GetMiddlePos(float leftPos, float rightPos)
 
 void ManagerMovement_SetOrigins(uint8_t id)
 {
-    ManagerMotor_SetOriginShift(id, motorsData[id]->position);
-    managerMovement.mPosGoal[id] = 0.0f;
-    ManagerMotor_MovePosSpeed(id, 0.0f, 0.0f);
+	ManagerMotor_SoftwareOrigin(id);
 }
 
 bool ManagerMovement_GoToPos(uint8_t exerciseId, float pos)
