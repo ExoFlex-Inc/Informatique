@@ -43,13 +43,13 @@
 #define MMOT_INIT_OK            6
 #define MMOT_INIT_ERROR         7
 
-#define MMOT_CONTROL_POS_OLD   0
-#define MMOT_CONTROL_SPEED     1
-#define MMOT_CONTROL_POS_SPEED 2
+#define MMOT_CONTROL_POS_OLD          0
+#define MMOT_CONTROL_SPEED            1
+#define MMOT_CONTROL_POS_SPEED        2
 #define MMOT_CONTROL_POS_SPEED_TORQUE 3
 
-#define MMOT_MIN_SPEED_CMD 0.01
-#define MMOT_MAX_SPEED_CMD 2
+#define MMOT_MIN_SPEED_CMD  0.01
+#define MMOT_MAX_SPEED_CMD  2
 #define MMOT_MAX_TORQUE_CMD 15
 
 typedef struct
@@ -105,15 +105,17 @@ void ManagerMotor_WaitingSecurity();
 void ManagerMotor_StartMotors();
 void ManagerMotor_StartMotor(uint8_t id);
 
-void ManagerMotor_NextCmd();
-void ManagerMotor_NextCmdPosOld(uint8_t id);
-void ManagerMotor_NextCmdSpeed(uint8_t id);
-void ManagerMotor_NextCmdPosSpeed(uint8_t id);
-void ManagerMotor_NextCmdPosSpeedTorque(uint8_t id);
-float ManagerMotor_CalcSpeedFromTorque(float torque, float torqueGoal, float wMin, float wMax);
+void  ManagerMotor_NextCmd();
+void  ManagerMotor_NextCmdPosOld(uint8_t id);
+void  ManagerMotor_NextCmdSpeed(uint8_t id);
+void  ManagerMotor_NextCmdPosSpeed(uint8_t id);
+void  ManagerMotor_NextCmdPosSpeedTorque(uint8_t id);
+float ManagerMotor_CalcSpeedFromTorque(float torque, float torqueGoal,
+                                       float wMin, float wMax);
 
 void ManagerMotor_SendToMotors();
 void ManagerMotor_DisableMotors();
+void ManagerMotor_DisableMotorsMovement();
 
 void ManagerMotor_VerifyMotorsConnection();
 void ManagerMotor_VerifyMotorsState();
@@ -238,7 +240,7 @@ void ManagerMotor_Task()
             break;
 
         case MMOT_STATE_ERROR:
-            ManagerMotor_DisableMotors();
+            ManagerMotor_DisableMotorsMovement();
             break;
         }
         timerMs = HAL_GetTick();
@@ -460,7 +462,6 @@ void ManagerMotor_NextCmdPosOld(uint8_t id)
     else
     {
         motors[id].goalReady = false;  // Motor reached his goal
-        // motors[id].goalPosition = motors[id].motor.position;
     }
 }
 
@@ -497,25 +498,29 @@ void ManagerMotor_NextCmdPosSpeedTorque(uint8_t id)
     // Get the remaining distance to the goal
     float posLeft = fabsf(motors[id].motor.position - motors[id].goalPosition);
 
-    //TODO Handle case when motor is going backwards
+    // TODO Handle case when motor is going backwards
 
     // Motor is not at goal
     if (posLeft > GOAL_POS_TOL && motors[id].goalReady)
     {
-    	float alpha = 0.9;
+        float alpha = 0.9;
 
-        int8_t dir = ManagerMotor_GetMotorDirection(id);
-        float torque = motors[id].motor.torque;
+        int8_t dir    = ManagerMotor_GetMotorDirection(id);
+        float  torque = motors[id].motor.torque;
 
         if (dir < 0)
         {
-        	torque = -torque;
+            torque = -torque;
         }
 
-        float speedFromTorque = ManagerMotor_CalcSpeedFromTorque(torque, fabsf(motors[id].goalTorque), MMOT_MIN_SPEED_CMD, motors[id].goalSpeed);
+        float speedFromTorque = ManagerMotor_CalcSpeedFromTorque(
+            torque, fabsf(motors[id].goalTorque), MMOT_MIN_SPEED_CMD,
+            motors[id].goalSpeed);
 
-        motors[id].cmdSpeed = motors[id].cmdSpeed * alpha + speedFromTorque * dir * (1-alpha);
-        motors[id].cmdPosition = motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
+        motors[id].cmdSpeed =
+            motors[id].cmdSpeed * alpha + speedFromTorque * dir * (1 - alpha);
+        motors[id].cmdPosition =
+            motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
     }
     // Motor reached his goal
     else
@@ -525,33 +530,39 @@ void ManagerMotor_NextCmdPosSpeedTorque(uint8_t id)
     }
 }
 
-
-//Speed is always calculated as absolute value and needs to be assigned a direction afterwards
-float ManagerMotor_CalcSpeedFromTorque(float torque, float torqueGoal, float wMin, float wMax)
+// Speed is always calculated as absolute value and needs to be assigned a
+// direction afterwards
+float ManagerMotor_CalcSpeedFromTorque(float torque, float torqueGoal,
+                                       float wMin, float wMax)
 {
-	float w = 0;
-	float decelFactor = 0.1;
+    float w           = 0;
+    float decelFactor = 0.1;
 
-	// Définir les seuils pour 25% et 75%
-    float torque25 = 0.25f * torqueGoal;
-    float torque75 = 0.75f * torqueGoal;
+    // Définir les seuils pour 25% et 75%
+    float torque25  = 0.25f * torqueGoal;
+    float torque75  = 0.75f * torqueGoal;
     float torque110 = 1.10f * torqueGoal;
 
     // Calculer w en fonction de torque
-    if (torque <= torque25) {
+    if (torque <= torque25)
+    {
         w = wMax;
     }
-    else if (torque >= torque25 && torque <= torque75) {
+    else if (torque >= torque25 && torque <= torque75)
+    {
         // Transition linéaire entre wMin et wMax
         w = wMax - (wMax - wMin) * (torque - torque25) / (torque75 - torque25);
     }
-    else if (torque >= torque75 && torque <= torque110) {
+    else if (torque >= torque75 && torque <= torque110)
+    {
         w = wMin;
     }
-    else {
+    else
+    {
         // Décélération quand torque dépasse torque110
         w = wMin - decelFactor * (torque - torque110);
-        if (w < -wMax) {
+        if (w < -wMax)
+        {
             w = -wMax;
         }
     }
@@ -650,7 +661,8 @@ void ManagerMotor_MovePosSpeed(uint8_t id, float pos, float speed)
     motors[id].goalReady    = true;
 }
 
-void ManagerMotor_MovePosSpeedTorque(uint8_t id, float pos, float speed, float torque)
+void ManagerMotor_MovePosSpeedTorque(uint8_t id, float pos, float speed,
+                                     float torque)
 {
     if (fabsf(speed) > MMOT_MAX_SPEED_CMD)
     {
@@ -659,7 +671,7 @@ void ManagerMotor_MovePosSpeedTorque(uint8_t id, float pos, float speed, float t
 
     if (fabsf(torque) > MMOT_MAX_TORQUE_CMD)
     {
-    	torque = MMOT_MAX_TORQUE_CMD;
+        torque = MMOT_MAX_TORQUE_CMD;
     }
 
     motors[id].controlType  = MMOT_CONTROL_POS_SPEED_TORQUE;
@@ -835,6 +847,19 @@ void ManagerMotor_DisableMotors()
 #endif
 #ifndef MMOT_DEV_MOTOR_3_DISABLE
     PeriphMotors_Disable(&motors[MMOT_MOTOR_3].motor);
+#endif
+}
+
+void ManagerMotor_DisableMotorsMovement()
+{
+#ifndef MMOT_DEV_MOTOR_1_DISABLE
+	PeriphMotors_Move(&motors[MMOT_MOTOR_1].motor, 0, 0, 0, 0, 0);
+#endif
+#ifndef MMOT_DEV_MOTOR_2_DISABLE
+	PeriphMotors_Move(&motors[MMOT_MOTOR_2].motor, 0, 0, 0, 0, 0);
+#endif
+#ifndef MMOT_DEV_MOTOR_3_DISABLE
+	PeriphMotors_Move(&motors[MMOT_MOTOR_3].motor, 0, 0, 0, 0, 0);
 #endif
 }
 

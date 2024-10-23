@@ -137,6 +137,7 @@ void ManagerSecurity_Error()
     {
         ManagerMotor_Reset();
         ManagerMovement_Reset();
+        lastTime  = HAL_GetTick();
         ManagerSecurity.reset = false;
         ManagerError_ResetAllErrors();
 
