@@ -31,7 +31,9 @@ export const getExerciseDataById = async (req, res) => {
   const { exerciseId } = req.params;
 
   if (!exerciseId) {
-    return res.status(400).json({ message: "Missing required parameter: exerciseId" });
+    return res
+      .status(400)
+      .json({ message: "Missing required parameter: exerciseId" });
   }
 
   try {

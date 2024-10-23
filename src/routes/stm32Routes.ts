@@ -4,7 +4,7 @@ import {
   recordingStm32Data,
   handleButtonClick,
   getSavedData,
-  clearData
+  clearData,
 } from "../controllers/stm32Controller.ts";
 
 const router = express.Router();

@@ -12,8 +12,8 @@ import { styled } from "@mui/material/styles";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import AirlineSeatLegroomExtraIcon from "@mui/icons-material/AirlineSeatLegroomExtra";
-import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
-import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import LineChart from "../components/LineChart";
 import MotorControlWidget from "../components/MotorControlWidget";
 import useStm32 from "../hooks/use-stm32";
@@ -153,18 +153,17 @@ export default function Manual() {
     ],
   });
 
-
   const exportCsv = async () => {
     try {
       if (!recordCsv) {
         // Clear previous data
         await fetch("http://localhost:3001/stm32/clear-data", {
-          method: "POST", 
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
         });
-        setRecordCsv(true); 
+        setRecordCsv(true);
       } else {
         // Fetch saved STM32 data locally
         const response = await fetch("http://localhost:3001/stm32/saved-data", {
@@ -173,13 +172,13 @@ export default function Manual() {
             "Content-Type": "application/json",
           },
         });
-  
+
         if (response.ok) {
           const responseData = await response.json();
           const stm32Data = responseData.data;
-  
+
           generateAndDownloadCsv(stm32Data);
-  
+
           setRecordCsv(false);
         } else {
           console.error("Error fetching saved STM32 data.");
@@ -189,24 +188,25 @@ export default function Manual() {
       console.error("Error during CSV export:", error);
     }
   };
-  
+
   const generateAndDownloadCsv = (stm32Data) => {
-    let csvContent = "Index,Dorsiflexion Angle,Eversion Angle,Extension Angle,Dorsiflexion Torque,Eversion Torque,Extension Torque\n";
-  
+    let csvContent =
+      "Index,Dorsiflexion Angle,Eversion Angle,Extension Angle,Dorsiflexion Torque,Eversion Torque,Extension Torque\n";
+
     const dataLength = stm32Data.angles.dorsiflexion.length;
-  
+
     for (let i = 0; i < dataLength; i++) {
-      const rowData = `${i+1},${stm32Data.angles.dorsiflexion[i]},${stm32Data.angles.eversion[i]},${stm32Data.angles.extension[i]},${stm32Data.torques.dorsiflexion[i]},${stm32Data.torques.eversion[i]},${stm32Data.torques.extension[i]}\n`;
+      const rowData = `${i + 1},${stm32Data.angles.dorsiflexion[i]},${stm32Data.angles.eversion[i]},${stm32Data.angles.extension[i]},${stm32Data.torques.dorsiflexion[i]},${stm32Data.torques.eversion[i]},${stm32Data.torques.extension[i]}\n`;
       csvContent += rowData;
     }
-  
+
     // Create a CSV file and trigger download
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.style.display = 'none';
+    const a = document.createElement("a");
+    a.style.display = "none";
     a.href = url;
-    a.download = 'stm32_data.csv';
+    a.download = "stm32_data.csv";
     document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);
@@ -232,23 +232,24 @@ export default function Manual() {
               ></Button>
             </div>
             <div className="max-w-36">
-            <IconButton
-              onClick={() => setGraphPause(false)}
-              disabled={!graphPause}
-            >
-              <PlayArrowIcon />
-            </IconButton>
-            <IconButton
-              onClick={() => setGraphPause(true)}
-              disabled={graphPause}
-            >
-              <PauseIcon />
-            </IconButton>
               <IconButton
-                onClick={exportCsv}
-                disabled={stm32Data === null}
+                onClick={() => setGraphPause(false)}
+                disabled={!graphPause}
               >
-                {recordCsv ? <RadioButtonUncheckedIcon /> : <RadioButtonCheckedIcon />}
+                <PlayArrowIcon />
+              </IconButton>
+              <IconButton
+                onClick={() => setGraphPause(true)}
+                disabled={graphPause}
+              >
+                <PauseIcon />
+              </IconButton>
+              <IconButton onClick={exportCsv} disabled={stm32Data === null}>
+                {recordCsv ? (
+                  <RadioButtonUncheckedIcon />
+                ) : (
+                  <RadioButtonCheckedIcon />
+                )}
               </IconButton>
             </div>
             <Box sx={{ width: 50 }} />

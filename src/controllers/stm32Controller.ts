@@ -89,7 +89,7 @@ const clearData = asyncHandler(async (req: Request, res: Response) => {
     console.error("Error in clearData:", error);
     return res.status(500).send("An error occurred while clearing data.");
   }
-} );
+});
 
 const insertInitialDataToSupabase = async (): Promise<boolean> => {
   try {
@@ -220,12 +220,16 @@ const recordingStm32Data = async (req: Request, res: Response) => {
       }
 
       // Start recording
-      togglePushInterval(true); 
-      return res.status(200).send({ exercise_id: exerciseId, message: "Recording started." });
+      togglePushInterval(true);
+      return res
+        .status(200)
+        .send({ exercise_id: exerciseId, message: "Recording started." });
     } else {
       // Stop recording
       togglePushInterval(false);
-      return res.status(200).send({ exercise_id: exerciseId, message: "Recording stopped." });
+      return res
+        .status(200)
+        .send({ exercise_id: exerciseId, message: "Recording stopped." });
     }
   } catch (error) {
     // Handle unexpected errors
@@ -381,4 +385,10 @@ const handleButtonClick = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-export { initializeSerialPort, recordingStm32Data, handleButtonClick, getSavedData, clearData };
+export {
+  initializeSerialPort,
+  recordingStm32Data,
+  handleButtonClick,
+  getSavedData,
+  clearData,
+};
