@@ -64,6 +64,33 @@ let saveData = {
 
 let exerciseId: number | null = null;
 
+const getSavedData = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    if (!saveData) {
+      return res.status(404).send("No data available.");
+    }
+
+    res.status(200).json({
+      data: saveData,
+    });
+
+    clearPreviousData();
+  } catch (error) {
+    console.error("Error in getSavedData:", error);
+    return res.status(500).send("An error occurred while retrieving data.");
+  }
+});
+
+const clearData = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    clearPreviousData();
+    return res.status(200).send("Data cleared successfully.");
+  } catch (error) {
+    console.error("Error in clearData:", error);
+    return res.status(500).send("An error occurred while clearing data.");
+  }
+} );
+
 const insertInitialDataToSupabase = async (): Promise<boolean> => {
   try {
     // Fetch the authenticated user
@@ -193,12 +220,12 @@ const recordingStm32Data = async (req: Request, res: Response) => {
       }
 
       // Start recording
-      togglePushInterval(true);
-      return res.status(200).send("Recording started.");
+      togglePushInterval(true); 
+      return res.status(200).send({ exercise_id: exerciseId, message: "Recording started." });
     } else {
       // Stop recording
       togglePushInterval(false);
-      return res.status(200).send("Recording stopped.");
+      return res.status(200).send({ exercise_id: exerciseId, message: "Recording stopped." });
     }
   } catch (error) {
     // Handle unexpected errors
@@ -354,4 +381,4 @@ const handleButtonClick = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-export { initializeSerialPort, recordingStm32Data, handleButtonClick };
+export { initializeSerialPort, recordingStm32Data, handleButtonClick, getSavedData, clearData };

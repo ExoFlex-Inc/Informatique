@@ -135,7 +135,7 @@ export default function Activity() {
       const startDate = date[0].toISOString();
       const endDate = date[1].toISOString();
 
-      const url = `http://localhost:3001/exercise-data/${userId}?start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`;
+      const url = `http://localhost:3001/exercise-data/dates/${userId}?start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`;
 
       try {
         const response = await fetch(url, {

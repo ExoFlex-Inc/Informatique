@@ -6,15 +6,19 @@ import {
   Grid,
   TextField,
   IconButton,
+  Button as MuiButton,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import AirlineSeatLegroomExtraIcon from "@mui/icons-material/AirlineSeatLegroomExtra";
+import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import LineChart from "../components/LineChart";
 import MotorControlWidget from "../components/MotorControlWidget";
 import useStm32 from "../hooks/use-stm32";
 import Button from "../components/Button.tsx";
+import { saveAs } from "file-saver";
 
 const WhiteBorderCheckbox = styled(Checkbox)(() => ({
   color: "white",
@@ -57,7 +61,6 @@ const errorMap = {
   24: "ERROR_24",
   25: "ERROR_25",
 };
-
 export default function Manual() {
   const { stm32Data, socket, errorFromStm32 } = useStm32();
   const [errorDescription, setErrorDescription] = useState("");
@@ -68,6 +71,7 @@ export default function Manual() {
     motor2: { x: 0, position: 0, torque: 0, current: 0 },
     motor3: { x: 0, position: 0, torque: 0, current: 0 },
   });
+  const [recordCsv, setRecordCsv] = useState(false);
 
   useEffect(() => {
     if (stm32Data?.ErrorCode !== undefined) {
@@ -123,8 +127,6 @@ export default function Manual() {
   const getChartData = () => ({
     datasets: [
       {
-        label: "Motor 1",
-        borderColor: "rgb(255, 99, 132)",
         data: [
           {
             x: latestMotorData.motor1.x,
@@ -133,27 +135,82 @@ export default function Manual() {
         ],
       },
       {
-        label: "Motor 2",
-        borderColor: "rgb(99, 255, 132)",
         data: [
           {
-            x: latestMotorData.motor1.x,
+            x: latestMotorData.motor2.x,
             y: latestMotorData.motor2[graphDataType],
           },
         ],
       },
       {
-        label: "Motor 3",
-        borderColor: "rgb(99, 132, 255)",
         data: [
           {
-            x: latestMotorData.motor1.x,
+            x: latestMotorData.motor3.x,
             y: latestMotorData.motor3[graphDataType],
           },
         ],
       },
     ],
   });
+
+
+  const exportCsv = async () => {
+    try {
+      if (!recordCsv) {
+        // Clear previous data
+        await fetch("http://localhost:3001/stm32/clear-data", {
+          method: "POST", 
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        setRecordCsv(true); 
+      } else {
+        // Fetch saved STM32 data locally
+        const response = await fetch("http://localhost:3001/stm32/saved-data", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+  
+        if (response.ok) {
+          const responseData = await response.json();
+          const stm32Data = responseData.data;
+  
+          generateAndDownloadCsv(stm32Data);
+  
+          setRecordCsv(false);
+        } else {
+          console.error("Error fetching saved STM32 data.");
+        }
+      }
+    } catch (error) {
+      console.error("Error during CSV export:", error);
+    }
+  };
+  
+  const generateAndDownloadCsv = (stm32Data) => {
+    let csvContent = "Index,Dorsiflexion Angle,Eversion Angle,Extension Angle,Dorsiflexion Torque,Eversion Torque,Extension Torque\n";
+  
+    const dataLength = stm32Data.angles.dorsiflexion.length;
+  
+    for (let i = 0; i < dataLength; i++) {
+      const rowData = `${i+1},${stm32Data.angles.dorsiflexion[i]},${stm32Data.angles.eversion[i]},${stm32Data.angles.extension[i]},${stm32Data.torques.dorsiflexion[i]},${stm32Data.torques.eversion[i]},${stm32Data.torques.extension[i]}\n`;
+      csvContent += rowData;
+    }
+  
+    // Create a CSV file and trigger download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = 'stm32_data.csv';
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
 
   return (
     <Box sx={{ height: "100vh", overflow: "auto" }}>
@@ -174,6 +231,7 @@ export default function Manual() {
                 color="blueAccent.main hover:bg-blue-700 text-white"
               ></Button>
             </div>
+            <div className="max-w-36">
             <IconButton
               onClick={() => setGraphPause(false)}
               disabled={!graphPause}
@@ -186,6 +244,13 @@ export default function Manual() {
             >
               <PauseIcon />
             </IconButton>
+              <IconButton
+                onClick={exportCsv}
+                disabled={stm32Data === null}
+              >
+                {recordCsv ? <RadioButtonUncheckedIcon /> : <RadioButtonCheckedIcon />}
+              </IconButton>
+            </div>
             <Box sx={{ width: 50 }} />
             <FormControlLabel
               control={
