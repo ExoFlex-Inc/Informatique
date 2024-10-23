@@ -262,11 +262,11 @@ void ManagerHMI_ExecuteManualIncrement(char* cmd)
         }
         else if (strcmp(cmd, "ExtensionU") == 0)
         {
-            ManagerMovement_ManualCmdExtension(MMOV_UP);
+            ManagerMovement_ManualCmdExtension(MMOV_UP_EXT);
         }
         else if (strcmp(cmd, "ExtensionD") == 0)
         {
-            ManagerMovement_ManualCmdExtension(MMOV_DOWN);
+            ManagerMovement_ManualCmdExtension(MMOV_DOWN_EXT);
         }
     }
 }

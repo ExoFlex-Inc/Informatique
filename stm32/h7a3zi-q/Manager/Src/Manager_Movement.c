@@ -8,7 +8,7 @@
 #include <string.h>
 #include <Periph_Solenoid.h>
 
-#define MMOV_REST_POS -1
+#define MMOV_REST_POS 1
 
 #define MAX_EXERCISES 10
 #define MAX_MOVEMENT  3
@@ -818,12 +818,12 @@ void ManagerMovement_HomingExtension()
         }
         else
         {
-            ManagerMovement_ManualCmdExtension(MMOV_DOWN);
+            ManagerMovement_ManualCmdExtension(MMOV_DOWN_EXT);
         }
     }
     else
     {
-        ManagerMovement_ManualCmdExtension(MMOV_UP);
+        ManagerMovement_ManualCmdExtension(MMOV_UP_EXT);
     }
 }
 
