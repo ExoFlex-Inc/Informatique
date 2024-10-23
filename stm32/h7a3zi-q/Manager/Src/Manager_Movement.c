@@ -385,11 +385,11 @@ void ManagerMovement_ChangeSideLeft()
 				ManagerMovement_HomingEversion();
 			}
 		}
+	    else
+	    {
+	        ManagerMovement_ManualCmdEversion(MMOV_INSIDE);
+	    }
 	}
-    else
-    {
-        ManagerMovement_ManualCmdEversion(MMOV_INSIDE);
-    }
 }
 
 /*
