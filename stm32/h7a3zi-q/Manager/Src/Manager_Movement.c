@@ -14,6 +14,8 @@
 #define MAX_MOVEMENT  3
 #define EXTREME_POS   4
 
+#define MMOV_DELTA_CHANGESIDE 0.13 // rad
+
 #define MMOV_SPEED_M1 0.5 // rad/s
 #define MMOV_SPEED_M2 0.5 // rad/s
 #define MMOV_SPEED_M3 0.1 // rad/s
@@ -64,6 +66,7 @@ bool buttonStartReset;
 
 bool changeSideFree;
 bool eversionFree;
+bool changeSideDelta;
 
 // Left and right pos for homing
 float leftPos;
@@ -170,6 +173,7 @@ void ManagerMovement_Reset()
 
     changeSideFree = false;
     eversionFree = false;
+    changeSideDelta = false;
 
     pos1Reached = false;
     pos2Reached = false;
@@ -208,9 +212,10 @@ void ManagerMovement_Task()
 
     case MMOV_STATE_CHANGESIDE:
         ManagerMovement_ChangeSide();
+        break;
 
     case MMOV_STATE_ERROR:
-
+    	PeriphSolenoid_StopPWMs();
         break;
     }
 }
@@ -224,7 +229,7 @@ void ManagerMovement_WaitingSecurity()
 	managerMovement.currentLegSide = PeriphSwitch_GetLegSide();
     if (managerMovement.securityPass && managerMovement.currentLegSide != 0)
     {
-        managerMovement.state = MMOV_STATE_MANUAL;
+        managerMovement.state = MMOV_STATE_CHANGESIDE;
     }
 }
 
@@ -351,15 +356,28 @@ void ManagerMovement_ChangeSideRight()
 	if (PeriphSolenoid_UnlockChangeSide() || changeSideFree) // UNLOCK the soleinoid to allow changing side motion
 	{
 		changeSideFree = true;
-		if (PeriphSwitch_GetLegSide() == MMOV_LEG_IS_RIGHT || managerMovement.currentLegSide == MMOV_LEG_IS_RIGHT)
+		if ((PeriphSwitch_GetLegSide() == MMOV_LEG_IS_RIGHT && ManagerMovement_InsideLimitSwitch())|| managerMovement.currentLegSide == MMOV_LEG_IS_RIGHT)
 		{
-			ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
-			managerMovement.currentLegSide = MMOV_LEG_IS_RIGHT;
-
-			if (PeriphSolenoid_UnlockEversion() || eversionFree)// UNLOCK the soleinoid to allow eversion motion
+			if (managerMovement.currentLegSide != MMOV_LEG_IS_RIGHT)
 			{
-				eversionFree = true;
-				ManagerMovement_HomingEversion();
+				ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
+				managerMovement.currentLegSide = MMOV_LEG_IS_RIGHT;
+			}
+
+			if (!changeSideDelta)
+			{
+				if (ManagerMovement_GoToPos(MMOV_EVERSION, motorsData[MMOT_MOTOR_2]->position + MMOV_DELTA_CHANGESIDE))
+				{
+					changeSideDelta = true;
+				}
+			}
+			else
+			{
+				if (PeriphSolenoid_UnlockEversion() || eversionFree)// UNLOCK the soleinoid to allow eversion motion
+				{
+					eversionFree = true;
+					ManagerMovement_HomingEversion();
+				}
 			}
 		}
 		else
@@ -373,16 +391,29 @@ void ManagerMovement_ChangeSideLeft()
 {
 	if (PeriphSolenoid_UnlockChangeSide() || changeSideFree) // UNLOCK the soleinoid to allow changing side motion
 	{
-		if (PeriphSwitch_GetLegSide() == MMOV_LEG_IS_LEFT || managerMovement.currentLegSide == MMOV_LEG_IS_LEFT)
+		changeSideFree = true;
+		if ((PeriphSwitch_GetLegSide() == MMOV_LEG_IS_LEFT && ManagerMovement_InsideLimitSwitch())|| managerMovement.currentLegSide == MMOV_LEG_IS_LEFT)
 		{
-			ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
-			changeSideFree = true;
-			managerMovement.currentLegSide = MMOV_LEG_IS_LEFT;
-
-			if (PeriphSolenoid_UnlockEversion() || eversionFree)// UNLOCK the soleinoid to allow eversion motion
+			if (managerMovement.currentLegSide != MMOV_LEG_IS_LEFT)
 			{
-				eversionFree = true;
-				ManagerMovement_HomingEversion();
+				ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
+				managerMovement.currentLegSide = MMOV_LEG_IS_LEFT;
+			}
+
+			if (!changeSideDelta)
+			{
+				if (ManagerMovement_GoToPos(MMOV_EVERSION, motorsData[MMOT_MOTOR_2]->position + MMOV_DELTA_CHANGESIDE))
+				{
+					changeSideDelta = true;
+				}
+			}
+			else
+			{
+				if (PeriphSolenoid_UnlockEversion() || eversionFree)// UNLOCK the soleinoid to allow eversion motion
+				{
+					eversionFree = true;
+					ManagerMovement_HomingEversion();
+				}
 			}
 		}
 	    else
@@ -862,6 +893,7 @@ void ManagerMovement_HomingEversion()
                     managerMovement.state = MMOV_STATE_MANUAL;
                     changeSideFree = false;
                     eversionFree = false;
+                    changeSideDelta = false;
                 }
                 else
                 {
