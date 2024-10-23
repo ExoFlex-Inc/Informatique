@@ -226,6 +226,10 @@ void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
                 // Flag error: State couldn't change
             }
         }
+        else if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "Reset") == 0)
+		{
+			ManagerSecurity_Reset();
+		}
         else if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "ChangeSide") == 0)
         {
         	if(ManagerMovement_SetState(MMOV_STATE_CHANGESIDE))
