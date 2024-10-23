@@ -878,6 +878,12 @@ void ManagerMotor_StopManualMovement(uint8_t motorindex)
 /********************************************
  * Origin shift
  ********************************************/
+void ManagerMotor_SoftwareOrigin(uint8_t id)
+{
+	PeriphMotors_SoftwareOrigin(&motors[id].motor);
+    motors[id].cmdPosition = 0;
+}
+
 
 void ManagerMotor_ApplyOriginShift(uint8_t id)
 {
