@@ -52,10 +52,10 @@
 #define MMOT_MAX_SPEED_CMD  2
 #define MMOT_MAX_TORQUE_CMD 15
 
-#define MMOT_GR_HOME_OFFSET -3.14 / 2 //90 deg in rad
-#define MMOT_GR_L 0.3 //m
-#define MMOT_GR_M 5 //kg
-#define MMOT_GR_G 9.81 //m/s2
+#define MMOT_GR_HOME_OFFSET -3.14 / 2  // 90 deg in rad
+#define MMOT_GR_L           0.3  // m
+#define MMOT_GR_M           5  // kg
+#define MMOT_GR_G           9.81  // m/s2
 
 typedef struct
 {
@@ -491,10 +491,10 @@ void ManagerMotor_NextCmdPosSpeed(uint8_t id)
         motors[id].cmdPosition =
             motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
 
-        //Gravity compensation
+        // Gravity compensation
         if (id == MMOT_MOTOR_3)
         {
-    		motors[id].cmdTorque = ManagerMotor_CalcGravityCompensation();
+            motors[id].cmdTorque = ManagerMotor_CalcGravityCompensation();
         }
     }
     // Motor reached his goal
@@ -534,10 +534,10 @@ void ManagerMotor_NextCmdPosSpeedTorque(uint8_t id)
         motors[id].cmdPosition =
             motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
 
-        //Gravity compensation
+        // Gravity compensation
         if (id == MMOT_MOTOR_3)
         {
-    		motors[id].cmdTorque = ManagerMotor_CalcGravityCompensation();
+            motors[id].cmdTorque = ManagerMotor_CalcGravityCompensation();
         }
     }
     // Motor reached his goal
@@ -590,23 +590,21 @@ float ManagerMotor_CalcSpeedFromTorque(float torque, float torqueGoal,
 
 float ManagerMotor_CalcGravityCompensation()
 {
-	//Get angle : check if home or not
-	bool isHomed = PeriphMotors_IsSoftwareOrigin(&motors[MMOT_MOTOR_3].motor);
-	float tetha = 0;
+    // Get angle : check if home or not
+    bool  isHomed = PeriphMotors_IsSoftwareOrigin(&motors[MMOT_MOTOR_3].motor);
+    float tetha   = 0;
 
-	if (isHomed)
-	{
-		tetha = MMOT_GR_HOME_OFFSET + motors[MMOT_MOTOR_3].motor.position;
-	}
-	else
-	{
-		tetha = motors[MMOT_MOTOR_3].motor.position;
-	}
+    if (isHomed)
+    {
+        tetha = MMOT_GR_HOME_OFFSET + motors[MMOT_MOTOR_3].motor.position;
+    }
+    else
+    {
+        tetha = motors[MMOT_MOTOR_3].motor.position;
+    }
 
-	return MMOT_GR_L * MMOT_GR_M * MMOT_GR_G * tetha;
+    return MMOT_GR_L * MMOT_GR_M * MMOT_GR_G * tetha;
 }
-
-
 
 void ManagerMotor_SendToMotors()
 {
