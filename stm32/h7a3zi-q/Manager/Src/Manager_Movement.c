@@ -227,7 +227,8 @@ void ManagerMovement_Task()
 
 void ManagerMovement_WaitingSecurity()
 {
-    if (managerMovement.securityPass)
+	managerMovement.currentLegSide = PeriphSwitch_GetLegSide();
+    if (managerMovement.securityPass && managerMovement.currentLegSide != 0)
     {
         managerMovement.state = MMOV_STATE_MANUAL;
     }
@@ -371,10 +372,11 @@ void ManagerMovement_ChangeSideStartingPos()
 
 void ManagerMovement_ChangeSideRight()
 {
-	if (PeriphSolenoid_UnlockChangeSide() || changeSideFree) // UNLOCK the soleinoid to allow changing side motion
+
+	if ((PeriphSolenoid_UnlockChangeSide() &&  PeriphSwitch_GetLegSide() == MMOV_LEG_IS_RIGHT) || changeSideFree) // UNLOCK the soleinoid to allow changing side motion
 	{
 		changeSideFree = true;
-		if ((PeriphSwitch_GetLegSide() == MMOV_LEG_IS_RIGHT && ManagerMovement_InsideLimitSwitch())|| managerMovement.currentLegSide == MMOV_LEG_IS_RIGHT)
+		if ((PeriphSwitch_GetLegSide() == MMOV_LEG_IS_RIGHT && ManagerMovement_InsideLimitSwitch()) || managerMovement.currentLegSide == MMOV_LEG_IS_RIGHT)
 		{
 			if (managerMovement.currentLegSide != MMOV_LEG_IS_RIGHT)
 			{
@@ -397,7 +399,7 @@ void ManagerMovement_ChangeSideRight()
 
 void ManagerMovement_ChangeSideLeft()
 {
-	if (PeriphSolenoid_UnlockChangeSide() || changeSideFree) // UNLOCK the soleinoid to allow changing side motion
+	if (PeriphSolenoid_UnlockChangeSide() && PeriphSwitch_GetLegSide() == MMOV_LEG_IS_RIGHT || changeSideFree) // UNLOCK the soleinoid to allow changing side motion
 	{
 		changeSideFree = true;
 		if ((PeriphSwitch_GetLegSide() == MMOV_LEG_IS_LEFT && ManagerMovement_InsideLimitSwitch())|| managerMovement.currentLegSide == MMOV_LEG_IS_LEFT)
