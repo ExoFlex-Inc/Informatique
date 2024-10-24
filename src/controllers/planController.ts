@@ -10,6 +10,34 @@ const postPlan = asyncHandler(async (req: Request, res: Response) => {
   }
 
   try {
+    const { data: existingPlan, error: fetchError } = await supaClient
+      .from("plans")
+      .select("*")
+      .eq("user_id", user_id)
+      .single();
+
+    if (fetchError) {
+      console.error("Error fetching existing plan:", fetchError);
+      return res
+        .status(500)
+        .json({ message: "Error fetching existing plan", error: fetchError.message });
+    }
+
+    if (existingPlan) {
+      const { error: deleteError } = await supaClient
+        .from("plans")
+        .delete()
+        .eq("user_id", user_id);
+
+      if (deleteError) {
+        console.error("Error deleting existing plan:", deleteError);
+        return res
+          .status(500)
+          .json({ message: "Error deleting existing plan", error: deleteError.message });
+      }
+      console.log(`Existing plan for user ${user_id} deleted.`);
+    }
+
     const { data, error } = await supaClient
       .from("plans")
       .insert([
@@ -22,14 +50,14 @@ const postPlan = asyncHandler(async (req: Request, res: Response) => {
       .select();
 
     if (error) {
-      console.error("Error sending plan:", error);
+      console.error("Error inserting new plan:", error);
       return res
         .status(500)
-        .json({ message: "Error sending plan", error: error.message });
+        .json({ message: "Error inserting new plan", error: error.message });
     }
 
-    console.log("Success sending plan:", data);
-    return res.status(200).json({ message: "Success sending plan", data });
+    console.log("Success sending new plan:", data);
+    return res.status(200).json({ message: "Success sending new plan", data });
   } catch (err) {
     console.error("Unexpected error:", err);
     return res.status(500).json({ message: "Unexpected error occurred." });
@@ -47,12 +75,10 @@ const getPlan = asyncHandler(async (req: Request, res: Response) => {
   }
 
   try {
-    // Fetch the latest plan from the 'plans' table
     const { data, error } = await supaClient
       .from("plans")
       .select("*")
       .eq("user_id", user_id)
-      .order("created_at", { ascending: false })
       .single();
 
     // Handle error scenarios

@@ -194,6 +194,12 @@ AS PERMISSIVE FOR INSERT
 TO public
 WITH CHECK (true);
 
+CREATE POLICY "users can delete own plans" 
+ON "public"."plans"
+AS PERMISSIVE FOR DELETE
+TO public
+USING (user_id = auth.uid());
+
 CREATE POLICY "admins_and_managers_can_assign_admin" ON public.user_profiles
 AS PERMISSIVE FOR UPDATE
 TO public
