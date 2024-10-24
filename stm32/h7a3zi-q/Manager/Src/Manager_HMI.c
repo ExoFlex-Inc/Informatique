@@ -48,7 +48,6 @@ float ManagerHMI_Degrees2Radians(float degrees);
 float ManagerHMI_Radians2Degrees(float radians);
 float ManagerHMI_Sec2Millis(float seconds);
 
-
 bool sendNow;
 
 void ManagerHMI_Init()
@@ -463,5 +462,5 @@ float ManagerHMI_Sec2Millis(float seconds)
 
 void ManagerHMI_SendNow()
 {
-	sendNow = true;
+    sendNow = true;
 }
