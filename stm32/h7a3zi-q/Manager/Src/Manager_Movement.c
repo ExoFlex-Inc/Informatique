@@ -374,7 +374,7 @@ void ManagerMovement_ChangeSideStartingPos()
 void ManagerMovement_ChangeSideRight()
 {
     if ((PeriphSolenoid_UnlockChangeSide() &&
-         PeriphSwitch_GetLegSide() == MMOV_LEG_IS_RIGHT) ||
+         PeriphSwitch_GetLegSide() == MMOV_LEG_IS_LEFT) ||
         changeSideFree)  // UNLOCK the soleinoid to allow changing side motion
     {
         changeSideFree = true;
