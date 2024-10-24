@@ -18,12 +18,10 @@ const postPlan = asyncHandler(async (req: Request, res: Response) => {
 
     if (fetchError) {
       console.error("Error fetching existing plan:", fetchError);
-      return res
-        .status(500)
-        .json({
-          message: "Error fetching existing plan",
-          error: fetchError.message,
-        });
+      return res.status(500).json({
+        message: "Error fetching existing plan",
+        error: fetchError.message,
+      });
     }
 
     if (existingPlan) {
@@ -34,12 +32,10 @@ const postPlan = asyncHandler(async (req: Request, res: Response) => {
 
       if (deleteError) {
         console.error("Error deleting existing plan:", deleteError);
-        return res
-          .status(500)
-          .json({
-            message: "Error deleting existing plan",
-            error: deleteError.message,
-          });
+        return res.status(500).json({
+          message: "Error deleting existing plan",
+          error: deleteError.message,
+        });
       }
       console.log(`Existing plan for user ${user_id} deleted.`);
     }
