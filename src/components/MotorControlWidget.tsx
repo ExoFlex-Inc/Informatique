@@ -1,6 +1,7 @@
 import { Paper, Typography, Grid, Box, Icon } from "@mui/material";
 import Button from "./Button.tsx";
 import { ReactNode } from "react";
+import { stm32DataType } from "../hooks/use-stm32.ts";
 interface MotorControlWidgetProps {
   title: string;
   icon: ReactNode;
@@ -8,6 +9,7 @@ interface MotorControlWidgetProps {
   mode: string;
   action: string;
   color: string;
+  stm32Data: stm32DataType | null;
   disabled?: boolean;
 }
 
@@ -17,6 +19,7 @@ export default function MotorControlWidget({
   labels,
   mode,
   action,
+  stm32Data,
   disabled = false,
 }: MotorControlWidgetProps) {
   return (
@@ -53,7 +56,7 @@ export default function MotorControlWidget({
                 action={action}
                 content={label}
                 color="blueAccent.main hover:bg-blue-700 text-white"
-                disabled={disabled}
+                disabled={disabled || stm32Data?.Mode == "ChangeSide"}
               />
             </Grid>
           ))}

@@ -1,26 +1,20 @@
 import React, { useEffect, useState, useRef } from "react";
-import Button from "../components/Button.tsx";
 import ProgressionWidget from "../components/ProgressionWidget.tsx";
 
 import { usePlan } from "../hooks/use-plan.ts";
 import useStm32 from "../hooks/use-stm32.ts";
 
-import { useMediaQuery, useTheme } from "@mui/material";
+import { useMediaQuery, useTheme, Box, Grid } from "@mui/material";
 import { useUserProfile } from "../hooks/use-profile.ts";
 
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import PauseIcon from "@mui/icons-material/Pause";
-import StopIcon from "@mui/icons-material/Stop";
-import RotateLeftIcon from "@mui/icons-material/RotateLeft";
-import RotateRightIcon from "@mui/icons-material/RotateRight";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import LineChart from "../components/LineChart.tsx";
 import { tokens } from "../hooks/theme.ts";
 import ExerciseOverviewWidget from "../components/ExerciseOverviewWidget.tsx";
 import RatingPopUp from "../components/RatingPopUp.tsx";
-import ToggleSide from "../components/ToggleSide.tsx";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
+import ManualControl from "../components/ManualControl.tsx";
+import Button from "../components/Button.tsx";
+import { Pause, PlayArrow, Refresh } from "@mui/icons-material";
 interface ChartData {
   datasets: {
     label: string;
@@ -188,139 +182,53 @@ export default function HMI() {
 
   return (
     <div className="flex flex-col custom-height">
-      <div className="ml-10">
-        <ToggleSide />
-      </div>
       <CustomScrollbar>
-        <div className="plan-grid grid-cols-2 grid-rows-2 gap-4 mr-10 ml-10 ">
-          <div className="bg-white rounded-2xl flex items-center h-auto">
-            <LineChart chartData={chartData} type="line" socket={socket} />
-          </div>
-          <div className="bg-white rounded-2xl content-evenly">
-            <ProgressionWidget
-              setOpenDialogPainScale={setOpenDialogPainScale}
-              stm32Data={stm32Data}
-              planData={planData}
-            />
-          </div>
-          <div className="bg-white col-span-1 flex flex-col justify-around rounded-2xl mb-5">
-            <div className="flex justify-between mt-5 ml-10 mr-10">
-              {stm32Data &&
-              stm32Data.AutoState !== "Ready" &&
-              stm32Data.AutoState !== "WaitingForPlan" ? (
+        <Box>
+          <Grid padding={5} container spacing={2} sx={{ justifyContent: "center", alignItems: "center" }}>
+            <Grid item xs={12}>
+            <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  mb: 2,
+                }}
+              >
                 <Button
-                  label="Pause"
-                  icon={<PauseIcon />}
-                  mode="Auto"
-                  action="Control"
-                  content="Pause"
-                  disabled={!stm32Data || errorFromStm32}
-                  color="bg-yellow-500"
-                />
-              ) : (
-                <Button
-                  label="Start"
-                  icon={<PlayArrowIcon />}
-                  mode="Auto"
-                  action="Control"
-                  content="Start"
-                  disabled={
-                    !stm32Data ||
-                    errorFromStm32 ||
-                    stm32Data.AutoState === "WaitingForPlan"
-                  }
-                  color="bg-green-500"
-                />
-              )}
-              <Button
-                label="Stop"
-                icon={<StopIcon />}
-                mode="Auto"
-                action="Control"
-                content="Stop"
-                disabled={
-                  !stm32Data ||
-                  errorFromStm32 ||
-                  stm32Data?.AutoState === "Ready"
-                }
-                color="bg-red-500"
-              />
-            </div>
-            {stm32Data?.AutoState === "Dorsiflexion" && (
-              <div className="flex justify-between ml-10 mr-10 items-center">
-                <Button
-                  label="DorsiflexionUp"
-                  icon={<ArrowUpwardIcon />}
-                  mode="Auto"
-                  action="Calib"
-                  content="dorsiflexionU"
-                  disabled={!stm32Data || errorFromStm32}
-                  color="bg-gray-500"
+                  icon={<PlayArrow />}
                 />
                 <Button
-                  label="DorsiflexionDown"
-                  icon={<ArrowDownwardIcon />}
-                  mode="Auto"
-                  action="Calib"
-                  content="dorsiflexionD"
-                  disabled={!stm32Data || errorFromStm32}
-                  color="bg-gray-500"
+                  icon={<Pause />}
                 />
-              </div>
-            )}
-            {stm32Data?.AutoState === "Extension" && (
-              <div className="flex justify-between ml-10 mr-10 items-center">
-                <Button
-                  label="ExtensionUp"
-                  icon={<ArrowUpwardIcon />}
-                  mode="Auto"
-                  action="Calib"
-                  content="extensionU"
-                  disabled={!stm32Data || errorFromStm32}
-                  color="bg-gray-500"
+                <Button 
+                  icon={<Refresh/>}
+                  disabled={!stm32Data?.ErrorCode}
+                  mode="Refresh"
                 />
-                <Button
-                  label="ExtensionDown"
-                  icon={<ArrowDownwardIcon />}
-                  mode="Auto"
-                  action="Calib"
-                  content="extensionD"
-                  disabled={!stm32Data || errorFromStm32}
-                  color="bg-gray-500"
+              </Box>
+              <LineChart chartData={chartData} type="line" socket={socket} />
+            </Grid>
+            <Grid item>
+              <Box padding={1} bgcolor="white" sx={{borderRadius: "16px"}}>
+                <ProgressionWidget
+                  setOpenDialogPainScale={setOpenDialogPainScale}
+                  stm32Data={stm32Data}
+                  planData={planData}
                 />
-              </div>
-            )}
-            {stm32Data?.AutoState === "Eversion" && (
-              <div className="flex justify-between ml-10 mr-10 items-center">
-                <Button
-                  label="EversionLeft"
-                  icon={<RotateLeftIcon />}
-                  mode="Auto"
-                  action="Calib"
-                  content="eversionL"
-                  disabled={!stm32Data || errorFromStm32}
-                  color="bg-gray-500"
-                />
-                <Button
-                  label="EversionRight"
-                  icon={<RotateRightIcon />}
-                  mode="Auto"
-                  action="Calib"
-                  content="eversionR"
-                  disabled={!stm32Data || errorFromStm32}
-                  color="bg-gray-500"
-                />
-              </div>
-            )}
-          </div>
-          <ExerciseOverviewWidget stm32Data={stm32Data} planData={planData} />
-        </div>
+              </Box>
+            </Grid>
+            <Grid item>
+              <ExerciseOverviewWidget stm32Data={stm32Data} planData={planData} />
+            </Grid>
+          </Grid>
+        </Box>
       </CustomScrollbar>
       <RatingPopUp
         setOpenDialogPainScale={setOpenDialogPainScale}
         setPainScale={setPainScale}
         openDialogPainScale={openDialogPainScale}
       />
+      <ManualControl errorFromStm32={errorFromStm32} stm32Data={stm32Data} />
     </div>
   );
 }

@@ -1,15 +1,17 @@
 import React, { useRef, useState } from "react";
-import { Button as MuiButton } from "@mui/material";
+import { IconButton, Button as MuiButton, Typography } from "@mui/material";
 
 interface ButtonProps {
-  label: string;
+  label?: string;
   icon?: React.ReactNode;
   mode?: string;
   action?: string;
   content?: string;
   onMouseDown?: () => void;
   onClick?: () => void;
-  color?: string;
+  mainColor?: string;
+  hoverColor?: string;
+  textColor?: string;
   disabled?: boolean;
 }
 
@@ -19,7 +21,9 @@ const Button: React.FC<ButtonProps> = ({
   mode,
   action,
   content,
-  color,
+  mainColor,
+  hoverColor,
+  textColor,
   disabled,
   onClick,
 }) => {
@@ -88,24 +92,42 @@ const Button: React.FC<ButtonProps> = ({
   };
 
   return (
-    <MuiButton
-      fullWidth
-      variant="contained"
-      disabled={disabled}
-      sx={{
-        mt: 3,
-        mb: 2,
-        textTransform: "none",
-        fontSize: "1rem",
-        backgroundColor: "blueAccent.main",
-        "&:hover": {
-          backgroundColor: "#1e3a8a",
-        },
-      }}
-      onMouseDown={handleMouseDown}
-    >
-      {label}
-    </MuiButton>
+    (icon ? 
+      <IconButton
+        size="large"
+        sx={{
+          backgroundColor: mainColor,
+          '&:hover': {
+            backgroundColor: hoverColor,
+            color: textColor
+          }
+        }}
+        disabled={disabled}
+      >
+        {icon}
+      </IconButton>
+    :
+      <MuiButton
+        fullWidth
+        variant="contained"
+        disabled={disabled}
+        sx={{
+          mt: 3,
+          mb: 2,
+          textTransform: "none",
+          fontSize: "1rem",
+          backgroundColor: "blueAccent.main",
+          "&:hover": {
+            backgroundColor: "#1e3a8a",
+          },
+        }}
+        onMouseDown={handleMouseDown}
+      >
+        <Typography>
+          {label}
+        </Typography>
+      </MuiButton>
+    )
   );
 };
 

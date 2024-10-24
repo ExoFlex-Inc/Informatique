@@ -8,14 +8,12 @@ import {
   IconButton,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import PauseIcon from "@mui/icons-material/Pause";
-import AirlineSeatLegroomExtraIcon from "@mui/icons-material/AirlineSeatLegroomExtra";
+import {Refresh, PlayArrow, Pause} from "@mui/icons-material"
 import LineChart from "../components/LineChart";
-import MotorControlWidget from "../components/MotorControlWidget";
-import useStm32 from "../hooks/use-stm32";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
-import ToggleSide from "../components/ToggleSide.tsx";
+import useStm32 from "../hooks/use-stm32.ts";
+import Button from "../components/Button.tsx";
+import ManualControl from "../components/ManualControl.tsx";
 
 const WhiteBorderCheckbox = styled(Checkbox)(({ theme }) => ({
   color: "white",
@@ -60,10 +58,10 @@ const errorMap = {
 };
 
 export default function Manual() {
-  const { stm32Data, socket, errorFromStm32 } = useStm32();
   const [errorDescription, setErrorDescription] = useState("");
   const [graphDataType, setGraphDataType] = useState("position");
   const [graphPause, setGraphPause] = useState(false);
+  const {stm32Data, socket, errorFromStm32} = useStm32();
 
   const [latestMotorData, setLatestMotorData] = useState({
     motor1: { x: 0, position: 0, torque: 0, current: 0 },
@@ -161,7 +159,7 @@ export default function Manual() {
     <div className="custom-height flex flex-col">
       <CustomScrollbar>
         <Box>
-          <Grid container spacing={2}>
+          <Grid container spacing={2} sx={{ justifyContent: "center", alignItems: "center" }}>
             <Grid item xs={12}>
               <Box
                 sx={{
@@ -171,20 +169,24 @@ export default function Manual() {
                   mb: 2,
                 }}
               >
-                <ToggleSide />
                 <Box sx={{ width: 50 }} />
                 <IconButton
                   onClick={() => setGraphPause(false)}
                   disabled={!graphPause}
                 >
-                  <PlayArrowIcon />
+                  <PlayArrow />
                 </IconButton>
                 <IconButton
                   onClick={() => setGraphPause(true)}
                   disabled={graphPause}
                 >
-                  <PauseIcon />
+                  <Pause />
                 </IconButton>
+                <Button 
+                  icon={<Refresh/>}
+                  disabled={!stm32Data?.ErrorCode}
+                  mode="Refresh"
+                />
                 <Box sx={{ width: 50 }} />
                 <FormControlLabel
                   control={
@@ -221,33 +223,7 @@ export default function Manual() {
                 graphPause={graphPause}
               />
             </Grid>
-            <Grid item xs={12} md={6}>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  height: "100%",
-                }}
-              >
-                <MotorControlWidget
-                  title="Anatomical Movement"
-                  icon={<AirlineSeatLegroomExtraIcon sx={{ fontSize: 56 }} />}
-                  labels={[
-                    "EversionL",
-                    "EversionR",
-                    "DorsiflexionU",
-                    "DorsiflexionD",
-                    "ExtensionU",
-                    "ExtensionD",
-                  ]}
-                  mode="Manual"
-                  action="Increment"
-                  disabled={errorFromStm32}
-                />
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={3}>
               <Box
                 sx={{
                   display: "flex",
@@ -265,6 +241,11 @@ export default function Manual() {
                   InputProps={{
                     readOnly: true,
                   }}
+                  inputProps={{
+                    sx: {
+                      whiteSpace: 'pre'
+                    }
+                  }}
                   sx={{ marginRight: 5 }}
                 />
               </Box>
@@ -272,6 +253,7 @@ export default function Manual() {
           </Grid>
         </Box>
       </CustomScrollbar>
+      <ManualControl stm32Data={stm32Data} errorFromStm32={errorFromStm32} />
     </div>
   );
 }

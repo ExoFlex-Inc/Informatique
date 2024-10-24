@@ -7,7 +7,7 @@ interface MyEvents {
   serialPortClosed: string;
 }
 
-type stm32DataType = {
+export type stm32DataType = {
   Mode: string;
   AutoState: string;
   HomingState: string;
@@ -15,10 +15,10 @@ type stm32DataType = {
   Repetitions: number;
   ExerciseIdx: number;
   ErrorCode: number;
-  Positions: number;
-  Torques: number;
-  Current: number;
-};
+  Positions: number[];
+  Torques: number[];
+  Current: number[];
+}
 
 const ENDPOINT = "http://localhost:3001"; // Pointing to the server on port 3001
 

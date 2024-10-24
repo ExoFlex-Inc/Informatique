@@ -1,13 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  FormControl,
-  FormLabel,
-} from "@mui/material";
 import UserSearchBar from "../components/UserSearchBar.tsx";
-import { blue } from "@mui/material/colors";
 import ExercisesLimitsTable from "../components/ExercisesLimitsTable.tsx";
 import ExercisesPlanTable from "../components/ExercisesPlanTable.tsx";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
@@ -120,7 +112,7 @@ export default function Planning() {
   return (
     <div className="flex flex-col custom-height">
       <div className="flex justify-center items-center">
-        <ToggleSide setSide={setSide} />
+        <ToggleSide side={side} setSide={setSide} />
         <UserSearchBar
           sx={{ width: 500 }}
           setSearchQuery={setSelectedUser}
