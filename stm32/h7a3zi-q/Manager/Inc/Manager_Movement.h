@@ -42,6 +42,11 @@
 #define MMOV_EVERSION     2
 #define MMOV_EXTENSION    3
 
+#define MMOV_MOVESTATE_EVERSION 0
+#define MMOV_MOVESTATE_DORSIFLEXION 1
+#define MMOV_MOVESTATE_EXTENSION 2
+
+
 typedef struct
 {
     uint8_t autoState;

@@ -10,6 +10,9 @@
 
 #include "main.h"
 
+void PeriphSolenoid_Init();
+void PeriphSolenoid_ResetLocksState();
+
 bool PeriphSolenoid_UnlockChangeSide();
 bool PeriphSolenoid_UnlockEversion();
 

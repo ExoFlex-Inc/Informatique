@@ -22,15 +22,23 @@
 
 #define SOLENOID_PWM_PERCENT 80 //%
 
+bool isEversionFree;
+bool isChangeSideFree;
 
+void PeriphSolenoid_ActivateSolenoid(TIM_HandleTypeDef *htim, uint32_t channel, uint16_t pin1, GPIO_TypeDef* GPIO1, uint16_t pin2, GPIO_TypeDef* GPIO2, uint32_t compare_value);
+void PeriphSolenoid_DeactivateSolenoid(TIM_HandleTypeDef *htim, uint32_t channel, uint16_t pin1, GPIO_TypeDef* GPIO1, uint16_t pin2, GPIO_TypeDef* GPIO2);
 uint32_t PeriphSolenoid_SetDutyCycle(TIM_HandleTypeDef *htim, uint32_t channel, float duty_cycle_percent);
+
+void PeriphSolenoid_Init()
+{
+	PeriphSolenoid_ResetLocksState();
+}
 
 /********************************************
  * Unlock the solenoids
  ********************************************/
 bool PeriphSolenoid_UnlockChangeSide()
 {
-	static bool isChangeSideFree = false;
     static uint32_t lastActivationTime = 0;
 
     uint32_t currentTime = HAL_GetTick();
@@ -62,7 +70,6 @@ bool PeriphSolenoid_UnlockChangeSide()
 
 bool PeriphSolenoid_UnlockEversion()
 {
-	static bool isEversionFree = false;
 	static uint32_t lastActivationTime = 0;
 
 	uint32_t currentTime = HAL_GetTick();
@@ -104,6 +111,28 @@ void PeriphSolenoid_StopPWMs()
 {
 	HAL_TIM_PWM_Stop(PS_SOLENOID_EVERSION_PWM, PS_CHANNEL_SOLENOID_EVERSION_PWM);
 	HAL_TIM_PWM_Stop(PS_SOLENOID_CHANGESIDE_PWM, PS_CHANNEL_SOLENOID_CHANGESIDE_PWM);
+}
+
+void PeriphSolenoid_ResetLocksState()
+{
+	isChangeSideFree = false;
+	isEversionFree = false;
+}
+void PeriphSolenoid_ActivateSolenoid(TIM_HandleTypeDef *htim, uint32_t channel, uint16_t pin1, GPIO_TypeDef* GPIO1, uint16_t pin2, GPIO_TypeDef* GPIO2, uint32_t compare_value)
+{
+	__HAL_TIM_SET_COMPARE(htim, channel, compare_value);
+	HAL_TIM_PWM_Start(htim, channel);
+
+	HAL_GPIO_WritePin(GPIO1, pin1, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIO2, pin2, GPIO_PIN_SET);
+}
+
+void PeriphSolenoid_DeactivateSolenoid(TIM_HandleTypeDef *htim, uint32_t channel, uint16_t pin1, GPIO_TypeDef* GPIO1, uint16_t pin2, GPIO_TypeDef* GPIO2)
+{
+	HAL_GPIO_WritePin(GPIO1, pin1, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIO2, pin2, GPIO_PIN_RESET);
+
+	HAL_TIM_PWM_Stop(htim, channel);
 }
 
 /********************************************

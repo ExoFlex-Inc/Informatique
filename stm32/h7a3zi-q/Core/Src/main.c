@@ -133,6 +133,7 @@ int main(void)
 	ManagerHMI_Init();
 	ManagerMovement_Init();
 	ManagerSecurity_Init();
+	PeriphSolenoid_Init();
 
   while (1)
   {

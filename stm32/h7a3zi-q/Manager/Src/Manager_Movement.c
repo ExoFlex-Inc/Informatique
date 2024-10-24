@@ -22,9 +22,10 @@
 
 #define MANUAL_MAX_TRANSMIT_TIME 200  // ms
 
-#define MMOV_CHANGESIDE_STATE_WAITING4CMD 0
-#define MMOV_CHANGESIDE_STATE_MOVERIGHT   1
-#define MMOV_CHANGESIDE_STATE_MOVELEFT    2
+#define MMOV_CHANGESIDE_STATE_STARTINGPOS 0
+#define MMOV_CHANGESIDE_STATE_GETCMD 1
+#define MMOV_CHANGESIDE_STATE_MOVERIGHT   2
+#define MMOV_CHANGESIDE_STATE_MOVELEFT    3
 
 typedef struct
 {
@@ -66,7 +67,6 @@ bool buttonStartReset;
 
 bool changeSideFree;
 bool eversionFree;
-bool changeSideDelta;
 
 // Left and right pos for homing
 float leftPos;
@@ -108,7 +108,8 @@ void ManagerMovement_AutoStop();
 
 // Change side
 void ManagerMovement_ChangeSide();
-void ManagerMovement_Waiting4Cmd();
+void ManagerMovement_ChangeSideStartingPos();
+void ManagerMovement_ChangeSideGetCmd();
 void ManagerMovement_ChangeSideRight();
 void ManagerMovement_ChangeSideLeft();
 
@@ -124,6 +125,7 @@ void ManagerMovement_RestPos();
 
 // General movement functions
 bool  ManagerMovement_GoToPos(uint8_t exerciseId, float pos);
+bool ManagerMovement_GoToMultiplePos(float eversionPos, float dorsiflexionPos, float extensionPos);
 void  ManagerMovement_AutoMovement(uint8_t mouvType, float Position);
 void  ManagerMovement_SetFirstPos(uint8_t exerciseIdx);
 float ManagerMovement_GetMiddlePos(float leftPos, float rightPos);
@@ -173,7 +175,6 @@ void ManagerMovement_Reset()
 
     changeSideFree = false;
     eversionFree = false;
-    changeSideDelta = false;
 
     pos1Reached = false;
     pos2Reached = false;
@@ -186,7 +187,7 @@ void ManagerMovement_Reset()
 
     managerMovement.state           = MMOV_STATE_WAITING_SECURITY;
     managerMovement.autoState       = MMOV_AUTO_STATE_WAITING4PLAN;
-    managerMovement.changeSideState = MMOV_CHANGESIDE_STATE_WAITING4CMD;
+    managerMovement.changeSideState = MMOV_CHANGESIDE_STATE_STARTINGPOS;
     managerMovement.homingState     = MMOV_HOMING_EXTENSION;
 }
 
@@ -226,10 +227,9 @@ void ManagerMovement_Task()
 
 void ManagerMovement_WaitingSecurity()
 {
-	managerMovement.currentLegSide = PeriphSwitch_GetLegSide();
-    if (managerMovement.securityPass && managerMovement.currentLegSide != 0)
+    if (managerMovement.securityPass)
     {
-        managerMovement.state = MMOV_STATE_CHANGESIDE;
+        managerMovement.state = MMOV_STATE_MANUAL;
     }
 }
 
@@ -317,8 +317,13 @@ void ManagerMovement_ChangeSide()
 {
     switch (managerMovement.changeSideState)
     {
-    case MMOV_CHANGESIDE_STATE_WAITING4CMD:
-        ManagerMovement_Waiting4Cmd();
+    case MMOV_CHANGESIDE_STATE_STARTINGPOS:
+		ManagerMovement_ChangeSideStartingPos();
+
+	   	break;
+
+    case MMOV_CHANGESIDE_STATE_GETCMD:
+        ManagerMovement_ChangeSideGetCmd();
 
         break;
 
@@ -334,7 +339,7 @@ void ManagerMovement_ChangeSide()
     }
 }
 
-void ManagerMovement_Waiting4Cmd()
+void ManagerMovement_ChangeSideGetCmd()
 {
 
     if (managerMovement.currentLegSide == MMOV_LEG_IS_LEFT)
@@ -351,6 +356,19 @@ void ManagerMovement_Waiting4Cmd()
     }
 }
 
+void ManagerMovement_ChangeSideStartingPos()
+{
+	//Change side pos
+	float eversionPos = 0.0f;
+	float dorsiflexionPos = 0.78f;
+	float extensionPos = 0.4f;
+
+	if (ManagerMovement_GoToMultiplePos(eversionPos, dorsiflexionPos, extensionPos))
+	{
+		managerMovement.changeSideState = MMOV_CHANGESIDE_STATE_GETCMD;
+	}
+}
+
 void ManagerMovement_ChangeSideRight()
 {
 	if (PeriphSolenoid_UnlockChangeSide() || changeSideFree) // UNLOCK the soleinoid to allow changing side motion
@@ -364,20 +382,10 @@ void ManagerMovement_ChangeSideRight()
 				managerMovement.currentLegSide = MMOV_LEG_IS_RIGHT;
 			}
 
-			if (!changeSideDelta)
+			if (PeriphSolenoid_UnlockEversion() || eversionFree)// UNLOCK the soleinoid to allow eversion motion
 			{
-				if (ManagerMovement_GoToPos(MMOV_EVERSION, motorsData[MMOT_MOTOR_2]->position + MMOV_DELTA_CHANGESIDE))
-				{
-					changeSideDelta = true;
-				}
-			}
-			else
-			{
-				if (PeriphSolenoid_UnlockEversion() || eversionFree)// UNLOCK the soleinoid to allow eversion motion
-				{
-					eversionFree = true;
-					ManagerMovement_HomingEversion();
-				}
+				eversionFree = true;
+				ManagerMovement_HomingEversion();
 			}
 		}
 		else
@@ -400,20 +408,10 @@ void ManagerMovement_ChangeSideLeft()
 				managerMovement.currentLegSide = MMOV_LEG_IS_LEFT;
 			}
 
-			if (!changeSideDelta)
+			if (PeriphSolenoid_UnlockEversion() || eversionFree)// UNLOCK the soleinoid to allow eversion motion
 			{
-				if (ManagerMovement_GoToPos(MMOV_EVERSION, motorsData[MMOT_MOTOR_2]->position + MMOV_DELTA_CHANGESIDE))
-				{
-					changeSideDelta = true;
-				}
-			}
-			else
-			{
-				if (PeriphSolenoid_UnlockEversion() || eversionFree)// UNLOCK the soleinoid to allow eversion motion
-				{
-					eversionFree = true;
-					ManagerMovement_HomingEversion();
-				}
+				eversionFree = true;
+				ManagerMovement_HomingEversion();
 			}
 		}
 	    else
@@ -888,12 +886,11 @@ void ManagerMovement_HomingEversion()
 
                 if (managerMovement.state == MMOV_STATE_CHANGESIDE)
                 {
+                	PeriphSolenoid_ResetLocksState();
                     managerMovement.changeSideState =
-                        MMOV_CHANGESIDE_STATE_WAITING4CMD;
+                        MMOV_CHANGESIDE_STATE_STARTINGPOS;
                     managerMovement.state = MMOV_STATE_MANUAL;
-                    changeSideFree = false;
-                    eversionFree = false;
-                    changeSideDelta = false;
+
                 }
                 else
                 {
@@ -922,6 +919,8 @@ void ManagerMovement_HomingDorsiflexion()
             leftPos       = motorsData[MMOT_MOTOR_1]->position;
             dorUpLimitHit = true;
             ManagerMotor_StopManualMovement(MMOT_MOTOR_1);
+
+            managerMovement.currentLegSide = PeriphSwitch_GetLegSide(); //Get leg side when the foot is at highest
         }
 
         if (PeriphSwitch_DorsiflexionDown() || dorDownLimitHit)
@@ -996,6 +995,44 @@ bool ManagerMovement_GoToPos(uint8_t exerciseId, float pos)
         commandSent = false;
     }
     return posReached;
+}
+
+bool ManagerMovement_GoToMultiplePos(float eversionPos, float dorsiflexionPos, float extensionPos)
+{
+	// Local Switch case
+	static uint8_t goToPosState = 0;
+
+	bool allPosReached = false;
+
+	switch (goToPosState)
+	{
+	case MMOV_MOVESTATE_EVERSION:
+		if (ManagerMovement_GoToPos(MMOV_EVERSION, eversionPos))
+		{
+			goToPosState = MMOV_MOVESTATE_DORSIFLEXION;
+		}
+
+		break;
+
+	case MMOV_MOVESTATE_DORSIFLEXION:
+		if (ManagerMovement_GoToPos(MMOV_DORSIFLEXION, dorsiflexionPos))
+		{
+			goToPosState = MMOV_MOVESTATE_EXTENSION;
+		}
+
+		break;
+
+	case MMOV_MOVESTATE_EXTENSION:
+		if (ManagerMovement_GoToPos(MMOV_EXTENSION, extensionPos))
+		{
+			goToPosState = MMOV_MOVESTATE_EVERSION;
+			allPosReached = true;
+		}
+
+		break;
+	}
+
+	return allPosReached;
 }
 
 /*
