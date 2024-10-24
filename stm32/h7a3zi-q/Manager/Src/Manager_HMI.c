@@ -2,7 +2,6 @@
 #include <Manager_HMI.h>
 #include <Manager_Motor.h>
 #include <Manager_Movement.h>
-#include <Manager_Security.h>
 #include <Periph_UartRingBuf.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,6 +39,7 @@ void ManagerHMI_ExecuteControlCmd(char* cmd);
 void ManagerHMI_GetStrMode(uint8_t index, char* str);
 void ManagerHMI_GetStrAutoState(uint8_t index, char* str);
 void ManagerHMI_GetStrHomingState(uint8_t index, char* str);
+void ManagerHMI_GetStrLegSide(uint8_t index, char* str);
 
 /*
  * Utilities
@@ -92,11 +92,13 @@ void ManagerHMI_SendJSON()
     char strMode[M_HMI_STRING_LENGTH];
     char strAutoState[M_HMI_STRING_LENGTH];
     char strHomingState[M_HMI_STRING_LENGTH];
+    char strLegSide[M_HMI_STRING_LENGTH];
 
     // Get the data for the JSON fields
     ManagerHMI_GetStrMode(ManagerMovement_GetState(), strMode);
     ManagerHMI_GetStrHomingState(pPlan->homingState, strHomingState);
     ManagerHMI_GetStrAutoState(pPlan->autoState, strAutoState);
+    ManagerHMI_GetStrLegSide(pPlan->legSide, strLegSide);
 
     uint8_t exerciseIdx = pPlan->exCount;
     uint8_t repsCount   = pPlan->repsCount;
@@ -116,14 +118,15 @@ void ManagerHMI_SendJSON()
     // Manually build the JSON string using snprintf
     snprintf(jsonMessage, PUART_TX_BUF_SIZE,
              "{\"Mode\":\"%s\",\"AutoState\":\"%s\",\"HomingState\":\"%s\","
+             "\"CurrentLegSide\":\"%s\","
              "\"Repetitions\":%d,\"ExerciseIdx\":%d,\"ErrorCode\":\"%lu\","
              "\"Positions\":[%.2f,%.2f,%.2f],"
              "\"Torques\":[%.2f,%.2f,%.2f],"
              "\"Current\":[%.2f,%.2f,%.2f]}",
-             strMode, strAutoState, strHomingState, repsCount, exerciseIdx,
-             ManagerError_GetErrorStatus(), -positions[0], positions[1],
-             positions[2], -torques[0], torques[1], torques[2], current[0],
-             current[1], current[2]);
+             strMode, strAutoState, strHomingState, strLegSide, repsCount,
+             exerciseIdx, ManagerError_GetErrorStatus(), -positions[0],
+             positions[1], positions[2], -torques[0], torques[1], torques[2],
+             current[0], current[1], current[2]);
 
     // Send JSON string over UART
     PeriphUartRingBuf_Send(jsonMessage, strlen(jsonMessage));
@@ -234,6 +237,16 @@ void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
         {
             ManagerSecurity_Reset();
         }
+        else if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "ChangeSide") == 0)
+        {
+            if (ManagerMovement_SetState(MMOV_STATE_CHANGESIDE))
+            {
+            }
+            else
+            {
+                // Flag error: State couldn't change
+            }
+        }
     }
 }
 
@@ -259,11 +272,11 @@ void ManagerHMI_ExecuteManualIncrement(char* cmd)
         }
         else if (strcmp(cmd, "ExtensionU") == 0)
         {
-            ManagerMovement_ManualCmdExtension(MMOV_UP);
+            ManagerMovement_ManualCmdExtension(MMOV_UP_EXT);
         }
         else if (strcmp(cmd, "ExtensionD") == 0)
         {
-            ManagerMovement_ManualCmdExtension(MMOV_DOWN);
+            ManagerMovement_ManualCmdExtension(MMOV_DOWN_EXT);
         }
     }
 }
@@ -381,9 +394,13 @@ void ManagerHMI_GetStrMode(uint8_t index, char* str)
     case MMOV_STATE_AUTOMATIC:
         strcpy(str, "Automatic");
         break;
+    case MMOV_STATE_CHANGESIDE:
+        strcpy(str, "ChangeSide");
+        break;
     case MMOV_STATE_ERROR:
         strcpy(str, "Error");
         break;
+
     default:
         strcpy(str, "");
         break;
@@ -439,6 +456,22 @@ void ManagerHMI_GetStrHomingState(uint8_t index, char* str)
         break;
     case MMOV_HOMING_REST_POS:
         strcpy(str, "Rest");
+        break;
+    default:
+        strcpy(str, "");
+        break;
+    }
+}
+
+void ManagerHMI_GetStrLegSide(uint8_t index, char* str)
+{
+    switch (index)
+    {
+    case MMOV_LEG_IS_LEFT:
+        strcpy(str, "LegIsLeft");
+        break;
+    case MMOV_LEG_IS_RIGHT:
+        strcpy(str, "LegIsRight");
         break;
     default:
         strcpy(str, "");
