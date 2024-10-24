@@ -760,6 +760,9 @@ void ManagerMovement_AutoStop()
             exerciseIdx = 0;
             movementIdx = 0;
             repsCount   = 0;
+
+            //Update HMI with end of exercise
+            ManagerHMI_SendNow();
         }
 
         managerMovement.autoState = MMOV_AUTO_STATE_READY;

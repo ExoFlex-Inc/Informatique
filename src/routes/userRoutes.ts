@@ -6,7 +6,7 @@ import {
   downloadAvatar,
   uploadAvatar,
   getAdmins,
-} from "../controllers/userController";
+} from "../controllers/userController.ts";
 
 const router = express.Router();
 const upload = multer();

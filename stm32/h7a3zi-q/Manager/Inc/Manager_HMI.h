@@ -7,5 +7,6 @@
 
 void ManagerHMI_Init();
 void ManagerHMI_Task();
+void ManagerHMI_SendNow();
 
 #endif
