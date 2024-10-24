@@ -827,7 +827,7 @@ void ManagerMovement_AutoStop()
             movementIdx = 0;
             repsCount   = 0;
 
-            //Update HMI with end of exercise
+            // Update HMI with end of exercise
             ManagerHMI_SendNow();
         }
 
