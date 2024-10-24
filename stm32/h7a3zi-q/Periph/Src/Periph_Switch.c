@@ -1,22 +1,22 @@
 #include "Periph_Switch.h"
 
-#define PS_GPIO_DORSIFLEXION_UP GPIOE
+#define PS_GPIO_DORSIFLEXION_UP   GPIOE
 #define PS_GPIO_LEG_LEFT          GPIOE
 #define PS_GPIO_EXTENSION_DOWN    GPIOE
-#define PS_GPIO_EVERSION_RIGHT    GPIOE
-#define PS_GPIO_LEG_RIGHT         GPIOF
 #define PS_GPIO_EVERSION_LEFT     GPIOF
+#define PS_GPIO_LEG_RIGHT         GPIOF
+#define PS_GPIO_EVERSION_RIGHT    GPIOE
 #define PS_GPIO_EXTENSION_UP      GPIOF
-#define PS_GPIO_DORSIFLEXION_DOWN   GPIOD
+#define PS_GPIO_DORSIFLEXION_DOWN GPIOD
 
-#define PS_PIN_DORSIFLEXION_UP GPIO_PIN_4  // D57
+#define PS_PIN_DORSIFLEXION_UP   GPIO_PIN_4  // D57
 #define PS_PIN_LEG_LEFT          GPIO_PIN_5  // D58
 #define PS_PIN_EXTENSION_DOWN    GPIO_PIN_6  // D59
-#define PS_PIN_EVERSION_RIGHT    GPIO_PIN_3  // D60
+#define PS_PIN_EVERSION_LEFT     GPIO_PIN_7  // D60
 #define PS_PIN_LEG_RIGHT         GPIO_PIN_8  // D61
-#define PS_PIN_EVERSION_LEFT     GPIO_PIN_7  // D62
+#define PS_PIN_EVERSION_RIGHT    GPIO_PIN_3  // D62
 #define PS_PIN_EXTENSION_UP      GPIO_PIN_9  // D63
-#define PS_PIN_DORSIFLEXION_DOWN   GPIO_PIN_10  // D64
+#define PS_PIN_DORSIFLEXION_DOWN GPIO_PIN_10  // D64
 
 #define DEBOUNCE_THRESHOLD 5
 
@@ -303,4 +303,17 @@ bool PeriphSwitch_AnySwitch()
         return true;
     }
     return false;
+}
+
+uint8_t PeriphSwitch_GetLegSide()
+{
+    if (PeriphSwitch_LegLeft())
+    {
+        return 1;
+    }
+    else if (PeriphSwitch_LegRight())
+    {
+        return 2;
+    }
+    return 0;
 }

@@ -35,6 +35,7 @@ typedef struct
     float AmpPerNm;
 
     float ratio;
+    float offset;
 } MotorParameters;
 
 typedef struct
@@ -54,6 +55,7 @@ void PeriphMotors_Enable(Motor* pMotor);
 void PeriphMotors_SubscribeToRx(Motor* pMotor);
 void PeriphMotors_Disable(Motor* pMotor);
 void PeriphMotors_SetZeroPosition(Motor* pMotor);
+void PeriphMotors_SoftwareOrigin(Motor* pMotor);
 void PeriphMotors_Move(Motor* pMotor, float position, float velocity,
                        float torque, float kp, float kd);
 void PeriphMotors_ParseMotorState(Motor* pMotor, uint8_t* canData);
