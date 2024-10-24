@@ -364,10 +364,17 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
 
 // Function to handle button clicks and send data to serial port
 const handleButtonClick = asyncHandler(async (req: Request, res: Response) => {
-  const { mode, action, content } = req.body;
-  console.log(`Button clicked: {${mode};${action};${content};}`);
+  let dataToSend = "{";
 
-  const dataToSend = `{${mode};${action};${content};}`;
+  Object.values(req.body).forEach((value) => {
+    if (value) {
+      dataToSend += value + ";";
+    }
+  });
+
+  dataToSend += "}";
+
+  console.log(`Button clicked:${dataToSend}`);
   const serialPort = getSerialPort();
 
   if (serialPort && serialPort.isOpen) {

@@ -120,7 +120,7 @@ const Button: React.FC<ButtonProps> = ({
       } else if (content === "Stop" || content === "Pause") {
         sendingStm32StopRecordingRequests();
         sendingRequests();
-      } else if (action === "Control" || action === "Homing") {
+      } else {
         sendingRequests();
       }
     }
