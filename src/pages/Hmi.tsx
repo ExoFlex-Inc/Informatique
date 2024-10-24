@@ -4,8 +4,7 @@ import { usePlan } from "../hooks/use-plan.ts";
 import useStm32 from "../hooks/use-stm32.ts";
 
 import { useMediaQuery, useTheme, Box, Grid } from "@mui/material";
-import { useUserProfile } from "../hooks/use-profile.ts";
-
+import { useUser } from "../hooks/use-user.ts";
 import LineChart from "../components/LineChart.tsx";
 import { tokens } from "../hooks/theme.ts";
 import ExerciseOverviewWidget from "../components/ExerciseOverviewWidget.tsx";

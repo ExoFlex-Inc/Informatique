@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useEffect, useState } from "react";
 import {
   Box,
   Checkbox,
@@ -97,34 +96,35 @@ export default function Manual() {
       stm32Data.Current &&
       !graphPause
     ) {
-    if (
-      stm32Data &&
-      stm32Data.Positions &&
-      stm32Data.Torques &&
-      stm32Data.Current &&
-      !graphPause
-    ) {
-      const currentTime = Date.now();
-      setLatestMotorData({
-        motor1: {
-          x: currentTime,
-          position: stm32Data.Positions[0],
-          torque: stm32Data.Torques[0],
-          current: stm32Data.Current[0],
-        },
-        motor2: {
-          x: currentTime,
-          position: stm32Data.Positions[1],
-          torque: stm32Data.Torques[1],
-          current: stm32Data.Current[1],
-        },
-        motor3: {
-          x: currentTime,
-          position: stm32Data.Positions[2],
-          torque: stm32Data.Torques[2],
-          current: stm32Data.Current[2],
-        },
-      });
+      if (
+        stm32Data &&
+        stm32Data.Positions &&
+        stm32Data.Torques &&
+        stm32Data.Current &&
+        !graphPause
+      ) {
+        const currentTime = Date.now();
+        setLatestMotorData({
+          motor1: {
+            x: currentTime,
+            position: stm32Data.Positions[0],
+            torque: stm32Data.Torques[0],
+            current: stm32Data.Current[0],
+          },
+          motor2: {
+            x: currentTime,
+            position: stm32Data.Positions[1],
+            torque: stm32Data.Torques[1],
+            current: stm32Data.Current[1],
+          },
+          motor3: {
+            x: currentTime,
+            position: stm32Data.Positions[2],
+            torque: stm32Data.Torques[2],
+            current: stm32Data.Current[2],
+          },
+        });
+      }
     }
   }, [stm32Data, socket, graphPause]);
 
