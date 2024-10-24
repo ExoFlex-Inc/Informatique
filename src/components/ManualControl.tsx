@@ -87,7 +87,7 @@ const ManualControl = ({ errorFromStm32, stm32Data } : ManualControlProps) => {
                                                         mainColor="blueAccent.main"
                                                         hoverColor="#1D4ED8"
                                                         textColor="text-white"   
-                                                        disabled={errorFromStm32 || stm32Data?.Mode == "ChangeSide"}
+                                                        disabled={errorFromStm32 || changeSideDisabled}
                                                         icon={<ArrowBack />}
                                                     />
 
@@ -98,7 +98,7 @@ const ManualControl = ({ errorFromStm32, stm32Data } : ManualControlProps) => {
                                                         mainColor="blueAccent.main"
                                                         hoverColor="#1D4ED8"
                                                         textColor="text-white"          
-                                                        disabled={errorFromStm32 || stm32Data?.Mode == "ChangeSide"}
+                                                        disabled={errorFromStm32 || changeSideDisabled}
                                                         icon={<ArrowForward />}
                                                     />
                                                 </Box>
@@ -115,7 +115,7 @@ const ManualControl = ({ errorFromStm32, stm32Data } : ManualControlProps) => {
                                                         mainColor="blueAccent.main"
                                                         hoverColor="#1D4ED8"
                                                         textColor="text-white"  
-                                                        disabled={errorFromStm32 || stm32Data?.Mode == "ChangeSide"}
+                                                        disabled={errorFromStm32 || changeSideDisabled}
                                                         icon={<ArrowUpward />}
                                                     />
                                                     <Button
@@ -125,7 +125,7 @@ const ManualControl = ({ errorFromStm32, stm32Data } : ManualControlProps) => {
                                                         mainColor="blueAccent.main"
                                                         hoverColor="#1D4ED8"
                                                         textColor="text-white"  
-                                                        disabled={errorFromStm32 || stm32Data?.Mode == "ChangeSide"}
+                                                        disabled={errorFromStm32 || changeSideDisabled}
                                                         icon={<ArrowDownward />}
                                                     />
                                                 </Box>
@@ -142,7 +142,7 @@ const ManualControl = ({ errorFromStm32, stm32Data } : ManualControlProps) => {
                                                         mainColor="blueAccent.main"
                                                         hoverColor="#1D4ED8"
                                                         textColor="text-white"  
-                                                        disabled={errorFromStm32 || stm32Data?.Mode == "ChangeSide"}
+                                                        disabled={errorFromStm32 || changeSideDisabled}
                                                         icon={<ArrowUpward />}
                                                     />
                                                     <Button
@@ -152,7 +152,7 @@ const ManualControl = ({ errorFromStm32, stm32Data } : ManualControlProps) => {
                                                         mainColor="blueAccent.main"
                                                         hoverColor="#1D4ED8"
                                                         textColor="text-white"        
-                                                        disabled={errorFromStm32 || stm32Data?.Mode == "ChangeSide"}
+                                                        disabled={errorFromStm32 || changeSideDisabled}
                                                         icon={<ArrowDownward />}
                                                     />
                                                 </Box>
@@ -176,17 +176,18 @@ const ManualControl = ({ errorFromStm32, stm32Data } : ManualControlProps) => {
                                                 content="Forward" 
                                                 mainColor="blueAccent.main"
                                                 hoverColor="#1D4ED8"
-                                                textColor="text-white"                                                 disabled={errorFromStm32}
+                                                textColor="text-white"                                                 
+                                                disabled={errorFromStm32 || changeSideDisabled}
                                                 icon={<Compress />}
                                             />
                                             <Button 
                                                 mode={buttonMode} 
-                                                action="Tightening" 
+                                                action="Tightening"
                                                 content="Backward" 
                                                 mainColor="blueAccent.main"
                                                 hoverColor="#1D4ED8"
                                                 textColor="text-white"            
-                                                disabled={errorFromStm32}
+                                                disabled={errorFromStm32 || changeSideDisabled}
                                                 icon={<Expand />}
                                             />
                                         </Box>
@@ -220,9 +221,9 @@ const ManualControl = ({ errorFromStm32, stm32Data } : ManualControlProps) => {
                                             />
                                         </Box>
                                         {stm32Data?.Mode == "ChangeSide" &&
-                                            <Box sx={{display: "flex", gap: "40px", alignItems: "center"}}>
+                                            <Box sx={{display: "flex", gap: "20px", justifyContent: "center"}}>
                                                 <CircularProgress color="secondary" />
-                                                <Typography variant="subtitle1">
+                                                <Typography variant="subtitle1" sx={{alignContent: "center"}}>
                                                     Changing side
                                                 </Typography>
                                             </Box> 
