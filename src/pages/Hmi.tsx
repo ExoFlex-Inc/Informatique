@@ -83,7 +83,7 @@ export default function HMI() {
       planData &&
       socket
     ) {
-      let message = `{Auto;Plan;${planData.limits.left.angles.eversion};${planData.limits.right.angles.eversion};${planData.limits.left.angles.extension};${planData.limits.right.angles.extension};${planData.limits.left.angles.dorsiflexion};${planData.limits.right.angles.dorsiflexion};${planData.limits.left.torque.eversion};${planData.limits.right.torque.eversion};${planData.limits.left.torque.extension};${planData.limits.right.torque.extension};${planData.limits.left.torque.dorsiflexion};${planData.limits.right.torque.dorsiflexion}`;
+      let message = `{Auto;Plan;${planData.limits.left.angles.dorsiflexion};${planData.limits.left.torque.dorsiflexion};${planData.limits.left.angles.eversion};${planData.limits.left.torque.eversion};${planData.limits.left.angles.extension};${planData.limits.left.torque.extension};${planData.limits.right.angles.dorsiflexion};${planData.limits.right.torque.dorsiflexion};${planData.limits.right.angles.eversion};${planData.limits.right.torque.eversion};${planData.limits.right.angles.extension};${planData.limits.right.torque.extension}`;
       planData.plan.forEach((set) => {
         message += `;${set.movement.length}`;
         for (var i = 0; i < 3; i++) {

@@ -251,7 +251,7 @@ void ManagerMovement_WaitingSecurity()
     managerMovement.currentLegSide = PeriphSwitch_GetLegSide();
     if (managerMovement.securityPass && managerMovement.currentLegSide != 0)
     {
-        managerMovement.state = MMOV_STATE_MANUAL;
+        managerMovement.state = MMOV_STATE_HOMING;
     }
 }
 
@@ -772,11 +772,11 @@ void ManagerMovement_AutoStrectching()
 
 	if (managerMovement.currentLegSide == MMOV_LEG_IS_LEFT)
 	{
-		angleLimit = legRightLimits[currentMovement-1].maxAngle;
+		angleLimit = legLeftLimits[currentMovement-1].maxAngle;
 	}
 	else if (managerMovement.currentLegSide == MMOV_LEG_IS_RIGHT)
 	{
-		angleLimit = legLeftLimits[currentMovement-1].maxAngle;
+		angleLimit = legRightLimits[currentMovement-1].maxAngle;
 	}
 
 	// Send Torque commandes
@@ -807,11 +807,16 @@ void ManagerMovement_AutoStrectching()
 	}
 	else if (HAL_GetTick() - exerciseTimer >= exercisesTime[exerciseIdx])
 	{
+		ManagerMotor_StopManualMovement(MMOT_MOTOR_1);
+		ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
+		ManagerMotor_StopManualMovement(MMOT_MOTOR_3);
+
 		movementIdx--;
 		cmd1Sent = false;
 		cmd2Sent = false;
 		cmd3Sent = false;
 		managerMovement.autoState = MMOV_AUTO_STATE_2FIRST_POS;
+
 	}
 }
 
@@ -865,7 +870,7 @@ void ManagerMovement_AutoRest()
     {
         managerMovement.autoState = MMOV_AUTO_STATE_STOP;
     }
-    else if (HAL_GetTick() - pauseTimer >= exercisesTime[exerciseIdx])
+    else if (HAL_GetTick() - pauseTimer >= pauseTime[exerciseIdx])
     {
         managerMovement.autoState = MMOV_AUTO_STATE_READY;
         repsCount++;
@@ -1238,18 +1243,18 @@ void ManagerMovement_AutoTorque(uint8_t mouvType, float posLimit, float targetTo
     if (mouvType == MMOV_DORSIFLEXION)  // Set goalPosition for motor 1 for
                                         // MMOV_DORSIFLEXION
     {
-        managerMovement.mPosGoal[MMOT_MOTOR_1] = -posLimit;  // Motor is inverse
+        managerMovement.mPosGoal[MMOT_MOTOR_1] = posLimit;
         managerMovement.mTorqueGoal[MMOT_MOTOR_1] = targetTorque;
         ManagerMotor_MovePosSpeedTorque(MMOT_MOTOR_1, managerMovement.mPosGoal[MMOT_MOTOR_1], managerMovement.mSpeedGoal[MMOT_MOTOR_1], managerMovement.mTorqueGoal[MMOT_MOTOR_1]);
     }
     else if (mouvType == MMOV_EVERSION)  // Set goalPosition for motor 2 and
                                          // for MMOV_EVERSION
     {
-        if (PeriphSwitch_LegLeft())
+        if (managerMovement.currentLegSide == MMOV_LEG_IS_LEFT)
         {
             managerMovement.mPosGoal[MMOT_MOTOR_2] = -posLimit;
         }
-        else if (PeriphSwitch_LegRight())
+        else if (managerMovement.currentLegSide == MMOV_LEG_IS_RIGHT)
         {
             managerMovement.mPosGoal[MMOT_MOTOR_2] = posLimit;
         }
@@ -1259,7 +1264,7 @@ void ManagerMovement_AutoTorque(uint8_t mouvType, float posLimit, float targetTo
     else if (mouvType ==
              MMOV_EXTENSION)  // Set goalPosition for motor 3 for MMOV_EXTENSION
     {
-        managerMovement.mPosGoal[MMOT_MOTOR_3] = -posLimit;  // Motor is inverse
+        managerMovement.mPosGoal[MMOT_MOTOR_3] = posLimit;
 		managerMovement.mTorqueGoal[MMOT_MOTOR_3] = targetTorque;
 		ManagerMotor_MovePosSpeedTorque(MMOT_MOTOR_3, managerMovement.mPosGoal[MMOT_MOTOR_3], managerMovement.mSpeedGoal[MMOT_MOTOR_3], managerMovement.mTorqueGoal[MMOT_MOTOR_3]);
     }
