@@ -294,11 +294,11 @@ void ManagerHMI_ExecutePlanCmd(char* cmd, uint8_t size)
 
         		if (i < MAX_MOVEMENT-1)//Left leg limit
         		{
-        			ManagerMovement_AddLimits(i, posLimit, torqueLimit, 0);
+        			ManagerMovement_AddLimits(i, posLimit, torqueLimit, MMOV_LEG_IS_LEFT);
         		}
         		else //Right leg limits
         		{
-        			ManagerMovement_AddLimits(i-3, posLimit, torqueLimit, 1);
+        			ManagerMovement_AddLimits(i-MAX_MOVEMENT, posLimit, torqueLimit, MMOV_LEG_IS_RIGHT);
         		}
         	}
             //cmd += M_HMI_CONTENT_FIRST_EXERCISE_SECTION * M_HMI_STRING_LENGTH;
