@@ -853,13 +853,13 @@ void ManagerMotor_DisableMotors()
 void ManagerMotor_DisableMotorsMovement()
 {
 #ifndef MMOT_DEV_MOTOR_1_DISABLE
-	PeriphMotors_Move(&motors[MMOT_MOTOR_1].motor, 0, 0, 0, 0, 0);
+    PeriphMotors_Move(&motors[MMOT_MOTOR_1].motor, 0, 0, 0, 0, 0);
 #endif
 #ifndef MMOT_DEV_MOTOR_2_DISABLE
-	PeriphMotors_Move(&motors[MMOT_MOTOR_2].motor, 0, 0, 0, 0, 0);
+    PeriphMotors_Move(&motors[MMOT_MOTOR_2].motor, 0, 0, 0, 0, 0);
 #endif
 #ifndef MMOT_DEV_MOTOR_3_DISABLE
-	PeriphMotors_Move(&motors[MMOT_MOTOR_3].motor, 0, 0, 0, 0, 0);
+    PeriphMotors_Move(&motors[MMOT_MOTOR_3].motor, 0, 0, 0, 0, 0);
 #endif
 }
 
@@ -904,10 +904,9 @@ void ManagerMotor_StopManualMovement(uint8_t motorindex)
  ********************************************/
 void ManagerMotor_SoftwareOrigin(uint8_t id)
 {
-	PeriphMotors_SoftwareOrigin(&motors[id].motor);
+    PeriphMotors_SoftwareOrigin(&motors[id].motor);
     motors[id].cmdPosition = 0;
 }
-
 
 void ManagerMotor_ApplyOriginShift(uint8_t id)
 {

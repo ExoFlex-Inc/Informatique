@@ -111,15 +111,16 @@ void ManagerHMI_SendJSON()
 
     // Manually build the JSON string using snprintf
     snprintf(jsonMessage, PUART_TX_BUF_SIZE,
-             "{\"Mode\":\"%s\",\"AutoState\":\"%s\",\"HomingState\":\"%s\",\"CurrentLegSide\":\"%s\","
+             "{\"Mode\":\"%s\",\"AutoState\":\"%s\",\"HomingState\":\"%s\","
+             "\"CurrentLegSide\":\"%s\","
              "\"Repetitions\":%d,\"ExerciseIdx\":%d,\"ErrorCode\":\"%lu\","
              "\"Positions\":[%.2f,%.2f,%.2f],"
              "\"Torques\":[%.2f,%.2f,%.2f],"
              "\"Current\":[%.2f,%.2f,%.2f]}",
-             strMode, strAutoState, strHomingState,strLegSide ,repsCount, exerciseIdx,
-             ManagerError_GetErrorStatus(), -positions[0], positions[1],
-             positions[2], -torques[0], torques[1], torques[2], current[0],
-             current[1], current[2]);
+             strMode, strAutoState, strHomingState, strLegSide, repsCount,
+             exerciseIdx, ManagerError_GetErrorStatus(), -positions[0],
+             positions[1], positions[2], -torques[0], torques[1], torques[2],
+             current[0], current[1], current[2]);
 
     // Send JSON string over UART
     PeriphUartRingBuf_Send(jsonMessage, strlen(jsonMessage));
@@ -227,19 +228,18 @@ void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
             }
         }
         else if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "Reset") == 0)
-		{
-			ManagerSecurity_Reset();
-		}
+        {
+            ManagerSecurity_Reset();
+        }
         else if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "ChangeSide") == 0)
         {
-        	if(ManagerMovement_SetState(MMOV_STATE_CHANGESIDE))
-        	{
-
-        	}
-        	else
-        	{
-        		// Flag error: State couldn't change
-        	}
+            if (ManagerMovement_SetState(MMOV_STATE_CHANGESIDE))
+            {
+            }
+            else
+            {
+                // Flag error: State couldn't change
+            }
         }
     }
 }
@@ -389,8 +389,8 @@ void ManagerHMI_GetStrMode(uint8_t index, char* str)
         strcpy(str, "Automatic");
         break;
     case MMOV_STATE_CHANGESIDE:
-   		strcpy(str, "ChangeSide");
-   		break;
+        strcpy(str, "ChangeSide");
+        break;
     case MMOV_STATE_ERROR:
         strcpy(str, "Error");
         break;
