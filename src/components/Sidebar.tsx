@@ -19,9 +19,9 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import FeedOutlinedIcon from "@mui/icons-material/FeedOutlined";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import GroupIcon from "@mui/icons-material/Group";
-import Icon from "../../public/assets/user.png";
-import { useUserProfile } from "../hooks/use-profile";
+import Icon from "../../assets/user.png";
 import CustomScrollbar from "./CustomScrollbars";
+import { useUser } from "../hooks/use-user";
 
 interface ProSidebarProps {
   permissions: string;
@@ -35,8 +35,6 @@ interface ItemProps {
 }
 
 const Item: React.FC<ItemProps> = ({ title, to, icon, selected }) => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -47,13 +45,12 @@ const Item: React.FC<ItemProps> = ({ title, to, icon, selected }) => {
     <MenuItem
       active={selected === title}
       style={{
-        color: colors.grey[100],
+        color: "white",
       }}
       onClick={handleClick}
       icon={icon}
-    >
-      <Typography color={colors.grey[100]}>{title}</Typography>
-    </MenuItem>
+      prefix={title}
+    ></MenuItem>
   );
 };
 
@@ -62,7 +59,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected, setSelected] = useState("");
-  const { profile } = useUserProfile();
+  const { user } = useUser();
   const isTablet = useMediaQuery("(max-width: 768px)");
   const location = useLocation();
   const page = location.pathname.split("/").pop() || "";
@@ -71,8 +68,8 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
     let upperCasePage;
     if (page === "hmi") {
       upperCasePage = "HMI";
-    } else if (page === "wellness_network" || page === "professional_network") {
-      upperCasePage = "Wellness Network";
+    } else if (page === "network" || page === "professional_network") {
+      upperCasePage = "Network";
     } else {
       upperCasePage = page.charAt(0).toUpperCase() + page.slice(1);
     }
@@ -108,8 +105,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
                       : `${colors.primary[400]}`,
                     transition: "background-color 0.3s",
                     "&:hover": {
-                      backgroundColor:
-                        `${colors.blueAccent[400]}` + " !important",
+                      backgroundColor: `${colors.blueAccent[400]}`,
                       color: "white !important",
                       fontWeight: "bold !important",
                     },
@@ -135,6 +131,12 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
               style={{
                 margin: "10px 0 20px 0",
                 color: colors.grey[100],
+                backgroundColor: "transparent",
+              }}
+              rootStyles={{
+                "&:hover": {
+                  backgroundColor: "transparent !important",
+                },
               }}
             >
               {!isCollapsed && (
@@ -155,9 +157,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
               <Box mb="25px">
                 <Box display="flex" justifyContent="center" alignItems="center">
                   <Avatar
-                    src={
-                      profile.avatar_blob_url ? profile.avatar_blob_url : Icon
-                    }
+                    src={user.avatar_blob_url ? user.avatar_blob_url : Icon}
                     sx={
                       isTablet
                         ? { width: 50, height: 50 }
@@ -169,20 +169,20 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
                 <Box textAlign="center">
                   <Typography
                     className={
-                      profile?.first_name.length < 15 ? "text-4xl" : "text-xl"
+                      user?.first_name.length < 15 ? "text-4xl" : "text-xl"
                     }
                     variant={isTablet ? "h3" : "h2"}
                     color={colors.grey[100]}
                     fontWeight="bold"
                     sx={{ m: "10px 0 0 0" }}
                   >
-                    {profile?.first_name || "Client"}
+                    {user?.first_name || "Client"}
                   </Typography>
                   <Typography
                     variant={isTablet ? "h6" : "h5"}
                     color={colors.greenAccent[500]}
                   >
-                    {profile?.speciality || "Speciality"}
+                    {user?.speciality || "Speciality"}
                   </Typography>
                 </Box>
               </Box>
@@ -204,8 +204,8 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
                 />
               )}
               <Item
-                title="Wellness Network"
-                to="/wellness_network"
+                title="Network"
+                to="/network"
                 icon={<GroupIcon />}
                 selected={selected}
               />

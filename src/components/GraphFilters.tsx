@@ -14,7 +14,6 @@ const GraphFilters: React.FC<GraphFiltersProps> = ({
   const dropdownRef = useDropdown(setIsGraphFilterOpen);
 
   function changeGraphType(type: string) {
-    console.log("graphType", type);
     setGraphType(type);
     setIsGraphFilterOpen(false);
   }
@@ -23,18 +22,18 @@ const GraphFilters: React.FC<GraphFiltersProps> = ({
     <div ref={dropdownRef} className="flex z-30 w-min mt-2 absolute">
       <List className="bg-gray-600 rounded-md ml-4">
         <ListItem disablePadding>
-          <ListItemButton onClick={() => changeGraphType("Rigidity")}>
-            <ListItemText
-              className="w-max"
-              primary="Rigidity Graph"
-            ></ListItemText>
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
           <ListItemButton onClick={() => changeGraphType("Amplitude")}>
             <ListItemText
               className="w-max"
               primary="Amplitude Graph"
+            ></ListItemText>
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => changeGraphType("Rigidity")}>
+            <ListItemText
+              className="w-max"
+              primary="Rigidity Graph"
             ></ListItemText>
           </ListItemButton>
         </ListItem>
@@ -48,14 +47,7 @@ const GraphFilters: React.FC<GraphFiltersProps> = ({
             ></ListItemText>
           </ListItemButton>
         </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton onClick={() => changeGraphType("Total seance time")}>
-            <ListItemText
-              className="w-max"
-              primary="Total seance time Graph"
-            ></ListItemText>
-          </ListItemButton>
-        </ListItem>
+        <ListItem disablePadding></ListItem>
         <ListItem disablePadding>
           <ListItemButton onClick={() => changeGraphType("Feedback")}>
             <ListItemText

@@ -48,6 +48,9 @@ float ManagerHMI_Degrees2Radians(float degrees);
 float ManagerHMI_Radians2Degrees(float radians);
 float ManagerHMI_Sec2Millis(float seconds);
 
+
+bool sendNow;
+
 void ManagerHMI_Init()
 {
     cJSON_InitHooks(NULL);
@@ -63,17 +66,20 @@ void ManagerHMI_Init()
     {
         buf[i] = 0;
     }
+
+    sendNow = false;
 }
 
 void ManagerHMI_Task()
 {
     ManagerHMI_ReceiveJSON();
 
-    if (HAL_GetTick() - timerMs >= M_HMI_TIMER)
+    if (HAL_GetTick() - timerMs >= M_HMI_TIMER || sendNow)
     {
         ManagerHMI_SendJSON();
 
         timerMs = HAL_GetTick();
+        sendNow = false;
     }
 }
 
@@ -453,4 +459,9 @@ float ManagerHMI_Degrees2Radians(float degrees)
 float ManagerHMI_Sec2Millis(float seconds)
 {
     return seconds *= 1000;
+}
+
+void ManagerHMI_SendNow()
+{
+	sendNow = true;
 }

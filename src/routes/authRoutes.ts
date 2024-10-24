@@ -4,8 +4,8 @@ import {
   signup,
   login,
   logout,
-  getSession,
   setSession,
+  getSession,
 } from "../controllers/authController.ts";
 
 const router = express.Router();
@@ -31,7 +31,7 @@ router.post(
 );
 
 router.post("/logout", logout);
-router.get("/session", getSession);
 router.post("/session", setSession);
+router.get("/session", getSession);
 
 export default router;

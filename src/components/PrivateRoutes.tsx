@@ -1,15 +1,15 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useUserProfile } from "../hooks/use-profile.ts";
+import { useUser } from "../hooks/use-user.ts";
 
 const PrivateRoutes = ({ requiredPermissions }) => {
-  const { profile } = useUserProfile(); // Assuming isLoading is part of the hook
-  const userPermissions = profile?.permissions || [];
+  const { user } = useUser(); // Assuming isLoading is part of the hook
+  const userPermissions = user?.permissions || [];
 
   const hasPermission = requiredPermissions.some((permission) =>
     userPermissions.includes(permission),
   );
 
-  if (!profile) {
+  if (!user) {
     return null;
   }
 
