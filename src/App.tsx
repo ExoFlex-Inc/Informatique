@@ -5,7 +5,6 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
   RouterProvider,
-  useNavigate,
 } from "react-router-dom";
 import { ColorModeContext, useMode } from "./hooks/theme.ts";
 import { CssBaseline, ThemeProvider } from "@mui/material";
@@ -18,7 +17,7 @@ import Manual from "./pages/Manual.tsx";
 import TermsAndConditions from "./pages/TermsAndConditions.tsx";
 import Settings from "./pages/Settings.tsx";
 import Planning from "./pages/Planning.tsx";
-import WellnessNetwork from "./pages/WellnessNetwork.tsx";
+import Network from "./pages/Network.tsx";
 import Profile from "./pages/Profile.tsx";
 import Forbidden from "./pages/Forbidden.tsx";
 import HMI from "./pages/Hmi.tsx";
@@ -27,16 +26,15 @@ import PrivateRoutes from "./components/PrivateRoutes.tsx";
 import ProSideBar from "./components/Sidebar.tsx";
 import TopBar from "./components/TopBar.tsx";
 
-import { useUserProfile } from "./hooks/use-profile.ts";
-
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, useQueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import Login from "./pages/Login.tsx";
 import Loading from "./components/Loading.tsx";
-import { useSupabaseSession } from "./hooks/use-session.ts";
 import ErrorBoundary from "./components/ErrorBoundary.tsx";
+import { useUser } from "./hooks/use-user.ts";
+import { useEffect, useState } from "react";
 
 // Create a query client with default options
 const queryClient = new QueryClient({
@@ -86,7 +84,7 @@ const router = createBrowserRouter(
         </Route>
 
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/wellness_network" element={<WellnessNetwork />} />
+        <Route path="/network" element={<Network />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/hmi" element={<HMI />} />
@@ -96,69 +94,55 @@ const router = createBrowserRouter(
 );
 
 function PublicRoutes() {
-  const {
-    profile,
-    isLoading: isProfileLoading,
-    isError: isProfileError,
-    error: profileError,
-  } = useUserProfile();
-
-  const isLoading = isProfileLoading;
-  const isError = isProfileError;
-  const error = profileError;
-
-  // Handle loading state
-  if (isLoading) {
-    return (
-      <div className="loading-container">
-        <Loading />
-      </div>
-    );
-  }
-
-  // Handle error state
-  if (isError) {
-    console.error("Error fetching profile or session:", error);
-    return <Outlet />;
-  }
-
-  // If the user is authenticated, redirect to the dashboard
-  if (profile) {
-    return <Navigate to="/dashboard" />;
-  }
-
-  // If the user is not authenticated, render the public route components
   return <Outlet />;
 }
 
 function AppLayout() {
-  const {
-    profile,
-    isLoading: isProfileLoading,
-    isFetching: isProfileFetching,
-    isError: isProfileError,
-    isStale: isProfileStale,
-    status: profileStatus,
-  } = useUserProfile();
+  const { user, isLoading, isError, error } = useUser();
+  const queryClient = useQueryClient();
 
-  const {
-    session,
-    isLoading: isSessionLoading,
-    isFetching: isSessionFetching,
-    isError: isSessionError,
-  } = useSupabaseSession();
+  const [avatarLoading, setAvatarLoading] = useState(false);
 
-  // Determine the overall loading and error states
-  const isLoading = isProfileLoading || isSessionLoading;
-  const isFetching = isProfileFetching || isSessionFetching;
-  const isError = isProfileError || isSessionError;
+  useEffect(() => {
+    const fetchAvatar = async () => {
+      if (user?.avatar_url) {
+        setAvatarLoading(true);
+        try {
+          const avatarResponse = await fetch(
+            `http://localhost:3001/user/avatar/${user.user_id}?path=${encodeURIComponent(
+              user.avatar_url,
+            )}`,
+            {
+              method: "GET",
+              credentials: "include",
+            },
+          );
 
-  if (isError) {
-    queryClient.clear();
-    return <Navigate to="/login" />;
-  }
+          if (avatarResponse.ok) {
+            const avatarBlob = await avatarResponse.blob();
+            const avatarBlobUrl = URL.createObjectURL(avatarBlob);
 
-  if (isLoading || isFetching || profileStatus === "pending") {
+            // Update the user data with the avatar blob URL
+            queryClient.setQueryData(["user"], (oldData) => ({
+              ...oldData,
+              avatar_blob_url: avatarBlobUrl,
+            }));
+          } else {
+            console.error("Failed to fetch avatar:", avatarResponse.statusText);
+          }
+        } catch (err) {
+          console.error("Error fetching avatar:", err);
+        } finally {
+          setAvatarLoading(false);
+        }
+      }
+    };
+
+    fetchAvatar();
+  }, [user?.avatar_url]);
+
+  // Handle loading state
+  if (isLoading || avatarLoading) {
     return (
       <div className="loading-container">
         <Loading />
@@ -166,28 +150,31 @@ function AppLayout() {
     );
   }
 
-  if (isProfileStale) {
-    console.log("Profile data is stale.");
+  // Handle errors
+  if (isError) {
+    console.error("Error fetching user in AppLayout:", error);
+    queryClient.clear();
+    return <Navigate to="/login" />;
   }
 
-  if (profileStatus === "success") {
-    if (profile && session) {
-      return (
-        <>
-          <ProSideBar permissions={profile.permissions} />
-          <main className="content overflow-hidden">
-            <TopBar />
-            <Outlet />
-          </main>
-        </>
-      );
-    } else {
-      return <Navigate to="/login" />;
-    }
+  // Render the app layout only when user exists and avatar is fetched
+  if (user) {
+    return (
+      <>
+        <ProSideBar permissions={user.permissions} />
+        <main className="content overflow-hidden">
+          <TopBar />
+          <Outlet />
+        </main>
+      </>
+    );
   }
 
-  // Handle any other statuses if necessary
-  return null;
+  return (
+    <div className="loading-container">
+      <Loading />
+    </div>
+  );
 }
 
 function App() {

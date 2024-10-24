@@ -78,6 +78,18 @@ void PeriphMotors_SoftwareOrigin(Motor* pMotor)
     pMotor->position = 0;
 }
 
+bool PeriphMotors_IsSoftwareOrigin(Motor* pMotor)
+{
+    if (pMotor->parameters.offset != 0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 void PeriphMotors_Move(Motor* pMotor, float position, float velocity,
                        float torque, float kp, float kd)
 {

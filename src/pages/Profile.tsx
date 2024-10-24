@@ -15,13 +15,13 @@ import {
   TextField,
 } from "@mui/material";
 import { styled } from "@mui/material";
-import DefaultProfilePic from "../../public/assets/user.png";
+import DefaultProfilePic from "../../assets/user.png";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
-import { useUserProfile } from "../hooks/use-profile.ts";
 import Loading from "../components/Loading.tsx";
+import { useUser } from "../hooks/use-user.ts";
 
 function Profile() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -29,7 +29,7 @@ function Profile() {
   const [fieldInput, setFieldInput] = useState("");
   const [editIndex, setEditIndex] = useState<Number | null>(null);
 
-  const { profile, updateProfile, uploadAvatar, isLoading } = useUserProfile();
+  const { user, updateProfile, uploadAvatar, isLoading } = useUser();
 
   function toggleEdit(index: Number) {
     setEditIndex(index === editIndex ? null : index);
@@ -74,7 +74,7 @@ function Profile() {
     }
 
     try {
-      updateProfile({ ...profile, [key]: fieldInput });
+      updateProfile({ ...user, [key]: fieldInput });
     } catch (error) {
       console.error("Error updating profile:", error);
     } finally {
@@ -108,9 +108,7 @@ function Profile() {
         >
           <Avatar
             src={
-              profile?.avatar_blob_url
-                ? profile.avatar_blob_url
-                : DefaultProfilePic
+              user?.avatar_blob_url ? user.avatar_blob_url : DefaultProfilePic
             }
             sx={{ width: "25vw", height: "25vw" }}
           />
@@ -135,7 +133,7 @@ function Profile() {
           })}
         >
           <Paper sx={{ width: "40vw" }}>
-            {profile &&
+            {user &&
               Object.keys(shownInformation).map((key, index) => (
                 <div key={index}>
                   <ListItem>
@@ -159,11 +157,11 @@ function Profile() {
                             onChange={(event) =>
                               setFieldInput(event.target.value)
                             }
-                            defaultValue={profile[key as keyof typeof profile]}
+                            defaultValue={user[key as keyof typeof user]}
                           />
                         ) : (
                           <ListItemText
-                            primary={`${profile[key as keyof typeof profile]}`}
+                            primary={`${user[key as keyof typeof user]}`}
                           />
                         )}
                       </Grid>

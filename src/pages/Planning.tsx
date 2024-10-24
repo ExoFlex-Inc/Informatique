@@ -14,6 +14,7 @@ import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import { useRelations } from "../hooks/use-relations.ts";
 import { usePlan } from "../hooks/use-plan.ts";
 import Loading from "../components/Loading.tsx";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Planning() {
   const [selectedUser, setSelectedUser] = useState<any[]>([]);
@@ -33,6 +34,7 @@ export default function Planning() {
     setLimitRight,
     setPlan,
   } = usePlan(selectedUser.length === 1 ? selectedUser[0]?.user_id : null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (planData) {
