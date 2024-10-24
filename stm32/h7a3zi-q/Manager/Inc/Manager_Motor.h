@@ -12,8 +12,8 @@
 /***********************************************/
 
 #define MMOT_MOTOR_NBR 3
-#define MMOT_MOTOR_1   0
-#define MMOT_MOTOR_2   1
+#define MMOT_MOTOR_1   1
+#define MMOT_MOTOR_2   0
 #define MMOT_MOTOR_3   2
 
 #define MMOT_STATE_WAITING_SECURITY 1
@@ -32,6 +32,8 @@ bool   ManagerMotor_IsGoalStateReady(uint8_t id);
 void ManagerMotor_MovePosOld(uint8_t id, float pos);
 void ManagerMotor_MoveSpeed(uint8_t id, float speed);
 void ManagerMotor_MovePosSpeed(uint8_t id, float pos, float speed);
+void ManagerMotor_MovePosSpeedTorque(uint8_t id, float pos, float speed,
+                                     float torque);
 
 bool    ManagerMotor_IsWaitingSecurity();
 void    ManagerMotor_SecurityPassed();
@@ -40,6 +42,7 @@ bool    ManagerMotor_InError();
 uint8_t ManagerMotor_GetState();
 void    ManagerMotor_StopManualMovement(uint8_t motorindex);
 
+void ManagerMotor_SoftwareOrigin(uint8_t id);
 void ManagerMotor_SetMotorOrigin(uint8_t id);
 void ManagerMotor_SetOriginShift(uint8_t id, float shiftValue);
 

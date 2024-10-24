@@ -48,6 +48,9 @@ float ManagerHMI_Degrees2Radians(float degrees);
 float ManagerHMI_Radians2Degrees(float radians);
 float ManagerHMI_Sec2Millis(float seconds);
 
+
+bool sendNow;
+
 void ManagerHMI_Init()
 {
     cJSON_InitHooks(NULL);
@@ -63,17 +66,20 @@ void ManagerHMI_Init()
     {
         buf[i] = 0;
     }
+
+    sendNow = false;
 }
 
 void ManagerHMI_Task()
 {
     ManagerHMI_ReceiveJSON();
 
-    if (HAL_GetTick() - timerMs >= M_HMI_TIMER)
+    if (HAL_GetTick() - timerMs >= M_HMI_TIMER || sendNow)
     {
         ManagerHMI_SendJSON();
 
         timerMs = HAL_GetTick();
+        sendNow = false;
     }
 }
 
@@ -183,7 +189,7 @@ void ManagerHMI_ParseJson(char* msg, uint8_t maxlength, uint8_t* sectionNbr)
 
 void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
 {
-    if (sectionNbr >= 2)
+    if (sectionNbr >= 1)
     {
         if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "Manual") == 0)
         {
@@ -227,6 +233,20 @@ void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
                 // Flag error: State couldn't change
             }
         }
+        else if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "Reset") == 0)
+        {
+            ManagerSecurity_Reset();
+        }
+        else if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "ChangeSide") == 0)
+        {
+            if (ManagerMovement_SetState(MMOV_STATE_CHANGESIDE))
+            {
+            }
+            else
+            {
+                // Flag error: State couldn't change
+            }
+        }
     }
 }
 
@@ -252,11 +272,11 @@ void ManagerHMI_ExecuteManualIncrement(char* cmd)
         }
         else if (strcmp(cmd, "ExtensionU") == 0)
         {
-            ManagerMovement_ManualCmdExtension(MMOV_UP);
+            ManagerMovement_ManualCmdExtension(MMOV_UP_EXT);
         }
         else if (strcmp(cmd, "ExtensionD") == 0)
         {
-            ManagerMovement_ManualCmdExtension(MMOV_DOWN);
+            ManagerMovement_ManualCmdExtension(MMOV_DOWN_EXT);
         }
     }
 }
@@ -472,4 +492,9 @@ float ManagerHMI_Degrees2Radians(float degrees)
 float ManagerHMI_Sec2Millis(float seconds)
 {
     return seconds *= 1000;
+}
+
+void ManagerHMI_SendNow()
+{
+	sendNow = true;
 }

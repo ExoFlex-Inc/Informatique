@@ -133,20 +133,17 @@ int main(void)
 	ManagerHMI_Init();
 	ManagerMovement_Init();
 	ManagerSecurity_Init();
+	PeriphSolenoid_Init();
 
   while (1)
   {
-//	PeriphUartRingBuf_Task();
-//	PeriphSwitch_Task();
-//
-//	ManagerMotor_Task();
-//	ManagerHMI_Task();
-//	ManagerMovement_Task();
-//	ManagerSecurity_Task();
+	PeriphUartRingBuf_Task();
+	PeriphSwitch_Task();
 
-	PeriphSolenoid_UnlockChangeSide();
-
-
+	ManagerMotor_Task();
+	ManagerHMI_Task();
+	ManagerMovement_Task();
+	ManagerSecurity_Task();
 
     /* USER CODE END WHILE */
 

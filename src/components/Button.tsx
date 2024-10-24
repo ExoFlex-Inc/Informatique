@@ -17,7 +17,6 @@ interface ButtonProps {
 
 const Button: React.FC<ButtonProps> = ({
   label,
-  icon,
   mode,
   action,
   content,
@@ -25,27 +24,23 @@ const Button: React.FC<ButtonProps> = ({
   hoverColor,
   textColor,
   disabled,
-  onClick,
 }) => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   let message = content;
 
   const sendingRequests = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:3001/api/hmi-button-click",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            mode: mode,
-            action: action,
-            content: message,
-          }),
+      const response = await fetch("http://localhost:3001/stm32/button", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          mode: mode,
+          action: action,
+          content: message,
+        }),
+      });
 
       if (response.ok) {
         console.log("Button click sent successfully.");
@@ -56,6 +51,50 @@ const Button: React.FC<ButtonProps> = ({
     } catch (error) {
       console.error("An error occurred:", error);
       clearInterval(intervalRef.current!);
+    }
+  };
+
+  const sendingStm32RecordingRequests = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/stm32/record", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          start: true,
+        }),
+      });
+
+      if (response.ok) {
+        console.log("Recording started successfully.");
+      } else {
+        console.error("Failed to start recording.");
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
+    }
+  };
+
+  const sendingStm32StopRecordingRequests = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/stm32/record", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          start: false,
+        }),
+      });
+
+      if (response.ok) {
+        console.log("Recording stopped successfully.");
+      } else {
+        console.error("Failed to stop recording.");
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
     }
   };
 
@@ -77,15 +116,16 @@ const Button: React.FC<ButtonProps> = ({
     }
 
     if (e.button === 0) {
-      // Start sending requests with interval for mouse down event
       if (action === "Increment") {
         intervalRef.current = setInterval(sendingRequests, 20);
-        // Add event listener for mouseup
-        const handleMouseUpWithIntervalClear = () => {
-          handleMouseUp();
-        };
-        window.addEventListener("mouseup", handleMouseUpWithIntervalClear);
-      } else if (action === "Control" || "Homing") {
+        window.addEventListener("mouseup", handleMouseUp);
+      } else if (content === "Start") {
+        // sendingStm32RecordingRequests();
+        sendingRequests();
+      } else if (content === "Stop" || content === "Pause") {
+        // sendingStm32StopRecordingRequests();
+        sendingRequests();
+      } else {
         sendingRequests();
       }
     }

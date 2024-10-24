@@ -27,6 +27,7 @@ export default function Planning() {
     setLimitRight,
     setPlan,
   } = usePlan(selectedUser.length === 1 ? selectedUser[0]?.user_id : null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (planData) {
