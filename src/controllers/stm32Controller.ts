@@ -63,6 +63,7 @@ let saveData = {
 };
 
 let exerciseId: number | null = null;
+let oldTime: Date | null = null;
 
 const getSavedData = asyncHandler(async (req: Request, res: Response) => {
   try {
@@ -375,6 +376,15 @@ const handleButtonClick = asyncHandler(async (req: Request, res: Response) => {
   dataToSend += "}";
 
   console.log(`Button clicked:${dataToSend}`);
+
+  const currentTime = new Date();
+
+  if (oldTime && currentTime.getTime() - oldTime.getTime() > 200) {
+    console.log("Button clicked sent over 200ms.");
+  } else {
+    oldTime = currentTime;
+  }
+
   const serialPort = getSerialPort();
 
   if (serialPort && serialPort.isOpen) {
