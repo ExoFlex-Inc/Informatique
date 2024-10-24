@@ -115,10 +115,10 @@ const Button: React.FC<ButtonProps> = ({
         intervalRef.current = setInterval(sendingRequests, 20);
         window.addEventListener("mouseup", handleMouseUp);
       } else if (content === "Start") {
-        sendingStm32RecordingRequests();
+        // sendingStm32RecordingRequests();
         sendingRequests();
       } else if (content === "Stop" || content === "Pause") {
-        sendingStm32StopRecordingRequests();
+        // sendingStm32StopRecordingRequests();
         sendingRequests();
       } else {
         sendingRequests();
