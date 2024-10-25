@@ -39,10 +39,6 @@ typedef struct
     float   mSpeedGoal[MMOT_MOTOR_NBR];
     bool    reset;
     bool    securityPass;
-    float   mPosGoal[MMOT_MOTOR_NBR];
-    float   mSpeedGoal[MMOT_MOTOR_NBR];
-    bool    reset;
-    bool    securityPass;
     uint8_t currentLegSide;
 
 } ManagerMovement_t;
