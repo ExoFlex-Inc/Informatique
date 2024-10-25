@@ -254,11 +254,11 @@ void ManagerHMI_ExecuteManualIncrement(char* cmd)
 {
     if (cmd != NULL)
     {
-        if (strcmp(cmd, "EversionR") == 0)
+        if (strcmp(cmd, "EversionO") == 0)
         {
             ManagerMovement_ManualCmdEversion(MMOV_OUTSIDE);
         }
-        else if (strcmp(cmd, "EversionL") == 0)
+        else if (strcmp(cmd, "EversionI") == 0)
         {
             ManagerMovement_ManualCmdEversion(MMOV_INSIDE);
         }
