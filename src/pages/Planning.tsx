@@ -156,7 +156,7 @@ export default function Planning() {
         />
       </div>
       <CustomScrollbar>
-        <div className="overflow-auto">
+        <div className="overflow-auto m-6">
           <ExercisesLimitsTable
             limitsLeft={planData?.limits?.left}
             limitsRight={planData?.limits?.right}
