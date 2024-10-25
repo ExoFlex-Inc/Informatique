@@ -12,7 +12,7 @@ import RatingPopUp from "../components/RatingPopUp.tsx";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import ManualControl from "../components/ManualControl.tsx";
 import Button from "../components/Button.tsx";
-import { Pause, PlayArrow, Refresh } from "@mui/icons-material";
+import { Pause, PlayArrow, Refresh, Stop } from "@mui/icons-material";
 interface ChartData {
   datasets: {
     label: string;
@@ -285,28 +285,36 @@ export default function HMI() {
                   mb: 2,
                 }}
               >
+                {stm32Data?.AutoState == "WaitingForPlan" || stm32Data?.AutoState == "Ready" ? 
+                  <Button
+                    mode="Auto"
+                    action="Control"
+                    content="Start"
+                    icon={<PlayArrow />}
+                  />
+                :
+                  <Button
+                    mode="Auto"
+                    action="Control"
+                    content="Pause"
+                    icon={<Pause />}
+                  />
+                }
                 <Button
+                  icon={<Stop />}
                   mode="Auto"
                   action="Control"
-                  content="Start"
+                  content="Stop"
                   disabled={
                     !stm32Data ||
                     errorFromStm32 ||
-                    stm32Data.AutoState === "WaitingForPlan"
+                    stm32Data?.AutoState === "Ready"
                   }
-                  icon={<PlayArrow />}
-                />
-                <Button
-                  mode="Auto"
-                  action="Control"
-                  content="Pause"
-                  disabled={!stm32Data || errorFromStm32}
-                  icon={<Pause />}
                 />
                 <Button 
                   icon={<Refresh/>}
                   disabled={!stm32Data?.ErrorCode}
-                  mode="Refresh"
+                  mode="Reset"
                 />
               </Box>
               <LineChart chartData={chartData} type="line" socket={socket} />
