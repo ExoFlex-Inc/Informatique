@@ -275,9 +275,14 @@ export default function HMI() {
     <div className="flex flex-col custom-height">
       <CustomScrollbar>
         <Box>
-          <Grid padding={5} container spacing={2} sx={{ justifyContent: "center", alignItems: "center" }}>
+          <Grid
+            padding={5}
+            container
+            spacing={2}
+            sx={{ justifyContent: "center", alignItems: "center" }}
+          >
             <Grid item xs={12}>
-            <Box
+              <Box
                 sx={{
                   display: "flex",
                   justifyContent: "center",
@@ -285,21 +290,22 @@ export default function HMI() {
                   mb: 2,
                 }}
               >
-                {stm32Data?.AutoState == "WaitingForPlan" || stm32Data?.AutoState == "Ready" ? 
+                {stm32Data?.AutoState == "WaitingForPlan" ||
+                stm32Data?.AutoState == "Ready" ? (
                   <Button
                     mode="Auto"
                     action="Control"
                     content="Start"
                     icon={<PlayArrow />}
                   />
-                :
+                ) : (
                   <Button
                     mode="Auto"
                     action="Control"
                     content="Pause"
                     icon={<Pause />}
                   />
-                }
+                )}
                 <Button
                   icon={<Stop />}
                   mode="Auto"
@@ -311,8 +317,8 @@ export default function HMI() {
                     stm32Data?.AutoState === "Ready"
                   }
                 />
-                <Button 
-                  icon={<Refresh/>}
+                <Button
+                  icon={<Refresh />}
                   disabled={!stm32Data?.ErrorCode}
                   mode="Reset"
                 />
@@ -320,7 +326,7 @@ export default function HMI() {
               <LineChart chartData={chartData} type="line" socket={socket} />
             </Grid>
             <Grid item>
-              <Box padding={1} bgcolor="white" sx={{borderRadius: "16px"}}>
+              <Box padding={1} bgcolor="white" sx={{ borderRadius: "16px" }}>
                 <ProgressionWidget
                   setOpenDialogPainScale={setOpenDialogPainScale}
                   stm32Data={stm32Data}
@@ -329,7 +335,10 @@ export default function HMI() {
               </Box>
             </Grid>
             <Grid item>
-              <ExerciseOverviewWidget stm32Data={stm32Data} planData={planData} />
+              <ExerciseOverviewWidget
+                stm32Data={stm32Data}
+                planData={planData}
+              />
             </Grid>
           </Grid>
         </Box>

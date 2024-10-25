@@ -8,7 +8,7 @@ import {
   IconButton,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import {Refresh, PlayArrow, Pause} from "@mui/icons-material"
+import { Refresh, PlayArrow, Pause } from "@mui/icons-material";
 import LineChart from "../components/LineChart";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import useStm32 from "../hooks/use-stm32.ts";
@@ -60,7 +60,7 @@ export default function Manual() {
   const [errorDescription, setErrorDescription] = useState("");
   const [graphDataType, setGraphDataType] = useState("position");
   const [graphPause, setGraphPause] = useState(false);
-  const {stm32Data, socket, errorFromStm32} = useStm32();
+  const { stm32Data, socket, errorFromStm32 } = useStm32();
 
   const [latestMotorData, setLatestMotorData] = useState({
     motor1: { x: 0, position: 0, torque: 0, current: 0 },
@@ -220,7 +220,11 @@ export default function Manual() {
     <div className="custom-height flex flex-col">
       <CustomScrollbar>
         <Box>
-          <Grid container spacing={2} sx={{ justifyContent: "center", alignItems: "center" }}>
+          <Grid
+            container
+            spacing={2}
+            sx={{ justifyContent: "center", alignItems: "center" }}
+          >
             <Grid item xs={12}>
               <Box
                 sx={{
@@ -243,8 +247,8 @@ export default function Manual() {
                 >
                   <Pause />
                 </IconButton>
-                <Button 
-                  icon={<Refresh/>}
+                <Button
+                  icon={<Refresh />}
                   disabled={!stm32Data?.ErrorCode}
                   mode="Reset"
                 />
@@ -304,8 +308,8 @@ export default function Manual() {
                   }}
                   inputProps={{
                     sx: {
-                      whiteSpace: 'pre'
-                    }
+                      whiteSpace: "pre",
+                    },
                   }}
                   sx={{ marginRight: 5 }}
                 />

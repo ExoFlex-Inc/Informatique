@@ -24,7 +24,7 @@ const Button: React.FC<ButtonProps> = ({
   hoverColor,
   textColor,
   disabled,
-  icon
+  icon,
 }) => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   let message = content;
@@ -132,44 +132,40 @@ const Button: React.FC<ButtonProps> = ({
     }
   };
 
-  return (
-    (icon ? 
-      <IconButton
-        onMouseDown={handleMouseDown}
-        size="large"
-        sx={{
-          backgroundColor: mainColor,
-          '&:hover': {
-            backgroundColor: hoverColor,
-            color: textColor
-          }
-        }}
-        disabled={disabled}
-      >
-        {icon}
-      </IconButton>
-    :
-      <MuiButton
-        fullWidth
-        variant="contained"
-        disabled={disabled}
-        sx={{
-          mt: 3,
-          mb: 2,
-          textTransform: "none",
-          fontSize: "1rem",
-          backgroundColor: "blueAccent.main",
-          "&:hover": {
-            backgroundColor: "#1e3a8a",
-          },
-        }}
-        onMouseDown={handleMouseDown}
-      >
-        <Typography>
-          {label}
-        </Typography>
-      </MuiButton>
-    )
+  return icon ? (
+    <IconButton
+      onMouseDown={handleMouseDown}
+      size="large"
+      sx={{
+        backgroundColor: mainColor,
+        "&:hover": {
+          backgroundColor: hoverColor,
+          color: textColor,
+        },
+      }}
+      disabled={disabled}
+    >
+      {icon}
+    </IconButton>
+  ) : (
+    <MuiButton
+      fullWidth
+      variant="contained"
+      disabled={disabled}
+      sx={{
+        mt: 3,
+        mb: 2,
+        textTransform: "none",
+        fontSize: "1rem",
+        backgroundColor: "blueAccent.main",
+        "&:hover": {
+          backgroundColor: "#1e3a8a",
+        },
+      }}
+      onMouseDown={handleMouseDown}
+    >
+      <Typography>{label}</Typography>
+    </MuiButton>
   );
 };
 

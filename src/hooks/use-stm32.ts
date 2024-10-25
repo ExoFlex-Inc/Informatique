@@ -18,7 +18,7 @@ export type stm32DataType = {
   Positions: number[];
   Torques: number[];
   Current: number[];
-}
+};
 
 const ENDPOINT = "http://localhost:3001"; // Pointing to the server on port 3001
 

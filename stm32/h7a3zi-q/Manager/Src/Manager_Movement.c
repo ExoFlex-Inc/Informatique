@@ -4,7 +4,6 @@
 #include <Manager_Motor.h>
 #include <Manager_Movement.h>
 #include <Periph_Solenoid.h>
-#include <Periph_Solenoid.h>
 #include <Periph_Switch.h>
 #include <Periph_UartRingBuf.h>
 #include <string.h>
@@ -407,7 +406,7 @@ void ManagerMovement_ChangeSideRight()
 void ManagerMovement_ChangeSideLeft()
 {
     if ((PeriphSolenoid_UnlockChangeSide() &&
-            PeriphSwitch_GetLegSide() == MMOV_LEG_IS_RIGHT) ||
+         PeriphSwitch_GetLegSide() == MMOV_LEG_IS_RIGHT) ||
         changeSideFree)  // UNLOCK the soleinoid to allow changing side motion
     {
         changeSideFree = true;
