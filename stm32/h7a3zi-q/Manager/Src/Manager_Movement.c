@@ -780,26 +780,29 @@ void ManagerMovement_AutoStrectching()
 	}
 
 	// Send Torque commandes
-	if (!cmd1Sent && movementNbr >= 1)
+	if (currentMovement != MMOV_EVERSION)
 	{
-		ManagerMovement_AutoTorque(currentMovement, angleLimit, goToTorque);
-		cmd1Sent = true;
-		movementIdx++;
-	}
-	else if (!cmd2Sent && movementNbr >= 2)
-	{
-		ManagerMovement_AutoTorque(currentMovement, angleLimit, goToTorque);
-		cmd2Sent = true;
-		movementIdx++;
-	}
-	else if (!cmd3Sent && movementNbr >= 3)
-	{
-		ManagerMovement_AutoTorque(currentMovement, angleLimit, goToTorque);
-		cmd3Sent = true;
-		movementIdx++;
+		if (!cmd1Sent && movementNbr >= 1)
+		{
+			ManagerMovement_AutoTorque(currentMovement, angleLimit, goToTorque);
+			cmd1Sent = true;
+			movementIdx++;
+		}
+		else if (!cmd2Sent && movementNbr >= 2)
+		{
+			ManagerMovement_AutoTorque(currentMovement, angleLimit, goToTorque);
+			cmd2Sent = true;
+			movementIdx++;
+		}
+		else if (!cmd3Sent && movementNbr >= 3)
+		{
+			ManagerMovement_AutoTorque(currentMovement, angleLimit, goToTorque);
+			cmd3Sent = true;
+			movementIdx++;
+		}
 	}
 
-	//TODO: Faite arreter letirement si le torque ressentit depasse la limit de couple
+	//TODO: Faite arreter l etirement si le torque ressentit depasse la limit de couple
 
 	if (stopButton || !startButton)
 	{
