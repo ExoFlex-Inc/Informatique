@@ -235,9 +235,8 @@ export default function Manual() {
                 }}
               >
                 <Box sx={{ width: 50 }} />
-                <Box gap={4} sx={{display: "flex"}}>
-
-                  <Button 
+                <Box gap={4} sx={{ display: "flex" }}>
+                  <Button
                     onClick={() => setGraphPause(false)}
                     icon={<PlayArrow />}
                     disabled={!graphPause}
@@ -245,7 +244,7 @@ export default function Manual() {
                     hoverColor="#33a63f"
                   />
 
-                  <Button 
+                  <Button
                     onClick={() => setGraphPause(true)}
                     disabled={graphPause}
                     icon={<Pause />}

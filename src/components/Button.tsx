@@ -25,7 +25,7 @@ const Button: React.FC<ButtonProps> = ({
   textColor,
   disabled,
   icon,
-  onClick
+  onClick,
 }) => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   let message = content;

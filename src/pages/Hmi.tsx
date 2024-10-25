@@ -328,7 +328,10 @@ export default function HMI() {
                   mainColor="#1ec6e1"
                   hoverColor="#2aa6ba"
                   icon={<Home />}
-                  disabled={stm32Data?.AutoState !== "Ready" && stm32Data?.AutoState !== "WaitingForPlan"}
+                  disabled={
+                    stm32Data?.AutoState !== "Ready" &&
+                    stm32Data?.AutoState !== "WaitingForPlan"
+                  }
                   mode="Homing"
                 />
                 <Button
