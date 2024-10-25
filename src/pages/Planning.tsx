@@ -1,26 +1,20 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  FormControl,
-  FormLabel,
-} from "@mui/material";
 import UserSearchBar from "../components/UserSearchBar.tsx";
-import { blue } from "@mui/material/colors";
 import ExercisesLimitsTable from "../components/ExercisesLimitsTable.tsx";
 import ExercisesPlanTable from "../components/ExercisesPlanTable.tsx";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import { useRelations } from "../hooks/use-relations.ts";
 import { usePlan } from "../hooks/use-plan.ts";
 import Loading from "../components/Loading.tsx";
+import { Side } from "../components/ToggleSide.tsx";
+import ToggleSide from "../components/ToggleSide.tsx";
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function Planning() {
   const [selectedUser, setSelectedUser] = useState<any[]>([]);
   const [isDisabled, setIsDisabled] = useState(true);
   const [addExerciseDisable, setAddExerciseDisable] = useState(true);
-  const [side, setSide] = useState("Left");
+  const [side, setSide] = useState<Side>(null);
   const [checked, setChecked] = useState(false);
   const checkboxRefs = useRef<(HTMLInputElement | null)[]>([]);
   const { relations, isLoading: isLoadingRelations } = useRelations();
@@ -81,10 +75,6 @@ export default function Planning() {
     }
   };
 
-  const handleToggleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSide((event.target as HTMLInputElement).value);
-  };
-
   // Function to save plan to Supabase
   const savePlanToSupabase = async (plan: any) => {
     try {
@@ -124,31 +114,7 @@ export default function Planning() {
   return (
     <div className="flex flex-col custom-height">
       <div className="flex justify-center items-center">
-        <FormControl>
-          <FormLabel
-            sx={{ "&.Mui-focused": { color: blue[600] } }}
-            id="demo-controlled-radio-buttons-group"
-          >
-            Side
-          </FormLabel>
-          <RadioGroup
-            aria-labelledby="demo-controlled-radio-buttons-group"
-            name="controlled-radio-buttons-group"
-            onChange={handleToggleChange}
-            value={side}
-          >
-            <FormControlLabel
-              value="Left"
-              control={<Radio sx={{ "&.Mui-checked": { color: blue[600] } }} />}
-              label="Left"
-            />
-            <FormControlLabel
-              value="Right"
-              control={<Radio sx={{ "&.Mui-checked": { color: blue[600] } }} />}
-              label="Right"
-            />
-          </RadioGroup>
-        </FormControl>
+        <ToggleSide side={side} setSide={setSide} />
         <UserSearchBar
           sx={{ width: 500 }}
           setSearchQuery={setSelectedUser}

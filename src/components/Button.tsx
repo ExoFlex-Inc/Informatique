@@ -1,15 +1,17 @@
 import React, { useRef, useState } from "react";
-import { Button as MuiButton } from "@mui/material";
+import { IconButton, Button as MuiButton, Typography } from "@mui/material";
 
 interface ButtonProps {
-  label: string;
+  label?: string;
   icon?: React.ReactNode;
   mode?: string;
   action?: string;
   content?: string;
   onMouseDown?: () => void;
   onClick?: () => void;
-  color?: string;
+  mainColor?: string;
+  hoverColor?: string;
+  textColor?: string;
   disabled?: boolean;
 }
 
@@ -18,7 +20,11 @@ const Button: React.FC<ButtonProps> = ({
   mode,
   action,
   content,
+  mainColor,
+  hoverColor,
+  textColor,
   disabled,
+  icon,
 }) => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   let message = content;
@@ -126,7 +132,22 @@ const Button: React.FC<ButtonProps> = ({
     }
   };
 
-  return (
+  return icon ? (
+    <IconButton
+      onMouseDown={handleMouseDown}
+      size="large"
+      sx={{
+        backgroundColor: mainColor,
+        "&:hover": {
+          backgroundColor: hoverColor,
+          color: textColor,
+        },
+      }}
+      disabled={disabled}
+    >
+      {icon}
+    </IconButton>
+  ) : (
     <MuiButton
       fullWidth
       variant="contained"
@@ -143,7 +164,7 @@ const Button: React.FC<ButtonProps> = ({
       }}
       onMouseDown={handleMouseDown}
     >
-      {label}
+      <Typography>{label}</Typography>
     </MuiButton>
   );
 };

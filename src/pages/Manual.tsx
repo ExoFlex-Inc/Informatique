@@ -6,19 +6,14 @@ import {
   Grid,
   TextField,
   IconButton,
-  Button as MuiButton,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import PauseIcon from "@mui/icons-material/Pause";
-import AirlineSeatLegroomExtraIcon from "@mui/icons-material/AirlineSeatLegroomExtra";
-import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
-import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import { Refresh, PlayArrow, Pause } from "@mui/icons-material";
 import LineChart from "../components/LineChart";
-import MotorControlWidget from "../components/MotorControlWidget";
-import useStm32 from "../hooks/use-stm32";
+import CustomScrollbar from "../components/CustomScrollbars.tsx";
+import useStm32 from "../hooks/use-stm32.ts";
 import Button from "../components/Button.tsx";
-import { saveAs } from "file-saver";
+import ManualControl from "../components/ManualControl.tsx";
 
 const WhiteBorderCheckbox = styled(Checkbox)(() => ({
   color: "white",
@@ -62,10 +57,11 @@ const errorMap = {
   25: "ERROR_25",
 };
 export default function Manual() {
-  const { stm32Data, socket, errorFromStm32 } = useStm32();
   const [errorDescription, setErrorDescription] = useState("");
   const [graphDataType, setGraphDataType] = useState("position");
   const [graphPause, setGraphPause] = useState(false);
+  const { stm32Data, socket, errorFromStm32 } = useStm32();
+
   const [latestMotorData, setLatestMotorData] = useState({
     motor1: { x: 0, position: 0, torque: 0, current: 0 },
     motor2: { x: 0, position: 0, torque: 0, current: 0 },
@@ -100,27 +96,35 @@ export default function Manual() {
       stm32Data.Current &&
       !graphPause
     ) {
-      const currentTime = Date.now();
-      setLatestMotorData({
-        motor1: {
-          x: currentTime,
-          position: stm32Data.Positions[0],
-          torque: stm32Data.Torques[0],
-          current: stm32Data.Current[0],
-        },
-        motor2: {
-          x: currentTime,
-          position: stm32Data.Positions[1],
-          torque: stm32Data.Torques[1],
-          current: stm32Data.Current[1],
-        },
-        motor3: {
-          x: currentTime,
-          position: stm32Data.Positions[2],
-          torque: stm32Data.Torques[2],
-          current: stm32Data.Current[2],
-        },
-      });
+      if (
+        stm32Data &&
+        stm32Data.Positions &&
+        stm32Data.Torques &&
+        stm32Data.Current &&
+        !graphPause
+      ) {
+        const currentTime = Date.now();
+        setLatestMotorData({
+          motor1: {
+            x: currentTime,
+            position: stm32Data.Positions[0],
+            torque: stm32Data.Torques[0],
+            current: stm32Data.Current[0],
+          },
+          motor2: {
+            x: currentTime,
+            position: stm32Data.Positions[1],
+            torque: stm32Data.Torques[1],
+            current: stm32Data.Current[1],
+          },
+          motor3: {
+            x: currentTime,
+            position: stm32Data.Positions[2],
+            torque: stm32Data.Torques[2],
+            current: stm32Data.Current[2],
+          },
+        });
+      }
     }
   }, [stm32Data, socket, graphPause]);
 
@@ -213,130 +217,108 @@ export default function Manual() {
   };
 
   return (
-    <Box sx={{ height: "100vh", overflow: "auto" }}>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              mb: 2,
-            }}
+    <div className="custom-height flex flex-col">
+      <CustomScrollbar>
+        <Box>
+          <Grid
+            container
+            spacing={2}
+            sx={{ justifyContent: "center", alignItems: "center" }}
           >
-            <div className="max-w-36">
-              <Button
-                label="Reset"
-                mode="Reset"
-                color="blueAccent.main hover:bg-blue-700 text-white"
-              ></Button>
-            </div>
-            <div className="max-w-36">
-              <IconButton
-                onClick={() => setGraphPause(false)}
-                disabled={!graphPause}
+            <Grid item xs={12}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  mb: 2,
+                }}
               >
-                <PlayArrowIcon />
-              </IconButton>
-              <IconButton
-                onClick={() => setGraphPause(true)}
-                disabled={graphPause}
+                <Box sx={{ width: 50 }} />
+                <IconButton
+                  onClick={() => setGraphPause(false)}
+                  disabled={!graphPause}
+                >
+                  <PlayArrow />
+                </IconButton>
+                <IconButton
+                  onClick={() => setGraphPause(true)}
+                  disabled={graphPause}
+                >
+                  <Pause />
+                </IconButton>
+                <Button
+                  icon={<Refresh />}
+                  disabled={!stm32Data?.ErrorCode}
+                  mode="Reset"
+                />
+                <Box sx={{ width: 50 }} />
+                <FormControlLabel
+                  control={
+                    <WhiteBorderCheckbox
+                      checked={graphDataType === "position"}
+                      onChange={() => setGraphDataType("position")}
+                    />
+                  }
+                  label="Position"
+                />
+                <FormControlLabel
+                  control={
+                    <WhiteBorderCheckbox
+                      checked={graphDataType === "torque"}
+                      onChange={() => setGraphDataType("torque")}
+                    />
+                  }
+                  label="Torque"
+                />
+                <FormControlLabel
+                  control={
+                    <WhiteBorderCheckbox
+                      checked={graphDataType === "current"}
+                      onChange={() => setGraphDataType("current")}
+                    />
+                  }
+                  label="Current"
+                />
+              </Box>
+              <LineChart
+                chartData={getChartData()}
+                mode="Manual"
+                type="realtime"
+                graphPause={graphPause}
+              />
+            </Grid>
+            <Grid item xs={12} md={3}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "100%",
+                }}
               >
-                <PauseIcon />
-              </IconButton>
-              <IconButton onClick={exportCsv} disabled={stm32Data === null}>
-                {recordCsv ? (
-                  <RadioButtonUncheckedIcon />
-                ) : (
-                  <RadioButtonCheckedIcon />
-                )}
-              </IconButton>
-            </div>
-            <Box sx={{ width: 50 }} />
-            <FormControlLabel
-              control={
-                <WhiteBorderCheckbox
-                  checked={graphDataType === "position"}
-                  onChange={() => setGraphDataType("position")}
+                <TextField
+                  value={errorDescription}
+                  multiline
+                  fullWidth
+                  rows={10}
+                  variant="outlined"
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                  inputProps={{
+                    sx: {
+                      whiteSpace: "pre",
+                    },
+                  }}
+                  sx={{ marginRight: 5 }}
                 />
-              }
-              label="Position"
-            />
-            <FormControlLabel
-              control={
-                <WhiteBorderCheckbox
-                  checked={graphDataType === "torque"}
-                  onChange={() => setGraphDataType("torque")}
-                />
-              }
-              label="Torque"
-            />
-            <FormControlLabel
-              control={
-                <WhiteBorderCheckbox
-                  checked={graphDataType === "current"}
-                  onChange={() => setGraphDataType("current")}
-                />
-              }
-              label="Current"
-            />
-          </Box>
-          <LineChart
-            chartData={getChartData()}
-            mode="Manual"
-            type="realtime"
-            graphPause={graphPause}
-          />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "100%",
-            }}
-          >
-            <MotorControlWidget
-              title="Anatomical Movement"
-              icon={<AirlineSeatLegroomExtraIcon sx={{ fontSize: 56 }} />}
-              labels={[
-                "EversionL",
-                "EversionR",
-                "DorsiflexionU",
-                "DorsiflexionD",
-                "ExtensionU",
-                "ExtensionD",
-              ]}
-              mode="Manual"
-              action="Increment"
-              disabled={errorFromStm32}
-            />
-          </Box>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "100%",
-            }}
-          >
-            <TextField
-              value={errorDescription}
-              multiline
-              fullWidth
-              rows={10}
-              variant="outlined"
-              InputProps={{
-                readOnly: true,
-              }}
-              sx={{ marginRight: 5 }}
-            />
-          </Box>
-        </Grid>
-      </Grid>
-    </Box>
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>
+      </CustomScrollbar>
+      <ManualControl stm32Data={stm32Data} errorFromStm32={errorFromStm32} />
+    </div>
   );
 }
