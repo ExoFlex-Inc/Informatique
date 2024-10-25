@@ -9,7 +9,7 @@
 #include <string.h>
 
 #define MMOV_EXT_RESTPOS 1.0
-#define MMOV_EVR_RESTPOS 0.17
+#define MMOV_EVR_RESTPOS 0.35
 #define MMOV_DOR_RESTPOS 0.0
 
 #define MAX_EXERCISES 10
