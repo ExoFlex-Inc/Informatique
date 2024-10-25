@@ -286,9 +286,21 @@ export default function HMI() {
                 }}
               >
                 <Button
+                  mode="Auto"
+                  action="Control"
+                  content="Start"
+                  disabled={
+                    !stm32Data ||
+                    errorFromStm32 ||
+                    stm32Data.AutoState === "WaitingForPlan"
+                  }
                   icon={<PlayArrow />}
                 />
                 <Button
+                  mode="Auto"
+                  action="Control"
+                  content="Pause"
+                  disabled={!stm32Data || errorFromStm32}
                   icon={<Pause />}
                 />
                 <Button 
