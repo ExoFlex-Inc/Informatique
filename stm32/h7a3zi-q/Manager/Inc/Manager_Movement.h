@@ -3,8 +3,13 @@
 
 #include "main.h"
 
-#define MMOV_OUTSIDE  -1
+/***********************************************/
+// DISABLE TORQUE STRETCHING
+//#define MMOV_DISABLE_TORQUE_STRETCHING
+/***********************************************/
+
 #define MMOV_INSIDE   1
+#define MMOV_OUTSIDE  -1
 #define MMOV_UP       1
 #define MMOV_DOWN     -1
 #define MMOV_UP_EXT   -1
@@ -42,6 +47,8 @@
 #define MMOV_EVERSION     2
 #define MMOV_EXTENSION    3
 
+#define MAX_MOVEMENT 3
+
 #define MMOV_MOVESTATE_EVERSION     0
 #define MMOV_MOVESTATE_DORSIFLEXION 1
 #define MMOV_MOVESTATE_EXTENSION    2
@@ -68,8 +75,10 @@ bool            ManagerMovement_SetState(uint8_t newState);
 // Auto Setup
 void ManagerMovement_AddExerciseInfo(uint8_t exerciseIdx, uint8_t moveNbr,
                                      uint8_t reps, float eTime, float pTime);
+void ManagerMovement_AddLimits(uint8_t Idx, float maxPos, float maxTorque,
+                               uint8_t side);
 void ManagerMovement_AddMouvement(uint8_t mvtIdx, uint8_t movementType,
-                                  float finalPosition);
+                                  float finalPosition, float targetTorque);
 void ManagerMovement_ResetExercise();
 
 // Auto buttons
