@@ -9,7 +9,7 @@
 #include <string.h>
 
 #define MMOV_EXT_RESTPOS 1.0
-#define MMOV_EVR_RESTPOS 0.35
+#define MMOV_EVR_RESTPOS 0.30
 #define MMOV_DOR_RESTPOS 0.0
 
 #define MAX_EXERCISES 10
@@ -644,11 +644,14 @@ void ManagerMovement_SetFirstPos(uint8_t mvtNbr)
     // so the array has max 3 values and is overwritten each sets
     for (uint8_t i = 0; i < mvtNbr; i++)
     {
-        if (movements[i + movementIdx] == MMOV_DORSIFLEXION ||
-            movements[i + movementIdx] == MMOV_EVERSION)
+        if (movements[i + movementIdx] == MMOV_DORSIFLEXION)
         {
-            firstPos[i] = motorsData[MMOT_MOTOR_1]->position;
+        	firstPos[i] = motorsData[MMOT_MOTOR_1]->position;
         }
+        else if (movements[i + movementIdx] == MMOV_EVERSION)
+		{
+			firstPos[i] = motorsData[MMOT_MOTOR_2]->position;
+		}
         else if (movements[i + movementIdx] == MMOV_EXTENSION)
         {
             firstPos[i] = motorsData[MMOT_MOTOR_3]->position;
@@ -758,16 +761,24 @@ void ManagerMovement_AutoStrectching()
 	// Serait la place ou mettre un commande en force
 
 	//TODO: ajouter gestion du cote de la jambe (Changement de limit)
+#ifndef MMOV_ENABLE_TORQUE_STRETCHING
 
-	#ifndef MMOV_ENABLE_TORQUE_STRETCHING
 	// cmd flags
 	static bool cmd1Sent = false;
 	static bool cmd2Sent = false;
 	static bool cmd3Sent = false;
 
+	static bool decreaseMvtNbr = false;
+
+	uint8_t movementNbr = mvtNbr[exerciseIdx];
+	if (!decreaseMvtNbr)
+	{
+		movementIdx -= movementNbr-1;
+		decreaseMvtNbr = true;
+	}
+
 	// Get movement info
 	uint8_t currentMovement = movements[movementIdx];
-	uint8_t movementNbr = mvtNbr[exerciseIdx];
 	float goToTorque = targetTorques[movementIdx];
 
 	float angleLimit = 0.0f;
@@ -784,7 +795,14 @@ void ManagerMovement_AutoStrectching()
 	}
 
 	// Send Torque commandes
-	if (currentMovement != MMOV_EVERSION)
+	if (currentMovement == MMOV_EVERSION)
+	{
+		if (movementIdx%3 == 0){cmd1Sent = true;}
+		else if(movementIdx%3 == 1){cmd2Sent = true;}
+		else if(movementIdx%3 == 2){cmd3Sent = true;}
+		movementIdx++;
+	}
+	else
 	{
 		if (!cmd1Sent && movementNbr >= 1)
 		{
@@ -805,8 +823,9 @@ void ManagerMovement_AutoStrectching()
 			movementIdx++;
 		}
 	}
-	#endif
-	//TODO: Faite arreter l etirement si le torque ressentit depasse la limit de couple
+
+#endif
+	//TODO: Faire arreter l etirement si le torque ressentit depasse la limit de couple
 
 	if (stopButton || !startButton)
 	{
@@ -819,11 +838,14 @@ void ManagerMovement_AutoStrectching()
 		ManagerMotor_StopManualMovement(MMOT_MOTOR_3);
 
 		movementIdx--;
+		managerMovement.autoState = MMOV_AUTO_STATE_2FIRST_POS;
+
+	#ifndef MMOV_ENABLE_TORQUE_STRETCHING
 		cmd1Sent = false;
 		cmd2Sent = false;
 		cmd3Sent = false;
-		managerMovement.autoState = MMOV_AUTO_STATE_2FIRST_POS;
-
+		decreaseMvtNbr = false;
+	#endif
 	}
 }
 

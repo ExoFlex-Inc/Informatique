@@ -4,8 +4,8 @@
 #include "main.h"
 
 /***********************************************/
-// ENABLE TORQUE STRETCHING
-// #define MMOV_ENABLE_TORQUE_STRETCHING
+// DISABLE TORQUE STRETCHING
+//#define MMOV_DISABLE_TORQUE_STRETCHING
 /***********************************************/
 
 #define MMOV_INSIDE   1

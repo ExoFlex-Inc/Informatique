@@ -247,6 +247,16 @@ void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
                 // Flag error: State couldn't change
             }
         }
+        else if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "Homing") == 0)
+		{
+			if (ManagerMovement_SetState(MMOV_STATE_HOMING))
+			{
+			}
+			else
+			{
+				// Flag error: State couldn't change
+			}
+		}
     }
 }
 
