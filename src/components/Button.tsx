@@ -135,6 +135,7 @@ const Button: React.FC<ButtonProps> = ({
   return (
     (icon ? 
       <IconButton
+        onMouseDown={handleMouseDown}
         size="large"
         sx={{
           backgroundColor: mainColor,
