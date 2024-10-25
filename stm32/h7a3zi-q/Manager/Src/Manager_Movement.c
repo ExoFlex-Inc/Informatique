@@ -8,7 +8,9 @@
 #include <Periph_UartRingBuf.h>
 #include <string.h>
 
-#define MMOV_REST_POS 1
+#define MMOV_EXT_RESTPOS 1.0
+#define MMOV_EVR_RESTPOS 0.35
+#define MMOV_DOR_RESTPOS 0.0
 
 #define MAX_EXERCISES 10
 #define MAX_MOVEMENT  3
@@ -1073,9 +1075,9 @@ void ManagerMovement_HomingDorsiflexion()
 
 void ManagerMovement_RestPos()
 {
-    if (ManagerMovement_GoToPos(MMOV_EXTENSION, MMOV_REST_POS))
+    if (ManagerMovement_GoToMultiplePos(MMOV_EVR_RESTPOS, MMOV_DOR_RESTPOS, MMOV_EXT_RESTPOS))
     {
-        managerMovement.homingState = MMOV_VERIF_PERSON_IN;
+        managerMovement.homingState = MMOV_HOMING_EXTENSION;
         managerMovement.state       = MMOV_STATE_MANUAL;
     }
 }
