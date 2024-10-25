@@ -8,8 +8,8 @@
 // #define MMOV_ENABLE_TORQUE_STRETCHING
 /***********************************************/
 
-#define MMOV_OUTSIDE  -1
 #define MMOV_INSIDE   1
+#define MMOV_OUTSIDE  -1
 #define MMOV_UP       1
 #define MMOV_DOWN     -1
 #define MMOV_UP_EXT   -1

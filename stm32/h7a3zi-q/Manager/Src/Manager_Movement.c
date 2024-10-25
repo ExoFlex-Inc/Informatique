@@ -757,6 +757,7 @@ void ManagerMovement_AutoStrectching()
 
 	//TODO: ajouter gestion du cote de la jambe (Changement de limit)
 
+	#ifndef MMOV_ENABLE_TORQUE_STRETCHING
 	// cmd flags
 	static bool cmd1Sent = false;
 	static bool cmd2Sent = false;
@@ -802,7 +803,7 @@ void ManagerMovement_AutoStrectching()
 			movementIdx++;
 		}
 	}
-
+	#endif
 	//TODO: Faite arreter l etirement si le torque ressentit depasse la limit de couple
 
 	if (stopButton || !startButton)
