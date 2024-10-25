@@ -251,7 +251,7 @@ void ManagerMovement_WaitingSecurity()
     managerMovement.currentLegSide = PeriphSwitch_GetLegSide();
     if (managerMovement.securityPass && managerMovement.currentLegSide != 0)
     {
-        managerMovement.state = MMOV_STATE_HOMING;
+        managerMovement.state = MMOV_STATE_MANUAL;
     }
 }
 
