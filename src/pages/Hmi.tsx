@@ -12,7 +12,7 @@ import RatingPopUp from "../components/RatingPopUp.tsx";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import ManualControl from "../components/ManualControl.tsx";
 import Button from "../components/Button.tsx";
-import { Pause, PlayArrow, Refresh, Stop } from "@mui/icons-material";
+import { Pause, PlayArrow, Refresh, Stop, Home } from "@mui/icons-material";
 interface ChartData {
   datasets: {
     label: string;
@@ -283,6 +283,7 @@ export default function HMI() {
           >
             <Grid item xs={12}>
               <Box
+                gap={4}
                 sx={{
                   display: "flex",
                   justifyContent: "center",
@@ -293,6 +294,8 @@ export default function HMI() {
                 {stm32Data?.AutoState == "WaitingForPlan" ||
                 stm32Data?.AutoState == "Ready" ? (
                   <Button
+                    mainColor="#2fb73d"
+                    hoverColor="#33a63f"
                     mode="Auto"
                     action="Control"
                     content="Start"
@@ -300,6 +303,8 @@ export default function HMI() {
                   />
                 ) : (
                   <Button
+                    mainColor="#f5d50b"
+                    hoverColor="#dcc21d"
                     mode="Auto"
                     action="Control"
                     content="Pause"
@@ -311,6 +316,8 @@ export default function HMI() {
                   mode="Auto"
                   action="Control"
                   content="Stop"
+                  mainColor="#e41b1b"
+                  hoverColor="#cb2626"
                   disabled={
                     !stm32Data ||
                     errorFromStm32 ||
@@ -318,6 +325,15 @@ export default function HMI() {
                   }
                 />
                 <Button
+                  mainColor="#1ec6e1"
+                  hoverColor="#2aa6ba"
+                  icon={<Home />}
+                  disabled={stm32Data?.AutoState !== "Ready" && stm32Data?.AutoState !== "WaitingForPlan"}
+                  mode="Homing"
+                />
+                <Button
+                  mainColor="#f1910f"
+                  hoverColor="#d08622"
                   icon={<Refresh />}
                   disabled={!stm32Data?.ErrorCode}
                   mode="Reset"
