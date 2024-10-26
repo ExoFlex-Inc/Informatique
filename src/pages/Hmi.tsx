@@ -115,7 +115,7 @@ export default function HMI() {
       !hasExecute.current
     ) {
       const message = "{Auto;Resetplan;}";
-      socket.emit("planData", message);
+      socket.emit("sendDataToStm32", message);
       hasExecute.current = true;
       console.log("Reset", message);
     }
@@ -143,13 +143,13 @@ export default function HMI() {
       });
       message += "}";
       console.log("plan", message);
-      socket.emit("planData", message);
+      socket.emit("sendDataToStm32", message);
     }
   }, [stm32Data, planData, socket]);
 
   useEffect(() => {
     const stopRecording = async () => {
-      if (stm32Data?.AutoState === "Stop" && socket) {
+      if (stm32Data?.AutoState === "Stop") {
         try {
           const response = await fetch("http://localhost:3001/stm32/record", {
             method: "POST",
@@ -173,7 +173,7 @@ export default function HMI() {
     };
 
     stopRecording();
-  }, [stm32Data, socket]);
+  }, [stm32Data]);
 
   useEffect(() => {
     if (

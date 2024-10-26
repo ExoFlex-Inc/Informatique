@@ -17,8 +17,31 @@ import { getSerialPort } from "./managers/serialPort.ts";
 import { supabaseMiddleware } from "./middlewares/supabaseMiddleware.ts";
 import "./config/passportConfig.ts";
 import rateLimit from "express-rate-limit";
+import { exec } from "child_process";
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const scriptPath = path.resolve(__dirname, '../src/utils/stm32Simulator.sh');
+
+// Run socat for the STM32 simulator
+const myShellScript = exec(`bash ${scriptPath} 2>&1`, (error, stdout, _) => {
+  if (error) {
+    console.error(`Error executing script: ${error.message}`);
+    return;
+  }
+  console.log(`Script output: ${stdout}`);
+});
+
+// Capture and log stdout data in real-time from socat
+myShellScript.stdout.on('data', (data) => {
+    console.log(`Output: ${data}`);
+});
+
 
 const app: Application = express();
 const httpServer = createServer(app);
@@ -70,14 +93,14 @@ app.use("/plan", planRoutes);
 
 io.on("connection", (socket) => {
   console.log("A client connected");
-  socket.on("planData", (planData) => {
+  socket.on("sendDataToStm32", (data) => {
     const serialPort = getSerialPort();
     if (serialPort && serialPort.isOpen) {
-      serialPort.write(planData, (err: any) => {
+      serialPort.write(data, (err: any) => {
         if (err) {
           console.error("Error writing to serial port:", err);
         } else {
-          console.log("Data sent to serial port:", planData);
+          console.log("Data sent to serial port:", data);
         }
       });
     }

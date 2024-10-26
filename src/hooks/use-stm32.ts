@@ -5,6 +5,7 @@ import socketIOClient, { Socket } from "socket.io-client";
 interface MyEvents {
   stm32Data: stm32DataType;
   serialPortClosed: string;
+  sendDataToStm32: string;
 }
 
 export type stm32DataType = {

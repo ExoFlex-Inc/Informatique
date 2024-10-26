@@ -265,16 +265,27 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
     res.status(200).send("Serial port already initialized.");
     return;
   }
+  let scannerPort: string | undefined;
 
-  const ports = await SerialPort.list();
-  const scannerPort = ports.find(
-    (port) => port.manufacturer === "STMicroelectronics",
-  );
+  if (process.env.ROBOT === 'true') {
+    const ports = await SerialPort.list();
+    const foundPort = ports.find(
+      (port) => port.manufacturer === "STMicroelectronics"
+    );
+
+    if (foundPort) {
+      scannerPort = foundPort.path;
+    }
+  } else {
+    scannerPort = process.env.HMI_SERIAL_PORT;
+  }
 
   if (scannerPort) {
-    console.log("Scanner port:", scannerPort.path);
+    console.log("Scanner port:", scannerPort);
+
+    // Initialize new SerialPort based on scannerPort type
     const newSerialPort = new SerialPort({
-      path: scannerPort.path,
+      path: scannerPort,
       baudRate: 115200,
     });
 
@@ -363,49 +374,9 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
   }
 });
 
-// Function to handle button clicks and send data to serial port
-const handleButtonClick = asyncHandler(async (req: Request, res: Response) => {
-  let dataToSend = "{";
-
-  Object.values(req.body).forEach((value) => {
-    if (value) {
-      dataToSend += value + ";";
-    }
-  });
-
-  dataToSend += "}";
-
-  console.log(`Button clicked:${dataToSend}`);
-
-  const currentTime = new Date();
-
-  if (oldTime && currentTime.getTime() - oldTime.getTime() > 200) {
-    console.log("Button clicked sent over 200ms.");
-  } else {
-    oldTime = currentTime;
-  }
-
-  const serialPort = getSerialPort();
-
-  if (serialPort && serialPort.isOpen) {
-    serialPort.write(dataToSend, (err: any) => {
-      if (err) {
-        console.error("Error writing to serial port:", err);
-        res.status(500).send("Serial Error");
-      } else {
-        console.log("Data sent to serial port:", dataToSend);
-        res.status(200).send("Data sent to serial port.");
-      }
-    });
-  } else {
-    res.status(500).send("Serial port not available.");
-  }
-});
-
 export {
   initializeSerialPort,
   recordingStm32Data,
-  handleButtonClick,
   getSavedData,
   clearData,
 };

@@ -1,5 +1,6 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { IconButton, Button as MuiButton, Typography } from "@mui/material";
+import useStm32 from "../hooks/use-stm32";
 
 interface ButtonProps {
   label?: string;
@@ -26,32 +27,40 @@ const Button: React.FC<ButtonProps> = ({
   disabled,
   icon,
 }) => {
+  const { socket } = useStm32();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  let message = content;
 
-  const sendingRequests = async () => {
+  const sendingRequests = async (mode: string | undefined, action: string | undefined, content: string | undefined) => {
+    
+    if (!socket) {
+      console.error("Socket is not available.");
+      return;
+    }
+
     try {
-      const response = await fetch("http://localhost:3001/stm32/button", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          mode: mode,
-          action: action,
-          content: message,
-        }),
-      });
+      let dataToSend = "{";
 
-      if (response.ok) {
-        console.log("Button click sent successfully.");
-      } else {
-        console.error("Failed to send button click.");
-        clearInterval(intervalRef.current!);
+      if (mode) {
+        dataToSend += `${mode};`;
       }
+
+      if (action) {
+        dataToSend += `${mode};`;
+      }
+
+      if (content) {
+        dataToSend += `${content};`;
+      }
+
+      dataToSend += "}";
+
+      console.log(`Button clicked: ${dataToSend}`);
+
+      socket.emit("sendDataToStm32", dataToSend);
+
     } catch (error) {
       console.error("An error occurred:", error);
-      clearInterval(intervalRef.current!);
+      clearIntervalRef();
     }
   };
 
@@ -101,7 +110,7 @@ const Button: React.FC<ButtonProps> = ({
 
   const clearIntervalRef = () => {
     if (intervalRef.current !== null) {
-      clearInterval(intervalRef.current!);
+      clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
   };
@@ -111,23 +120,23 @@ const Button: React.FC<ButtonProps> = ({
     window.removeEventListener("mouseup", handleMouseUp);
   };
 
-  const handleMouseDown = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (e.button === 2) {
       handleMouseUp();
     }
 
     if (e.button === 0) {
       if (action === "Increment") {
-        intervalRef.current = setInterval(sendingRequests, 20);
+        intervalRef.current = setInterval(() => sendingRequests(mode, action, content), 20);
         window.addEventListener("mouseup", handleMouseUp);
       } else if (content === "Start") {
-        // sendingStm32RecordingRequests();
-        sendingRequests();
+        sendingStm32RecordingRequests();
+        sendingRequests(mode, action, content);
       } else if (content === "Stop" || content === "Pause") {
-        // sendingStm32StopRecordingRequests();
-        sendingRequests();
+        sendingStm32StopRecordingRequests();
+        sendingRequests(mode, action, content);
       } else {
-        sendingRequests();
+        sendingRequests(mode, action, content);
       }
     }
   };
