@@ -254,7 +254,7 @@ void ManagerMovement_WaitingSecurity()
     managerMovement.currentLegSide = PeriphSwitch_GetLegSide();
     if (managerMovement.securityPass && managerMovement.currentLegSide != 0)
     {
-        managerMovement.state = MMOV_STATE_MANUAL;
+        managerMovement.state = MMOV_STATE_HOMING;
     }
 }
 
@@ -762,7 +762,7 @@ void ManagerMovement_AutoStrectching()
     // Serait la place ou mettre un commande en force
 
     // TODO: ajouter gestion du cote de la jambe (Changement de limit)
-#ifndef MMOV_ENABLE_TORQUE_STRETCHING
+#ifndef MMOV_DISABLE_TORQUE_STRETCHING
 
     // cmd flags
     static bool cmd1Sent = false;
@@ -848,10 +848,10 @@ void ManagerMovement_AutoStrectching()
         ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
         ManagerMotor_StopManualMovement(MMOT_MOTOR_3);
 
-        movementIdx--;
         managerMovement.autoState = MMOV_AUTO_STATE_2FIRST_POS;
 
-#ifndef MMOV_ENABLE_TORQUE_STRETCHING
+#ifndef MMOV_DISABLE_TORQUE_STRETCHING
+        movementIdx--;
         cmd1Sent       = false;
         cmd2Sent       = false;
         cmd3Sent       = false;
