@@ -34,7 +34,7 @@ function createJsonMessage() {
   const { positions, torques, currents } = generateRandomData(3);
   const message = {
     Mode: "Manual",
-    AutoState: "Ready",
+    AutoState: "Stop",
     HomingState: "",
     ExerciseIdx: 0,
     Repetitions: 1,

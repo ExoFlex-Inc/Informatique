@@ -63,7 +63,6 @@ let saveData = {
 };
 
 let exerciseId: number | null = null;
-let oldTime: Date | null = null;
 
 const getSavedData = asyncHandler(async (req: Request, res: Response) => {
   try {
