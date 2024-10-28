@@ -13,7 +13,11 @@ import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import ManualControl from "../components/ManualControl.tsx";
 import Button from "../components/Button.tsx";
 import { Pause, PlayArrow, Refresh, Stop } from "@mui/icons-material";
-interface ChartData {
+import { useStats } from "../hooks/use-stats.ts";
+import { useQueryClient } from "@tanstack/react-query";
+
+interface ChartDataimport
+ {
   datasets: {
     label: string;
     borderColor: string;
@@ -75,9 +79,12 @@ interface Movement {
 
 export default function HMI() {
   const { user } = useUser();
+  const { stats } = useStats();
   const { planData } = usePlan(user?.user_id) as {
     planData: PlanData | undefined;
   };
+  const queryClient = useQueryClient();
+
   const { stm32Data, socket, errorFromStm32 } = useStm32() as {
     stm32Data: Stm32Data | null | undefined;
     socket: any;
@@ -88,8 +95,6 @@ export default function HMI() {
   const [openDialogPainScale, setOpenDialogPainScale] =
     useState<boolean>(false);
   const [painScale, setPainScale] = useState<number>(0);
-
-  const isTablet = useMediaQuery("(max-width: 768px)");
 
   const hasExecute = useRef(false);
   const [chartData, setChartData] = useState<ChartData>({
@@ -230,17 +235,8 @@ export default function HMI() {
 
   useEffect(() => {
     if (painScale && user?.user_id) {
-      const date = Date.now();
-      const formattedDate = new Date(date).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "numeric",
-      });
       const requestBody = {
-        date: formattedDate,
+        stats: stats,
         rated_pain: painScale,
         user_id: user.user_id,
       };
@@ -259,6 +255,8 @@ export default function HMI() {
 
           if (exerciseData.ok) {
             console.log("Data saved successfully.");
+            queryClient.invalidateQueries("topUsers");
+            queryClient.invalidateQueries("stats",user.user_id);
           } else {
             console.error("Failed to save the data.");
           }
@@ -269,7 +267,7 @@ export default function HMI() {
 
       fetchData();
     }
-  }, [painScale, user]);
+  }, [painScale]);
 
   return (
     <div className="flex flex-col custom-height">
@@ -323,7 +321,7 @@ export default function HMI() {
                   mode="Reset"
                 />
               </Box>
-              <LineChart chartData={chartData} type="line" socket={socket} />
+              <LineChart chartData={chartData} type="line" />
             </Grid>
             <Grid item>
               <Box padding={1} bgcolor="white" sx={{ borderRadius: "16px" }}>

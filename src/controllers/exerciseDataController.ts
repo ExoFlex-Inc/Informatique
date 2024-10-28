@@ -58,22 +58,76 @@ export const getExerciseDataById = async (req, res) => {
 };
 
 export const postExerciseData = async (req, res) => {
-  const { date, user_id, rated_pain } = req.body;
+  const { user_id, rated_pain, stats } = req.body;
 
-  const { error } = await supaClient.from("exercise_data").insert({
-    date,
+  // Insert exercise data
+  const { error: exerciseError } = await supaClient.from("exercise_data").insert({
     rated_pain,
     user_id,
   });
 
-  if (error) {
+  if (exerciseError) {
     return res.status(500).json({
       message: "Failed to send exercise data",
-      error: error.message,
+      error: exerciseError.message,
     });
   }
 
-  return res
-    .status(200)
-    .json({ success: true, message: "Exercise data sent successfully" });
+  // Check if the user already has a stats entry
+  const { data: statsData, error: fetchError } = await supaClient
+    .from("stats")
+    .select("current_streak")
+    .eq("user_id", user_id)
+    .single();
+
+  if (fetchError) {
+    return res.status(500).json({
+      message: "Failed to retrieve current streak",
+      error: fetchError.message,
+    });
+  }
+
+  // If stats entry exists, update current_streak
+  if (statsData) {
+    const { error: updateError } = await supaClient
+      .from("stats")
+      .update({ current_streak: statsData.current_streak + 1 })
+      .eq("user_id", user_id);
+
+    if (updateError) {
+      return res.status(500).json({
+        message: "Failed to update current streak",
+        error: updateError.message,
+      });
+    }
+  } else {
+    // If no stats entry exists, create a new one
+    const { error: insertError } = await supaClient.from("stats").insert({
+      current_streak: stats.current_streak + 1,
+      user_id,
+    });
+
+    if (insertError) {
+      return res.status(500).json({
+        message: "Failed to create stats entry",
+        error: insertError.message,
+      });
+    }
+  }
+
+  if(stats.longest_streak < stats.current_streak) {
+    const { error: updateError } = await supaClient
+      .from("stats")
+      .update({ longest_streak: stats.current_streak+1 })
+      .eq("user_id", user_id);
+
+    if (updateError) {
+      return res.status(500).json({
+        message: "Failed to update longest streak",
+        error: updateError.message,
+      });
+    }
+  }
+
+  return res.status(200).json({ success: true, message: "Exercise data sent successfully" });
 };

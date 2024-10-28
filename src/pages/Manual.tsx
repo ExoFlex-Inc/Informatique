@@ -13,7 +13,6 @@ import LineChart from "../components/LineChart";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import useStm32 from "../hooks/use-stm32.ts";
 import Button from "../components/Button.tsx";
-import ManualControl from "../components/ManualControl.tsx";
 
 const WhiteBorderCheckbox = styled(Checkbox)(() => ({
   color: "white",

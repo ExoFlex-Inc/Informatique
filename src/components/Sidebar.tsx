@@ -19,7 +19,7 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import FeedOutlinedIcon from "@mui/icons-material/FeedOutlined";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import GroupIcon from "@mui/icons-material/Group";
-import Icon from "../../assets/user.png";
+import AvatarIcon from "../../assets/user.png";
 import CustomScrollbar from "./CustomScrollbars";
 import { useUser } from "../hooks/use-user";
 
@@ -157,7 +157,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
               <Box mb="25px">
                 <Box display="flex" justifyContent="center" alignItems="center">
                   <Avatar
-                    src={user.avatar_blob_url ? user.avatar_blob_url : Icon}
+                    src={user.avatar_blob_url ? user.avatar_blob_url : AvatarIcon}
                     sx={
                       isTablet
                         ? { width: 50, height: 50 }

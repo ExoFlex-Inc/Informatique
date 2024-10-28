@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Box,
   CircularProgress,
@@ -53,57 +53,40 @@ export default function ProgressionWidget({
   setOpenDialogPainScale,
 }: Props) {
   const [stretchProgress, setStretchProgress] = useState(0);
-  const [totalStretch, setTotalStretch] = useState(1);
   const [repetitionProgress, setRepetitionProgress] = useState(0);
-  const [totalRepetition, setTotalRepetition] = useState(0);
+  const [totalRepetition, setTotalRepetition] = useState(1);
+
+  // Memoize totalStretch calculation
+  const totalStretch = useMemo(() => {
+    if (!planData?.plan) return 1;
+    return planData.plan.reduce((total: number, exercise: any) => {
+      return total + (exercise?.repetitions || 0);
+    }, 0);
+  }, [planData]);
 
   useEffect(() => {
     if (stm32Data?.Repetitions !== undefined) {
       setRepetitionProgress(stm32Data.Repetitions);
+      setStretchProgress(stm32Data.Repetitions);
+      
+      // Open pain scale dialog if repetitions are complete
+      if (stm32Data.Repetitions === totalRepetition) {
+        setOpenDialogPainScale(true);
+      }
     }
-    if (stm32Data?.Repetitions !== 0 && stm32Data?.Repetitions !== undefined) {
-      setStretchProgress(stretchProgress + 1);
-    }
-    //Put the condition at true to make your test on hmi side.
-    if (stm32Data?.Repetitions / totalRepetition === 1) {
-      setOpenDialogPainScale(true);
-    }
-  }, [stm32Data?.Repetitions]);
+  }, [stm32Data?.Repetitions, totalRepetition, setOpenDialogPainScale]);
 
   useEffect(() => {
     if (planData && stm32Data?.ExerciseIdx !== undefined) {
-      const currentPlan = planData.plan[stm32Data.ExerciseIdx];
-      if (currentPlan && currentPlan.repetitions !== undefined) {
-        setTotalRepetition(currentPlan.repetitions);
-      }
+      setTotalRepetition(planData.plan[stm32Data.ExerciseIdx]?.repetitions || 1);
     }
   }, [planData, stm32Data?.ExerciseIdx]);
-
-  useEffect(() => {
-    if (stm32Data?.ExerciseIdx !== undefined) {
-      if (stm32Data.ExerciseIdx === 0 && stm32Data.Repetitions === 0) {
-        setStretchProgress(0);
-      }
-    }
-  }, [stm32Data?.ExerciseIdx, stm32Data?.Repetitions]);
-
-  useEffect(() => {
-    if (planData && planData.plan) {
-      let total = 0;
-      planData.plan.forEach((plan: any) => {
-        if (plan && plan.repetitions !== undefined) {
-          total += plan.repetitions;
-        }
-      });
-      setTotalStretch(total);
-    }
-  }, [planData]);
 
   return (
     <div className="">
       <div className="flex justify-center mb-2.5">
         <CircularProgressWithLabel
-          value={(stretchProgress / totalStretch) * 100}
+          value={(stretchProgress / totalStretch) * 100 || 0}
         />
       </div>
       <p className="text-black justify-center flex mb-7">Stretch Progress</p>
@@ -115,7 +98,7 @@ export default function ProgressionWidget({
           <LinearProgress
             color="success"
             variant="determinate"
-            value={(repetitionProgress / totalRepetition) * 100}
+            value={(repetitionProgress / totalRepetition) * 100 || 0}
           />
         </Box>
       </div>

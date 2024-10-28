@@ -27,7 +27,7 @@ export default defineConfig({
     VitePWA({
       mode:
         process.env.NODE_ENV === "production" ? "production" : "development",
-      strategies: "injectManifest", // Caching strategy
+      strategies: "injectManifest",
       injectManifest: {
         globPatterns: ["**/*.{js,css,html,png,svg,jpg}"], // Cache all relevant assets
       },
@@ -49,7 +49,6 @@ export default defineConfig({
   ],
   // Server settings
   server: {
-    hmr: {},
     // open: true,
     port: 1337, // Set the server port to 1337
   },

@@ -290,13 +290,15 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
 
     newSerialPort.on("error", (error) => {
       console.log("Serial port error:", error.message);
-      togglePushInterval(false); // Stop interval on error
+      togglePushInterval(false);
+      clearPreviousData();
     });
 
     newSerialPort.on("close", () => {
       console.log("Serial port closed");
       io.emit("serialPortClosed", "Serial port closed");
-      togglePushInterval(false); // Stop interval when port is closed
+      togglePushInterval(false);
+      clearPreviousData();
       setSerialPort(null);
     });
 

@@ -33,11 +33,11 @@ function generateRandomData(numMotors) {
 function createJsonMessage() {
   const { positions, torques, currents } = generateRandomData(3);
   const message = {
-    Mode: "Manual",
+    Mode: "Automatic",
     AutoState: "Stop",
     HomingState: "",
     ExerciseIdx: 0,
-    Repetitions: 1,
+    Repetitions: 10,
     ErrorCode: 0b10101,
     Positions: positions,
     Torques: torques,

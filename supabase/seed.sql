@@ -4,22 +4,33 @@ DECLARE
     j INTEGER;
     new_email TEXT;
     new_id UUID;
+    user1_id UUID;
     base_date TIMESTAMPTZ;
     exercise_data JSONB;
     rated_pain INTEGER;
     repetitions_done INTEGER;
     new_phone_number TEXT;
+    current_streak INTEGER;
+    longest_streak INTEGER;
+    first_name_array TEXT[] := ARRAY['John', 'Jane', 'Alex', 'Emily', 'Michael', 'Sarah', 'David', 'Laura', 'James', 'Emma', 'Daniel', 'Olivia', 'William', 'Sophia', 'Benjamin', 'Isabella', 'Jacob', 'Mia', 'Ethan', 'Ava'];
+    last_name_array TEXT[] := ARRAY['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin'];
+    random_first_name TEXT;
+    random_last_name TEXT;
 BEGIN
 
     SET LOCAL TIME ZONE 'America/Toronto';
 
-    FOR i IN 1..50 LOOP
+    FOR i IN 1..20 LOOP
         new_email := 'user' || i || '@exoflex.com';
         new_id := gen_random_uuid();
         base_date := NOW() - INTERVAL '1 month';
         new_phone_number := '(' || floor(random() * 900 + 100)::text || ')' ||
                     floor(random() * 900 + 100)::text || '-' ||
                     floor(random() * 10000)::text;
+
+        -- Select random first and last names from the predefined arrays
+        random_first_name := first_name_array[floor(random() * array_length(first_name_array, 1)) + 1];
+        random_last_name := last_name_array[floor(random() * array_length(last_name_array, 1)) + 1];
 
         -- Insert into auth.users
         INSERT INTO auth.users (
@@ -61,6 +72,11 @@ BEGIN
             ''
         );
 
+        -- Save user1's ID
+        IF i = 1 THEN
+            user1_id := new_id;
+        END IF;
+
         -- Insert into user_profiles
         INSERT INTO user_profiles (
             user_id, 
@@ -75,8 +91,8 @@ BEGIN
         ) 
         VALUES (
             new_id,
-            'User', 
-            'Lastname', 
+            random_first_name,
+            random_last_name,
             'Client', 
             'client',
             new_email,
@@ -132,6 +148,13 @@ BEGIN
                 }
             }'
         );
+
+        -- Generate random values for current_streak and longest_streak
+        current_streak := floor(random() * 100) + 1;
+        longest_streak := greatest(current_streak, floor(random() * 100) + 5);
+        -- Insert the random values into the stats table
+        INSERT INTO stats (user_id, current_streak, longest_streak)
+        VALUES (new_id, current_streak, longest_streak);
 
         -- Loop for exercises
         FOR j IN 1..50 LOOP
@@ -233,6 +256,10 @@ BEGIN
             floor(random() * 900 + 100)::text || '-' ||
             floor(random() * 10000)::text;
 
+        -- Select random first and last names from the predefined arrays
+        random_first_name := first_name_array[floor(random() * array_length(first_name_array, 1)) + 1];
+        random_last_name := last_name_array[floor(random() * array_length(last_name_array, 1)) + 1];
+
         INSERT INTO auth.users (
             instance_id, 
             id, 
@@ -285,8 +312,8 @@ BEGIN
         ) 
         VALUES (
             new_id,
-            'Admin', 
-            'Lastname', 
+            random_first_name,
+            random_last_name, 
             'Physiotherapist', 
             'admin',
             new_email,
@@ -379,6 +406,17 @@ BEGIN
         new_id
     );
 
+    INSERT INTO relations (
+        id,
+        admin_id,
+        client_id
+    )
+    VALUES (
+        gen_random_uuid(),
+        new_id,
+        user1_id
+    );
+
     -- Insert a default plan for the dev
     INSERT INTO plans (
         user_id,
@@ -425,6 +463,11 @@ BEGIN
             }
         }'
     );
+
+    current_streak := floor(random() * 100) + 1;
+    longest_streak := greatest(current_streak, floor(random() * 100) + 5); 
+    INSERT INTO stats (user_id, current_streak, longest_streak)
+    VALUES (new_id, current_streak, longest_streak);
 
     -- Exercises for dev user
         FOR j IN 1..50 LOOP
