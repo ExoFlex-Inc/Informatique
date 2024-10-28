@@ -48,7 +48,7 @@ const app: Application = express();
 const httpServer = createServer(app);
 const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: "http://localhost:1337",
+    origin: "http://localhost:1338",
     methods: ["GET", "POST"],
   },
 });
@@ -64,7 +64,7 @@ app.use("/auth", limiter);
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:1337",
+    origin: "http://localhost:1338",
     credentials: true,
   }),
 );
