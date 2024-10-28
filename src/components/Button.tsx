@@ -45,7 +45,7 @@ const Button: React.FC<ButtonProps> = ({
       }
 
       if (action) {
-        dataToSend += `${mode};`;
+        dataToSend += `${action};`;
       }
 
       if (content) {

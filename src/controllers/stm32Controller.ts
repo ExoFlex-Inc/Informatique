@@ -73,8 +73,7 @@ const getSavedData = asyncHandler(async (req: Request, res: Response) => {
     res.status(200).json({
       data: saveData,
     });
-
-    clearPreviousData();
+    resetSaveData()
   } catch (error) {
     console.error("Error in getSavedData:", error);
     return res.status(500).send("An error occurred while retrieving data.");
@@ -83,13 +82,63 @@ const getSavedData = asyncHandler(async (req: Request, res: Response) => {
 
 const clearData = asyncHandler(async (req: Request, res: Response) => {
   try {
-    clearPreviousData();
+    resetSaveData()
     return res.status(200).send("Data cleared successfully.");
   } catch (error) {
     console.error("Error in clearData:", error);
     return res.status(500).send("An error occurred while clearing data.");
   }
 });
+
+function resetSaveData() {
+  saveData = {
+    recorded_date: new Date()
+      .toLocaleString("en-CA", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+        timeZoneName: "short",
+      })
+      .replace(" 24:", " 00:"),
+    angles: {
+      dorsiflexion: [],
+      eversion: [],
+      extension: [],
+    },
+    angle_max: {
+      dorsiflexion: 0,
+      eversion: 0,
+      extension: 0,
+    },
+    torques: {
+      dorsiflexion: [],
+      eversion: [],
+      extension: [],
+    },
+    torque_max: {
+      dorsiflexion: 0,
+      eversion: 0,
+      extension: 0,
+    },
+    repetitions_done: 0,
+    repetitions_target: 0,
+  };
+
+  prevAngles = {
+    dorsiflexion: [],
+    eversion: [],
+    extension: [],
+  };
+  prevTorques = {
+    dorsiflexion: [],
+    eversion: [],
+    extension: [],
+  };
+}
 
 const insertInitialDataToSupabase = async (): Promise<boolean> => {
   try {
@@ -206,10 +255,7 @@ const recordingStm32Data = async (req: Request, res: Response) => {
 
     if (start) {
       // Clear previous data if needed
-      const clearSuccess = await clearPreviousData();
-      if (!clearSuccess) {
-        return res.status(500).send("Failed to clear previous data.");
-      }
+      resetSaveData()
 
       // Insert initial JSON data
       const initialInsertSuccess = await insertInitialDataToSupabase();
@@ -236,22 +282,6 @@ const recordingStm32Data = async (req: Request, res: Response) => {
     console.error("Error in recordingStm32Data:", error);
     return res.status(500).send("An unexpected error occurred.");
   }
-};
-
-// Function to clear accumulated data
-const clearPreviousData = () => {
-  prevAngles = {
-    dorsiflexion: [],
-    eversion: [],
-    extension: [],
-  };
-  prevTorques = {
-    dorsiflexion: [],
-    eversion: [],
-    extension: [],
-  };
-
-  return true;
 };
 
 // Function to initialize serial port
@@ -334,7 +364,7 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
 
           // Update saveData with new values
           saveData = {
-            ...saveData, // Preserve previous data
+            ...saveData,
             angles: {
               dorsiflexion: [...prevAngles.dorsiflexion],
               eversion: [...prevAngles.eversion],
