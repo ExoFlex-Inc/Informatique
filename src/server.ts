@@ -91,23 +91,31 @@ app.use("/notification", notificationRoute);
 app.use("/stm32", serialPortRoutes);
 app.use("/plan", planRoutes);
 
+let lastCallTime = 0;
+
 io.on("connection", (socket) => {
   console.log("A client connected");
 
   socket.on("sendDataToStm32", (data) => {
+    const currentTime = Date.now();
+
+    if (lastCallTime !== 0) {
+      const timeDifference = currentTime - lastCallTime;
+      console.log(`Time since last socket call: ${timeDifference} ms`);
+
+    }
+
+    lastCallTime = currentTime;
+
     const serialPort = getSerialPort();
     
     if (serialPort && serialPort.isOpen) {
-      console.time("SerialWriteTime");
-
       serialPort.write(data, (err) => {
         if (err) {
           console.error("Error writing to serial port:", err);
         } else {
           console.log("Data sent to serial port:", data);
         }
-        
-        console.timeEnd("SerialWriteTime");
       });
     }
   });
