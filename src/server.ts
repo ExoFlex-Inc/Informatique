@@ -93,15 +93,21 @@ app.use("/plan", planRoutes);
 
 io.on("connection", (socket) => {
   console.log("A client connected");
+
   socket.on("sendDataToStm32", (data) => {
     const serialPort = getSerialPort();
+    
     if (serialPort && serialPort.isOpen) {
-      serialPort.write(data, (err: any) => {
+      console.time("SerialWriteTime");
+
+      serialPort.write(data, (err) => {
         if (err) {
           console.error("Error writing to serial port:", err);
         } else {
           console.log("Data sent to serial port:", data);
         }
+        
+        console.timeEnd("SerialWriteTime");
       });
     }
   });
