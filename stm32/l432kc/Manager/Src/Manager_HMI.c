@@ -60,8 +60,9 @@ void ManagerHMI_SendJSON() {
     cJSON* root = cJSON_CreateObject();
 
     // Add mode, exercise, repetitions, sets, and errorcode to the JSON object
-    cJSON_AddStringToObject(root, "Mode", "Automatic");
-    cJSON_AddStringToObject(root, "AutoState", "Stretching");
+    cJSON_AddStringToObject(root, "Mode", "ChangeSide");
+    cJSON_AddStringToObject(root, "AutoState", "Ready");
+    cJSON_AddStringToObject(root, "CurrentLegSide", "LegIsLeft");
     cJSON_AddStringToObject(root, "HomingState", "");
     cJSON_AddNumberToObject(root, "ExerciseIdx", 0);
     cJSON_AddNumberToObject(root, "Repetitions", 1);

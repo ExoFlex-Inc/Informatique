@@ -1,5 +1,7 @@
+import { stm32DataType } from "../hooks/use-stm32.ts";
+
 interface ExerciseOverviewWidgetProps {
-  stm32Data?: string | null;
+  stm32Data?: stm32DataType | null;
   planData: any;
 }
 
