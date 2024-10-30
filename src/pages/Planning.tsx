@@ -5,6 +5,8 @@ import {
   Radio,
   FormControl,
   FormLabel,
+  Typography,
+  Box
 } from "@mui/material";
 import UserSearchBar from "../components/UserSearchBar.tsx";
 import { blue } from "@mui/material/colors";
@@ -177,48 +179,56 @@ export default function Planning() {
               />
             ))
           ) : (
-            <div className="flex justify-center items-center">
-              <p className="text-gray-500 text-lg">
+            <Box className="flex justify-center items-center">
+              <Typography sx={{color: "gray"}} fontSize={"30px"}>
                 No plan available for the selected user.
-              </p>
-            </div>
+              </Typography>
+            </Box>
+            // <div className="flex justify-center items-center">
+            //   <p className="text-gray-500 text-lg">
+            //   </p>
+            // </div>
           )}
         </div>
-        <div className="flex justify-center my-4">
-          <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mr-4 rounded"
-            onClick={addSet}
-          >
-            Add Set
-          </button>
+        {planData && planData.plan ? (
+          <div className="flex justify-center my-4">
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mr-4 rounded"
+              onClick={addSet}
+            >
+              Add Set
+            </button>
 
-          <button
-            className="bg-rose-500 hover:bg-rose-700 text-white font-bold py-2 px-4 mr-4 rounded"
-            onClick={addSetRest}
-          >
-            Add Set Rest
-          </button>
+            <button
+              className="bg-rose-500 hover:bg-rose-700 text-white font-bold py-2 px-4 mr-4 rounded"
+              onClick={addSetRest}
+            >
+              Add Set Rest
+            </button>
 
-          <button
-            disabled={addExerciseDisable}
-            className={
-              addExerciseDisable
-                ? "bg-gray-500 text-white font-bold py-2 px-4 mr-4 rounded cursor-not-allowed"
-                : "bg-cyan-500 hover:bg-cyan-700 text-white font-bold py-2 px-4 mr-4 rounded"
-            }
-            onClick={handleAddExercise}
-          >
-            Add Exercise
-          </button>
-          <button
-            className={`text-white font-bold py-2 px-4 rounded
-              ${isDisabled ? "bg-gray-500 cursor-not-allowed" : "bg-green-500 hover:bg-green-700"}`}
-            onClick={savePlan}
-            disabled={isDisabled}
-          >
-            Save Plan
-          </button>
-        </div>
+            <button
+              disabled={addExerciseDisable}
+              className={
+                addExerciseDisable
+                  ? "bg-gray-500 text-white font-bold py-2 px-4 mr-4 rounded cursor-not-allowed"
+                  : "bg-cyan-500 hover:bg-cyan-700 text-white font-bold py-2 px-4 mr-4 rounded"
+              }
+              onClick={handleAddExercise}
+            >
+              Add Exercise
+            </button>
+            <button
+              className={`text-white font-bold py-2 px-4 rounded
+                ${isDisabled ? "bg-gray-500 cursor-not-allowed" : "bg-green-500 hover:bg-green-700"}`}
+              onClick={savePlan}
+              disabled={isDisabled}
+            >
+              Save Plan
+            </button>
+          </div>
+        ) : 
+          (true)
+        }
       </CustomScrollbar>
     </div>
   );

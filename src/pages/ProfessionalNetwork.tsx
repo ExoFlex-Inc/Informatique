@@ -9,6 +9,7 @@ import Loading from "../components/Loading.tsx";
 import { useRelations } from "../hooks/use-relations.ts";
 import { useFetchPendingRelations } from "../hooks/use-relations.ts";
 import { useUser } from "../hooks/use-user.ts";
+import CustomScrollbar from "../components/CustomScrollbars.tsx";
 
 const ProfessionalNetwork = () => {
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ const ProfessionalNetwork = () => {
   }
 
   return (
-    <div>
+    <div className="flex flex-col custom-height">
       <div className="flex items-center gap-4 relative">
         <UserSearchBar
           sx={{ width: 500 }}
@@ -72,10 +73,12 @@ const ProfessionalNetwork = () => {
           true
         )}
       </div>
-      <UserList
-        listOfUsers={filteredUsers}
-        setFilteredUsers={setFilteredUsers}
-      />
+      <CustomScrollbar>
+        <UserList
+          listOfUsers={filteredUsers}
+          setFilteredUsers={setFilteredUsers}
+        />
+      </CustomScrollbar>
     </div>
   );
 };
