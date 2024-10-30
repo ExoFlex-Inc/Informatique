@@ -43,6 +43,7 @@ uint8_t ManagerMotor_GetState();
 void    ManagerMotor_StopManualMovement(uint8_t motorindex);
 
 void ManagerMotor_SoftwareOrigin(uint8_t id);
+bool ManagerMotor_HasMachineHomed();
 void ManagerMotor_SetMotorOrigin(uint8_t id);
 void ManagerMotor_SetOriginShift(uint8_t id, float shiftValue);
 
