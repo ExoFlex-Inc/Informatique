@@ -1213,7 +1213,7 @@ bool ManagerMovement_SetState(uint8_t newState)
 {
     bool stateChanged = false;
 
-    if (managerMovement.state == MMOV_STATE_WAITING_MANUAL ||
+    if (managerMovement.state == MMOV_STATE_MANUAL ||
     		managerMovement.state == MMOV_STATE_AUTOMATIC)
     {
     	if (newState != managerMovement.state)
