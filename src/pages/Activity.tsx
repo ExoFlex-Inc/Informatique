@@ -514,7 +514,7 @@ export default function Activity() {
   }
 
   return (
-    <div className=" mx-auto max-w-7xl">
+    <div className=" flex flex-col custom-height mx-auto max-w-7xl">
       <div className="mb-4 flex flex-wrap items-center gap-4">
         {/* User Search Bar */}
         <div className="flex-grow max-w-md">
@@ -572,8 +572,7 @@ export default function Activity() {
           {graphType}
         </Typography>
       </div>
-      {/* <CustomScrollbar> */}
-      <>
+      <CustomScrollbar>
         <div className="mb-4 basis-full">
           <LineChart type="activity" chartData={dataset1} title={title1} />
         </div>
@@ -600,8 +599,7 @@ export default function Activity() {
             </Paper>
           </Box>
         </ThemeProvider>
-      </>
-      {/* </CustomScrollbar> */}
+      </CustomScrollbar>
     </div>
   );
 }
