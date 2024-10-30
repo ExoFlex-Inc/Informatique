@@ -273,7 +273,7 @@ void ManagerMovement_Homing()
     switch (managerMovement.homingState)
     {
     case MMOV_VERIF_PERSON_IN:
-
+    	managerMovement.homingState = MMOV_HOMING_EXTENSION;
         break;
 
     case MMOV_HOMING_EXTENSION:
@@ -1216,10 +1216,12 @@ bool ManagerMovement_SetState(uint8_t newState)
     if (managerMovement.state == MMOV_STATE_MANUAL ||
     		managerMovement.state == MMOV_STATE_AUTOMATIC)
     {
-    	if (newState != managerMovement.state)
+
+		if (newState != managerMovement.state)
 		{
 			if (newState == MMOV_STATE_AUTOMATIC &&
-				managerMovement.state != MMOV_STATE_HOMING)
+				managerMovement.state != MMOV_STATE_HOMING &&
+				ManagerMotor_HasMachineHomed())
 			{
 				managerMovement.autoState = MMOV_AUTO_STATE_WAITING4PLAN;
 				stateChanged              = true;
@@ -1235,7 +1237,8 @@ bool ManagerMovement_SetState(uint8_t newState)
 				stateChanged = true;
 			}
 			else if (newState == MMOV_STATE_CHANGESIDE &&
-					 managerMovement.state != MMOV_STATE_HOMING)
+					 managerMovement.state != MMOV_STATE_HOMING &&
+					 ManagerMotor_HasMachineHomed())
 			{
 				stateChanged = true;
 			}
