@@ -23,9 +23,9 @@ import { useQueryClient } from "@tanstack/react-query";
 const Notification = () => {
   const [isNotifications, setIsNotifications] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [responseMessage, setResponseMessage] = useState({});
-  const dropdownRef = useRef(null);
-  const buttonRef = useRef(null);
+  const [responseMessage, setResponseMessage] = useState<{ [key: string]: string }>({});
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const queryClient = useQueryClient();
 
@@ -39,7 +39,7 @@ const Notification = () => {
   }, [notifications]);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node) &&
@@ -86,7 +86,7 @@ const Notification = () => {
       }
 
       //Invalidate relation query to refetch the updated data
-      queryClient.invalidateQueries(["relations"]);
+      queryClient.invalidateQueries({ queryKey: ["relations"] });
 
       const response = await fetch(
         `http://localhost:3001/notification/${notification.id}`,
@@ -193,7 +193,7 @@ const Notification = () => {
             <Paper sx={{ width: "30vw", padding: 2 }}>
               <List>
                 {notifications && notifications.length > 0 ? (
-                  notifications.map((notification, index) => (
+                  notifications.map((notification: any, index: number) => (
                     <ListItem
                       key={notification.id || index}
                       alignItems="flex-start"

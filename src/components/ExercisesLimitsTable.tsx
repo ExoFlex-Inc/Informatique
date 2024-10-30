@@ -62,9 +62,9 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
 
     // Update the appropriate state based on side and limit type
     if (side === "Right") {
-      setLimitRight(limitType, name as Stretch, parsedValue);
+      setLimitRight(limitType, name as Stretch, parsedValue ?? 0);
     } else {
-      setLimitLeft(limitType, name as Stretch, parsedValue);
+      setLimitLeft(limitType, name as Stretch, parsedValue ?? 0);
     }
   };
 

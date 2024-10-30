@@ -34,7 +34,7 @@ const ExerciseOverviewWidget: React.FC<ExerciseOverviewWidgetProps> = ({
         <tbody className="bg-white divide-y divide-gray-200">
           {planData && Array.isArray(planData.plan)
             ? planData.plan.map(
-                (item, index) =>
+                (item: { movement: any[]; repetitions: number; rest: number }, index: number) =>
                   "movement" in item && (
                     <tr
                       key={index}

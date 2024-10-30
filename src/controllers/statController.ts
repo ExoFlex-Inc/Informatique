@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import supaClient from "../utils/supabaseClient.ts";
 
-const fetchStats = async (req: Request, res: Response) => {
-    const user_id = req.params.userId;
+export const fetchStats = async (req: Request, res: Response) => {
+    const user_id = req.params["userId"];
   
     if (!user_id) {
       return res
@@ -29,11 +29,11 @@ const fetchStats = async (req: Request, res: Response) => {
       console.error("Error fetching stats:", error);
       return res
         .status(500)
-        .json({ message: "Error fetching stats", error: error.message });
+        .json({ message: "Error fetching stats", error: (error as any).message });
     }
   };
 
-  const fetchTopUsersStats = async (req: Request, res: Response) => {
+  export const fetchTopUsersStats = async (req: Request, res: Response) => {
 
     const {limit} = req.query;
   
@@ -75,11 +75,6 @@ const fetchStats = async (req: Request, res: Response) => {
       console.error("Error fetching stats:", error);
       return res
         .status(500)
-        .json({ message: "Error fetching stats", error: error.message });
+        .json({ message: "Error fetching stats", error: (error as any).message });
     }
   };
-
-export {
-  fetchStats,
-  fetchTopUsersStats
-};

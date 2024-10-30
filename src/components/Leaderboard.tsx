@@ -15,6 +15,7 @@ import {
 import AvatarIcon from "../../assets/user.png";
 
 interface User {
+  user_id: any;
   id: string;
   first_name: string;
   last_name: string;

@@ -39,9 +39,11 @@ const myShellScript = exec(`bash ${scriptPath} 2>&1`, (error, stdout, _) => {
 });
 
 // Capture and log stdout data in real-time from socat
-myShellScript.stdout.on('data', (data) => {
+if (myShellScript.stdout) {
+  myShellScript.stdout.on('data', (data) => {
     console.log(`Output: ${data}`);
-});
+  });
+}
 
 
 const app: Application = express();
@@ -74,10 +76,10 @@ app.use(supabaseMiddleware);
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "default_secret",
+    secret: process.env["SESSION_SECRET"] || "default_secret",
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: process.env.NODE_ENV === "production" },
+    cookie: { secure: process.env["NODE_ENV"] === "production" },
   }),
 );
 
@@ -129,7 +131,7 @@ io.on("connection", (socket) => {
 
 export { io };
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env["PORT"] || 3001;
 httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

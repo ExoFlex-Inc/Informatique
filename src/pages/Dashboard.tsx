@@ -8,7 +8,7 @@ import { useTopUsers, useUser } from "../hooks/use-user.ts";
 export default function Dashboard() {
   const {user} = useUser();
   const { stats, isLoading: statsLoading } = useStats();
-  const { users, isLoading: usersLoading } = useTopUsers();
+  const { users = [], isLoading: usersLoading } = useTopUsers();
 
   if (statsLoading || usersLoading) {
     return (
@@ -30,7 +30,7 @@ export default function Dashboard() {
           )}
           <Leaderboard
             users={users}
-            currentUser={users.find(u => u.user_id === user.user_id)}
+            currentUser={users?.find(u => u.user_id === user.user_id)}
           />
         </Grid>
       </Container>

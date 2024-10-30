@@ -9,7 +9,12 @@ import {
   Whatshot as WhatshotIcon
 } from '@mui/icons-material'
 
-export default function StretchStreak({ currentStreak, longestStreak }) {
+interface StretchStreakProps {
+  currentStreak: number;
+  longestStreak: number;
+}
+
+export default function StretchStreak({ currentStreak, longestStreak }: StretchStreakProps) {
     return (
     <Grid item xs={12} md={4}>
     <Paper

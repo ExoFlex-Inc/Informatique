@@ -1,5 +1,5 @@
 import DeleteIcon from "@mui/icons-material/Delete";
-import React, { useState, useRef } from "react";
+import React from "react";
 
 interface ExercisesPlanTableProps {
   setPlan: React.Dispatch<React.SetStateAction<any>>;
@@ -20,7 +20,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
 
   // Function to handle removing an exercise from the plan
   const removeExercise = (setIndex: number, exerciseIndex?: number) => {
-    setPlan((prevPlan) => {
+    setPlan((prevPlan: any) => {
       // Create a shallow copy of the entire prevPlan object (which includes plan and limits)
       const updatedPlan = { ...prevPlan };
 
@@ -88,7 +88,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
       parsedValue = 0;
     }
 
-    setPlan((prevPlan) => {
+    setPlan((prevPlan: any) => {
       // Create a shallow copy of the entire prevPlan object (including plan and limits)
       const updatedPlan = { ...prevPlan };
 
@@ -148,7 +148,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
           </thead>
           {/* Table Body */}
           <tbody className="bg-white">
-            {set.movement.map((element, exerciseIndex) => (
+            {set.movement.map((element: any, exerciseIndex: number) => (
               <tr key={exerciseIndex}>
                 {/* First Column */}
                 {exerciseIndex === 0 && (

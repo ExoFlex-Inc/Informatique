@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
-import asyncHandler from "express-async-handler";
 import supaClient from "../utils/supabaseClient.ts";
 
-const postPlan = asyncHandler(async (req: Request, res: Response) => {
+export const postPlan = async (req: Request, res: Response) => {
   const { plan, user_id } = req.body;
 
   if (!plan || !user_id) {
@@ -64,10 +63,10 @@ const postPlan = asyncHandler(async (req: Request, res: Response) => {
     console.error("Unexpected error:", err);
     return res.status(500).json({ message: "Unexpected error occurred." });
   }
-});
+};
 
-const getPlan = asyncHandler(async (req: Request, res: Response) => {
-  const user_id = req.params.userId;
+export const getPlan = async(req: Request, res: Response) => {
+  const user_id = req.params["userId"];
 
   // Input Validation
   if (!user_id) {
@@ -104,6 +103,4 @@ const getPlan = asyncHandler(async (req: Request, res: Response) => {
     console.error("Unexpected error:", err);
     return res.status(500).json({ message: "Unexpected error occurred." });
   }
-});
-
-export { postPlan, getPlan };
+};

@@ -61,7 +61,6 @@ export function useFetchPendingRelations() {
       return await response.json();
     },
     staleTime: 1000 * 60 * 5,
-    cacheTime: 1000 * 60 * 10,
     enabled: !!user?.user_id,
   });
 

@@ -17,7 +17,7 @@ async function registerFCMToken() {
         "/firebase-messaging-sw.js",
       );
       fcmToken = await getToken(messaging, {
-        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+        vapidKey: import.meta.env["VITE_FIREBASE_VAPID_KEY"],
         serviceWorkerRegistration: registration,
       });
     } else {
@@ -35,7 +35,7 @@ export default function Login() {
   const [showSignUpModal, setShowSignUpModal] = useState(false);
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const { user, updateProfile } = useUser();
+  const { updateProfile } = useUser();
 
   async function handleLogin(event: React.FormEvent) {
     event.preventDefault();

@@ -45,11 +45,14 @@ export default defineConfig({
         enabled: true, // Enable PWA in development
         type: undefined, // Optional, can be set to "module" or "classic"
       },
+      workbox: {
+        globPatterns: ["**/*"],
+      },
+      includeAssets: ["**/*"],
     }),
   ],
   // Server settings
   server: {
-    hmr: {},
     port: 1338,
   },
 });

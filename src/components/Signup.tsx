@@ -9,7 +9,11 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
-export default function Signup({ onClose }) {
+interface SignupProps {
+  onClose?: () => void;
+}
+
+export default function Signup({ onClose }: SignupProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -27,7 +31,7 @@ export default function Signup({ onClose }) {
     setShowConfirmPassword((show) => !show);
   };
 
-  async function handleSignUp(event) {
+  async function handleSignUp(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (password !== confirmPassword) {
       alert("Passwords do not match");

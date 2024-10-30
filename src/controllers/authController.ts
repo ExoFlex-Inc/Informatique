@@ -6,8 +6,8 @@ import { CookieOptions } from "express";
 
 const cookieOptions: CookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+  secure: process.env["NODE_ENV"] === "production",
+  sameSite: process.env["NODE_ENV"] === "production" ? "strict" : "lax",
   path: "/",
 };
 
@@ -56,6 +56,9 @@ export const signup = async (req: Request, res: Response) => {
       return res.status(400).json({ error: authInsertError.message });
     }
 
+    if (!newUserProfile.user) {
+      return res.status(400).json({ error: "User profile creation failed." });
+    }
     const newUserUUID = newUserProfile.user.id;
 
     // Insert user profile in the database
@@ -177,7 +180,7 @@ export const logout = async (req: Request, res: Response) => {
 
 export const setSession = async (req: Request, res: Response) => {
   try {
-    const { data, error } = await supaClient.auth.getSession();
+    const { data } = await supaClient.auth.getSession();
 
     if (data?.session) {
       // Session is active
@@ -196,12 +199,12 @@ export const setSession = async (req: Request, res: Response) => {
 
     // Use fetch to refresh the session
     const response = await fetch(
-      `${process.env.SUPABASE_API_URL}/auth/v1/token?grant_type=refresh_token`,
+      `${process.env["SUPABASE_API_URL"]}/auth/v1/token?grant_type=refresh_token`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          apikey: process.env.SUPABASE_ANON_KEY,
+          apikey: process.env["SUPABASE_ANON_KEY"],
         },
         body: JSON.stringify({
           refresh_token: refreshToken,
@@ -253,7 +256,7 @@ export const setSession = async (req: Request, res: Response) => {
   }
 };
 
-export const getSession = async (req: Request, res: Response) => {
+export const getSession = async (_: Request, res: Response) => {
   try {
     const { data, error } = await supaClient.auth.getSession();
 

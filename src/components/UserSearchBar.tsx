@@ -24,7 +24,7 @@ const UserSearchBar: React.FC<UserSearchBarProps> = ({
         disablePortal
         id="combo-box"
         options={users.map((user) => user.email)}
-        onChange={(event, value) => {
+        onChange={(_, value) => {
           const selectedUser = users.find((user) => user.email === value);
           setSearchQuery?.(selectedUser ? [selectedUser] : users);
         }}

@@ -101,7 +101,6 @@ export function useUser() {
     },
     // retry: false,
     staleTime: 0, // 5 minutes
-    cacheTime: 1000 * 60 * 60 * 24, // 24 hours
     refetchOnMount: true,
   });
 
@@ -136,7 +135,7 @@ export function useUser() {
         ...user,
         ...updatedProfile,
       });
-      queryClient.invalidateQueries(["user"]);
+      queryClient.invalidateQueries({ queryKey: ["user"] });
     },
   });
 
@@ -170,7 +169,7 @@ export function useUser() {
           ...user,
           avatar_url: avatarUrl,
         });
-        queryClient.invalidateQueries(["user"]);
+        queryClient.invalidateQueries({ queryKey: ["user"] });
       }
     },
   });
@@ -223,7 +222,7 @@ export function useTopUsers() {
 
       // Fetch avatars for each user and augment the user data
       const updatedData = await Promise.all(
-        data.map(async (profileData) => {
+        data.map(async (profileData: UserProfile) => {
           if (profileData.avatar_url) {
             try {
               const avatarResponse = await fetch(
@@ -261,7 +260,6 @@ export function useTopUsers() {
       return updatedData;
     },
     staleTime: 1000 * 60 * 15, // 15 min
-    cacheTime: 1000 * 60 * 60 * 24, // 24 hours
     refetchOnMount: true,
   });
 

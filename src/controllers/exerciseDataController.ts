@@ -1,6 +1,7 @@
 import supaClient from "../utils/supabaseClient.ts";
+import { Request, Response } from "express";
 
-export const getExerciseData = async (req, res) => {
+export const getExerciseData = async (req: Request, res: Response) => {
   const { userId } = req.params;
   const { start_date, end_date } = req.query;
 
@@ -23,11 +24,11 @@ export const getExerciseData = async (req, res) => {
 
     return res.status(200).json(data);
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: (error as any).message });
   }
 };
 
-export const getExerciseDataById = async (req, res) => {
+export const getExerciseDataById = async (req: Request, res: Response) => {
   const { exerciseId } = req.params;
 
   if (!exerciseId) {
@@ -53,11 +54,11 @@ export const getExerciseDataById = async (req, res) => {
 
     return res.status(200).json(data);
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: (error as any).message });
   }
 };
 
-export const postExerciseData = async (req, res) => {
+export const postExerciseData = async (req: Request, res: Response) => {
   const { user_id, rated_pain, stats } = req.body;
 
   // Insert exercise data

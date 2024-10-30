@@ -9,11 +9,12 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { Refresh, PlayArrow, Pause } from "@mui/icons-material";
+import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import LineChart from "../components/LineChart";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import useStm32 from "../hooks/use-stm32.ts";
 import Button from "../components/Button.tsx";
-
+import ManualControl from "../components/ManualControl.tsx";
 const WhiteBorderCheckbox = styled(Checkbox)(() => ({
   color: "white",
   "&.Mui-checked": {
@@ -75,12 +76,12 @@ export default function Manual() {
     }
   }, [stm32Data]);
 
-  const decodeErrorCode = (errorCode) => {
+  const decodeErrorCode = (errorCode: number) => {
     const errorNames = [];
     for (let i = 0; i < 32; i++) {
       if (errorCode & (1 << i)) {
-        if (errorMap[i]) {
-          errorNames.push(errorMap[i]);
+        if (errorMap[i as keyof typeof errorMap]) {
+          errorNames.push(errorMap[i as keyof typeof errorMap]);
         }
       }
     }
@@ -106,21 +107,21 @@ export default function Manual() {
         setLatestMotorData({
           motor1: {
             x: currentTime,
-            position: stm32Data.Positions[0],
-            torque: stm32Data.Torques[0],
-            current: stm32Data.Current[0],
+            position: stm32Data.Positions[0] ?? 0,
+            torque: stm32Data.Torques[0] ?? 0,
+            current: stm32Data.Current[0] ?? 0,
           },
           motor2: {
             x: currentTime,
-            position: stm32Data.Positions[1],
-            torque: stm32Data.Torques[1],
-            current: stm32Data.Current[1],
+            position: stm32Data.Positions[1] ?? 0,
+            torque: stm32Data.Torques[1] ?? 0,
+            current: stm32Data.Current[1] ?? 0,
           },
           motor3: {
             x: currentTime,
-            position: stm32Data.Positions[2],
-            torque: stm32Data.Torques[2],
-            current: stm32Data.Current[2],
+            position: stm32Data.Positions[2] ?? 0,
+            torque: stm32Data.Torques[2] ?? 0,
+            current: stm32Data.Current[2] ?? 0,
           },
         });
       }
@@ -192,7 +193,7 @@ export default function Manual() {
     }
   };
 
-  const generateAndDownloadCsv = (stm32Data) => {
+  const generateAndDownloadCsv = (stm32Data: any) => {
     let csvContent =
       "Index,Dorsiflexion Angle,Eversion Angle,Extension Angle,Dorsiflexion Torque,Eversion Torque,Extension Torque\n";
 
@@ -251,6 +252,11 @@ export default function Manual() {
                   disabled={!stm32Data?.ErrorCode}
                   mode="Reset"
                 />
+                <IconButton
+                  onClick={() => exportCsv()}
+                >
+                  <RadioButtonCheckedIcon />
+                </IconButton>
                 <Box sx={{ width: 50 }} />
                 <FormControlLabel
                   control={
@@ -282,8 +288,8 @@ export default function Manual() {
               </Box>
               <LineChart
                 chartData={getChartData()}
-                mode="Manual"
                 type="realtime"
+                title="Motor Data"
                 graphPause={graphPause}
               />
             </Grid>

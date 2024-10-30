@@ -64,29 +64,30 @@ let saveData = {
 
 let exerciseId: number | null = null;
 
-const getSavedData = asyncHandler(async (req: Request, res: Response) => {
+const getSavedData = asyncHandler(async (_: Request, res: Response) => {
   try {
     if (!saveData) {
-      return res.status(404).send("No data available.");
+      res.status(404).send("No data available.");
+      return;
     }
 
     res.status(200).json({
       data: saveData,
     });
-    resetSaveData()
+    resetSaveData();
   } catch (error) {
     console.error("Error in getSavedData:", error);
-    return res.status(500).send("An error occurred while retrieving data.");
+    res.status(500).send("An error occurred while retrieving data.");
   }
 });
 
-const clearData = asyncHandler(async (req: Request, res: Response) => {
+const clearData = asyncHandler(async (_: Request, res: Response) => {
   try {
-    resetSaveData()
-    return res.status(200).send("Data cleared successfully.");
+    resetSaveData();
+    res.status(200).send("Data cleared successfully.");
   } catch (error) {
     console.error("Error in clearData:", error);
-    return res.status(500).send("An error occurred while clearing data.");
+    res.status(500).send("An error occurred while clearing data.");
   }
 });
 
@@ -138,6 +139,8 @@ function resetSaveData() {
     eversion: [],
     extension: [],
   };
+
+  return true
 }
 
 const insertInitialDataToSupabase = async (): Promise<boolean> => {
@@ -283,7 +286,6 @@ const recordingStm32Data = async (req: Request, res: Response) => {
     return res.status(500).send("An unexpected error occurred.");
   }
 };
-
 // Function to initialize serial port
 const initializeSerialPort = asyncHandler(async (_, res: Response) => {
   const serialPort = getSerialPort();
@@ -296,7 +298,7 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
   }
   let scannerPort: string | undefined;
 
-  if (process.env.ROBOT === 'true') {
+  if (process.env['ROBOT'] === 'true') {
     const ports = await SerialPort.list();
     const foundPort = ports.find(
       (port) => port.manufacturer === "STMicroelectronics"
@@ -306,7 +308,7 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
       scannerPort = foundPort.path;
     }
   } else {
-    scannerPort = process.env.HMI_SERIAL_PORT;
+    scannerPort = process.env['HMI_SERIAL_PORT'];
   }
 
   if (scannerPort) {
@@ -321,14 +323,14 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
     newSerialPort.on("error", (error) => {
       console.log("Serial port error:", error.message);
       togglePushInterval(false);
-      clearPreviousData();
+      resetSaveData();
     });
 
     newSerialPort.on("close", () => {
       console.log("Serial port closed");
       io.emit("serialPortClosed", "Serial port closed");
       togglePushInterval(false);
-      clearPreviousData();
+      resetSaveData();
       setSerialPort(null);
     });
 
