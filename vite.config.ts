@@ -50,7 +50,6 @@ export default defineConfig({
   // Server settings
   server: {
     hmr: {},
-    // open: true,
-    port: 1337, // Set the server port to 1337
+    port: 1338,
   },
 });
