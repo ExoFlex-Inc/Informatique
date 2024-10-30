@@ -105,7 +105,10 @@ io.on("connection", (socket) => {
 
     if (lastCallTime !== 0) {
       const timeDifference = currentTime - lastCallTime;
-      console.log(`Time since last socket call: ${timeDifference} ms`);
+      if (timeDifference > 200) {
+
+        console.log(`Time since last socket call passed 200: ${timeDifference} ms`);
+      }
 
     }
 
