@@ -18,6 +18,7 @@
 #define M_HMI_CONTENT_SECTION                2
 #define M_HMI_EXERCISE_SECTION_NBR           14
 #define M_HMI_CONTENT_FIRST_EXERCISE_SECTION 12
+#define M_HMI_LIMIT_SECTION_LENGHT           12
 #define MVT_MAX                              3
 
 #define PI 3.1415926535
@@ -246,6 +247,16 @@ void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
                 // Flag error: State couldn't change
             }
         }
+        else if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "Homing") == 0)
+        {
+            if (ManagerMovement_SetState(MMOV_STATE_HOMING))
+            {
+            }
+            else
+            {
+                // Flag error: State couldn't change
+            }
+        }
     }
 }
 
@@ -253,11 +264,11 @@ void ManagerHMI_ExecuteManualIncrement(char* cmd)
 {
     if (cmd != NULL)
     {
-        if (strcmp(cmd, "EversionR") == 0)
+        if (strcmp(cmd, "EversionO") == 0)
         {
             ManagerMovement_ManualCmdEversion(MMOV_OUTSIDE);
         }
-        else if (strcmp(cmd, "EversionL") == 0)
+        else if (strcmp(cmd, "EversionI") == 0)
         {
             ManagerMovement_ManualCmdEversion(MMOV_INSIDE);
         }
@@ -288,7 +299,29 @@ void ManagerHMI_ExecutePlanCmd(char* cmd, uint8_t size)
         if (size > M_HMI_CONTENT_FIRST_EXERCISE_SECTION)
         {
             // Get max torque and pos (skip for now)
-            cmd += M_HMI_CONTENT_FIRST_EXERCISE_SECTION * M_HMI_STRING_LENGTH;
+            for (uint8_t i = 0; i < 2 * MAX_MOVEMENT; i++)
+            {
+                float posLimit = atof(cmd);
+                cmd += M_HMI_STRING_LENGTH;
+
+                float torqueLimit = atof(cmd);
+                cmd += M_HMI_STRING_LENGTH;
+
+                if (i < MAX_MOVEMENT - 1)  // Left leg limit
+                {
+                    ManagerMovement_AddLimits(
+                        i, ManagerHMI_Degrees2Radians(posLimit), torqueLimit,
+                        MMOV_LEG_IS_LEFT);
+                }
+                else  // Right leg limits
+                {
+                    ManagerMovement_AddLimits(
+                        i - MAX_MOVEMENT, ManagerHMI_Degrees2Radians(posLimit),
+                        torqueLimit, MMOV_LEG_IS_RIGHT);
+                }
+            }
+            // cmd += M_HMI_CONTENT_FIRST_EXERCISE_SECTION *
+            // M_HMI_STRING_LENGTH;
             size -= M_HMI_CONTENT_FIRST_EXERCISE_SECTION;
 
             // Verif if exercise plan is ok
@@ -330,7 +363,8 @@ void ManagerHMI_ExecutePlanCmd(char* cmd, uint8_t size)
                         }
 
                         ManagerMovement_AddMouvement(
-                            mvtIdx, movements, ManagerHMI_Degrees2Radians(pos));
+                            mvtIdx, movements, ManagerHMI_Degrees2Radians(pos),
+                            torque);
                         mvtIdx++;
 
                         if (j == mvtNbr - 1)

@@ -10,6 +10,7 @@ import { useRelations } from "../hooks/use-relations.ts";
 import { useFetchPendingRelations } from "../hooks/use-relations.ts";
 import { useUser } from "../hooks/use-user.ts";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
+import CustomScrollbar from "../components/CustomScrollbars.tsx";
 
 const ProfessionalNetwork = () => {
   const navigate = useNavigate();

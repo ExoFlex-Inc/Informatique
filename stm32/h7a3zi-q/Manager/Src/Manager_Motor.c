@@ -48,7 +48,7 @@
 #define MMOT_CONTROL_POS_SPEED        2
 #define MMOT_CONTROL_POS_SPEED_TORQUE 3
 
-#define MMOT_MIN_SPEED_CMD  0.01
+#define MMOT_MIN_SPEED_CMD  0.5
 #define MMOT_MAX_SPEED_CMD  2
 #define MMOT_MAX_TORQUE_CMD 15
 
@@ -557,8 +557,8 @@ float ManagerMotor_CalcSpeedFromTorque(float torque, float torqueGoal,
     float decelFactor = 0.1;
 
     // Définir les seuils pour 25% et 75%
-    float torque25  = 0.25f * torqueGoal;
-    float torque75  = 0.75f * torqueGoal;
+    float torque25  = 0.60f * torqueGoal;
+    float torque75  = 0.90f * torqueGoal;
     float torque110 = 1.10f * torqueGoal;
 
     // Calculer w en fonction de torque

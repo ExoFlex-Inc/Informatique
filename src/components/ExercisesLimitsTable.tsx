@@ -1,8 +1,8 @@
 import React, { ChangeEvent } from "react";
 import { TableContainer, TableHead, TableRow, TableBody, Table, TableCell, Typography } from "@mui/material";
+import { Side } from "./ToggleSide.tsx";
 
 // Define types for better type safety
-type Side = "Right" | "Left";
 type LimitType = "torque" | "angle";
 type Stretch = "dorsiflexion" | "extension" | "eversion";
 

@@ -3,14 +3,27 @@ import socketIOClient, { Socket } from "socket.io-client";
 
 // Define the type of events if needed
 interface MyEvents {
-  stm32Data: string;
+  stm32Data: stm32DataType;
   serialPortClosed: string;
 }
+
+export type stm32DataType = {
+  Mode: string;
+  AutoState: string;
+  HomingState: string;
+  CurrentLegSide: string;
+  Repetitions: number;
+  ExerciseIdx: number;
+  ErrorCode: number;
+  Positions: number[];
+  Torques: number[];
+  Current: number[];
+};
 
 const ENDPOINT = "http://localhost:3001"; // Pointing to the server on port 3001
 
 const useStm32 = () => {
-  const [stm32Data, setStm32Data] = useState<string | null>(null);
+  const [stm32Data, setStm32Data] = useState<stm32DataType | null>(null);
   const [retrySerial, setRetrySerial] = useState<boolean>(true);
   const [errorFromStm32, setErrorFromStm32] = useState<boolean>(false);
   const [socket, setSocket] = useState<Socket<MyEvents> | null>(null);
