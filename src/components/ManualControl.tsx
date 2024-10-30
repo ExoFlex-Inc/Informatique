@@ -8,7 +8,7 @@ import {
   Grid,
   Card,
   CardContent,
-  useTheme
+  useTheme,
 } from "@mui/material";
 import {
   ArrowBack,
@@ -58,9 +58,7 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
   }, [stm32Data?.AutoState, stm32Data?.Mode]);
 
   return (
-    <Box
-      sx={{ justifyContent: "center", display: "flex", marginY: "10px" }}
-    >
+    <Box sx={{ justifyContent: "center", display: "flex", marginY: "10px" }}>
       <Box sx={{ display: "flex", flexDirection: "column" }}>
         <Box sx={{ display: "flex", justifyContent: "center" }}>
           <IconButton
@@ -115,8 +113,8 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
               <Card sx={{ background: "#141b2d" }}>
                 <CardContent
                   sx={{
-                    "&.MuiCardContent-root:last-child" : {
-                      padding: "5px"
+                    "&.MuiCardContent-root:last-child": {
+                      padding: "5px",
                     },
                     height: "120px",
                     display: "flex",
@@ -133,7 +131,7 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
                       flexDirection: "column",
                     }}
                   >
-                    <Grid container >
+                    <Grid container>
                       <Grid item xs={4}>
                         <Typography
                           sx={{ justifyContent: "center", display: "flex" }}

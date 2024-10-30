@@ -1,5 +1,13 @@
 import React, { ChangeEvent } from "react";
-import { TableContainer, TableHead, TableRow, TableBody, Table, TableCell, Typography } from "@mui/material";
+import {
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableBody,
+  Table,
+  TableCell,
+  Typography,
+} from "@mui/material";
 import { Side } from "./ToggleSide.tsx";
 
 // Define types for better type safety
@@ -70,49 +78,52 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
   };
 
   return (
-    <TableContainer sx={{borderRadius: "12px", bgcolor: "white"}}>
+    <TableContainer sx={{ borderRadius: "12px", bgcolor: "white" }}>
       <Table>
         <TableHead className="bg-gray-50">
           <TableRow>
-            <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }} colSpan={3}>
-              <Typography align="center" sx={{color: "gray"}}>
+            <TableCell
+              sx={{ borderRight: 1, borderColor: "lightgrey" }}
+              colSpan={3}
+            >
+              <Typography align="center" sx={{ color: "gray" }}>
                 Max Torque {side} (Nm)
               </Typography>
             </TableCell>
-            <TableCell sx={{borderColor: "lightgrey"}} colSpan={3}>
-              <Typography align="center" sx={{color: "gray"}}>
+            <TableCell sx={{ borderColor: "lightgrey" }} colSpan={3}>
+              <Typography align="center" sx={{ color: "gray" }}>
                 Max Angle {side} (degrees)
               </Typography>
             </TableCell>
           </TableRow>
           <TableRow>
             <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}>
-              <Typography align="center" sx={{color: "gray"}}>
+              <Typography align="center" sx={{ color: "gray" }}>
                 Dorsiflexion Ankle
               </Typography>
             </TableCell>
             <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}>
-              <Typography align="center" sx={{color: "gray"}}>
+              <Typography align="center" sx={{ color: "gray" }}>
                 Extension Knee
               </Typography>
             </TableCell>
             <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}>
-              <Typography align="center" sx={{color: "gray"}}>
+              <Typography align="center" sx={{ color: "gray" }}>
                 Eversion Ankle
               </Typography>
             </TableCell>
             <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}>
-              <Typography align="center" sx={{color: "gray"}}>
+              <Typography align="center" sx={{ color: "gray" }}>
                 Dorsiflexion Ankle
               </Typography>
             </TableCell>
             <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}>
-              <Typography align="center" sx={{color: "gray"}}>
+              <Typography align="center" sx={{ color: "gray" }}>
                 Extension Knee
               </Typography>
             </TableCell>
             <TableCell sx={{ borderColor: "lightgrey" }}>
-              <Typography align="center" sx={{color: "gray"}}>
+              <Typography align="center" sx={{ color: "gray" }}>
                 Eversion Ankle
               </Typography>
             </TableCell>
@@ -172,7 +183,7 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
                 value={
                   side === "Right"
                     ? (effectiveLimitsRight.angles.dorsiflexion ?? "")
-                  : (effectiveLimitsLeft.angles.dorsiflexion ?? "")
+                    : (effectiveLimitsLeft.angles.dorsiflexion ?? "")
                 }
                 onChange={(event) => handleLimitChange(event, "angle", side)}
                 className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
@@ -187,7 +198,7 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
                 value={
                   side === "Right"
                     ? (effectiveLimitsRight.angles.extension ?? "")
-                  : (effectiveLimitsLeft.angles.extension ?? "")
+                    : (effectiveLimitsLeft.angles.extension ?? "")
                 }
                 onChange={(event) => handleLimitChange(event, "angle", side)}
                 className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
@@ -202,7 +213,7 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
                 value={
                   side === "Right"
                     ? (effectiveLimitsRight.angles.eversion ?? "")
-                  : (effectiveLimitsLeft.angles.eversion ?? "")
+                    : (effectiveLimitsLeft.angles.eversion ?? "")
                 }
                 onChange={(event) => handleLimitChange(event, "angle", side)}
                 className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"

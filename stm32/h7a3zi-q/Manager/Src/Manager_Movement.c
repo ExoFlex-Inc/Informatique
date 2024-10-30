@@ -1214,41 +1214,41 @@ bool ManagerMovement_SetState(uint8_t newState)
     bool stateChanged = false;
 
     if (managerMovement.state == MMOV_STATE_MANUAL ||
-    		managerMovement.state == MMOV_STATE_AUTOMATIC)
+        managerMovement.state == MMOV_STATE_AUTOMATIC)
     {
-    	if (newState != managerMovement.state)
-		{
-			if (newState == MMOV_STATE_AUTOMATIC &&
-				managerMovement.state != MMOV_STATE_HOMING)
-			{
-				managerMovement.autoState = MMOV_AUTO_STATE_WAITING4PLAN;
-				stateChanged              = true;
-			}
-			else if (newState == MMOV_STATE_HOMING)
-			{
-				managerMovement.homingState = MMOV_VERIF_PERSON_IN;
-				stateChanged                = true;
-			}
-			else if (newState == MMOV_STATE_MANUAL &&
-					 managerMovement.state != MMOV_STATE_HOMING)
-			{
-				stateChanged = true;
-			}
-			else if (newState == MMOV_STATE_CHANGESIDE &&
-					 managerMovement.state != MMOV_STATE_HOMING)
-			{
-				stateChanged = true;
-			}
+        if (newState != managerMovement.state)
+        {
+            if (newState == MMOV_STATE_AUTOMATIC &&
+                managerMovement.state != MMOV_STATE_HOMING)
+            {
+                managerMovement.autoState = MMOV_AUTO_STATE_WAITING4PLAN;
+                stateChanged              = true;
+            }
+            else if (newState == MMOV_STATE_HOMING)
+            {
+                managerMovement.homingState = MMOV_VERIF_PERSON_IN;
+                stateChanged                = true;
+            }
+            else if (newState == MMOV_STATE_MANUAL &&
+                     managerMovement.state != MMOV_STATE_HOMING)
+            {
+                stateChanged = true;
+            }
+            else if (newState == MMOV_STATE_CHANGESIDE &&
+                     managerMovement.state != MMOV_STATE_HOMING)
+            {
+                stateChanged = true;
+            }
 
-			if (stateChanged)
-			{
-				managerMovement.state = newState;
-			}
-		}
-		else
-		{
-			stateChanged = true;
-		}
+            if (stateChanged)
+            {
+                managerMovement.state = newState;
+            }
+        }
+        else
+        {
+            stateChanged = true;
+        }
     }
 
     return stateChanged;

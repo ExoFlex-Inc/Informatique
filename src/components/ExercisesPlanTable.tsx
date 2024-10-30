@@ -1,7 +1,15 @@
-import { TableContainer, TableHead, TableRow, TableBody, Table, TableCell, Typography, Box } from "@mui/material";
+import {
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableBody,
+  Table,
+  TableCell,
+  Typography,
+  Box,
+} from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import React, { useState, useRef } from "react";
-
 
 interface ExercisesPlanTableProps {
   setPlan: React.Dispatch<React.SetStateAction<any>>;
@@ -130,27 +138,29 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
   return (
     <Box>
       {set.movement.length > 0 ? (
-        <TableContainer sx={{borderRadius: "12px", bgcolor: "white", marginTop: "20px"}}>
+        <TableContainer
+          sx={{ borderRadius: "12px", bgcolor: "white", marginTop: "20px" }}
+        >
           <Table>
             <TableHead className="bg-gray-50">
               <TableRow>
-                <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}/>
-                <TableCell sx={{ borderRight: 1, borderColor: "lightgrey"}}>
-                  <Typography align="center" sx={{color: "gray"}}>
+                <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }} />
+                <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}>
+                  <Typography align="center" sx={{ color: "gray" }}>
                     Exercise
                   </Typography>
                 </TableCell>
-                <TableCell sx={{ borderRight: 1, borderColor: "lightgrey"}}>
-                  <Typography align="center" sx={{color: "gray"}}>
+                <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}>
+                  <Typography align="center" sx={{ color: "gray" }}>
                     Target Angle (Degrees)
                   </Typography>
                 </TableCell>
-                <TableCell sx={{ borderRight: 1, borderColor: "lightgrey"}}>
-                  <Typography align="center" sx={{color: "gray"}}>
+                <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}>
+                  <Typography align="center" sx={{ color: "gray" }}>
                     Target Torque (Nm)
                   </Typography>
                 </TableCell>
-                <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}/>
+                <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }} />
               </TableRow>
             </TableHead>
             <TableBody>
@@ -158,7 +168,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                 <TableRow key={exerciseIndex}>
                   {exerciseIndex === 0 && (
                     <TableCell
-                      sx={{border: "none"}}
+                      sx={{ border: "none" }}
                       className="px-6 py-4 text-center whitespace-nowrap"
                       rowSpan={set.movement.length}
                     >
@@ -170,7 +180,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                       />
                     </TableCell>
                   )}
-                  <TableCell sx={{border: "none"}}>
+                  <TableCell sx={{ border: "none" }}>
                     <select
                       name="exercise"
                       value={element.exercise}
@@ -187,7 +197,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                       ))}
                     </select>
                   </TableCell>
-                  <TableCell sx={{border: "none"}}>
+                  <TableCell sx={{ border: "none" }}>
                     <input
                       type="number"
                       name="target_angle"
@@ -199,7 +209,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                       className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                     />
                   </TableCell>
-                  <TableCell sx={{border: "none"}}>
+                  <TableCell sx={{ border: "none" }}>
                     <input
                       type="number"
                       name="target_torque"
@@ -211,7 +221,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                       className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                     />
                   </TableCell>
-                  <TableCell sx={{border: "none"}}>
+                  <TableCell sx={{ border: "none" }}>
                     <button
                       className="text-black"
                       onClick={() => removeExercise(setIndex, exerciseIndex)}
@@ -224,23 +234,44 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
             </TableBody>
             <TableHead className="bg-gray-50" sx={{ borderColor: "lightgrey" }}>
               <TableRow>
-                <TableCell sx={{ borderRight: 1, borderTop: 1, borderColor: "lightgrey"}}>
-                  <Typography align="center" sx={{color: "gray"}}>
+                <TableCell
+                  sx={{
+                    borderRight: 1,
+                    borderTop: 1,
+                    borderColor: "lightgrey",
+                  }}
+                >
+                  <Typography align="center" sx={{ color: "gray" }}>
                     Repetitions
                   </Typography>
                 </TableCell>
-                <TableCell sx={{ borderRight: 1, borderTop: 1, borderColor: "lightgrey"}}>
-                  <Typography align="center" sx={{color: "gray"}}>
+                <TableCell
+                  sx={{
+                    borderRight: 1,
+                    borderTop: 1,
+                    borderColor: "lightgrey",
+                  }}
+                >
+                  <Typography align="center" sx={{ color: "gray" }}>
                     Rest (Sec)
                   </Typography>
                 </TableCell>
-                <TableCell sx={{ borderRight: 1, borderTop: 1, borderColor: "lightgrey"}}>
-                  <Typography align="center" sx={{color: "gray"}}>
+                <TableCell
+                  sx={{
+                    borderRight: 1,
+                    borderTop: 1,
+                    borderColor: "lightgrey",
+                  }}
+                >
+                  <Typography align="center" sx={{ color: "gray" }}>
                     Time (Sec)
                   </Typography>
                 </TableCell>
-                <TableCell colSpan={2} sx={{ borderTop: 1, borderColor: "lightgrey"}}>
-                  <Typography align="center" sx={{color: "gray"}}>
+                <TableCell
+                  colSpan={2}
+                  sx={{ borderTop: 1, borderColor: "lightgrey" }}
+                >
+                  <Typography align="center" sx={{ color: "gray" }}>
                     Speed (Degrees/Sec)
                   </Typography>
                 </TableCell>
@@ -293,16 +324,18 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
           </Table>
         </TableContainer>
       ) : (
-        <TableContainer sx={{borderRadius: "12px", bgcolor: "white", marginTop: "20px"}}>
+        <TableContainer
+          sx={{ borderRadius: "12px", bgcolor: "white", marginTop: "20px" }}
+        >
           <Table>
             <TableHead className="bg-gray-50">
               <TableRow>
-                <TableCell sx={{ borderRight: 1, borderColor: "lightgrey"}}>
-                  <Typography align="center" sx={{color: "gray"}}>
+                <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}>
+                  <Typography align="center" sx={{ color: "gray" }}>
                     Set Rest (Sec)
                   </Typography>
                 </TableCell>
-                <TableCell sx={{ borderRight: 1, borderColor: "lightgrey"}}/>
+                <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }} />
               </TableRow>
             </TableHead>
             <TableBody className="bg-white">
@@ -317,7 +350,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                     className="text-black border border-gray-300 rounded text-center px-2 py-1 w-full"
                   />
                 </TableCell>
-                <TableCell sx={{ textAlign: "center"}}>
+                <TableCell sx={{ textAlign: "center" }}>
                   <button
                     className="text-black"
                     onClick={() => removeExercise(setIndex)}
@@ -329,7 +362,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
             </TableBody>
           </Table>
         </TableContainer>
-      )}  
+      )}
     </Box>
     // <div className="mt-4 ml-10 mr-10 rounded-lg overflow-hidden">
     //   {"movement" in set ? (

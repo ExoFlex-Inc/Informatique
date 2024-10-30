@@ -106,10 +106,21 @@ export default function ProgressionWidget({
           value={(stretchProgress / totalStretch) * 100}
         />
       </div>
-      <Typography fontSize={"20px"} sx={{color: "black", justifyContent: "center", display: "flex", marginBottom: "28px"}}>
+      <Typography
+        fontSize={"20px"}
+        sx={{
+          color: "black",
+          justifyContent: "center",
+          display: "flex",
+          marginBottom: "28px",
+        }}
+      >
         Stretch Progress
       </Typography>
-      <Typography fontSize={"20px"} sx={{color: "black", justifyContent: "center", display: "flex"}}>
+      <Typography
+        fontSize={"20px"}
+        sx={{ color: "black", justifyContent: "center", display: "flex" }}
+      >
         {repetitionProgress + "/" + totalRepetition}
       </Typography>
       <div className="flex justify-center mb-1">
@@ -121,7 +132,9 @@ export default function ProgressionWidget({
           />
         </Box>
       </div>
-      <Typography sx={{color: "black", justifyContent: "center", display: "flex"}}>
+      <Typography
+        sx={{ color: "black", justifyContent: "center", display: "flex" }}
+      >
         Repetitions Progress
       </Typography>
     </div>

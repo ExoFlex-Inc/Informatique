@@ -6,7 +6,7 @@ import {
   FormControl,
   FormLabel,
   Typography,
-  Box
+  Box,
 } from "@mui/material";
 import UserSearchBar from "../components/UserSearchBar.tsx";
 import ExercisesLimitsTable from "../components/ExercisesLimitsTable.tsx";
@@ -153,7 +153,7 @@ export default function Planning() {
             ))
           ) : (
             <Box className="flex justify-center items-center">
-              <Typography sx={{color: "gray"}} fontSize={"30px"}>
+              <Typography sx={{ color: "gray" }} fontSize={"30px"}>
                 No plan available for the selected user.
               </Typography>
             </Box>
@@ -199,9 +199,9 @@ export default function Planning() {
               Save Plan
             </button>
           </div>
-        ) : 
-          (true)
-        }
+        ) : (
+          true
+        )}
       </CustomScrollbar>
     </div>
   );
