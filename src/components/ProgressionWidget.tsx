@@ -54,7 +54,7 @@ export default function ProgressionWidget({
 }: Props) {
   const [stretchProgress, setStretchProgress] = useState(0);
   const [repetitionProgress, setRepetitionProgress] = useState(0);
-  const [totalRepetition, setTotalRepetition] = useState(1);
+  const [totalRepetition, setTotalRepetition] = useState(0);
 
   // Memoize totalStretch calculation
   const totalStretch = useMemo(() => {
@@ -79,7 +79,12 @@ export default function ProgressionWidget({
 
   useEffect(() => {
     if (planData && stm32Data?.ExerciseIdx !== undefined) {
-      setTotalRepetition(planData.plan[stm32Data.ExerciseIdx]?.repetitions || 1);
+      if(planData.plan[stm32Data.ExerciseIdx]?.repetitions) {
+        const repetitions = planData.plan[stm32Data.ExerciseIdx]?.repetitions;
+        setTotalRepetition(repetitions);
+      } else {
+        setTotalRepetition(0);
+      }
     }
   }, [planData, stm32Data?.ExerciseIdx]);
 
