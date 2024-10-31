@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig } from 'vite';
 import react from "@vitejs/plugin-react";
 import dotenv from "dotenv";
 import { VitePWA } from "vite-plugin-pwa";
@@ -7,11 +7,6 @@ import { VitePWA } from "vite-plugin-pwa";
 dotenv.config();
 
 export default defineConfig({
-  // Disable CSS source maps in development
-  css: {
-    devSourcemap: false,
-  },
-  logLevel: "warn",
   // Define environment variables for Vite
   define: {
     "process.env.SUPABASE_API_URL": JSON.stringify(

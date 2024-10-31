@@ -104,7 +104,7 @@ function Profile() {
           overlap="circular"
           color="info"
           anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          badgeContent={<AddAPhotoIcon padding="4px" className="h-28" />}
+          badgeContent={<AddAPhotoIcon className="h-28" />}
         >
           <Avatar
             src={

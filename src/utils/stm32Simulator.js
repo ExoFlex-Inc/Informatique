@@ -37,7 +37,7 @@ function createJsonMessage() {
     AutoState: "Stop",
     HomingState: "",
     ExerciseIdx: 0,
-    Repetitions: 10,
+    Repetitions: 6,
     ErrorCode: 0b10101,
     Positions: positions,
     Torques: torques,

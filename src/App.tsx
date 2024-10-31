@@ -41,7 +41,6 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
-      cacheTime: 1000 * 60 * 60 * 24, // 24 hours
     },
   },
 });
@@ -124,7 +123,7 @@ function AppLayout() {
 
             // Update the user data with the avatar blob URL
             queryClient.setQueryData(["user"], (oldData) => ({
-              ...oldData,
+              ...(typeof oldData === 'object' && oldData !== null ? oldData : {}),
               avatar_blob_url: avatarBlobUrl,
             }));
           } else {

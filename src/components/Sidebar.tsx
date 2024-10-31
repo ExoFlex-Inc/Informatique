@@ -60,7 +60,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected, setSelected] = useState("");
   const { user } = useUser();
-  const isTablet = useMediaQuery("(max-width: 768px)");
+  const isTablet = useMediaQuery("(max-width: 1024px)");
   const location = useLocation();
   const page = location.pathname.split("/").pop() || "";
 

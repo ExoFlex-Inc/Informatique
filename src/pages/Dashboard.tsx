@@ -4,6 +4,7 @@ import { useStats } from '../hooks/use-stats.ts';
 import Loading from "../components/Loading.tsx";
 import Leaderboard from "../components/Leaderboard.tsx";
 import { useTopUsers, useUser } from "../hooks/use-user.ts";
+import CustomScrollbar from "../components/CustomScrollbars.tsx";
 
 export default function Dashboard() {
   const {user} = useUser();
@@ -19,21 +20,23 @@ export default function Dashboard() {
   }
 
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: 'background.default', minHeight: '100vh' }}>
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Grid container spacing={3}>
-          {stats && (
-            <StretchStreak
-              currentStreak={stats.current_streak}
-              longestStreak={stats.longest_streak}
+    <Box sx={{ flexGrow: 1, bgcolor: 'background.default', height: 'calc(100vh - 100px)', display: 'flex', flexDirection: 'column' }}>
+      <CustomScrollbar>
+        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+          <Grid container spacing={3}>
+            {stats && (
+              <StretchStreak
+                currentStreak={stats.current_streak}
+                longestStreak={stats.longest_streak}
+              />
+            )}
+            <Leaderboard
+              users={users}
+              currentUser={users?.find(u => u.user_id === user.user_id)}
             />
-          )}
-          <Leaderboard
-            users={users}
-            currentUser={users?.find(u => u.user_id === user.user_id)}
-          />
-        </Grid>
-      </Container>
+          </Grid>
+        </Container>
+      </CustomScrollbar>
     </Box>
   );
 }

@@ -58,7 +58,7 @@ export default function Leaderboard({ users, currentUser }: LeaderboardProps) {
     }
   }, []);
 
-  const rankColors = ["#FFD700", "#C0C0C0", "#CD7F32"]; // Gold, Silver, Bronze
+  const rankColors = ["#FFD700", "#C0C0C0", "#CD7F32"]; 
 
   return (
     <Grid item xs={12} md={8}>
@@ -66,7 +66,7 @@ export default function Leaderboard({ users, currentUser }: LeaderboardProps) {
         p: 2, 
         display: 'flex', 
         flexDirection: 'column', 
-        height: 500, 
+        height: 450, 
         backgroundColor: 'white', 
         color: 'black',
         borderRadius: 2,

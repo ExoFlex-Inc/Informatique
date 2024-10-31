@@ -1,9 +1,12 @@
 import { ErrorBoundary as ReactErrorBoundary } from "react-error-boundary";
 import { Box, Typography, Button, Paper, Container } from "@mui/material";
 import { Error as ErrorIcon } from "@mui/icons-material";
+import { ReactNode } from "react";
 
 // Fallback component to display in case of an error
-function ErrorFallback({ error, resetErrorBoundary }) {
+import { FallbackProps } from "react-error-boundary";
+
+function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   return (
     <Container maxWidth="sm">
       <Paper
@@ -39,7 +42,7 @@ function ErrorFallback({ error, resetErrorBoundary }) {
   );
 }
 
-const ErrorBoundary = ({ children }) => {
+const ErrorBoundary = ({ children }: { children: ReactNode }) => {
   return (
     <ReactErrorBoundary
       FallbackComponent={ErrorFallback}

@@ -132,7 +132,7 @@ export default function Planning() {
           />
 
           {planData && planData.plan ? (
-            planData.plan.map((set, setIndex) => (
+            planData.plan.map((set: any, setIndex: number) => (
               <ExercisesPlanTable
                 key={setIndex}
                 setPlan={setPlan}
