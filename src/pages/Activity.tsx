@@ -61,28 +61,35 @@ function onGraphTypeChange(
   titles: string[],
   colors: string[],
   dates: string[],
-  ...args: (number[][] | undefined)[][]
+  ...args: (number[] | undefined)[]
 ) {
   const mappedArgs = args.map(
-    (arg: (number[][] | undefined)[], index: number) => {
+    (arg: number[] | undefined, index: number) => {
       const dataPoints = [];
       let cumulativeIndex = 0;
 
-      for (let i = 0; i < arg.length; i++) {
-        const valueArray = arg[i] ?? [];
-        const date = dates[i];
+      if (!arg) return {
+        label: labels[index],
+        data: [],
+        borderColor: colors[index],
+        fill: false,
+        tension: 0.1,
+        pointRadius: show_points ? 5 : 2,
+        pointHoverRadius: 7,
+      };
 
-        for (let j = 0; j < valueArray.length; j++) {
-          const yValue = valueArray[j];
-          if (yValue !== undefined && yValue !== null) {
-            dataPoints.push({
-              x: cumulativeIndex + 1,
-              y: yValue,
-              recorded_date: date,
-            });
-          }
-          cumulativeIndex++;
+      const recordedDate = dates[index] ?? ""; // Use the date at the args index
+
+      for (let i = 0; i < arg.length; i++) {
+        const yValue = arg[i];
+        if (yValue !== undefined && yValue !== null) {
+          dataPoints.push({
+            x: cumulativeIndex + 1,
+            y: yValue,
+            recorded_date: recordedDate, // Apply the same date to all points in this arg
+          });
         }
+        cumulativeIndex++;
       }
 
       return {
@@ -105,7 +112,7 @@ function onGraphTypeChange(
       labels: xAxisLabels,
       datasets: mappedArgs,
     },
-    title: titles[0],
+    title: titles[0] || "",
   };
 }
 
@@ -172,7 +179,7 @@ export default function Activity() {
           console.error(result.message);
         }
       } catch (error) {
-        console.error(error.message);
+        console.error((error as any).message);
       }
     };
 
@@ -195,27 +202,15 @@ export default function Activity() {
         ];
 
         const angle_stretch = {
-          dorsiflexion: filteredData.map((item) =>
-            item.data.angles.dorsiflexion.map((angle) => angle),
-          ),
-          eversion: filteredData.map((item) =>
-            item.data.angles.eversion.map((angle) => angle),
-          ),
-          extension: filteredData.map((item) =>
-            item.data.angles.extension.map((angle) => angle),
-          ),
+          dorsiflexion: filteredData.flatMap((item) => item.data.angles.dorsiflexion),
+          eversion: filteredData.flatMap((item) => item.data.angles.eversion),
+          extension: filteredData.flatMap((item) => item.data.angles.extension),
         };
 
         const force_stretch = {
-          dorsiflexion: filteredData.map((item) =>
-            item.data.torques.dorsiflexion.map((torque) => torque),
-          ),
-          eversion: filteredData.map((item) =>
-            item.data.torques.eversion.map((torque) => torque),
-          ),
-          extension: filteredData.map((item) =>
-            item.data.torques.extension.map((torque) => torque),
-          ),
+          dorsiflexion: filteredData.flatMap((item) => item.data.torques.dorsiflexion),
+          eversion: filteredData.flatMap((item) => item.data.torques.eversion),
+          extension: filteredData.flatMap((item) => item.data.torques.extension),
         };
 
         const repetitions_done = filteredData?.map(
@@ -224,14 +219,8 @@ export default function Activity() {
         const repetitions_target = filteredData?.map(
           (item) => item.data.repetitions_target,
         );
-        // Wrap the repetitions data in an array for the graph
-        const repetitions_done_wrapped = repetitions_done.map((item) => [item]);
-        const repetitions_target_wrapped = repetitions_target.map((item) => [
-          item,
-        ]);
 
         const rated_pain = filteredData?.map((element) => [element.rated_pain]);
-        const rated_pain_wrapped = rated_pain.map((item) => [item]);
 
         switch (graphType) {
           case "Amplitude":
@@ -277,8 +266,8 @@ export default function Activity() {
                 ["Number of Repetitions"],
                 colors,
                 dates,
-                repetitions_done_wrapped,
-                repetitions_target_wrapped,
+                repetitions_done.flat(),
+                repetitions_target.flat(),
               );
               setDataset1(chartData);
               setTitle1(title);
@@ -293,7 +282,7 @@ export default function Activity() {
                 ["Pain Scale from 1 to 5"],
                 colors,
                 dates,
-                rated_pain_wrapped,
+                rated_pain.flat().filter((item): item is number => item !== undefined),
               );
               setDataset1(chartData);
               setTitle1(title);
@@ -407,8 +396,19 @@ export default function Activity() {
     const endDate = new Date(dateRange[1]);
 
     const dates = data.map((item) => {
-      const date = new Date(item.data.recorded_date);
-      return date.toISOString().split("T")[0];
+      // Remove the timezone abbreviation
+      const cleanedDateString = item.data.recorded_date.replace(/\s*\b[A-Z]{3}\b$/, '');
+      // Replace ', ' with 'T' to create an ISO string
+      const isoDateString = cleanedDateString.replace(', ', 'T');
+      const date = new Date(isoDateString);
+      // Format the date as 'YYYY-MM-DD'
+      const formattedDate =
+        date.getFullYear() +
+        '-' +
+        String(date.getMonth() + 1).padStart(2, '0') +
+        '-' +
+        String(date.getDate()).padStart(2, '0');
+      return formattedDate;
     });
 
     const missingDates: string[] = [];
@@ -420,7 +420,7 @@ export default function Activity() {
       currentDate.setUTCDate(currentDate.getUTCDate() + 1)
     ) {
       const formattedDate = currentDate.toISOString().split("T")[0];
-      if (!dates.includes(formattedDate)) {
+      if (formattedDate && !dates.includes(formattedDate)) {
         missingDates.push(formattedDate);
       }
     }

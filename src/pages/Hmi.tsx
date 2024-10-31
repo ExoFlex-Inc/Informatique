@@ -159,7 +159,7 @@ export default function HMI() {
 
   useEffect(() => {
     const stopRecording = async () => {
-      if (stm32Data?.AutoState === "Stop") {
+      if (stm32Data?.AutoState === "Stop" || stm32Data?.Mode === "Error") {
         try {
           const response = await fetch("http://localhost:3001/stm32/record", {
             method: "POST",
