@@ -594,11 +594,7 @@ export default function Activity() {
         </ThemeProvider>
       </>
       {/* </CustomScrollbar> */}
-      {isLoading && 
-        (
-          <Loading />
-        )
-      }
+      {isLoading && <Loading />}
     </div>
   );
 }

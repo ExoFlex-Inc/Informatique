@@ -42,7 +42,6 @@ const ProfessionalNetwork = () => {
     setFilteredUsers(filteredAdmin);
   }, [admins, notifications, relations]);
 
-
   return (
     <div className="custom-height relative flex flex-col">
       <div className="flex items-center gap-4 relative">
@@ -73,11 +72,7 @@ const ProfessionalNetwork = () => {
           setFilteredUsers={setFilteredUsers}
         />
       </CustomScrollbar>
-      {isLoading &&
-        (
-          <Loading />
-        )
-      }
+      {isLoading && <Loading />}
     </div>
   );
 };

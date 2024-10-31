@@ -38,11 +38,7 @@ export default function Network() {
       </div>
 
       <UserList listOfUsers={filteredRelations} />
-      {isLoading && 
-        (
-          <Loading />
-        )
-      }
+      {isLoading && <Loading />}
     </div>
   );
 }

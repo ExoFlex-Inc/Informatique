@@ -196,11 +196,7 @@ function Profile() {
           </Paper>
         </ThemeProvider>
       </Box>
-      {isLoading && 
-        (
-          <Loading />
-        )
-      }
+      {isLoading && <Loading />}
     </div>
   );
 }

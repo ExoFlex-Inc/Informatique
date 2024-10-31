@@ -179,11 +179,7 @@ export default function Planning() {
           </button>
         </div>
       </CustomScrollbar>
-      {isLoading &&
-        (
-          <Loading />
-        )
-      }
+      {isLoading && <Loading />}
     </div>
   );
 }
