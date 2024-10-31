@@ -273,7 +273,7 @@ void ManagerMovement_Homing()
     switch (managerMovement.homingState)
     {
     case MMOV_VERIF_PERSON_IN:
-
+    	managerMovement.homingState = MMOV_HOMING_EXTENSION;
         break;
 
     case MMOV_HOMING_EXTENSION:
@@ -1249,6 +1249,7 @@ bool ManagerMovement_SetState(uint8_t newState)
         {
             stateChanged = true;
         }
+
     }
 
     return stateChanged;
