@@ -50,7 +50,7 @@ const ProfessionalNetwork = () => {
   }
 
   return (
-    <div className="custom-height flex flex-col">
+    <div className="flex flex-col custom-height">
       <div className="flex items-center gap-4 relative">
         <UserSearchBar
           sx={{ width: 500 }}

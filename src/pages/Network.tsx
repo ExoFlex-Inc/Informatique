@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useRelations } from "../hooks/use-relations.ts";
 import Loading from "../components/Loading.tsx";
 import { useUser } from "../hooks/use-user.ts";
+import CustomScrollbar from "../components/CustomScrollbars.tsx";
 
 export default function Network() {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ export default function Network() {
   }
 
   return (
-    <div>
+    <div className="flex flex-col custom-height">
       <div className="flex items-center gap-4 relative">
         <UserSearchBar
           sx={{ width: 500 }}
@@ -44,8 +45,9 @@ export default function Network() {
           </Button>
         )}
       </div>
-
-      <UserList listOfUsers={filteredRelations} />
+      <CustomScrollbar>
+        <UserList listOfUsers={filteredRelations} />
+      </CustomScrollbar>
     </div>
   );
 }

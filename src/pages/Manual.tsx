@@ -316,7 +316,6 @@ export default function Manual() {
                       whiteSpace: "pre",
                     },
                   }}
-                  sx={{ marginRight: 5 }}
                 />
               </Box>
             </Grid>
