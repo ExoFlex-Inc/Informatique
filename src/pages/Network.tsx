@@ -12,22 +12,14 @@ export default function Network() {
   const { user } = useUser();
   const { relations, isLoading } = useRelations();
 
-  const [filteredRelations, setFilteredRelations] = useState([]);
+  const [filteredRelations, setFilteredRelations] = useState<any[]>([]);
 
   useEffect(() => {
     setFilteredRelations(relations);
   }, [relations]);
 
-  if (isLoading) {
-    return (
-      <div className="loading-container">
-        <Loading />
-      </div>
-    );
-  }
-
   return (
-    <div>
+    <div className="relative">
       <div className="flex items-center gap-4 relative">
         <UserSearchBar
           sx={{ width: 500 }}
@@ -46,6 +38,11 @@ export default function Network() {
       </div>
 
       <UserList listOfUsers={filteredRelations} />
+      {isLoading && 
+        (
+          <Loading />
+        )
+      }
     </div>
   );
 }

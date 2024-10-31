@@ -19,6 +19,7 @@ const ProfessionalNetwork = () => {
   const { notifications, isLoading: notificationsLoading } =
     useFetchPendingRelations();
 
+  const isLoading = adminLoading || relationsLoading || notificationsLoading;
   const [filteredUsers, setFilteredUsers] = useState(admins);
 
   useEffect(() => {
@@ -41,16 +42,9 @@ const ProfessionalNetwork = () => {
     setFilteredUsers(filteredAdmin);
   }, [admins, notifications, relations]);
 
-  if (adminLoading || relationsLoading || notificationsLoading) {
-    return (
-      <div className="loading-container">
-        <Loading />
-      </div>
-    );
-  }
 
   return (
-    <div className="custom-height flex flex-col">
+    <div className="custom-height relative flex flex-col">
       <div className="flex items-center gap-4 relative">
         <UserSearchBar
           sx={{ width: 500 }}
@@ -79,6 +73,11 @@ const ProfessionalNetwork = () => {
           setFilteredUsers={setFilteredUsers}
         />
       </CustomScrollbar>
+      {isLoading &&
+        (
+          <Loading />
+        )
+      }
     </div>
   );
 };

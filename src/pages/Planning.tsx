@@ -29,6 +29,7 @@ export default function Planning() {
     setPlan,
   } = usePlan(selectedUser.length === 1 ? selectedUser[0]?.user_id : null);
   const queryClient = useQueryClient();
+  const isLoading = isLoadingPlan || isLoadingRelations;
 
   useEffect(() => {
     if (planData) {
@@ -103,16 +104,8 @@ export default function Planning() {
     }
   };
 
-  if (isLoadingRelations || isLoadingPlan) {
-    return (
-      <div className="loading-container">
-        <Loading />
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-col custom-height">
+    <div className="flex relative flex-col custom-height">
       <div className="flex justify-center items-center">
         <ToggleSide side={side} setSide={setSide} />
         <UserSearchBar
@@ -186,6 +179,11 @@ export default function Planning() {
           </button>
         </div>
       </CustomScrollbar>
+      {isLoading &&
+        (
+          <Loading />
+        )
+      }
     </div>
   );
 }

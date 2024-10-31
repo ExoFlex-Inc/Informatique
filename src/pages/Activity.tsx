@@ -505,16 +505,8 @@ export default function Activity() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="loading-container">
-        <Loading />
-      </div>
-    );
-  }
-
   return (
-    <div className=" mx-auto max-w-7xl">
+    <div className="relative mx-auto max-w-7xl">
       <div className="mb-4 flex flex-wrap items-center gap-4">
         {/* User Search Bar */}
         <div className="flex-grow max-w-md">
@@ -602,6 +594,11 @@ export default function Activity() {
         </ThemeProvider>
       </>
       {/* </CustomScrollbar> */}
+      {isLoading && 
+        (
+          <Loading />
+        )
+      }
     </div>
   );
 }

@@ -89,16 +89,8 @@ function Profile() {
     setFieldError(false);
   };
 
-  if (isLoading) {
-    return (
-      <div className="loading-container">
-        <Loading />
-      </div>
-    );
-  }
-
   return (
-    <div className="flex">
+    <div className="relative flex">
       <IconButton className="hover:opacity-50 m-4" onClick={handleButtonClick}>
         <StyledBadge
           overlap="circular"
@@ -204,6 +196,11 @@ function Profile() {
           </Paper>
         </ThemeProvider>
       </Box>
+      {isLoading && 
+        (
+          <Loading />
+        )
+      }
     </div>
   );
 }
