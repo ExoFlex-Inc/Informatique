@@ -143,7 +143,7 @@ function AppLayout() {
   // Handle loading state
   if (isLoading || avatarLoading) {
     return (
-      <div className="loading-container">
+      <div className="relative loading-container">
         <Loading />
       </div>
     );
@@ -170,7 +170,7 @@ function AppLayout() {
   }
 
   return (
-    <div className="loading-container">
+    <div className="relative loading-container">
       <Loading />
     </div>
   );

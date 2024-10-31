@@ -13,22 +13,14 @@ export default function Network() {
   const { user } = useUser();
   const { relations, isLoading } = useRelations();
 
-  const [filteredRelations, setFilteredRelations] = useState([]);
+  const [filteredRelations, setFilteredRelations] = useState<any[]>([]);
 
   useEffect(() => {
     setFilteredRelations(relations);
   }, [relations]);
 
-  if (isLoading) {
-    return (
-      <div className="loading-container">
-        <Loading />
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-col custom-height">
+    <div className="relative">
       <div className="flex items-center gap-4 relative">
         <UserSearchBar
           sx={{ width: 500 }}
@@ -45,9 +37,9 @@ export default function Network() {
           </Button>
         )}
       </div>
-      <CustomScrollbar>
-        <UserList listOfUsers={filteredRelations} />
-      </CustomScrollbar>
+
+      <UserList listOfUsers={filteredRelations} />
+      {isLoading && <Loading />}
     </div>
   );
 }

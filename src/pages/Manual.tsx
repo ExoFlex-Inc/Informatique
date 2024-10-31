@@ -8,8 +8,7 @@ import {
   IconButton,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { Refresh, PlayArrow, Pause } from "@mui/icons-material";
-import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
+import { Refresh, PlayArrow, Pause, Home } from "@mui/icons-material";
 import LineChart from "../components/LineChart";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import useStm32 from "../hooks/use-stm32.ts";
@@ -235,28 +234,38 @@ export default function Manual() {
                 }}
               >
                 <Box sx={{ width: 50 }} />
-                <IconButton
-                  onClick={() => setGraphPause(false)}
-                  disabled={!graphPause}
-                >
-                  <PlayArrow />
-                </IconButton>
-                <IconButton
-                  onClick={() => setGraphPause(true)}
-                  disabled={graphPause}
-                >
-                  <Pause />
-                </IconButton>
-                <Button
-                  icon={<Refresh />}
-                  disabled={!stm32Data?.ErrorCode}
-                  mode="Reset"
-                />
-                <IconButton
-                  onClick={() => exportCsv()}
-                >
-                  <RadioButtonCheckedIcon />
-                </IconButton>
+                <Box gap={4} sx={{ display: "flex" }}>
+                  <Button
+                    onClick={() => setGraphPause(false)}
+                    icon={<PlayArrow />}
+                    disabled={!graphPause}
+                    mainColor="#2fb73d"
+                    hoverColor="#33a63f"
+                  />
+
+                  <Button
+                    onClick={() => setGraphPause(true)}
+                    disabled={graphPause}
+                    icon={<Pause />}
+                    mainColor="#f5d50b"
+                    hoverColor="#dcc21d"
+                  />
+
+                  <Button
+                    icon={<Home />}
+                    mode="Homing"
+                    mainColor="#1ec6e1"
+                    hoverColor="#2aa6ba"
+                  />
+
+                  <Button
+                    icon={<Refresh />}
+                    disabled={!stm32Data?.ErrorCode}
+                    mode="Reset"
+                    mainColor="#f1910f"
+                    hoverColor="#d08622"
+                  />
+                </Box>
                 <Box sx={{ width: 50 }} />
                 <FormControlLabel
                   control={

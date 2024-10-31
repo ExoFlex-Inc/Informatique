@@ -26,6 +26,7 @@ const Button: React.FC<ButtonProps> = ({
   textColor,
   disabled,
   icon,
+  onClick,
 }) => {
   const { socket } = useStm32();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -153,6 +154,7 @@ const Button: React.FC<ButtonProps> = ({
         },
       }}
       disabled={disabled}
+      onClick={onClick}
     >
       {icon}
     </IconButton>
