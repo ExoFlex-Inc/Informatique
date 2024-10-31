@@ -155,7 +155,7 @@ export default function Activity() {
         const result = await response.json();
 
         if (response.ok) {
-          setData(result);
+          setData(result ?? []);
 
           // Put the date in the client timezone
           const startDate = date[0].toLocaleDateString("en-CA");
@@ -164,9 +164,9 @@ export default function Activity() {
           // Check if the selected date range is only one day
           if (startDate === endDate) {
             // Extract available sessions for this day
-            const sessionTimes = result.map(
-              (item: any) => item.data.recorded_date,
-            );
+            const sessionTimes = result
+              .filter((item: any) => item?.data)
+              .map((item: any) => item.data.recorded_date ?? "");
             setAvailableSessions(sessionTimes); // Set available sessions for dropdown
             setSelectedSession(
               sessionTimes.length > 0 ? sessionTimes[0] : null,
@@ -194,7 +194,7 @@ export default function Activity() {
           ? data.filter((item) => item.data.recorded_date === selectedSession)
           : data;
 
-        const dates = filteredData.map((item) => item.data.recorded_date);
+        const dates = filteredData.map((item) => item?.data?.recorded_date);
         const colors = [
           "rgb(99, 255, 132)",
           "rgb(255, 99, 132)",
@@ -202,22 +202,22 @@ export default function Activity() {
         ];
 
         const angle_stretch = {
-          dorsiflexion: filteredData.flatMap((item) => item.data.angles.dorsiflexion),
-          eversion: filteredData.flatMap((item) => item.data.angles.eversion),
-          extension: filteredData.flatMap((item) => item.data.angles.extension),
+          dorsiflexion: filteredData.flatMap((item) => item?.data?.angles.dorsiflexion),
+          eversion: filteredData.flatMap((item) => item?.data?.angles.eversion),
+          extension: filteredData.flatMap((item) => item?.data?.angles.extension),
         };
 
         const force_stretch = {
-          dorsiflexion: filteredData.flatMap((item) => item.data.torques.dorsiflexion),
-          eversion: filteredData.flatMap((item) => item.data.torques.eversion),
-          extension: filteredData.flatMap((item) => item.data.torques.extension),
+          dorsiflexion: filteredData.flatMap((item) => item?.data?.torques.dorsiflexion),
+          eversion: filteredData.flatMap((item) => item?.data?.torques.eversion),
+          extension: filteredData.flatMap((item) => item?.data?.torques.extension),
         };
 
         const repetitions_done = filteredData?.map(
-          (item) => item.data.repetitions_done,
+          (item) => item?.data?.repetitions_done,
         );
         const repetitions_target = filteredData?.map(
-          (item) => item.data.repetitions_target,
+          (item) => item?.data?.repetitions_target,
         );
 
         const rated_pain = filteredData?.map((element) => [element.rated_pain]);
@@ -336,9 +336,9 @@ export default function Activity() {
       case "Amplitude":
         // Compute average of angles
         const angles = {
-          dorsiflexion: data.flatMap((item) => item.data.angles.dorsiflexion),
-          eversion: data.flatMap((item) => item.data.angles.eversion),
-          extension: data.flatMap((item) => item.data.angles.extension),
+          dorsiflexion: data.flatMap((item) => item?.data?.angles.dorsiflexion),
+          eversion: data.flatMap((item) => item?.data?.angles.eversion),
+          extension: data.flatMap((item) => item?.data?.angles.extension),
         };
         const angleAverages: AngleMaxAverages = {
           dorsiflexion: calculateAverage(angles.dorsiflexion),
@@ -351,9 +351,9 @@ export default function Activity() {
       case "Rigidity":
         // Compute average of torques
         const torques = {
-          dorsiflexion: data.flatMap((item) => item.data.torques.dorsiflexion),
-          eversion: data.flatMap((item) => item.data.torques.eversion),
-          extension: data.flatMap((item) => item.data.torques.extension),
+          dorsiflexion: data.flatMap((item) => item?.data?.torques.dorsiflexion),
+          eversion: data.flatMap((item) => item?.data?.torques.eversion),
+          extension: data.flatMap((item) => item?.data?.torques.extension),
         };
         const torqueAverages: AngleMaxAverages = {
           dorsiflexion: calculateAverage(torques.dorsiflexion),
@@ -365,9 +365,9 @@ export default function Activity() {
 
       case "Number of repetitions":
         // Compute average of repetitions
-        const repetitionsDone = data.map((item) => item.data.repetitions_done);
+        const repetitionsDone = data.map((item) => item?.data?.repetitions_done);
         const repetitionsTarget = data.map(
-          (item) => item.data.repetitions_target,
+          (item) => item?.data?.repetitions_target,
         );
         const averageRepetitionsDone = calculateAverage(repetitionsDone);
         const averageRepetitionsTarget = calculateAverage(repetitionsTarget);
@@ -394,13 +394,19 @@ export default function Activity() {
   function getMissingDates(data: dataStructure[], dateRange: DateRange) {
     const startDate = new Date(dateRange[0]);
     const endDate = new Date(dateRange[1]);
-
+  
     const dates = data.map((item) => {
+      // Ensure recorded_date exists before processing
+      if (!item?.data?.recorded_date) {
+        return null; // Return null for missing dates to handle later
+      }
+  
       // Remove the timezone abbreviation
       const cleanedDateString = item.data.recorded_date.replace(/\s*\b[A-Z]{3}\b$/, '');
       // Replace ', ' with 'T' to create an ISO string
       const isoDateString = cleanedDateString.replace(', ', 'T');
       const date = new Date(isoDateString);
+      
       // Format the date as 'YYYY-MM-DD'
       const formattedDate =
         date.getFullYear() +
@@ -408,11 +414,12 @@ export default function Activity() {
         String(date.getMonth() + 1).padStart(2, '0') +
         '-' +
         String(date.getDate()).padStart(2, '0');
+        
       return formattedDate;
-    });
-
+    }).filter(Boolean); // Filter out any null values from missing dates
+  
     const missingDates: string[] = [];
-
+  
     // Generate all dates in the date range
     for (
       let currentDate = new Date(startDate);
@@ -424,7 +431,7 @@ export default function Activity() {
         missingDates.push(formattedDate);
       }
     }
-
+  
     setMissingDates(missingDates);
   }
 
@@ -506,7 +513,7 @@ export default function Activity() {
   }
 
   return (
-    <div className="relative mx-auto max-w-7xl">
+    <div className="relative mx-auto max-w-7xl flex flex-col custom-height">
       <div className="mb-4 flex flex-wrap items-center gap-4">
         {/* User Search Bar */}
         <div className="flex-grow max-w-md">
@@ -591,8 +598,7 @@ export default function Activity() {
             </Paper>
           </Box>
         </ThemeProvider>
-      </>
-      {/* </CustomScrollbar> */}
+      </CustomScrollbar>
       {isLoading && <Loading />}
     </div>
   );

@@ -58,6 +58,7 @@ export default function ProgressionWidget({
 
   // Memoize totalStretch calculation
   const totalStretch = useMemo(() => {
+    console.log(planData);
     if (!planData?.plan) return 1;
     return planData.plan.reduce((total: number, exercise: any) => {
       return total + (exercise?.repetitions || 0);

@@ -22,6 +22,7 @@ export default function Dashboard() {
   return (
     <Box sx={{ flexGrow: 1, bgcolor: 'background.default', height: 'calc(100vh - 100px)', display: 'flex', flexDirection: 'column' }}>
       <CustomScrollbar>
+        {user.permissions === 'dev' || user.permissions === 'client' && (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
           <Grid container spacing={3}>
             {stats && (
@@ -36,6 +37,7 @@ export default function Dashboard() {
             />
           </Grid>
         </Container>
+          )}
       </CustomScrollbar>
     </Box>
   );

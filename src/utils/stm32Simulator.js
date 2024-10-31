@@ -34,10 +34,10 @@ function createJsonMessage() {
   const { positions, torques, currents } = generateRandomData(3);
   const message = {
     Mode: "Automatic",
-    AutoState: "Stop",
+    AutoState: "Stretching",
     HomingState: "",
     ExerciseIdx: 0,
-    Repetitions: 6,
+    Repetitions:1,
     ErrorCode: 0b10101,
     Positions: positions,
     Torques: torques,

@@ -13,6 +13,8 @@ import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import ManualControl from "../components/ManualControl.tsx";
 import Button from "../components/Button.tsx";
 import { Pause, PlayArrow, Refresh, Stop, Home } from "@mui/icons-material";
+import { useStats } from "../hooks/use-stats.ts";
+import { useQueryClient } from "@tanstack/react-query";
 interface ChartData {
   datasets: {
     label: string;
