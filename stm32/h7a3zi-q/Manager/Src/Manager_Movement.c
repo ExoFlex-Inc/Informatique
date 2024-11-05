@@ -80,7 +80,7 @@ bool evInsideLimitHit;
 bool evOutsideLimitHit;
 bool exUpLimitHit;
 
-bool buttonStartReset;
+bool isAtFirstPos;
 
 bool changeSideFree;
 bool eversionFree;
@@ -193,8 +193,8 @@ void ManagerMovement_Reset()
     movementIdx = 0;
     repsCount   = 0;
 
-    commandSent      = false;
-    buttonStartReset = false;
+    commandSent  = false;
+    isAtFirstPos = false;
 
     changeSideFree = false;
     eversionFree   = false;
@@ -680,29 +680,15 @@ void ManagerMovement_AutoReady()
     }
     else
     {
-        // Stops the start cmd if reps are over
-        if (repsCount >= repetitions[exerciseIdx] && !buttonStartReset)
-        {
-            startButton = false;
-            movementIdx += mvtNbr[exerciseIdx];
-
-            buttonStartReset = true;
-        }
         // Waiting for button Start on HMI
         if (startButton)
         {
-            if (repsCount >= repetitions[exerciseIdx])
-            {
-                repsCount = 0;
-                exerciseIdx++;
-            }
-
             if (repsCount == 0)
             {
                 // Set the position that the exercise is starting
                 ManagerMovement_SetFirstPos(mvtNbr[exerciseIdx]);
             }
-            buttonStartReset          = false;
+            // Start streaching sequence
             managerMovement.autoState = MMOV_AUTO_STATE_2GOAL;
         }
     }
@@ -745,14 +731,15 @@ void ManagerMovement_Auto2Goal()
     }
     else
     {
-        managerMovement.autoState = MMOV_AUTO_STATE_STRETCHING;
-        exerciseTimer             = HAL_GetTick();
+        isAtFirstPos = false;
+        movementIdx--;
 
         pos1Reached = false;
         pos2Reached = false;
         pos3Reached = false;
 
-        movementIdx--;
+        exerciseTimer             = HAL_GetTick();
+        managerMovement.autoState = MMOV_AUTO_STATE_STRETCHING;
     }
 }
 
@@ -893,14 +880,24 @@ void ManagerMovement_Auto2FirstPos()
     }
     else
     {
-        managerMovement.autoState = MMOV_AUTO_STATE_REST;
-        pauseTimer                = HAL_GetTick();
+        isAtFirstPos = true;
 
         pos1Reached = false;
         pos2Reached = false;
         pos3Reached = false;
 
         movementIdx++;
+
+        if (!startButton ||
+            stopButton)  // if called by state STOP, go back to STOP
+        {
+            managerMovement.autoState = MMOV_AUTO_STATE_STOP;
+        }
+        else  // If called by State FIRSTPOS, go to REST
+        {
+            pauseTimer                = HAL_GetTick();
+            managerMovement.autoState = MMOV_AUTO_STATE_REST;
+        }
     }
 }
 
@@ -912,46 +909,33 @@ void ManagerMovement_AutoRest()
     }
     else if (HAL_GetTick() - pauseTimer >= pauseTime[exerciseIdx])
     {
-        managerMovement.autoState = MMOV_AUTO_STATE_READY;
-        repsCount++;
+        if (repsCount >=
+            repetitions[exerciseIdx] - 1)  // Reps are done, got to STOP
+        {
+            managerMovement.autoState = MMOV_AUTO_STATE_STOP;
+        }
+        else  // Continue exercise with next rep
+        {
+            managerMovement.autoState = MMOV_AUTO_STATE_READY;
+            repsCount++;
+        }
     }
 }
 
 void ManagerMovement_AutoStop()
 {
-    // Go to first pos
-    if (!pos3Reached && mvtNbr[exerciseIdx] >= 3)
+    if (!isAtFirstPos)
     {
-        if (ManagerMovement_GoToPos(movements[movementIdx], firstPos[2]))
-        {
-            pos3Reached = true;
-            movementIdx--;
-        }
-    }
-    else if (!pos2Reached && mvtNbr[exerciseIdx] >= 2)
-    {
-        if (ManagerMovement_GoToPos(movements[movementIdx], firstPos[1]))
-        {
-            pos2Reached = true;
-            movementIdx--;
-        }
-    }
-    else if (!pos1Reached && mvtNbr[exerciseIdx] >= 1)
-    {
-        if (ManagerMovement_GoToPos(movements[movementIdx], firstPos[0]))
-        {
-            pos1Reached = true;
-            movementIdx--;
-        }
+        ManagerMovement_Auto2FirstPos();  // Go to firstPos if not there
     }
     else
     {
-        // Resets everything like in Auto2FirstPos()
-        movementIdx++;
-
-        pos1Reached = false;
-        pos2Reached = false;
-        pos3Reached = false;
+        if (startButton)  // In state stop because exercise is over
+        {
+            movementIdx += mvtNbr[exerciseIdx];
+            exerciseIdx++;
+            repsCount = 0;
+        }
 
         // Reset the counter if exercises are done or if stop command on the HMI
         if (mvtNbr[exerciseIdx] == 0 || stopButton)
@@ -1219,7 +1203,8 @@ bool ManagerMovement_SetState(uint8_t newState)
         if (newState != managerMovement.state)
         {
             if (newState == MMOV_STATE_AUTOMATIC &&
-                managerMovement.state != MMOV_STATE_HOMING)
+                managerMovement.state != MMOV_STATE_HOMING &&
+                ManagerMotor_HasMachineHomed())
             {
                 managerMovement.autoState = MMOV_AUTO_STATE_WAITING4PLAN;
                 stateChanged              = true;
@@ -1235,7 +1220,8 @@ bool ManagerMovement_SetState(uint8_t newState)
                 stateChanged = true;
             }
             else if (newState == MMOV_STATE_CHANGESIDE &&
-                     managerMovement.state != MMOV_STATE_HOMING)
+                     managerMovement.state != MMOV_STATE_HOMING &&
+                     ManagerMotor_HasMachineHomed())
             {
                 stateChanged = true;
             }
