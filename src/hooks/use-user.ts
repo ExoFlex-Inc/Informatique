@@ -199,7 +199,6 @@ export function useUser() {
 }
 
 export function useTopUsers() {
-
   const {
     data: users,
     isLoading,

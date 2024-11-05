@@ -15,9 +15,12 @@ export function useStats() {
         throw new Error("User ID is missing");
       }
 
-      const response = await fetch(`http://localhost:3001/stat/${user.user_id}`, {
-        method: "GET",
-      });
+      const response = await fetch(
+        `http://localhost:3001/stat/${user.user_id}`,
+        {
+          method: "GET",
+        },
+      );
 
       if (!response.ok) {
         throw new Error(`Error fetching stats: ${response.statusText}`);
@@ -28,7 +31,7 @@ export function useStats() {
         throw new Error("No stats found for this user.");
       }
 
-      return statsData[0]; 
+      return statsData[0];
     },
     enabled: !!user?.user_id,
   });

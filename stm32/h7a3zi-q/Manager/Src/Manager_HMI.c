@@ -64,7 +64,6 @@ void ManagerHMI_Init()
     {
         buf[i] = 0;
     }
-
 }
 
 void ManagerHMI_Task()
@@ -528,5 +527,5 @@ float ManagerHMI_Sec2Millis(float seconds)
 
 void ManagerHMI_SendNow()
 {
-	ManagerHMI_SendJSON();
+    ManagerHMI_SendJSON();
 }

@@ -69,7 +69,7 @@ export default function ProgressionWidget({
     if (stm32Data?.Repetitions !== undefined) {
       setRepetitionProgress(stm32Data.Repetitions);
       setStretchProgress(stm32Data.Repetitions);
-      
+
       // Open pain scale dialog if repetitions are complete
       if (stm32Data.Repetitions === totalRepetition) {
         setOpenDialogPainScale(true);
@@ -79,7 +79,7 @@ export default function ProgressionWidget({
 
   useEffect(() => {
     if (planData && stm32Data?.ExerciseIdx !== undefined) {
-      if(planData.plan[stm32Data.ExerciseIdx]?.repetitions) {
+      if (planData.plan[stm32Data.ExerciseIdx]?.repetitions) {
         const repetitions = planData.plan[stm32Data.ExerciseIdx]?.repetitions;
         setTotalRepetition(repetitions);
       } else {

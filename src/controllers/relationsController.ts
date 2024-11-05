@@ -48,7 +48,10 @@ export const fetchRelation = async (req: Request, res: Response) => {
     console.error("Error fetching relations:", error);
     return res
       .status(500)
-      .json({ message: "Error fetching relations", error: (error as any).message });
+      .json({
+        message: "Error fetching relations",
+        error: (error as any).message,
+      });
   }
 };
 
@@ -124,7 +127,10 @@ export const removeRelation = async (req: Request, res: Response) => {
   }
 };
 
-export const getPendingAdminNotifications = async (req: Request, res: Response) => {
+export const getPendingAdminNotifications = async (
+  req: Request,
+  res: Response,
+) => {
   const userId = req.params["userId"];
 
   if (!userId) {

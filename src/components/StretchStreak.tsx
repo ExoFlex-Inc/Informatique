@@ -1,64 +1,69 @@
-import { 
-  Typography, 
-  Paper,  
-  Box,
-  CircularProgress,
-  Grid,
-} from '@mui/material'
-import { 
-  Whatshot as WhatshotIcon
-} from '@mui/icons-material'
+import { Typography, Paper, Box, CircularProgress, Grid } from "@mui/material";
+import { Whatshot as WhatshotIcon } from "@mui/icons-material";
 
 interface StretchStreakProps {
   currentStreak: number;
   longestStreak: number;
 }
 
-export default function StretchStreak({ currentStreak, longestStreak }: StretchStreakProps) {
-    return (
+export default function StretchStreak({
+  currentStreak,
+  longestStreak,
+}: StretchStreakProps) {
+  return (
     <Grid item xs={12} md={4}>
-    <Paper
+      <Paper
         elevation={3}
         sx={{
-            p: 2,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            height: 240,
-            position: 'relative',
-            backgroundColor: 'white',
+          p: 2,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          height: 240,
+          position: "relative",
+          backgroundColor: "white",
         }}
+      >
+        <Typography
+          component="h2"
+          variant="h6"
+          color="blueAccent.main"
+          gutterBottom
         >
-        <Typography component="h2" variant="h6" color="blueAccent.main" gutterBottom>
-            Stretch Streak
+          Stretch Streak
         </Typography>
-        <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-            <CircularProgress 
-            variant="determinate" 
-            value={(currentStreak / longestStreak) * 100} 
-            size={120} 
-            thickness={4} 
+        <Box sx={{ position: "relative", display: "inline-flex" }}>
+          <CircularProgress
+            variant="determinate"
+            value={(currentStreak / longestStreak) * 100}
+            size={120}
+            thickness={4}
             color="secondary"
-            />
-            <Box
+          />
+          <Box
             sx={{
-                top: 0,
-                left: 0,
-                bottom: 0,
-                right: 0,
-                position: 'absolute',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+              top: 0,
+              left: 0,
+              bottom: 0,
+              right: 0,
+              position: "absolute",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
-            >
-            <WhatshotIcon sx={{ fontSize: 60, color: 'orange' }} />
-            </Box>
+          >
+            <WhatshotIcon sx={{ fontSize: 60, color: "orange" }} />
+          </Box>
         </Box>
-        <Typography component="p" variant="h4" color={"blueAccent.main"} sx={{ mt: 2 }}>
-            {currentStreak} days
+        <Typography
+          component="p"
+          variant="h4"
+          color={"blueAccent.main"}
+          sx={{ mt: 2 }}
+        >
+          {currentStreak} days
         </Typography>
-        </Paper>
+      </Paper>
     </Grid>
-    );
+  );
 }

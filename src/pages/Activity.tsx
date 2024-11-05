@@ -63,12 +63,12 @@ function onGraphTypeChange(
   dates: string[],
   ...args: (number[] | undefined)[]
 ) {
-  const mappedArgs = args.map(
-    (arg: number[] | undefined, index: number) => {
-      const dataPoints = [];
-      let cumulativeIndex = 0;
+  const mappedArgs = args.map((arg: number[] | undefined, index: number) => {
+    const dataPoints = [];
+    let cumulativeIndex = 0;
 
-      if (!arg) return {
+    if (!arg)
+      return {
         label: labels[index],
         data: [],
         borderColor: colors[index],
@@ -78,31 +78,30 @@ function onGraphTypeChange(
         pointHoverRadius: 7,
       };
 
-      const recordedDate = dates[index] ?? ""; // Use the date at the args index
+    const recordedDate = dates[index] ?? ""; // Use the date at the args index
 
-      for (let i = 0; i < arg.length; i++) {
-        const yValue = arg[i];
-        if (yValue !== undefined && yValue !== null) {
-          dataPoints.push({
-            x: cumulativeIndex + 1,
-            y: yValue,
-            recorded_date: recordedDate, // Apply the same date to all points in this arg
-          });
-        }
-        cumulativeIndex++;
+    for (let i = 0; i < arg.length; i++) {
+      const yValue = arg[i];
+      if (yValue !== undefined && yValue !== null) {
+        dataPoints.push({
+          x: cumulativeIndex + 1,
+          y: yValue,
+          recorded_date: recordedDate, // Apply the same date to all points in this arg
+        });
       }
+      cumulativeIndex++;
+    }
 
-      return {
-        label: labels[index],
-        data: dataPoints,
-        borderColor: colors[index],
-        fill: false,
-        tension: 0.1,
-        pointRadius: show_points ? 5 : 2,
-        pointHoverRadius: 7,
-      };
-    },
-  );
+    return {
+      label: labels[index],
+      data: dataPoints,
+      borderColor: colors[index],
+      fill: false,
+      tension: 0.1,
+      pointRadius: show_points ? 5 : 2,
+      pointHoverRadius: 7,
+    };
+  });
 
   // Update x-axis labels based on the cumulative data points
   const xAxisLabels = mappedArgs[0]?.data?.map((point) => point.x) ?? [];
@@ -202,15 +201,25 @@ export default function Activity() {
         ];
 
         const angle_stretch = {
-          dorsiflexion: filteredData.flatMap((item) => item?.data?.angles.dorsiflexion),
+          dorsiflexion: filteredData.flatMap(
+            (item) => item?.data?.angles.dorsiflexion,
+          ),
           eversion: filteredData.flatMap((item) => item?.data?.angles.eversion),
-          extension: filteredData.flatMap((item) => item?.data?.angles.extension),
+          extension: filteredData.flatMap(
+            (item) => item?.data?.angles.extension,
+          ),
         };
 
         const force_stretch = {
-          dorsiflexion: filteredData.flatMap((item) => item?.data?.torques.dorsiflexion),
-          eversion: filteredData.flatMap((item) => item?.data?.torques.eversion),
-          extension: filteredData.flatMap((item) => item?.data?.torques.extension),
+          dorsiflexion: filteredData.flatMap(
+            (item) => item?.data?.torques.dorsiflexion,
+          ),
+          eversion: filteredData.flatMap(
+            (item) => item?.data?.torques.eversion,
+          ),
+          extension: filteredData.flatMap(
+            (item) => item?.data?.torques.extension,
+          ),
         };
 
         const repetitions_done = filteredData?.map(
@@ -282,7 +291,9 @@ export default function Activity() {
                 ["Pain Scale from 1 to 5"],
                 colors,
                 dates,
-                rated_pain.flat().filter((item): item is number => item !== undefined),
+                rated_pain
+                  .flat()
+                  .filter((item): item is number => item !== undefined),
               );
               setDataset1(chartData);
               setTitle1(title);
@@ -351,7 +362,9 @@ export default function Activity() {
       case "Rigidity":
         // Compute average of torques
         const torques = {
-          dorsiflexion: data.flatMap((item) => item?.data?.torques.dorsiflexion),
+          dorsiflexion: data.flatMap(
+            (item) => item?.data?.torques.dorsiflexion,
+          ),
           eversion: data.flatMap((item) => item?.data?.torques.eversion),
           extension: data.flatMap((item) => item?.data?.torques.extension),
         };
@@ -365,7 +378,9 @@ export default function Activity() {
 
       case "Number of repetitions":
         // Compute average of repetitions
-        const repetitionsDone = data.map((item) => item?.data?.repetitions_done);
+        const repetitionsDone = data.map(
+          (item) => item?.data?.repetitions_done,
+        );
         const repetitionsTarget = data.map(
           (item) => item?.data?.repetitions_target,
         );
@@ -394,32 +409,37 @@ export default function Activity() {
   function getMissingDates(data: dataStructure[], dateRange: DateRange) {
     const startDate = new Date(dateRange[0]);
     const endDate = new Date(dateRange[1]);
-  
-    const dates = data.map((item) => {
-      // Ensure recorded_date exists before processing
-      if (!item?.data?.recorded_date) {
-        return null; // Return null for missing dates to handle later
-      }
-  
-      // Remove the timezone abbreviation
-      const cleanedDateString = item.data.recorded_date.replace(/\s*\b[A-Z]{3}\b$/, '');
-      // Replace ', ' with 'T' to create an ISO string
-      const isoDateString = cleanedDateString.replace(', ', 'T');
-      const date = new Date(isoDateString);
-      
-      // Format the date as 'YYYY-MM-DD'
-      const formattedDate =
-        date.getFullYear() +
-        '-' +
-        String(date.getMonth() + 1).padStart(2, '0') +
-        '-' +
-        String(date.getDate()).padStart(2, '0');
-        
-      return formattedDate;
-    }).filter(Boolean); // Filter out any null values from missing dates
-  
+
+    const dates = data
+      .map((item) => {
+        // Ensure recorded_date exists before processing
+        if (!item?.data?.recorded_date) {
+          return null; // Return null for missing dates to handle later
+        }
+
+        // Remove the timezone abbreviation
+        const cleanedDateString = item.data.recorded_date.replace(
+          /\s*\b[A-Z]{3}\b$/,
+          "",
+        );
+        // Replace ', ' with 'T' to create an ISO string
+        const isoDateString = cleanedDateString.replace(", ", "T");
+        const date = new Date(isoDateString);
+
+        // Format the date as 'YYYY-MM-DD'
+        const formattedDate =
+          date.getFullYear() +
+          "-" +
+          String(date.getMonth() + 1).padStart(2, "0") +
+          "-" +
+          String(date.getDate()).padStart(2, "0");
+
+        return formattedDate;
+      })
+      .filter(Boolean); // Filter out any null values from missing dates
+
     const missingDates: string[] = [];
-  
+
     // Generate all dates in the date range
     for (
       let currentDate = new Date(startDate);
@@ -431,7 +451,7 @@ export default function Activity() {
         missingDates.push(formattedDate);
       }
     }
-  
+
     setMissingDates(missingDates);
   }
 

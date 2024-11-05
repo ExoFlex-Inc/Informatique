@@ -65,7 +65,7 @@ export const postPlan = async (req: Request, res: Response) => {
   }
 };
 
-export const getPlan = async(req: Request, res: Response) => {
+export const getPlan = async (req: Request, res: Response) => {
   const user_id = req.params["userId"];
 
   // Input Validation

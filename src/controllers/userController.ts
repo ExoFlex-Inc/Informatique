@@ -116,55 +116,55 @@ export const downloadAvatar = async (req: Request, res: Response) => {
 };
 
 export const uploadAvatar = async (req: Request, res: Response) => {
-    const userId = req.params["userId"];
+  const userId = req.params["userId"];
 
-    if (!userId) {
-      return res.status(400).json({ error: "No userId provided" });
-    }
+  if (!userId) {
+    return res.status(400).json({ error: "No userId provided" });
+  }
 
-    const file = req.file;
-    if (!file) {
-      return res.status(400).json({ error: "No file uploaded" });
-    }
+  const file = req.file;
+  if (!file) {
+    return res.status(400).json({ error: "No file uploaded" });
+  }
 
-    const fileExt = file.originalname.split(".").pop();
-    const fileName = `${Math.random()}.${fileExt}`;
-    const filePath = `${fileName}`;
+  const fileExt = file.originalname.split(".").pop();
+  const fileName = `${Math.random()}.${fileExt}`;
+  const filePath = `${fileName}`;
 
-    const { data: profile, error: profileError } = await supaClient
-      .from("user_profiles")
-      .select("avatar_url")
-      .eq("user_id", userId)
-      .single();
+  const { data: profile, error: profileError } = await supaClient
+    .from("user_profiles")
+    .select("avatar_url")
+    .eq("user_id", userId)
+    .single();
 
-    if (profileError) {
-      return res.status(500).json({
-        error: `Error fetching user profile: ${profileError.message}`,
-      });
-    }
+  if (profileError) {
+    return res.status(500).json({
+      error: `Error fetching user profile: ${profileError.message}`,
+    });
+  }
 
-    await deleteOldImage(profile?.avatar_url);
+  await deleteOldImage(profile?.avatar_url);
 
-    const { data: avatarUrl, error: uploadError } = await supaClient.storage
-      .from("avatars")
-      .upload(filePath, file.buffer, { contentType: file.mimetype });
+  const { data: avatarUrl, error: uploadError } = await supaClient.storage
+    .from("avatars")
+    .upload(filePath, file.buffer, { contentType: file.mimetype });
 
-    if (uploadError) {
-      return res
-        .status(500)
-        .json({ error: `Error uploading avatar: ${uploadError.message}` });
-    }
+  if (uploadError) {
+    return res
+      .status(500)
+      .json({ error: `Error uploading avatar: ${uploadError.message}` });
+  }
 
-    const { error: updateError } = await supaClient
-      .from("user_profiles")
-      .update({ avatar_url: filePath })
-      .eq("user_id", userId);
+  const { error: updateError } = await supaClient
+    .from("user_profiles")
+    .update({ avatar_url: filePath })
+    .eq("user_id", userId);
 
-    if (updateError) {
-      return res
-        .status(500)
-        .json({ error: `Error updating user profile: ${updateError.message}` });
-    }
+  if (updateError) {
+    return res
+      .status(500)
+      .json({ error: `Error updating user profile: ${updateError.message}` });
+  }
 
-    res.status(200).json({ avatar_url: avatarUrl.path });
-  };
+  res.status(200).json({ avatar_url: avatarUrl.path });
+};

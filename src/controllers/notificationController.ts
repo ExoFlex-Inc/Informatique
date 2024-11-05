@@ -3,7 +3,7 @@ import supaClient from "../utils/supabaseClient.ts";
 import type { Request, Response } from "express";
 
 export const getNotifications = async (req: Request, res: Response) => {
-  const userId = req.params['userId'];
+  const userId = req.params["userId"];
 
   if (!userId) {
     return res.status(400).json({ message: "User ID is required" });
@@ -70,12 +70,15 @@ export const createNotification = async (req: Request, res: Response) => {
     console.error("Server error:", error);
     return res
       .status(500)
-      .json({ message: "Internal server error", error: (error as Error).message });
+      .json({
+        message: "Internal server error",
+        error: (error as Error).message,
+      });
   }
 };
 
 export const deleteNotification = async (req: Request, res: Response) => {
-  const notificationId = req.params['notificationId'];
+  const notificationId = req.params["notificationId"];
 
   if (!notificationId) {
     return res.status(400).json({ message: "Notification ID is required" });
@@ -100,6 +103,9 @@ export const deleteNotification = async (req: Request, res: Response) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ message: "Internal server error", error: (error as Error).message });
+      .json({
+        message: "Internal server error",
+        error: (error as Error).message,
+      });
   }
 };

@@ -62,10 +62,12 @@ export const postExerciseData = async (req: Request, res: Response) => {
   const { user_id, rated_pain } = req.body;
 
   // Insert exercise data
-  const { error: exerciseError } = await supaClient.from("exercise_data").insert({
-    rated_pain,
-    user_id,
-  });
+  const { error: exerciseError } = await supaClient
+    .from("exercise_data")
+    .insert({
+      rated_pain,
+      user_id,
+    });
 
   if (exerciseError) {
     return res.status(500).json({
@@ -104,7 +106,8 @@ export const postExerciseData = async (req: Request, res: Response) => {
       lastUpdated.setHours(0, 0, 0, 0);
       now.setHours(0, 0, 0, 0);
 
-      const diffInDays = (now.getTime() - lastUpdated.getTime()) / (1000 * 60 * 60 * 24);
+      const diffInDays =
+        (now.getTime() - lastUpdated.getTime()) / (1000 * 60 * 60 * 24);
 
       if (diffInDays === 1) {
         // Exactly one day has passed, increment the streak

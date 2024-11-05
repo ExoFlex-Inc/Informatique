@@ -191,7 +191,9 @@ export default function HMI() {
       planData?.plan &&
       stm32Data.ExerciseIdx < planData.plan.length
     ) {
-      const currentSet = planData.plan[stm32Data.ExerciseIdx] ?? { movement: [] };
+      const currentSet = planData.plan[stm32Data.ExerciseIdx] ?? {
+        movement: [],
+      };
       const currentExercise = currentSet.movement[0]?.exercise;
 
       if (
@@ -224,7 +226,7 @@ export default function HMI() {
               x: stm32Data.Repetitions,
               y: stm32Data.Torques[2] ?? 0,
             });
-        }
+          }
           return { ...prevChartData, datasets: newData };
         });
       }
@@ -237,8 +239,18 @@ export default function HMI() {
         if (prevChartData.datasets[0] && prevChartData.datasets[1]) {
           return {
             datasets: [
-              { ...prevChartData.datasets[0], data: [], label: prevChartData.datasets[0].label, borderColor: prevChartData.datasets[0].borderColor },
-              { ...prevChartData.datasets[1], data: [], label: prevChartData.datasets[1].label, borderColor: prevChartData.datasets[1].borderColor },
+              {
+                ...prevChartData.datasets[0],
+                data: [],
+                label: prevChartData.datasets[0].label,
+                borderColor: prevChartData.datasets[0].borderColor,
+              },
+              {
+                ...prevChartData.datasets[1],
+                data: [],
+                label: prevChartData.datasets[1].label,
+                borderColor: prevChartData.datasets[1].borderColor,
+              },
             ],
           };
         }
@@ -271,7 +283,9 @@ export default function HMI() {
           if (exerciseData.ok) {
             console.log("Data saved successfully.");
             queryClient.invalidateQueries({ queryKey: ["topUsers"] });
-            queryClient.invalidateQueries({ queryKey: ["stats", user.user_id] });
+            queryClient.invalidateQueries({
+              queryKey: ["stats", user.user_id],
+            });
           } else {
             console.error("Failed to save the data.");
           }
@@ -355,7 +369,11 @@ export default function HMI() {
                   mode="Reset"
                 />
               </Box>
-              <LineChart chartData={chartData} type="line" title="Exercise Progression" />
+              <LineChart
+                chartData={chartData}
+                type="line"
+                title="Exercise Progression"
+              />
             </Grid>
             <Grid item>
               <Box padding={1} bgcolor="white" sx={{ borderRadius: "16px" }}>
@@ -380,7 +398,10 @@ export default function HMI() {
         setPainScale={setPainScale}
         openDialogPainScale={openDialogPainScale}
       />
-      <ManualControl errorFromStm32={errorFromStm32} stm32Data={stm32Data ?? null} />
+      <ManualControl
+        errorFromStm32={errorFromStm32}
+        stm32Data={stm32Data ?? null}
+      />
     </div>
   );
 }

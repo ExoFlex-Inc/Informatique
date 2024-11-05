@@ -143,7 +143,8 @@ const LineChart: React.FC<LineChartProps> = ({
                   const dataPoint = context.raw as ScatterDataPoint;
                   const label = context.dataset.label || "";
                   const value = context.formattedValue;
-                  const recordedDate = (dataPoint as any)?.recorded_date || "N/A";
+                  const recordedDate =
+                    (dataPoint as any)?.recorded_date || "N/A";
 
                   return `${label}: ${value}\nRecorded Date: ${recordedDate}`;
                 },
@@ -163,7 +164,7 @@ const LineChart: React.FC<LineChartProps> = ({
         ...prevOptions,
         scales: {
           x: {
-            ...prevOptions.scales?.['x'],
+            ...prevOptions.scales?.["x"],
             realtime: {
               ...(prevOptions?.scales?.["x"] as any)?.realtime,
               pause: graphPause,
@@ -231,7 +232,12 @@ const LineChart: React.FC<LineChartProps> = ({
           ref={chartRef}
           data={
             type === "realtime"
-              ? { datasets: chartOptions.datasets as ChartDataset<"line", (number | ScatterDataPoint | null)[]>[] }
+              ? {
+                  datasets: chartOptions.datasets as ChartDataset<
+                    "line",
+                    (number | ScatterDataPoint | null)[]
+                  >[],
+                }
               : chartData
           }
           options={chartOptions}

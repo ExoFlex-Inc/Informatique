@@ -5,12 +5,12 @@ import {
   FormControlLabel,
   Grid,
   TextField,
-  IconButton
+  IconButton,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { Refresh, PlayArrow, Pause, Home } from "@mui/icons-material";
-import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
-import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import LineChart from "../components/LineChart";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import useStm32 from "../hooks/use-stm32.ts";
@@ -272,24 +272,28 @@ export default function Manual() {
                     mainColor="blueAccent.main"
                     hoverColor="blueAccent.hover"
                   />
-                <IconButton
-                  onClick={(e) => {
-                    exportCsv();
-                  }}
-                  onTouchStart={(e) => {
-                    exportCsv();
-                  }}
-                  size="large"
-                  sx={{
-                    backgroundColor: "blueAccent.main",
-                    "&:hover": {
-                      backgroundColor: "blueAccent.hover",
-                    },
-                  }}
-                  disabled={!stm32Data?.ErrorCode}
-                >
-                  {recordCsv ? <RadioButtonUncheckedIcon/>: <RadioButtonCheckedIcon/>}
-                </IconButton>
+                  <IconButton
+                    onClick={(e) => {
+                      exportCsv();
+                    }}
+                    onTouchStart={(e) => {
+                      exportCsv();
+                    }}
+                    size="large"
+                    sx={{
+                      backgroundColor: "blueAccent.main",
+                      "&:hover": {
+                        backgroundColor: "blueAccent.hover",
+                      },
+                    }}
+                    disabled={!stm32Data?.ErrorCode}
+                  >
+                    {recordCsv ? (
+                      <RadioButtonUncheckedIcon />
+                    ) : (
+                      <RadioButtonCheckedIcon />
+                    )}
+                  </IconButton>
                 </Box>
                 <Box sx={{ width: 50 }} />
                 <FormControlLabel

@@ -140,7 +140,7 @@ function resetSaveData() {
     extension: [],
   };
 
-  return true
+  return true;
 }
 
 const insertInitialDataToSupabase = async (): Promise<boolean> => {
@@ -258,7 +258,7 @@ const recordingStm32Data = async (req: Request, res: Response) => {
 
     if (start) {
       // Clear previous data if needed
-      resetSaveData()
+      resetSaveData();
 
       // Insert initial JSON data
       const initialInsertSuccess = await insertInitialDataToSupabase();
@@ -298,17 +298,17 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
   }
   let scannerPort: string | undefined;
 
-  if (process.env['ROBOT'] === 'true') {
+  if (process.env["ROBOT"] === "true") {
     const ports = await SerialPort.list();
     const foundPort = ports.find(
-      (port) => port.manufacturer === "STMicroelectronics"
+      (port) => port.manufacturer === "STMicroelectronics",
     );
 
     if (foundPort) {
       scannerPort = foundPort.path;
     }
   } else {
-    scannerPort = process.env['HMI_SERIAL_PORT'];
+    scannerPort = process.env["HMI_SERIAL_PORT"];
   }
 
   if (scannerPort) {
@@ -407,9 +407,4 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
   }
 });
 
-export {
-  initializeSerialPort,
-  recordingStm32Data,
-  getSavedData,
-  clearData,
-};
+export { initializeSerialPort, recordingStm32Data, getSavedData, clearData };

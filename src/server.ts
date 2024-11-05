@@ -28,7 +28,7 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const scriptPath = path.resolve(__dirname, '../src/utils/stm32Simulator.sh');
+const scriptPath = path.resolve(__dirname, "../src/utils/stm32Simulator.sh");
 
 // Run socat for the STM32 simulator
 const myShellScript = exec(`bash ${scriptPath} 2>&1`, (error, stdout, _) => {
@@ -41,11 +41,10 @@ const myShellScript = exec(`bash ${scriptPath} 2>&1`, (error, stdout, _) => {
 
 // Capture and log stdout data in real-time from socat
 if (myShellScript.stdout) {
-  myShellScript.stdout.on('data', (data) => {
+  myShellScript.stdout.on("data", (data) => {
     console.log(`Output: ${data}`);
   });
 }
-
 
 const app: Application = express();
 const httpServer = createServer(app);
@@ -107,16 +106,16 @@ io.on("connection", (socket) => {
     if (lastCallTime !== 0) {
       const timeDifference = currentTime - lastCallTime;
       if (timeDifference > 200) {
-
-        console.log(`Time since last socket call passed 200: ${timeDifference} ms`);
+        console.log(
+          `Time since last socket call passed 200: ${timeDifference} ms`,
+        );
       }
-
     }
 
     lastCallTime = currentTime;
 
     const serialPort = getSerialPort();
-    
+
     if (serialPort && serialPort.isOpen) {
       serialPort.write(data, (err) => {
         if (err) {

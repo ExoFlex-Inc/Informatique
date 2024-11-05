@@ -1,7 +1,7 @@
 import express from "express";
 import {
-    fetchStats,
-    fetchTopUsersStats,
+  fetchStats,
+  fetchTopUsersStats,
 } from "../controllers/statController.ts";
 
 const router = express.Router();

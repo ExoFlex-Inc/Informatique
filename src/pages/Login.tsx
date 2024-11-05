@@ -12,7 +12,7 @@ async function registerFCMToken() {
   try {
     // Register the service worker with the correct path
     // const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-    
+
     // Wait for the service worker to be ready
     // await navigator.serviceWorker.ready;
 
@@ -25,7 +25,10 @@ async function registerFCMToken() {
     console.log("Token received:", token);
     return token;
   } catch (error) {
-    console.error("Service worker registration or token retrieval failed:", error);
+    console.error(
+      "Service worker registration or token retrieval failed:",
+      error,
+    );
     return null;
   }
 }

@@ -23,7 +23,9 @@ import { useQueryClient } from "@tanstack/react-query";
 const Notification = () => {
   const [isNotifications, setIsNotifications] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [responseMessage, setResponseMessage] = useState<{ [key: string]: string }>({});
+  const [responseMessage, setResponseMessage] = useState<{
+    [key: string]: string;
+  }>({});
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 

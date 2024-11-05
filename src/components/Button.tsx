@@ -31,8 +31,11 @@ const Button: React.FC<ButtonProps> = ({
   const { socket } = useStm32();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const sendingRequests = async (mode: string | undefined, action: string | undefined, content: string | undefined) => {
-    
+  const sendingRequests = async (
+    mode: string | undefined,
+    action: string | undefined,
+    content: string | undefined,
+  ) => {
     if (!socket) {
       console.error("Socket is not available.");
       return;
@@ -58,7 +61,6 @@ const Button: React.FC<ButtonProps> = ({
       console.log(`Button clicked: ${dataToSend}`);
 
       socket.emit("sendDataToStm32", dataToSend);
-
     } catch (error) {
       console.error("An error occurred:", error);
       clearIntervalRef();
@@ -124,10 +126,17 @@ const Button: React.FC<ButtonProps> = ({
     window.removeEventListener("touchend", handleEnd);
   };
 
-  const handleStart = (e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
+  const handleStart = (
+    e:
+      | React.MouseEvent<HTMLButtonElement>
+      | React.TouchEvent<HTMLButtonElement>,
+  ) => {
     e.preventDefault(); // Prevent any unintended default behaviors
     if (action === "Increment") {
-      intervalRef.current = setInterval(() => sendingRequests(mode, action, content), 20);
+      intervalRef.current = setInterval(
+        () => sendingRequests(mode, action, content),
+        20,
+      );
       window.addEventListener("mouseup", handleEnd);
       window.addEventListener("touchend", handleEnd);
     } else if (content === "Start") {

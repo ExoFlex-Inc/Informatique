@@ -1,5 +1,5 @@
 import { useContext, useState, useRef, useEffect } from "react";
-import { ColorModeContext} from "../hooks/theme.ts";
+import { ColorModeContext } from "../hooks/theme.ts";
 
 import {
   Box,
@@ -123,7 +123,11 @@ export default function TopBar() {
           <IconButton className="h-14" onClick={onProfileClick}>
             <Avatar
               ref={avatarRef}
-              src={user?.avatar_blob_url ? user.avatar_blob_url : '/assets/user.png'}
+              src={
+                user?.avatar_blob_url
+                  ? user.avatar_blob_url
+                  : "/assets/user.png"
+              }
             />
           </IconButton>
         )}

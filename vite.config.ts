@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import dotenv from "dotenv";
 import { VitePWA } from "vite-plugin-pwa";
@@ -20,23 +20,23 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      strategies: 'injectManifest',
+      strategies: "injectManifest",
       injectManifest: {
-        rollupFormat: 'iife'
+        rollupFormat: "iife",
       },
-      registerType: 'autoUpdate',
-      srcDir: 'public',
-      filename: 'firebase-messaging-sw.js',
+      registerType: "autoUpdate",
+      srcDir: "public",
+      filename: "firebase-messaging-sw.js",
 
       devOptions: {
         enabled: true,
         type: "classic",
       },
-    })
+    }),
   ],
   build: {
     rollupOptions: {
-      input: './index.html',
+      input: "./index.html",
     },
   },
   // Server settings
