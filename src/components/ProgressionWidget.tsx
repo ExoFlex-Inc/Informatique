@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import {
   Box,
   CircularProgress,
-  CircularProgressProps,
+  type CircularProgressProps,
   Typography,
   LinearProgress,
 } from "@mui/material";

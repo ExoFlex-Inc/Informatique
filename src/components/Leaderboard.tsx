@@ -12,7 +12,6 @@ import {
   Box,
   Grid,
 } from '@mui/material';
-import AvatarIcon from "../../assets/user.png";
 
 interface User {
   user_id: any;
@@ -108,7 +107,7 @@ export default function Leaderboard({ users, currentUser }: LeaderboardProps) {
         </Box>
         <List ref={listRef} sx={{ width: '100%', bgcolor: 'transparent', overflowY: 'auto', flexGrow: 1 }}>
           {sortedUsers.map((user, index) => (
-            <ListItem key={user.id} sx={{ 
+            <ListItem key={user.user_id} sx={{ 
               py: 1.5, 
               borderBottom: '1px solid #e0e0e0',
               '&:last-child': { borderBottom: 'none' },
@@ -127,7 +126,7 @@ export default function Leaderboard({ users, currentUser }: LeaderboardProps) {
                 </Typography>
               </Box>
               <ListItemAvatar>
-                <Avatar alt={user.first_name} src={user.avatar_blob_url ? user.avatar_blob_url : AvatarIcon} />
+                <Avatar alt={user.first_name} src={user.avatar_blob_url ? user.avatar_blob_url : '/assets/user.png'} />
               </ListItemAvatar>
               <ListItemText
                 primary={
@@ -157,7 +156,7 @@ export default function Leaderboard({ users, currentUser }: LeaderboardProps) {
               <Typography variant="body1" sx={{ fontWeight: 'bold', color: 'black', mr: 2 }}>
                 {currentUserRank + 1}.
               </Typography>
-              <Avatar alt={currentUser.first_name} src={currentUser.avatar_blob_url ? currentUser.avatar_blob_url : AvatarIcon} sx={{ mr: 2 }} />
+              <Avatar alt={currentUser.first_name} src={currentUser.avatar_blob_url ? currentUser.avatar_blob_url : '/assets/user.png'} sx={{ mr: 2 }} />
               <Typography variant="body1" sx={{ fontWeight: 'bold', color: 'black' }}>
                 {currentUser.first_name} {currentUser.last_name}
               </Typography>

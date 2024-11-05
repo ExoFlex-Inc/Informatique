@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import { SerialPort } from "serialport";
 import asyncHandler from "express-async-handler";
 import {

@@ -15,7 +15,7 @@ import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import { useRelations } from "../hooks/use-relations.ts";
 import { usePlan } from "../hooks/use-plan.ts";
 import Loading from "../components/Loading.tsx";
-import { Side } from "../components/ToggleSide.tsx";
+import type { Side } from "../components/ToggleSide.tsx";
 import ToggleSide from "../components/ToggleSide.tsx";
 import { useQueryClient } from "@tanstack/react-query";
 

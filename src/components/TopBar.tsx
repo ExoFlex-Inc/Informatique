@@ -19,7 +19,6 @@ import PersonIcon from "@mui/icons-material/Person";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
-import Icon from "../../assets/user.png";
 
 import Notification from "./Notification.tsx";
 
@@ -88,7 +87,7 @@ export default function TopBar() {
 
         await deleteToken(messaging);
 
-        navigate("/login");
+        navigate("/login", { replace: true });
       } catch (error) {
         if (error instanceof Error) {
           console.error("Error logging out:", error.message);
@@ -124,7 +123,7 @@ export default function TopBar() {
           <IconButton className="h-14" onClick={onProfileClick}>
             <Avatar
               ref={avatarRef}
-              src={user?.avatar_blob_url ? user.avatar_blob_url : Icon}
+              src={user?.avatar_blob_url ? user.avatar_blob_url : '/assets/user.png'}
             />
           </IconButton>
         )}

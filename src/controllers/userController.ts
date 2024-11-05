@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import supaClient from "../utils/supabaseClient.ts";
 
 export const getUserProfile = async (req: Request, res: Response) => {

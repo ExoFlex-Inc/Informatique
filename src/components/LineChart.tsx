@@ -4,7 +4,7 @@ import "chartjs-adapter-luxon";
 import Chart from "chart.js/auto";
 import { CategoryScale } from "chart.js";
 import StreamingPlugin from "chartjs-plugin-streaming";
-import {
+import type {
   ChartData,
   ChartOptions,
   ScatterDataPoint,

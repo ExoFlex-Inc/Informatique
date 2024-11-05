@@ -5,7 +5,7 @@ import { FilterAlt } from "@mui/icons-material";
 import GraphFilters from "../components/GraphFilters.tsx";
 import { DateRangePicker } from "rsuite";
 import "rsuite/DateRangePicker/styles/index.css";
-import { ChartData } from "chart.js";
+import type { ChartData } from "chart.js";
 import {
   Box,
   ThemeProvider,

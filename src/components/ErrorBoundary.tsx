@@ -4,7 +4,7 @@ import { Error as ErrorIcon } from "@mui/icons-material";
 import { ReactNode } from "react";
 
 // Fallback component to display in case of an error
-import { FallbackProps } from "react-error-boundary";
+import type { FallbackProps } from "react-error-boundary";
 
 function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   return (

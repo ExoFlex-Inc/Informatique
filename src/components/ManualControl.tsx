@@ -23,7 +23,7 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { useState } from "react";
 import Button from "./Button.tsx";
-import { stm32DataType } from "../hooks/use-stm32.ts";
+import type { stm32DataType } from "../hooks/use-stm32.ts";
 import { useEffect } from "react";
 import { tokens } from "../hooks/theme";
 

@@ -2,7 +2,7 @@ import {
   Dialog,
   DialogTitle,
   Rating,
-  IconContainerProps,
+  type IconContainerProps,
   DialogContent,
 } from "@mui/material";
 import { styled } from "@mui/material";

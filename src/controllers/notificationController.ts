@@ -1,6 +1,6 @@
 import supaClient from "../utils/supabaseClient.ts";
 
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 
 export const getNotifications = async (req: Request, res: Response) => {
   const userId = req.params['userId'];

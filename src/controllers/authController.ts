@@ -1,10 +1,9 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import supaClient from "../utils/supabaseClient.ts";
 import { validationResult } from "express-validator";
-import { CookieOptions } from "express";
 
-const cookieOptions: CookieOptions = {
+const cookieOptions = {
   httpOnly: true,
   secure: process.env["NODE_ENV"] === "production",
   sameSite: process.env["NODE_ENV"] === "production" ? "strict" : "lax",

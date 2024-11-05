@@ -8,7 +8,7 @@ import {
   TableCell,
   Typography,
 } from "@mui/material";
-import { Side } from "./ToggleSide.tsx";
+import type { Side } from "./ToggleSide.tsx";
 
 // Define types for better type safety
 type LimitType = "torque" | "angle";

@@ -3,7 +3,7 @@ import {
   Avatar,
   IconButton,
   Badge,
-  BadgeProps,
+  type BadgeProps,
   Grid,
   ListItem,
   Divider,
@@ -15,7 +15,6 @@ import {
   TextField,
 } from "@mui/material";
 import { styled } from "@mui/material";
-import DefaultProfilePic from "../../assets/user.png";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from "@mui/icons-material/Check";
@@ -100,7 +99,7 @@ function Profile() {
         >
           <Avatar
             src={
-              user?.avatar_blob_url ? user.avatar_blob_url : DefaultProfilePic
+              user?.avatar_blob_url ? user.avatar_blob_url : '/assets/user.png'
             }
             sx={{ width: "25vw", height: "25vw" }}
           />
