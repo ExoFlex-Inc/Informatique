@@ -946,31 +946,29 @@ void ManagerMotor_SoftwareOrigin(uint8_t id)
 
 bool ManagerMotor_HasMachineHomed()
 {
-	bool ret = true;
+    bool ret = true;
 
 #ifndef MMOT_DEV_MOTOR_1_DISABLE
     if (!PeriphMotors_IsSoftwareOrigin(&motors[MMOT_MOTOR_1].motor))
     {
-    	ret = false;
+        ret = false;
     }
 #endif
 #ifndef MMOT_DEV_MOTOR_2_DISABLE
     if (!PeriphMotors_IsSoftwareOrigin(&motors[MMOT_MOTOR_2].motor))
     {
-    	ret = false;
+        ret = false;
     }
 #endif
 #ifndef MMOT_DEV_MOTOR_3_DISABLE
     if (!PeriphMotors_IsSoftwareOrigin(&motors[MMOT_MOTOR_3].motor))
     {
-    	ret = false;
+        ret = false;
     }
 #endif
 
     return ret;
 }
-
-
 
 void ManagerMotor_ApplyOriginShift(uint8_t id)
 {

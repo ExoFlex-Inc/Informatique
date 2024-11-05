@@ -193,7 +193,7 @@ void ManagerMovement_Reset()
     movementIdx = 0;
     repsCount   = 0;
 
-    commandSent      = false;
+    commandSent  = false;
     isAtFirstPos = false;
 
     changeSideFree = false;
@@ -273,7 +273,7 @@ void ManagerMovement_Homing()
     switch (managerMovement.homingState)
     {
     case MMOV_VERIF_PERSON_IN:
-    	managerMovement.homingState = MMOV_HOMING_EXTENSION;
+        managerMovement.homingState = MMOV_HOMING_EXTENSION;
         break;
 
     case MMOV_HOMING_EXTENSION:
@@ -680,17 +680,17 @@ void ManagerMovement_AutoReady()
     }
     else
     {
-    	// Waiting for button Start on HMI
-		if (startButton)
-		{
-			if (repsCount == 0)
-			{
-				// Set the position that the exercise is starting
-				ManagerMovement_SetFirstPos(mvtNbr[exerciseIdx]);
-			}
-			// Start streaching sequence
-			managerMovement.autoState = MMOV_AUTO_STATE_2GOAL;
-		}
+        // Waiting for button Start on HMI
+        if (startButton)
+        {
+            if (repsCount == 0)
+            {
+                // Set the position that the exercise is starting
+                ManagerMovement_SetFirstPos(mvtNbr[exerciseIdx]);
+            }
+            // Start streaching sequence
+            managerMovement.autoState = MMOV_AUTO_STATE_2GOAL;
+        }
     }
 }
 
@@ -731,8 +731,8 @@ void ManagerMovement_Auto2Goal()
     }
     else
     {
-    	isAtFirstPos = false;
-    	movementIdx--;
+        isAtFirstPos = false;
+        movementIdx--;
 
         pos1Reached = false;
         pos2Reached = false;
@@ -880,7 +880,7 @@ void ManagerMovement_Auto2FirstPos()
     }
     else
     {
-    	isAtFirstPos = true;
+        isAtFirstPos = true;
 
         pos1Reached = false;
         pos2Reached = false;
@@ -888,14 +888,15 @@ void ManagerMovement_Auto2FirstPos()
 
         movementIdx++;
 
-        if(!startButton || stopButton) // if called by state STOP, go back to STOP
+        if (!startButton ||
+            stopButton)  // if called by state STOP, go back to STOP
         {
-        	managerMovement.autoState = MMOV_AUTO_STATE_STOP;
+            managerMovement.autoState = MMOV_AUTO_STATE_STOP;
         }
-        else // If called by State FIRSTPOS, go to REST
+        else  // If called by State FIRSTPOS, go to REST
         {
-        	pauseTimer                = HAL_GetTick();
-        	managerMovement.autoState = MMOV_AUTO_STATE_REST;
+            pauseTimer                = HAL_GetTick();
+            managerMovement.autoState = MMOV_AUTO_STATE_REST;
         }
     }
 }
@@ -908,32 +909,33 @@ void ManagerMovement_AutoRest()
     }
     else if (HAL_GetTick() - pauseTimer >= pauseTime[exerciseIdx])
     {
-    	if (repsCount >= repetitions[exerciseIdx]-1) // Reps are done, got to STOP
-    	{
-    		managerMovement.autoState = MMOV_AUTO_STATE_STOP;
-    	}
-    	else // Continue exercise with next rep
-    	{
-    		managerMovement.autoState = MMOV_AUTO_STATE_READY;
-			repsCount++;
-    	}
+        if (repsCount >=
+            repetitions[exerciseIdx] - 1)  // Reps are done, got to STOP
+        {
+            managerMovement.autoState = MMOV_AUTO_STATE_STOP;
+        }
+        else  // Continue exercise with next rep
+        {
+            managerMovement.autoState = MMOV_AUTO_STATE_READY;
+            repsCount++;
+        }
     }
 }
 
 void ManagerMovement_AutoStop()
 {
-	if (!isAtFirstPos)
-	{
-		ManagerMovement_Auto2FirstPos(); // Go to firstPos if not there
-	}
+    if (!isAtFirstPos)
+    {
+        ManagerMovement_Auto2FirstPos();  // Go to firstPos if not there
+    }
     else
     {
-    	if (startButton) // In state stop because exercise is over
-    	{
-    		movementIdx += mvtNbr[exerciseIdx];
-    		exerciseIdx++;
-    		repsCount   = 0;
-    	}
+        if (startButton)  // In state stop because exercise is over
+        {
+            movementIdx += mvtNbr[exerciseIdx];
+            exerciseIdx++;
+            repsCount = 0;
+        }
 
         // Reset the counter if exercises are done or if stop command on the HMI
         if (mvtNbr[exerciseIdx] == 0 || stopButton)
@@ -1196,44 +1198,43 @@ bool ManagerMovement_SetState(uint8_t newState)
     bool stateChanged = false;
 
     if (managerMovement.state == MMOV_STATE_MANUAL ||
-    		managerMovement.state == MMOV_STATE_AUTOMATIC)
+        managerMovement.state == MMOV_STATE_AUTOMATIC)
     {
+        if (newState != managerMovement.state)
+        {
+            if (newState == MMOV_STATE_AUTOMATIC &&
+                managerMovement.state != MMOV_STATE_HOMING &&
+                ManagerMotor_HasMachineHomed())
+            {
+                managerMovement.autoState = MMOV_AUTO_STATE_WAITING4PLAN;
+                stateChanged              = true;
+            }
+            else if (newState == MMOV_STATE_HOMING)
+            {
+                managerMovement.homingState = MMOV_VERIF_PERSON_IN;
+                stateChanged                = true;
+            }
+            else if (newState == MMOV_STATE_MANUAL &&
+                     managerMovement.state != MMOV_STATE_HOMING)
+            {
+                stateChanged = true;
+            }
+            else if (newState == MMOV_STATE_CHANGESIDE &&
+                     managerMovement.state != MMOV_STATE_HOMING &&
+                     ManagerMotor_HasMachineHomed())
+            {
+                stateChanged = true;
+            }
 
-		if (newState != managerMovement.state)
-		{
-			if (newState == MMOV_STATE_AUTOMATIC &&
-				managerMovement.state != MMOV_STATE_HOMING &&
-				ManagerMotor_HasMachineHomed())
-			{
-				managerMovement.autoState = MMOV_AUTO_STATE_WAITING4PLAN;
-				stateChanged              = true;
-			}
-			else if (newState == MMOV_STATE_HOMING)
-			{
-				managerMovement.homingState = MMOV_VERIF_PERSON_IN;
-				stateChanged                = true;
-			}
-			else if (newState == MMOV_STATE_MANUAL &&
-					 managerMovement.state != MMOV_STATE_HOMING)
-			{
-				stateChanged = true;
-			}
-			else if (newState == MMOV_STATE_CHANGESIDE &&
-					 managerMovement.state != MMOV_STATE_HOMING &&
-					 ManagerMotor_HasMachineHomed())
-			{
-				stateChanged = true;
-			}
-
-			if (stateChanged)
-			{
-				managerMovement.state = newState;
-			}
-		}
-		else
-		{
-			stateChanged = true;
-		}
+            if (stateChanged)
+            {
+                managerMovement.state = newState;
+            }
+        }
+        else
+        {
+            stateChanged = true;
+        }
     }
 
     return stateChanged;
