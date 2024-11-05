@@ -49,8 +49,6 @@ float ManagerHMI_Degrees2Radians(float degrees);
 float ManagerHMI_Radians2Degrees(float radians);
 float ManagerHMI_Sec2Millis(float seconds);
 
-bool sendNow;
-
 void ManagerHMI_Init()
 {
     cJSON_InitHooks(NULL);
@@ -67,19 +65,17 @@ void ManagerHMI_Init()
         buf[i] = 0;
     }
 
-    sendNow = false;
 }
 
 void ManagerHMI_Task()
 {
     ManagerHMI_ReceiveJSON();
 
-    if (HAL_GetTick() - timerMs >= M_HMI_TIMER || sendNow)
+    if (HAL_GetTick() - timerMs >= M_HMI_TIMER)
     {
         ManagerHMI_SendJSON();
 
         timerMs = HAL_GetTick();
-        sendNow = false;
     }
 }
 
@@ -106,6 +102,7 @@ void ManagerHMI_SendJSON()
     float positions[MMOT_MOTOR_NBR];
     float torques[MMOT_MOTOR_NBR];
     float current[MMOT_MOTOR_NBR];
+    float speed[MMOT_MOTOR_NBR];
 
     // Convert motor data
     for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
@@ -113,6 +110,7 @@ void ManagerHMI_SendJSON()
         positions[i] = ManagerHMI_Radians2Degrees(motorsData[i]->position);
         torques[i]   = motorsData[i]->torque;
         current[i]   = motorsData[i]->current;
+        speed[i]     = motorsData[i]->velocity;
     }
 
     // Manually build the JSON string using snprintf
@@ -122,11 +120,12 @@ void ManagerHMI_SendJSON()
              "\"Repetitions\":%d,\"ExerciseIdx\":%d,\"ErrorCode\":\"%lu\","
              "\"Positions\":[%.2f,%.2f,%.2f],"
              "\"Torques\":[%.2f,%.2f,%.2f],"
-             "\"Current\":[%.2f,%.2f,%.2f]}",
+             "\"Current\":[%.2f,%.2f,%.2f],"
+             "\"Speed\":[%.2f,%.2f,%.2f]}",
              strMode, strAutoState, strHomingState, strLegSide, repsCount,
-             exerciseIdx, ManagerError_GetErrorStatus(), -positions[0],
-             positions[1], positions[2], -torques[0], torques[1], torques[2],
-             current[0], current[1], current[2]);
+             exerciseIdx, ManagerError_GetErrorStatus(), positions[0],
+             positions[1], positions[2], torques[0], torques[1], torques[2],
+             current[0], current[1], current[2], speed[0], speed[1], speed[2]);
 
     // Send JSON string over UART
     PeriphUartRingBuf_Send(jsonMessage, strlen(jsonMessage));
@@ -529,5 +528,5 @@ float ManagerHMI_Sec2Millis(float seconds)
 
 void ManagerHMI_SendNow()
 {
-    sendNow = true;
+	ManagerHMI_SendJSON();
 }
