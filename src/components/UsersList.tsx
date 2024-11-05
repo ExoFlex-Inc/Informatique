@@ -45,6 +45,7 @@ const UserList: React.FC<UserListProps> = ({
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           sender_id: user?.user_id,
           receiver_id: listOfUsers?.[index]?.user_id,

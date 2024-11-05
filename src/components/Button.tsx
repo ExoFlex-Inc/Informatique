@@ -75,6 +75,7 @@ const Button: React.FC<ButtonProps> = ({
         body: JSON.stringify({
           start: true,
         }),
+        credentials: "include",
       });
 
       if (response.ok) {
@@ -97,6 +98,7 @@ const Button: React.FC<ButtonProps> = ({
         body: JSON.stringify({
           start: false,
         }),
+        credentials: "include",
       });
 
       if (response.ok) {
@@ -116,41 +118,38 @@ const Button: React.FC<ButtonProps> = ({
     }
   };
 
-  const handleMouseUp = () => {
+  const handleEnd = () => {
     clearIntervalRef();
-    window.removeEventListener("mouseup", handleMouseUp);
+    window.removeEventListener("mouseup", handleEnd);
+    window.removeEventListener("touchend", handleEnd);
   };
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (e.button === 2) {
-      handleMouseUp();
-    }
-
-    if (e.button === 0) {
-      if (action === "Increment") {
-        intervalRef.current = setInterval(() => sendingRequests(mode, action, content), 20);
-        window.addEventListener("mouseup", handleMouseUp);
-      } else if (content === "Start") {
-        sendingStm32RecordingRequests();
-        sendingRequests(mode, action, content);
-      } else if (content === "Stop" || content === "Pause") {
-        sendingStm32StopRecordingRequests();
-        sendingRequests(mode, action, content);
-      } else {
-        sendingRequests(mode, action, content);
-      }
+  const handleStart = (e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
+    e.preventDefault(); // Prevent any unintended default behaviors
+    if (action === "Increment") {
+      intervalRef.current = setInterval(() => sendingRequests(mode, action, content), 20);
+      window.addEventListener("mouseup", handleEnd);
+      window.addEventListener("touchend", handleEnd);
+    } else if (content === "Start") {
+      sendingStm32RecordingRequests();
+      sendingRequests(mode, action, content);
+    } else if (content === "Stop" || content === "Pause") {
+      sendingStm32StopRecordingRequests();
+      sendingRequests(mode, action, content);
+    } else {
+      sendingRequests(mode, action, content);
     }
   };
 
   return icon ? (
     <IconButton
-      onMouseDown={handleMouseDown}
+      onMouseDown={handleStart}
+      onTouchStart={handleStart}
       size="large"
       sx={{
         backgroundColor: mainColor,
         "&:hover": {
           backgroundColor: hoverColor,
-          color: textColor,
         },
       }}
       disabled={disabled}
@@ -170,10 +169,11 @@ const Button: React.FC<ButtonProps> = ({
         fontSize: "1rem",
         backgroundColor: "blueAccent.main",
         "&:hover": {
-          backgroundColor: "#1e3a8a",
+          backgroundColor: "blueAccent.hover",
         },
       }}
-      onMouseDown={handleMouseDown}
+      onMouseDown={handleStart}
+      onTouchStart={handleStart}
     >
       <Typography>{label}</Typography>
     </MuiButton>

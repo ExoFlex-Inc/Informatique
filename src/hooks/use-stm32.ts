@@ -38,6 +38,7 @@ const useStm32 = () => {
         "http://localhost:3001/stm32/initialize-serial-port",
         {
           method: "POST",
+          credentials: "include",
         },
       );
 

@@ -152,6 +152,7 @@ export function useUser() {
         `http://localhost:3001/user/avatar/${userId}`,
         {
           method: "POST",
+          credentials: "include",
           body: formData,
         },
       );

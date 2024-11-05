@@ -179,6 +179,24 @@ function AppLayout() {
 function App() {
   const [theme, colorMode] = useMode();
 
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      if (process.env.NODE_ENV === 'development') {
+        navigator.serviceWorker.register('/dev-sw.js').then((registration) => {
+          console.log("Dev service worker registered", registration);
+        }).catch((error) => {
+          console.error("Service worker registration failed:", error);
+        });
+      } else {
+        navigator.serviceWorker.register('/firebase-messaging-sw.js').then((registration) => {
+          console.log("Firebase messaging service worker registered", registration);
+        }).catch((error) => {
+          console.error("Service worker registration failed:", error);
+        });
+      }
+    }
+  }, []);
+
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>

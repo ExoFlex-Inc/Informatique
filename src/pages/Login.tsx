@@ -11,14 +11,14 @@ import { useUser } from "../hooks/use-user.ts";
 async function registerFCMToken() {
   try {
     // Register the service worker with the correct path
-    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    // const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
     
     // Wait for the service worker to be ready
-    await navigator.serviceWorker.ready;
+    // await navigator.serviceWorker.ready;
 
     // Retrieve the token with the service worker registration and VAPID key
     const token = await getToken(messaging, {
-      serviceWorkerRegistration: registration,
+      // serviceWorkerRegistration: registration,
       vapidKey: import.meta.env["VITE_FIREBASE_VAPID_KEY"], // Insert your VAPID key here
     });
 

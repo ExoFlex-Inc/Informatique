@@ -5,15 +5,18 @@ import {
   FormControlLabel,
   Grid,
   TextField,
-  IconButton,
+  IconButton
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { Refresh, PlayArrow, Pause, Home } from "@mui/icons-material";
+import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import LineChart from "../components/LineChart";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import useStm32 from "../hooks/use-stm32.ts";
 import Button from "../components/Button.tsx";
 import ManualControl from "../components/ManualControl.tsx";
+
 const WhiteBorderCheckbox = styled(Checkbox)(() => ({
   color: "white",
   "&.Mui-checked": {
@@ -160,13 +163,17 @@ export default function Manual() {
     try {
       if (!recordCsv) {
         // Clear previous data
-        await fetch("http://localhost:3001/stm32/clear-data", {
+        const response = await fetch("http://localhost:3001/stm32/clear-data", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: "include",
         });
-        setRecordCsv(true);
+        if (response.ok) {
+          console.log("Data cleared successfully.");
+          setRecordCsv(true);
+        }
       } else {
         // Fetch saved STM32 data locally
         const response = await fetch("http://localhost:3001/stm32/saved-data", {
@@ -239,32 +246,50 @@ export default function Manual() {
                     onClick={() => setGraphPause(false)}
                     icon={<PlayArrow />}
                     disabled={!graphPause}
-                    mainColor="#2fb73d"
-                    hoverColor="#33a63f"
+                    mainColor="blueAccent.main"
+                    hoverColor="blueAccent.hover"
                   />
 
                   <Button
                     onClick={() => setGraphPause(true)}
                     disabled={graphPause}
                     icon={<Pause />}
-                    mainColor="#f5d50b"
-                    hoverColor="#dcc21d"
+                    mainColor="blueAccent.main"
+                    hoverColor="blueAccent.hover"
                   />
 
                   <Button
                     icon={<Home />}
                     mode="Homing"
-                    mainColor="#1ec6e1"
-                    hoverColor="#2aa6ba"
+                    mainColor="blueAccent.main"
+                    hoverColor="blueAccent.hover"
                   />
 
                   <Button
                     icon={<Refresh />}
                     disabled={!stm32Data?.ErrorCode}
                     mode="Reset"
-                    mainColor="#f1910f"
-                    hoverColor="#d08622"
+                    mainColor="blueAccent.main"
+                    hoverColor="blueAccent.hover"
                   />
+                <IconButton
+                  onClick={(e) => {
+                    exportCsv();
+                  }}
+                  onTouchStart={(e) => {
+                    exportCsv();
+                  }}
+                  size="large"
+                  sx={{
+                    backgroundColor: "blueAccent.main",
+                    "&:hover": {
+                      backgroundColor: "blueAccent.hover",
+                    },
+                  }}
+                  disabled={!stm32Data?.ErrorCode}
+                >
+                  {recordCsv ? <RadioButtonUncheckedIcon/>: <RadioButtonCheckedIcon/>}
+                </IconButton>
                 </Box>
                 <Box sx={{ width: 50 }} />
                 <FormControlLabel

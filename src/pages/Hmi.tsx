@@ -168,6 +168,7 @@ export default function HMI() {
             body: JSON.stringify({
               start: false,
             }),
+            credentials: "include",
           });
 
           if (response.ok) {
@@ -263,6 +264,7 @@ export default function HMI() {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify(requestBody),
+              credentials: "include",
             },
           );
 

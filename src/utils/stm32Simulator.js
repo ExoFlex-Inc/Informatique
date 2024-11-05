@@ -33,8 +33,8 @@ function generateRandomData(numMotors) {
 function createJsonMessage() {
   const { positions, torques, currents } = generateRandomData(3);
   const message = {
-    Mode: "Automatic",
-    AutoState: "Stretching",
+    Mode: "Manual",
+    AutoState: "Ready",
     HomingState: "",
     ExerciseIdx: 0,
     Repetitions:1,
@@ -47,7 +47,7 @@ function createJsonMessage() {
 }
 
 // Periodically send JSON data over the serial port
-const sendInterval = 5000;
+const sendInterval = 2000;
 const sendData = () => {
   const jsonMessage = createJsonMessage();
   port.write(jsonMessage + '\n', (err) => {
