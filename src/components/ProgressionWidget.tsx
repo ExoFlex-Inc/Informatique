@@ -54,7 +54,7 @@ export default function ProgressionWidget({
 }: Props) {
   const [stretchProgress, setStretchProgress] = useState(0);
   const [repetitionProgress, setRepetitionProgress] = useState(0);
-  const [totalRepetition, setTotalRepetition] = useState(0);
+  const [totalRepetition, setTotalRepetition] = useState(-1);
 
   // Memoize totalStretch calculation
   const totalStretch = useMemo(() => {
