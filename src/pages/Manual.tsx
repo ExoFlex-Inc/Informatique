@@ -1,25 +1,23 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
-  Typography,
   Checkbox,
   FormControlLabel,
   Grid,
-  Paper,
   TextField,
   IconButton,
-  createTheme,
-  ThemeProvider,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import PauseIcon from "@mui/icons-material/Pause";
-import AirlineSeatLegroomExtraIcon from "@mui/icons-material/AirlineSeatLegroomExtra";
+import { Refresh, PlayArrow, Pause, Home } from "@mui/icons-material";
+import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import LineChart from "../components/LineChart";
-import MotorControlWidget from "../components/MotorControlWidget";
-import useStm32 from "../hooks/use-stm32";
+import CustomScrollbar from "../components/CustomScrollbars.tsx";
+import useStm32 from "../hooks/use-stm32.ts";
+import Button from "../components/Button.tsx";
+import ManualControl from "../components/ManualControl.tsx";
 
-const WhiteBorderCheckbox = styled(Checkbox)(({ theme }) => ({
+const WhiteBorderCheckbox = styled(Checkbox)(() => ({
   color: "white",
   "&.Mui-checked": {
     color: "white",
@@ -60,31 +58,25 @@ const errorMap = {
   24: "ERROR_24",
   25: "ERROR_25",
 };
-
 export default function Manual() {
-  const { stm32Data, socket, errorFromStm32 } = useStm32();
   const [errorDescription, setErrorDescription] = useState("");
   const [graphDataType, setGraphDataType] = useState("position");
   const [graphPause, setGraphPause] = useState(false);
+  const { stm32Data, socket, errorFromStm32 } = useStm32();
+
   const [latestMotorData, setLatestMotorData] = useState({
     motor1: { x: 0, position: 0, torque: 0, current: 0 },
     motor2: { x: 0, position: 0, torque: 0, current: 0 },
     motor3: { x: 0, position: 0, torque: 0, current: 0 },
   });
+  const [recordCsv, setRecordCsv] = useState(false);
 
-  useEffect(() => {
-    if (stm32Data?.ErrorCode !== undefined) {
-      const errorNames = decodeErrorCode(stm32Data.ErrorCode);
-      setErrorDescription(errorNames.join("\n") || "");
-    }
-  }, [stm32Data]);
-
-  const decodeErrorCode = (errorCode) => {
+  const decodeErrorCode = (errorCode: number) => {
     const errorNames = [];
     for (let i = 0; i < 32; i++) {
       if (errorCode & (1 << i)) {
-        if (errorMap[i]) {
-          errorNames.push(errorMap[i]);
+        if (errorMap[i as keyof typeof errorMap]) {
+          errorNames.push(errorMap[i as keyof typeof errorMap]);
         }
       }
     }
@@ -92,36 +84,52 @@ export default function Manual() {
   };
 
   useEffect(() => {
-    if (stm32Data && stm32Data.Positions && stm32Data.Torques && !graphPause) {
-      const currentTime = Date.now();
-      setLatestMotorData({
-        motor1: {
-          x: currentTime,
-          position: stm32Data.Positions[0],
-          torque: stm32Data.Torques[0],
-          current: stm32Data.Current[0],
-        },
-        motor2: {
-          x: currentTime,
-          position: stm32Data.Positions[1],
-          torque: stm32Data.Torques[1],
-          current: stm32Data.Current[1],
-        },
-        motor3: {
-          x: currentTime,
-          position: stm32Data.Positions[2],
-          torque: stm32Data.Torques[2],
-          current: stm32Data.Current[2],
-        },
-      });
+    if (
+      stm32Data &&
+      stm32Data.Positions &&
+      stm32Data.Torques &&
+      stm32Data.Current &&
+      !graphPause
+    ) {
+      if (
+        stm32Data &&
+        stm32Data.Positions &&
+        stm32Data.Torques &&
+        stm32Data.Current &&
+        !graphPause
+      ) {
+        const currentTime = Date.now();
+        setLatestMotorData({
+          motor1: {
+            x: currentTime,
+            position: stm32Data.Positions[0] ?? 0,
+            torque: stm32Data.Torques[0] ?? 0,
+            current: stm32Data.Current[0] ?? 0,
+          },
+          motor2: {
+            x: currentTime,
+            position: stm32Data.Positions[1] ?? 0,
+            torque: stm32Data.Torques[1] ?? 0,
+            current: stm32Data.Current[1] ?? 0,
+          },
+          motor3: {
+            x: currentTime,
+            position: stm32Data.Positions[2] ?? 0,
+            torque: stm32Data.Torques[2] ?? 0,
+            current: stm32Data.Current[2] ?? 0,
+          },
+        });
+      }
     }
-  }, [stm32Data, socket, graphPause]);
+    if (stm32Data?.ErrorCode !== undefined) {
+      const errorNames = decodeErrorCode(stm32Data.ErrorCode);
+      setErrorDescription(errorNames.join("\n") || "");
+    }
+  }, [stm32Data, graphPause]);
 
   const getChartData = () => ({
     datasets: [
       {
-        label: "Motor 1",
-        borderColor: "rgb(255, 99, 132)",
         data: [
           {
             x: latestMotorData.motor1.x,
@@ -130,21 +138,17 @@ export default function Manual() {
         ],
       },
       {
-        label: "Motor 2",
-        borderColor: "rgb(99, 255, 132)",
         data: [
           {
-            x: latestMotorData.motor1.x,
+            x: latestMotorData.motor2.x,
             y: latestMotorData.motor2[graphDataType],
           },
         ],
       },
       {
-        label: "Motor 3",
-        borderColor: "rgb(99, 132, 255)",
         data: [
           {
-            x: latestMotorData.motor1.x,
+            x: latestMotorData.motor3.x,
             y: latestMotorData.motor3[graphDataType],
           },
         ],
@@ -152,115 +156,220 @@ export default function Manual() {
     ],
   });
 
+  const exportCsv = async () => {
+    try {
+      if (!recordCsv) {
+        // Clear previous data
+        const response = await fetch("http://localhost:3001/stm32/clear-data", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        });
+        if (response.ok) {
+          console.log("Data cleared successfully.");
+          setRecordCsv(true);
+        }
+      } else {
+        // Fetch saved STM32 data locally
+        const response = await fetch("http://localhost:3001/stm32/saved-data", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const responseData = await response.json();
+          const stm32Data = responseData.data;
+
+          generateAndDownloadCsv(stm32Data);
+
+          setRecordCsv(false);
+        } else {
+          console.error("Error fetching saved STM32 data.");
+        }
+      }
+    } catch (error) {
+      console.error("Error during CSV export:", error);
+    }
+  };
+
+  const generateAndDownloadCsv = (stm32Data: any) => {
+    let csvContent =
+      "Index,Dorsiflexion Angle,Eversion Angle,Extension Angle,Dorsiflexion Torque,Eversion Torque,Extension Torque\n";
+
+    const dataLength = stm32Data.angles.dorsiflexion.length;
+
+    for (let i = 0; i < dataLength; i++) {
+      const rowData = `${i + 1},${stm32Data.angles.dorsiflexion[i]},${stm32Data.angles.eversion[i]},${stm32Data.angles.extension[i]},${stm32Data.torques.dorsiflexion[i]},${stm32Data.torques.eversion[i]},${stm32Data.torques.extension[i]}\n`;
+      csvContent += rowData;
+    }
+
+    // Create a CSV file and trigger download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.style.display = "none";
+    a.href = url;
+    a.download = "stm32_data.csv";
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   return (
-    <Box sx={{ height: "100vh", overflow: "auto" }}>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              mb: 2,
-            }}
+    <div className="custom-height flex flex-col">
+      <CustomScrollbar>
+        <Box>
+          <Grid
+            container
+            spacing={2}
+            sx={{ justifyContent: "center", alignItems: "center" }}
           >
-            <IconButton
-              onClick={() => setGraphPause(false)}
-              disabled={!graphPause}
-            >
-              <PlayArrowIcon />
-            </IconButton>
-            <IconButton
-              onClick={() => setGraphPause(true)}
-              disabled={graphPause}
-            >
-              <PauseIcon />
-            </IconButton>
-            <Box sx={{ width: 50 }} />
-            <FormControlLabel
-              control={
-                <WhiteBorderCheckbox
-                  checked={graphDataType === "position"}
-                  onChange={() => setGraphDataType("position")}
+            <Grid item xs={12}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  mb: 2,
+                }}
+              >
+                <Box sx={{ width: 50 }} />
+                <Box gap={4} sx={{ display: "flex" }}>
+                  <IconButton
+                    onClick={() => setGraphPause(false)}
+                    disabled={!graphPause}
+                    size="large"
+                    sx={{
+                      backgroundColor: "blueAccent.main",
+                      "&:hover": { backgroundColor: "blueAccent.hover" },
+                    }}
+                  >
+                    <PlayArrow />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => setGraphPause(true)}
+                    disabled={graphPause}
+                    size="large"
+                    sx={{
+                      backgroundColor: "blueAccent.main",
+                      "&:hover": { backgroundColor: "blueAccent.hover" },
+                    }}
+                  >
+                    <Pause />
+                  </IconButton>
+                  <Button
+                    icon={<Home />}
+                    mode="Homing"
+                    mainColor="blueAccent.main"
+                    hoverColor="blueAccent.hover"
+                    socket={socket}
+                  />
+
+                  <Button
+                    icon={<Refresh />}
+                    disabled={!stm32Data?.ErrorCode}
+                    mode="Reset"
+                    mainColor="blueAccent.main"
+                    hoverColor="blueAccent.hover"
+                    socket={socket}
+                  />
+                  <IconButton
+                    onClick={(e) => {
+                      exportCsv();
+                    }}
+                    onTouchStart={(e) => {
+                      exportCsv();
+                    }}
+                    size="large"
+                    sx={{
+                      backgroundColor: "blueAccent.main",
+                      "&:hover": {
+                        backgroundColor: "blueAccent.hover",
+                      },
+                    }}
+                    disabled={!stm32Data?.ErrorCode}
+                  >
+                    {recordCsv ? (
+                      <RadioButtonUncheckedIcon />
+                    ) : (
+                      <RadioButtonCheckedIcon />
+                    )}
+                  </IconButton>
+                </Box>
+                <Box sx={{ width: 50 }} />
+                <FormControlLabel
+                  control={
+                    <WhiteBorderCheckbox
+                      checked={graphDataType === "position"}
+                      onChange={() => setGraphDataType("position")}
+                    />
+                  }
+                  label="Position"
                 />
-              }
-              label="Position"
-            />
-            <FormControlLabel
-              control={
-                <WhiteBorderCheckbox
-                  checked={graphDataType === "torque"}
-                  onChange={() => setGraphDataType("torque")}
+                <FormControlLabel
+                  control={
+                    <WhiteBorderCheckbox
+                      checked={graphDataType === "torque"}
+                      onChange={() => setGraphDataType("torque")}
+                    />
+                  }
+                  label="Torque"
                 />
-              }
-              label="Torque"
-            />
-            <FormControlLabel
-              control={
-                <WhiteBorderCheckbox
-                  checked={graphDataType === "current"}
-                  onChange={() => setGraphDataType("current")}
+                <FormControlLabel
+                  control={
+                    <WhiteBorderCheckbox
+                      checked={graphDataType === "current"}
+                      onChange={() => setGraphDataType("current")}
+                    />
+                  }
+                  label="Current"
                 />
-              }
-              label="Current"
-            />
-          </Box>
-          <LineChart
-            chartData={getChartData()}
-            mode="Manual"
-            type="realtime"
-            graphPause={graphPause}
-          />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "100%",
-            }}
-          >
-            <MotorControlWidget
-              title="Anatomical Movement"
-              icon={<AirlineSeatLegroomExtraIcon sx={{ fontSize: 56 }} />}
-              labels={[
-                "EversionL",
-                "EversionR",
-                "DorsiflexionU",
-                "DorsiflexionD",
-                "ExtensionU",
-                "ExtensionD",
-              ]}
-              mode="Manual"
-              action="Increment"
-              disabled={errorFromStm32}
-            />
-          </Box>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "100%",
-            }}
-          >
-            <TextField
-              value={errorDescription}
-              multiline
-              fullWidth
-              rows={10}
-              variant="outlined"
-              InputProps={{
-                readOnly: true,
-              }}
-              sx={{ marginRight: 5 }}
-            />
-          </Box>
-        </Grid>
-      </Grid>
-    </Box>
+              </Box>
+              <LineChart
+                chartData={getChartData()}
+                type="realtime"
+                title="Motor Data"
+                graphPause={graphPause}
+              />
+            </Grid>
+            <Grid item xs={12} md={3}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "100%",
+                }}
+              >
+                <TextField
+                  value={errorDescription}
+                  multiline
+                  fullWidth
+                  rows={10}
+                  variant="outlined"
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                  inputProps={{
+                    sx: {
+                      whiteSpace: "pre",
+                    },
+                  }}
+                />
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>
+      </CustomScrollbar>
+      <ManualControl
+        stm32Data={stm32Data}
+        socket={socket}
+        errorFromStm32={errorFromStm32}
+      />
+    </div>
   );
 }

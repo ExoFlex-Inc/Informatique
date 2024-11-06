@@ -1,5 +1,5 @@
 import { useContext, useState, useRef, useEffect } from "react";
-import { ColorModeContext, tokens } from "../hooks/theme.ts";
+import { ColorModeContext } from "../hooks/theme.ts";
 
 import {
   Box,
@@ -15,33 +15,28 @@ import {
   ListItemButton,
   ListItemIcon,
 } from "@mui/material";
-import People from "@mui/icons-material/People";
 import PersonIcon from "@mui/icons-material/Person";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
-import Icon from "../../public/assets/user.png";
 
 import Notification from "./Notification.tsx";
 
 import Login from "./Signup.tsx";
 import { useNavigate } from "react-router-dom";
-import { useSupabaseSession } from "../hooks/use-session.ts";
-import { useUserProfile } from "../hooks/use-profile.ts";
 import { deleteToken } from "firebase/messaging";
 import { messaging } from "../utils/firebaseClient.ts";
 import { useQueryClient } from "@tanstack/react-query";
+import { useUser } from "../hooks/use-user.ts";
 
 export default function TopBar() {
-  const { session } = useSupabaseSession();
-  const { profile } = useUserProfile();
+  const { user } = useUser();
   const theme = useTheme();
   // const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
 
-  const menuRef = useRef(null);
-  const avatarRef = useRef(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const avatarRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
   const queryClient = useQueryClient();
@@ -66,7 +61,7 @@ export default function TopBar() {
     };
   }, [menuRef]);
 
-  const handleLogout = async (event) => {
+  const handleLogout = async (event: React.MouseEvent<HTMLDivElement>) => {
     event.preventDefault();
 
     if (window.confirm("Are you sure you want to log out?")) {
@@ -80,7 +75,7 @@ export default function TopBar() {
           },
           credentials: "include",
           body: JSON.stringify({
-            user_id: profile?.user_id,
+            user_id: user?.user_id,
           }),
         });
 
@@ -92,9 +87,13 @@ export default function TopBar() {
 
         await deleteToken(messaging);
 
-        navigate("/login");
+        navigate("/login", { replace: true });
       } catch (error) {
-        console.error("Error logging out:", error.message);
+        if (error instanceof Error) {
+          console.error("Error logging out:", error.message);
+        } else {
+          console.error("Error logging out:", error);
+        }
 
         alert("An error occurred while logging out. Please try again.");
       }
@@ -108,7 +107,7 @@ export default function TopBar() {
   return (
     <Box className="nav-bar relative justify-end">
       <Box className="flex items-center">
-        {session && (
+        {user && (
           <IconButton onClick={colorMode.toggleColorMode}>
             {theme.palette.mode === "dark" ? (
               <DarkModeOutlinedIcon />
@@ -117,20 +116,24 @@ export default function TopBar() {
             )}
           </IconButton>
         )}
-        {session && ( // Check if session exists
+        {user && ( // Check if session exists
           <Notification />
         )}
-        {session && (
+        {user && (
           <IconButton className="h-14" onClick={onProfileClick}>
             <Avatar
               ref={avatarRef}
-              src={profile?.avatar_blob_url ? profile.avatar_blob_url : Icon}
+              src={
+                user?.avatar_blob_url
+                  ? user.avatar_blob_url
+                  : "/assets/user.png"
+              }
             />
           </IconButton>
         )}
       </Box>
 
-      {session && session.user ? (
+      {user ? (
         isMenuOpen && (
           <Box
             ref={menuRef}

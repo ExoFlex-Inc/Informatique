@@ -2,22 +2,24 @@ import { Button } from "@mui/material";
 import UserSearchBar from "../components/UserSearchBar.tsx";
 import UserList from "../components/UsersList.tsx";
 import { useNavigate } from "react-router-dom";
-import { useUserProfile } from "../hooks/use-profile.ts";
 import { useState, useEffect } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import { useAdminProfile } from "../hooks/use-admin.ts";
 import Loading from "../components/Loading.tsx";
 import { useRelations } from "../hooks/use-relations.ts";
 import { useFetchPendingRelations } from "../hooks/use-relations.ts";
+import { useUser } from "../hooks/use-user.ts";
+import CustomScrollbar from "../components/CustomScrollbars.tsx";
 
 const ProfessionalNetwork = () => {
   const navigate = useNavigate();
-  const { profile } = useUserProfile();
+  const { user } = useUser();
   const { admins, isLoading: adminLoading } = useAdminProfile();
   const { relations, isLoading: relationsLoading } = useRelations();
   const { notifications, isLoading: notificationsLoading } =
     useFetchPendingRelations();
 
+  const isLoading = adminLoading || relationsLoading || notificationsLoading;
   const [filteredUsers, setFilteredUsers] = useState(admins);
 
   useEffect(() => {
@@ -38,18 +40,10 @@ const ProfessionalNetwork = () => {
       });
     }
     setFilteredUsers(filteredAdmin);
-  }, [notifications, relations]);
-
-  if (adminLoading || relationsLoading || notificationsLoading) {
-    return (
-      <div className="loading-container">
-        <Loading />
-      </div>
-    );
-  }
+  }, [admins, notifications, relations]);
 
   return (
-    <div>
+    <div className="custom-height relative flex flex-col">
       <div className="flex items-center gap-4 relative">
         <UserSearchBar
           sx={{ width: 500 }}
@@ -57,13 +51,13 @@ const ProfessionalNetwork = () => {
           users={admins}
         />
 
-        {profile?.permissions == "dev" || profile?.permissions == "client" ? (
+        {user?.permissions == "dev" || user?.permissions == "client" ? (
           <Button
             variant="contained"
             color="inherit"
             endIcon={<CloseIcon color="error" />}
             onClick={() => {
-              navigate("/wellness_network");
+              navigate("/network");
             }}
           >
             Cancel action
@@ -72,10 +66,13 @@ const ProfessionalNetwork = () => {
           true
         )}
       </div>
-      <UserList
-        listOfUsers={filteredUsers}
-        setFilteredUsers={setFilteredUsers}
-      />
+      <CustomScrollbar>
+        <UserList
+          listOfUsers={filteredUsers}
+          setFilteredUsers={setFilteredUsers}
+        />
+      </CustomScrollbar>
+      {isLoading && <Loading />}
     </div>
   );
 };

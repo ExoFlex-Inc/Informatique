@@ -18,6 +18,7 @@
 #define M_HMI_CONTENT_SECTION                2
 #define M_HMI_EXERCISE_SECTION_NBR           14
 #define M_HMI_CONTENT_FIRST_EXERCISE_SECTION 12
+#define M_HMI_LIMIT_SECTION_LENGHT           12
 #define MVT_MAX                              3
 
 #define PI 3.1415926535
@@ -39,6 +40,7 @@ void ManagerHMI_ExecuteControlCmd(char* cmd);
 void ManagerHMI_GetStrMode(uint8_t index, char* str);
 void ManagerHMI_GetStrAutoState(uint8_t index, char* str);
 void ManagerHMI_GetStrHomingState(uint8_t index, char* str);
+void ManagerHMI_GetStrLegSide(uint8_t index, char* str);
 
 /*
  * Utilities
@@ -85,11 +87,13 @@ void ManagerHMI_SendJSON()
     char strMode[M_HMI_STRING_LENGTH];
     char strAutoState[M_HMI_STRING_LENGTH];
     char strHomingState[M_HMI_STRING_LENGTH];
+    char strLegSide[M_HMI_STRING_LENGTH];
 
     // Get the data for the JSON fields
     ManagerHMI_GetStrMode(ManagerMovement_GetState(), strMode);
     ManagerHMI_GetStrHomingState(pPlan->homingState, strHomingState);
     ManagerHMI_GetStrAutoState(pPlan->autoState, strAutoState);
+    ManagerHMI_GetStrLegSide(pPlan->legSide, strLegSide);
 
     uint8_t exerciseIdx = pPlan->exCount;
     uint8_t repsCount   = pPlan->repsCount;
@@ -97,6 +101,7 @@ void ManagerHMI_SendJSON()
     float positions[MMOT_MOTOR_NBR];
     float torques[MMOT_MOTOR_NBR];
     float current[MMOT_MOTOR_NBR];
+    float speed[MMOT_MOTOR_NBR];
 
     // Convert motor data
     for (uint8_t i = 0; i < MMOT_MOTOR_NBR; i++)
@@ -104,19 +109,22 @@ void ManagerHMI_SendJSON()
         positions[i] = ManagerHMI_Radians2Degrees(motorsData[i]->position);
         torques[i]   = motorsData[i]->torque;
         current[i]   = motorsData[i]->current;
+        speed[i]     = motorsData[i]->velocity;
     }
 
     // Manually build the JSON string using snprintf
     snprintf(jsonMessage, PUART_TX_BUF_SIZE,
              "{\"Mode\":\"%s\",\"AutoState\":\"%s\",\"HomingState\":\"%s\","
+             "\"CurrentLegSide\":\"%s\","
              "\"Repetitions\":%d,\"ExerciseIdx\":%d,\"ErrorCode\":\"%lu\","
              "\"Positions\":[%.2f,%.2f,%.2f],"
              "\"Torques\":[%.2f,%.2f,%.2f],"
-             "\"Current\":[%.2f,%.2f,%.2f]}",
-             strMode, strAutoState, strHomingState, repsCount, exerciseIdx,
-             ManagerError_GetErrorStatus(), -positions[0], positions[1],
-             positions[2], -torques[0], torques[1], torques[2], current[0],
-             current[1], current[2]);
+             "\"Current\":[%.2f,%.2f,%.2f],"
+             "\"Speed\":[%.2f,%.2f,%.2f]}",
+             strMode, strAutoState, strHomingState, strLegSide, repsCount,
+             exerciseIdx, ManagerError_GetErrorStatus(), positions[0],
+             positions[1], positions[2], torques[0], torques[1], torques[2],
+             current[0], current[1], current[2], speed[0], speed[1], speed[2]);
 
     // Send JSON string over UART
     PeriphUartRingBuf_Send(jsonMessage, strlen(jsonMessage));
@@ -179,7 +187,7 @@ void ManagerHMI_ParseJson(char* msg, uint8_t maxlength, uint8_t* sectionNbr)
 
 void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
 {
-    if (sectionNbr >= 2)
+    if (sectionNbr >= 1)
     {
         if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "Manual") == 0)
         {
@@ -223,6 +231,30 @@ void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
                 // Flag error: State couldn't change
             }
         }
+        else if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "Reset") == 0)
+        {
+            ManagerSecurity_Reset();
+        }
+        else if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "ChangeSide") == 0)
+        {
+            if (ManagerMovement_SetState(MMOV_STATE_CHANGESIDE))
+            {
+            }
+            else
+            {
+                // Flag error: State couldn't change
+            }
+        }
+        else if (strcmp(ParsedMsg[M_HMI_MODE_SECTION], "Homing") == 0)
+        {
+            if (ManagerMovement_SetState(MMOV_STATE_HOMING))
+            {
+            }
+            else
+            {
+                // Flag error: State couldn't change
+            }
+        }
     }
 }
 
@@ -230,11 +262,11 @@ void ManagerHMI_ExecuteManualIncrement(char* cmd)
 {
     if (cmd != NULL)
     {
-        if (strcmp(cmd, "EversionR") == 0)
+        if (strcmp(cmd, "EversionO") == 0)
         {
             ManagerMovement_ManualCmdEversion(MMOV_OUTSIDE);
         }
-        else if (strcmp(cmd, "EversionL") == 0)
+        else if (strcmp(cmd, "EversionI") == 0)
         {
             ManagerMovement_ManualCmdEversion(MMOV_INSIDE);
         }
@@ -248,11 +280,11 @@ void ManagerHMI_ExecuteManualIncrement(char* cmd)
         }
         else if (strcmp(cmd, "ExtensionU") == 0)
         {
-            ManagerMovement_ManualCmdExtension(MMOV_UP);
+            ManagerMovement_ManualCmdExtension(MMOV_UP_EXT);
         }
         else if (strcmp(cmd, "ExtensionD") == 0)
         {
-            ManagerMovement_ManualCmdExtension(MMOV_DOWN);
+            ManagerMovement_ManualCmdExtension(MMOV_DOWN_EXT);
         }
     }
 }
@@ -265,7 +297,29 @@ void ManagerHMI_ExecutePlanCmd(char* cmd, uint8_t size)
         if (size > M_HMI_CONTENT_FIRST_EXERCISE_SECTION)
         {
             // Get max torque and pos (skip for now)
-            cmd += M_HMI_CONTENT_FIRST_EXERCISE_SECTION * M_HMI_STRING_LENGTH;
+            for (uint8_t i = 0; i < 2 * MAX_MOVEMENT; i++)
+            {
+                float posLimit = atof(cmd);
+                cmd += M_HMI_STRING_LENGTH;
+
+                float torqueLimit = atof(cmd);
+                cmd += M_HMI_STRING_LENGTH;
+
+                if (i < MAX_MOVEMENT - 1)  // Left leg limit
+                {
+                    ManagerMovement_AddLimits(
+                        i, ManagerHMI_Degrees2Radians(posLimit), torqueLimit,
+                        MMOV_LEG_IS_LEFT);
+                }
+                else  // Right leg limits
+                {
+                    ManagerMovement_AddLimits(
+                        i - MAX_MOVEMENT, ManagerHMI_Degrees2Radians(posLimit),
+                        torqueLimit, MMOV_LEG_IS_RIGHT);
+                }
+            }
+            // cmd += M_HMI_CONTENT_FIRST_EXERCISE_SECTION *
+            // M_HMI_STRING_LENGTH;
             size -= M_HMI_CONTENT_FIRST_EXERCISE_SECTION;
 
             // Verif if exercise plan is ok
@@ -307,7 +361,8 @@ void ManagerHMI_ExecutePlanCmd(char* cmd, uint8_t size)
                         }
 
                         ManagerMovement_AddMouvement(
-                            mvtIdx, movements, ManagerHMI_Degrees2Radians(pos));
+                            mvtIdx, movements, ManagerHMI_Degrees2Radians(pos),
+                            torque);
                         mvtIdx++;
 
                         if (j == mvtNbr - 1)
@@ -370,9 +425,13 @@ void ManagerHMI_GetStrMode(uint8_t index, char* str)
     case MMOV_STATE_AUTOMATIC:
         strcpy(str, "Automatic");
         break;
+    case MMOV_STATE_CHANGESIDE:
+        strcpy(str, "ChangeSide");
+        break;
     case MMOV_STATE_ERROR:
         strcpy(str, "Error");
         break;
+
     default:
         strcpy(str, "");
         break;
@@ -435,6 +494,22 @@ void ManagerHMI_GetStrHomingState(uint8_t index, char* str)
     }
 }
 
+void ManagerHMI_GetStrLegSide(uint8_t index, char* str)
+{
+    switch (index)
+    {
+    case MMOV_LEG_IS_LEFT:
+        strcpy(str, "LegIsLeft");
+        break;
+    case MMOV_LEG_IS_RIGHT:
+        strcpy(str, "LegIsRight");
+        break;
+    default:
+        strcpy(str, "");
+        break;
+    }
+}
+
 float ManagerHMI_Radians2Degrees(float radians)
 {
     return radians * (180.0 / PI);
@@ -448,4 +523,9 @@ float ManagerHMI_Degrees2Radians(float degrees)
 float ManagerHMI_Sec2Millis(float seconds)
 {
     return seconds *= 1000;
+}
+
+void ManagerHMI_SendNow()
+{
+    ManagerHMI_SendJSON();
 }

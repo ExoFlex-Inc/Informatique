@@ -4,7 +4,8 @@ import UserMenuDropdown from "./UserMenuDropdown.tsx";
 import { useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { Box, IconButton } from "@mui/material";
-import { useUserProfile } from "../hooks/use-profile.ts";
+import { useUser } from "../hooks/use-user.ts";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface UserListProps {
   listOfUsers: Array<{
@@ -24,7 +25,8 @@ const UserList: React.FC<UserListProps> = ({
   const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
   const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const { pathname } = useLocation();
-  const { profile } = useUserProfile();
+  const { user } = useUser();
+  const queryClient = useQueryClient();
 
   const addToButtonRefs = (el: HTMLButtonElement | null, index: number) => {
     if (el) {
@@ -43,11 +45,12 @@ const UserList: React.FC<UserListProps> = ({
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
-          sender_id: profile?.user_id,
-          receiver_id: listOfUsers[index].user_id,
-          user_name: `${profile?.first_name} ${profile?.last_name}`,
-          image_url: profile?.avatar_url,
+          sender_id: user?.user_id,
+          receiver_id: listOfUsers?.[index]?.user_id,
+          user_name: `${user?.first_name} ${user?.last_name}`,
+          image_url: user?.avatar_url,
           type: "relation",
           message: "sent a relation request",
         }),
@@ -59,6 +62,7 @@ const UserList: React.FC<UserListProps> = ({
 
       const newList = listOfUsers.filter((_, i) => i !== index);
       setFilteredUsers(newList);
+      queryClient.invalidateQueries({ queryKey: ["pendingRelations"] });
       window.alert("Invitation sent successfully.");
     } catch (error) {
       console.error("Error sending invitation:", error);
@@ -110,7 +114,7 @@ const UserList: React.FC<UserListProps> = ({
               <li className="text-black flex items-center justify-between p-2">
                 <span>{user.phone_number}</span>
                 <Box>
-                  {pathname === "/wellness_network" ? (
+                  {pathname === "/network" ? (
                     <IconButton
                       sx={{
                         "&:hover": {
@@ -138,7 +142,7 @@ const UserList: React.FC<UserListProps> = ({
               </li>
               {openMenuIndex === index && (
                 <UserMenuDropdown
-                  buttonRef={{ current: buttonRefs.current[index] }}
+                  buttonRef={{ current: buttonRefs.current[index] ?? null }}
                   clientId={user.user_id}
                   setOpenMenuIndex={setOpenMenuIndex}
                 />

@@ -1,5 +1,7 @@
+import type { stm32DataType } from "../hooks/use-stm32.ts";
+
 interface ExerciseOverviewWidgetProps {
-  stm32Data?: string | null;
+  stm32Data?: stm32DataType | null;
   planData: any;
 }
 
@@ -32,7 +34,10 @@ const ExerciseOverviewWidget: React.FC<ExerciseOverviewWidgetProps> = ({
         <tbody className="bg-white divide-y divide-gray-200">
           {planData && Array.isArray(planData.plan)
             ? planData.plan.map(
-                (item, index) =>
+                (
+                  item: { movement: any[]; repetitions: number; rest: number },
+                  index: number,
+                ) =>
                   "movement" in item && (
                     <tr
                       key={index}

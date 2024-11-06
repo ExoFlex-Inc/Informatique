@@ -13,7 +13,7 @@ const useDropdown = (
     | React.Dispatch<React.SetStateAction<Number | null>>
     | React.Dispatch<React.SetStateAction<boolean>>,
 ) => {
-  const dropdownRef = useRef(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: any) => {
