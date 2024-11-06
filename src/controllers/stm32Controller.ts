@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import { SerialPort } from "serialport";
 import asyncHandler from "express-async-handler";
 import {
@@ -63,34 +63,85 @@ let saveData = {
 };
 
 let exerciseId: number | null = null;
-let oldTime: Date | null = null;
 
-const getSavedData = asyncHandler(async (req: Request, res: Response) => {
+const getSavedData = asyncHandler(async (_: Request, res: Response) => {
   try {
     if (!saveData) {
-      return res.status(404).send("No data available.");
+      res.status(404).send("No data available.");
+      return;
     }
 
     res.status(200).json({
       data: saveData,
     });
-
-    clearPreviousData();
+    resetSaveData();
   } catch (error) {
     console.error("Error in getSavedData:", error);
-    return res.status(500).send("An error occurred while retrieving data.");
+    res.status(500).send("An error occurred while retrieving data.");
   }
 });
 
-const clearData = asyncHandler(async (req: Request, res: Response) => {
+const clearData = asyncHandler(async (_: Request, res: Response) => {
   try {
-    clearPreviousData();
-    return res.status(200).send("Data cleared successfully.");
+    resetSaveData();
+    res.status(200).send("Data cleared successfully.");
   } catch (error) {
     console.error("Error in clearData:", error);
-    return res.status(500).send("An error occurred while clearing data.");
+    res.status(500).send("An error occurred while clearing data.");
   }
 });
+
+function resetSaveData() {
+  saveData = {
+    recorded_date: new Date()
+      .toLocaleString("en-CA", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+        timeZoneName: "short",
+      })
+      .replace(" 24:", " 00:"),
+    angles: {
+      dorsiflexion: [],
+      eversion: [],
+      extension: [],
+    },
+    angle_max: {
+      dorsiflexion: 0,
+      eversion: 0,
+      extension: 0,
+    },
+    torques: {
+      dorsiflexion: [],
+      eversion: [],
+      extension: [],
+    },
+    torque_max: {
+      dorsiflexion: 0,
+      eversion: 0,
+      extension: 0,
+    },
+    repetitions_done: 0,
+    repetitions_target: 0,
+  };
+
+  prevAngles = {
+    dorsiflexion: [],
+    eversion: [],
+    extension: [],
+  };
+  prevTorques = {
+    dorsiflexion: [],
+    eversion: [],
+    extension: [],
+  };
+
+  return true;
+}
 
 const insertInitialDataToSupabase = async (): Promise<boolean> => {
   try {
@@ -207,10 +258,7 @@ const recordingStm32Data = async (req: Request, res: Response) => {
 
     if (start) {
       // Clear previous data if needed
-      const clearSuccess = await clearPreviousData();
-      if (!clearSuccess) {
-        return res.status(500).send("Failed to clear previous data.");
-      }
+      resetSaveData();
 
       // Insert initial JSON data
       const initialInsertSuccess = await insertInitialDataToSupabase();
@@ -238,23 +286,6 @@ const recordingStm32Data = async (req: Request, res: Response) => {
     return res.status(500).send("An unexpected error occurred.");
   }
 };
-
-// Function to clear accumulated data
-const clearPreviousData = () => {
-  prevAngles = {
-    dorsiflexion: [],
-    eversion: [],
-    extension: [],
-  };
-  prevTorques = {
-    dorsiflexion: [],
-    eversion: [],
-    extension: [],
-  };
-
-  return true;
-};
-
 // Function to initialize serial port
 const initializeSerialPort = asyncHandler(async (_, res: Response) => {
   const serialPort = getSerialPort();
@@ -265,28 +296,42 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
     res.status(200).send("Serial port already initialized.");
     return;
   }
+  let scannerPort: string | undefined;
 
-  const ports = await SerialPort.list();
-  const scannerPort = ports.find(
-    (port) => port.manufacturer === "STMicroelectronics",
-  );
+  if (process.env["ROBOT"] === "true") {
+    const ports = await SerialPort.list();
+    const foundPort = ports.find(
+      (port) => port.manufacturer === "STMicroelectronics",
+    );
+
+    if (foundPort) {
+      scannerPort = foundPort.path;
+    }
+  } else {
+    scannerPort = process.env["HMI_SERIAL_PORT"];
+  }
 
   if (scannerPort) {
-    console.log("Scanner port:", scannerPort.path);
+    console.log("Scanner port:", scannerPort);
+
+    // Initialize new SerialPort based on scannerPort type
     const newSerialPort = new SerialPort({
-      path: scannerPort.path,
+      path: scannerPort,
       baudRate: 115200,
     });
 
     newSerialPort.on("error", (error) => {
       console.log("Serial port error:", error.message);
-      togglePushInterval(false); // Stop interval on error
+      togglePushInterval(false);
+      resetSaveData();
+      setSerialPort(null);
     });
 
     newSerialPort.on("close", () => {
       console.log("Serial port closed");
       io.emit("serialPortClosed", "Serial port closed");
-      togglePushInterval(false); // Stop interval when port is closed
+      togglePushInterval(false);
+      resetSaveData();
       setSerialPort(null);
     });
 
@@ -322,7 +367,7 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
 
           // Update saveData with new values
           saveData = {
-            ...saveData, // Preserve previous data
+            ...saveData,
             angles: {
               dorsiflexion: [...prevAngles.dorsiflexion],
               eversion: [...prevAngles.eversion],
@@ -363,49 +408,4 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
   }
 });
 
-// Function to handle button clicks and send data to serial port
-const handleButtonClick = asyncHandler(async (req: Request, res: Response) => {
-  let dataToSend = "{";
-
-  Object.values(req.body).forEach((value) => {
-    if (value) {
-      dataToSend += value + ";";
-    }
-  });
-
-  dataToSend += "}";
-
-  console.log(`Button clicked:${dataToSend}`);
-
-  const currentTime = new Date();
-
-  if (oldTime && currentTime.getTime() - oldTime.getTime() > 200) {
-    console.log("Button clicked sent over 200ms.");
-  } else {
-    oldTime = currentTime;
-  }
-
-  const serialPort = getSerialPort();
-
-  if (serialPort && serialPort.isOpen) {
-    serialPort.write(dataToSend, (err: any) => {
-      if (err) {
-        console.error("Error writing to serial port:", err);
-        res.status(500).send("Serial Error");
-      } else {
-        console.log("Data sent to serial port:", dataToSend);
-        res.status(200).send("Data sent to serial port.");
-      }
-    });
-  } else {
-    res.status(500).send("Serial port not available.");
-  }
-});
-
-export {
-  initializeSerialPort,
-  recordingStm32Data,
-  handleButtonClick,
-  getSavedData,
-  clearData,
-};
+export { initializeSerialPort, recordingStm32Data, getSavedData, clearData };

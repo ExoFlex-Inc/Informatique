@@ -3,7 +3,7 @@ import {
   Avatar,
   IconButton,
   Badge,
-  BadgeProps,
+  type BadgeProps,
   Grid,
   ListItem,
   Divider,
@@ -15,7 +15,6 @@ import {
   TextField,
 } from "@mui/material";
 import { styled } from "@mui/material";
-import DefaultProfilePic from "../../assets/user.png";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from "@mui/icons-material/Check";
@@ -89,26 +88,18 @@ function Profile() {
     setFieldError(false);
   };
 
-  if (isLoading) {
-    return (
-      <div className="loading-container">
-        <Loading />
-      </div>
-    );
-  }
-
   return (
-    <div className="flex">
+    <div className="relative flex">
       <IconButton className="hover:opacity-50 m-4" onClick={handleButtonClick}>
         <StyledBadge
           overlap="circular"
           color="info"
           anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          badgeContent={<AddAPhotoIcon padding="4px" className="h-28" />}
+          badgeContent={<AddAPhotoIcon className="h-28" />}
         >
           <Avatar
             src={
-              user?.avatar_blob_url ? user.avatar_blob_url : DefaultProfilePic
+              user?.avatar_blob_url ? user.avatar_blob_url : "/assets/user.png"
             }
             sx={{ width: "25vw", height: "25vw" }}
           />
@@ -204,6 +195,7 @@ function Profile() {
           </Paper>
         </ThemeProvider>
       </Box>
+      {isLoading && <Loading />}
     </div>
   );
 }

@@ -7,11 +7,6 @@ import { VitePWA } from "vite-plugin-pwa";
 dotenv.config();
 
 export default defineConfig({
-  // Disable CSS source maps in development
-  css: {
-    devSourcemap: false,
-  },
-  logLevel: "warn",
   // Define environment variables for Vite
   define: {
     "process.env.SUPABASE_API_URL": JSON.stringify(
@@ -23,33 +18,29 @@ export default defineConfig({
   },
   // Plugins
   plugins: [
-    react(),
+    react({
+      include: "**/*.tsx",
+    }),
     VitePWA({
-      mode:
-        process.env.NODE_ENV === "production" ? "production" : "development",
-      strategies: "injectManifest", // Caching strategy
+      strategies: "injectManifest",
       injectManifest: {
-        globPatterns: ["**/*.{js,css,html,png,svg,jpg}"], // Cache all relevant assets
+        rollupFormat: "iife",
       },
-      srcDir: "public", // Ensure firebase-messaging-sw.js is in this directory
-      filename: "firebase-messaging-sw.js", // Ensure this file exists and is set up correctly
-      manifest: {
-        name: "exoflex",
-        short_name: "exoflex",
-        start_url: "/", // Correct start URL for the PWA
-        display: "standalone",
-        background_color: "#ffffff",
-        theme_color: "#3eaf7c",
-      },
+      registerType: "autoUpdate",
+
       devOptions: {
-        enabled: true, // Enable PWA in development
-        type: undefined, // Optional, can be set to "module" or "classic"
+        enabled: true,
+        type: "classic",
       },
     }),
   ],
+  build: {
+    rollupOptions: {
+      input: "./index.html",
+    },
+  },
   // Server settings
   server: {
-    hmr: {},
     port: 1338,
   },
 });

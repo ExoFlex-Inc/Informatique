@@ -34,10 +34,17 @@ jobs:
         run: clang-format -i  stm32/h7a3zi-q/Manager/Src/*.c stm32/h7a3zi-q/Manager/Inc/*.h stm32/h7a3zi-q/Periph/Inc/*.h stm32/h7a3zi-q/Periph/Src/*.c
         # stm32/h7a3zi-q/UnitTests/test/*.c
           
+      - name: Get Last Commit Message
+        id: get_commit_msg
+        run: |
+          echo "msg<<EOF" >> $GITHUB_OUTPUT
+          git log -1 --pretty=%B >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: |
-            Format: $(git log -1 --pretty=%B)
+            Format: ${{ steps.get_commit_msg.outputs.msg }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

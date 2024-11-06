@@ -1,10 +1,9 @@
 // src/middlewares/supabaseMiddleware.ts
 
 import supaClient from "../utils/supabaseClient.ts";
-import { Request, Response, NextFunction } from "express";
-import { CookieOptions } from "express";
+import type { Request, Response, NextFunction } from "express";
 
-const cookieOptions: CookieOptions = {
+const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
   sameSite: "strict",

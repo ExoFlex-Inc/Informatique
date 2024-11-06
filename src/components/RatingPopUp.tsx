@@ -2,7 +2,7 @@ import {
   Dialog,
   DialogTitle,
   Rating,
-  IconContainerProps,
+  type IconContainerProps,
   DialogContent,
 } from "@mui/material";
 import { styled } from "@mui/material";
@@ -68,7 +68,7 @@ const RatingPopUp: React.FC<RatingPopUpProps> = ({
 
   function IconContainer(props: IconContainerProps) {
     const { value, ...other } = props;
-    return <span {...other}>{customIcons[value].icon}</span>;
+    return <span {...other}>{customIcons[value]?.icon}</span>;
   }
 
   return (

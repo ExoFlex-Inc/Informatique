@@ -45,9 +45,10 @@ const UserList: React.FC<UserListProps> = ({
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           sender_id: user?.user_id,
-          receiver_id: listOfUsers[index].user_id,
+          receiver_id: listOfUsers?.[index]?.user_id,
           user_name: `${user?.first_name} ${user?.last_name}`,
           image_url: user?.avatar_url,
           type: "relation",
@@ -61,7 +62,7 @@ const UserList: React.FC<UserListProps> = ({
 
       const newList = listOfUsers.filter((_, i) => i !== index);
       setFilteredUsers(newList);
-      queryClient.invalidateQueries(["pendingRelations"]);
+      queryClient.invalidateQueries({ queryKey: ["pendingRelations"] });
       window.alert("Invitation sent successfully.");
     } catch (error) {
       console.error("Error sending invitation:", error);
@@ -141,7 +142,7 @@ const UserList: React.FC<UserListProps> = ({
               </li>
               {openMenuIndex === index && (
                 <UserMenuDropdown
-                  buttonRef={{ current: buttonRefs.current[index] }}
+                  buttonRef={{ current: buttonRefs.current[index] ?? null }}
                   clientId={user.user_id}
                   setOpenMenuIndex={setOpenMenuIndex}
                 />

@@ -41,7 +41,6 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
-      cacheTime: 1000 * 60 * 60 * 24, // 24 hours
     },
   },
 });
@@ -124,7 +123,9 @@ function AppLayout() {
 
             // Update the user data with the avatar blob URL
             queryClient.setQueryData(["user"], (oldData) => ({
-              ...oldData,
+              ...(typeof oldData === "object" && oldData !== null
+                ? oldData
+                : {}),
               avatar_blob_url: avatarBlobUrl,
             }));
           } else {
@@ -144,7 +145,7 @@ function AppLayout() {
   // Handle loading state
   if (isLoading || avatarLoading) {
     return (
-      <div className="loading-container">
+      <div className="relative loading-container">
         <Loading />
       </div>
     );
@@ -171,7 +172,7 @@ function AppLayout() {
   }
 
   return (
-    <div className="loading-container">
+    <div className="relative loading-container">
       <Loading />
     </div>
   );
@@ -179,6 +180,30 @@ function AppLayout() {
 
 function App() {
   const [theme, colorMode] = useMode();
+
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        // Unregister any existing service workers
+        registrations.forEach((registration) => registration.unregister());
+
+        // Register the appropriate service worker based on the environment
+        const swFile =
+          process.env.NODE_ENV === "development"
+            ? "/dev-sw.js"
+            : "/firebase-messaging-sw.js";
+
+        navigator.serviceWorker
+          .register(swFile, { scope: "/" })
+          .then((registration) => {
+            console.log(`${swFile} registered`, registration);
+          })
+          .catch((error) => {
+            console.error("Service worker registration failed:", error);
+          });
+      });
+    }
+  }, []);
 
   return (
     <ColorModeContext.Provider value={colorMode}>

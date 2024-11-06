@@ -8,6 +8,7 @@ import {
   Grid,
   Card,
   CardContent,
+  useTheme,
 } from "@mui/material";
 import {
   ArrowBack,
@@ -22,15 +23,23 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { useState } from "react";
 import Button from "./Button.tsx";
-import { stm32DataType } from "../hooks/use-stm32.ts";
+import type { stm32DataType } from "../hooks/use-stm32.ts";
 import { useEffect } from "react";
+import { tokens } from "../hooks/theme";
 
 interface ManualControlProps {
   errorFromStm32: boolean;
   stm32Data: stm32DataType | null;
+  socket: any;
 }
 
-const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
+const ManualControl = ({
+  errorFromStm32,
+  stm32Data,
+  socket,
+}: ManualControlProps) => {
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
   const [isManualControlOpen, setIsManualControlOpen] = useState(false);
   const buttonMode = "Manual";
   const action = "Increment";
@@ -54,25 +63,26 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
   }, [stm32Data?.AutoState, stm32Data?.Mode]);
 
   return (
-    <Box
-      sx={{ justifyContent: "center", display: "flex", marginBottom: "40px" }}
-    >
+    <Box sx={{ justifyContent: "center", display: "flex", marginY: "10px" }}>
       <Box sx={{ display: "flex", flexDirection: "column" }}>
         <Box sx={{ display: "flex", justifyContent: "center" }}>
           <IconButton
             onClick={() => setIsManualControlOpen(!isManualControlOpen)}
+            sx={{
+              backgroundColor: "blueAccent.main",
+              "&:hover": {
+                backgroundColor: "#1D4ED8",
+              },
+            }}
           >
-            {isManualControlOpen ? (
-              <KeyboardArrowDownIcon />
-            ) : (
-              <KeyboardArrowUpIcon />
-            )}
+            <KeyboardArrowUpIcon />
           </IconButton>
         </Box>
         <Typography>Manual Control</Typography>
       </Box>
       <Drawer
         anchor="bottom"
+        variant="persistent"
         open={isManualControlOpen}
         onClose={() => setIsManualControlOpen(false)}
         PaperProps={{
@@ -86,25 +96,37 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
       >
         <Box
           sx={{
-            p: 3,
-            background: "linear-gradient(45deg, #1795f2 5%, #140f80 90%)",
+            p: 1,
+            background: `linear-gradient(45deg, ${colors.primary[400]} 5%, #140f80 90%)`,
           }}
         >
-          <Typography variant="h5" gutterBottom align="center">
-            Manual Control
-          </Typography>
-          <Divider sx={{ my: 2 }} />
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
+            <IconButton
+              onClick={() => setIsManualControlOpen(!isManualControlOpen)}
+              sx={{
+                backgroundColor: "blueAccent.main",
+                "&:hover": {
+                  backgroundColor: "#1D4ED8",
+                },
+              }}
+            >
+              <KeyboardArrowDownIcon />
+            </IconButton>
+          </Box>
           <Grid container wrap="nowrap" spacing={3}>
             <Grid item xs={12} md={6}>
-              <Card sx={{ background: "#0a2540" }}>
+              <Card sx={{ background: "#141b2d" }}>
                 <CardContent
                   sx={{
-                    height: "200px",
+                    "&.MuiCardContent-root:last-child": {
+                      padding: "5px",
+                    },
+                    height: "120px",
                     display: "flex",
                     flexDirection: "column",
                   }}
                 >
-                  <Typography noWrap variant="h6" gutterBottom>
+                  <Typography noWrap variant="button">
                     Anatomical Movement
                   </Typography>
                   <Box
@@ -114,12 +136,11 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
                       flexDirection: "column",
                     }}
                   >
-                    <Grid container spacing={2}>
+                    <Grid container>
                       <Grid item xs={4}>
                         <Typography
                           sx={{ justifyContent: "center", display: "flex" }}
                           variant="subtitle1"
-                          gutterBottom
                         >
                           Eversion
                         </Typography>
@@ -139,10 +160,11 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
                                 : "EversionI"
                             }
                             mainColor="blueAccent.main"
-                            hoverColor="#1D4ED8"
+                            hoverColor="blueAccent.hover"
                             textColor="text-white"
                             disabled={errorFromStm32 || changeSideDisabled}
                             icon={<ArrowBack />}
+                            socket={socket}
                           />
 
                           <Button
@@ -154,10 +176,11 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
                                 : "EversionO"
                             }
                             mainColor="blueAccent.main"
-                            hoverColor="#1D4ED8"
+                            hoverColor="blueAccent.hover"
                             textColor="text-white"
                             disabled={errorFromStm32 || changeSideDisabled}
                             icon={<ArrowForward />}
+                            socket={socket}
                           />
                         </Box>
                       </Grid>
@@ -165,7 +188,6 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
                         <Typography
                           sx={{ justifyContent: "center", display: "flex" }}
                           variant="subtitle1"
-                          gutterBottom
                         >
                           Dorsiflexion
                         </Typography>
@@ -181,20 +203,22 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
                             action={action}
                             content="DorsiflexionU"
                             mainColor="blueAccent.main"
-                            hoverColor="#1D4ED8"
+                            hoverColor="blueAccent.hover"
                             textColor="text-white"
                             disabled={errorFromStm32 || changeSideDisabled}
                             icon={<ArrowUpward />}
+                            socket={socket}
                           />
                           <Button
                             mode={buttonMode}
                             action={action}
                             content="DorsiflexionD"
                             mainColor="blueAccent.main"
-                            hoverColor="#1D4ED8"
+                            hoverColor="blueAccent.hover"
                             textColor="text-white"
                             disabled={errorFromStm32 || changeSideDisabled}
                             icon={<ArrowDownward />}
+                            socket={socket}
                           />
                         </Box>
                       </Grid>
@@ -202,7 +226,6 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
                         <Typography
                           sx={{ justifyContent: "center", display: "flex" }}
                           variant="subtitle1"
-                          gutterBottom
                         >
                           Extension
                         </Typography>
@@ -218,20 +241,22 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
                             action={action}
                             content="ExtensionU"
                             mainColor="blueAccent.main"
-                            hoverColor="#1D4ED8"
+                            hoverColor="blueAccent.hover"
                             textColor="text-white"
                             disabled={errorFromStm32 || changeSideDisabled}
                             icon={<ArrowUpward />}
+                            socket={socket}
                           />
                           <Button
                             mode={buttonMode}
                             action={action}
                             content="ExtensionD"
                             mainColor="blueAccent.main"
-                            hoverColor="#1D4ED8"
+                            hoverColor="blueAccent.hover"
                             textColor="text-white"
                             disabled={errorFromStm32 || changeSideDisabled}
                             icon={<ArrowDownward />}
+                            socket={socket}
                           />
                         </Box>
                       </Grid>
@@ -241,15 +266,15 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
               </Card>
             </Grid>
             <Grid item xs={12} md={3}>
-              <Card sx={{ background: "#0a2540" }}>
+              <Card sx={{ background: "#141b2d" }}>
                 <CardContent
                   sx={{
-                    height: "200px",
+                    height: "120px",
                     display: "flex",
                     flexDirection: "column",
                   }}
                 >
-                  <Typography variant="h6" gutterBottom>
+                  <Typography variant="button" gutterBottom>
                     Foot Fastening
                   </Typography>
                   <Box
@@ -271,20 +296,22 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
                         action="Tightening"
                         content="Forward"
                         mainColor="blueAccent.main"
-                        hoverColor="#1D4ED8"
+                        hoverColor="blueAccent.hover"
                         textColor="text-white"
                         disabled={errorFromStm32 || changeSideDisabled}
                         icon={<Compress />}
+                        socket={socket}
                       />
                       <Button
                         mode={buttonMode}
                         action="Tightening"
                         content="Backward"
                         mainColor="blueAccent.main"
-                        hoverColor="#1D4ED8"
+                        hoverColor="blueAccent.hover"
                         textColor="text-white"
                         disabled={errorFromStm32 || changeSideDisabled}
                         icon={<Expand />}
+                        socket={socket}
                       />
                     </Box>
                   </Box>
@@ -292,15 +319,15 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
               </Card>
             </Grid>
             <Grid item xs={12} md={3}>
-              <Card sx={{ background: "#0a2540" }}>
+              <Card sx={{ background: "#141b2d" }}>
                 <CardContent
                   sx={{
-                    height: "200px",
+                    height: "120px",
                     display: "flex",
                     flexDirection: "column",
                   }}
                 >
-                  <Typography variant="h6" gutterBottom>
+                  <Typography variant="button" gutterBottom>
                     Switch Side
                   </Typography>
                   <Box
@@ -326,7 +353,7 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
                         }
                         hoverColor={
                           stm32Data?.CurrentLegSide == "LegIsRight"
-                            ? "#1D4ED8"
+                            ? "blueAccent.hover"
                             : ""
                         }
                         textColor={"text-white"}
@@ -336,6 +363,7 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
                           stm32Data?.CurrentLegSide == "LegIsLeft"
                         }
                         icon={<ArrowBack />}
+                        socket={socket}
                       />
                       <Button
                         mode="ChangeSide"
@@ -346,7 +374,7 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
                         }
                         hoverColor={
                           stm32Data?.CurrentLegSide == "LegIsLeft"
-                            ? "#1D4ED8"
+                            ? "blueAccent.hover"
                             : ""
                         }
                         textColor={"text-white"}
@@ -356,6 +384,7 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
                           stm32Data?.CurrentLegSide == "LegIsRight"
                         }
                         icon={<ArrowForward />}
+                        socket={socket}
                       />
                     </Box>
                     {stm32Data?.Mode == "ChangeSide" && (
