@@ -155,7 +155,7 @@ export default function Manual() {
       },
     ],
   });
-
+  
   const exportCsv = async () => {
     try {
       if (!recordCsv) {
@@ -198,12 +198,12 @@ export default function Manual() {
 
   const generateAndDownloadCsv = (stm32Data: any) => {
     let csvContent =
-      "Index,Dorsiflexion Angle,Eversion Angle,Extension Angle,Dorsiflexion Torque,Eversion Torque,Extension Torque\n";
+      "Index,Dorsiflexion Angle,Eversion Angle,Extension Angle,Dorsiflexion Torque,Eversion Torque,Extension Torque,Dorsiflexion Speed,Eversion Speed,Extension Speed\n";
 
     const dataLength = stm32Data.angles.dorsiflexion.length;
 
     for (let i = 0; i < dataLength; i++) {
-      const rowData = `${i + 1},${stm32Data.angles.dorsiflexion[i]},${stm32Data.angles.eversion[i]},${stm32Data.angles.extension[i]},${stm32Data.torques.dorsiflexion[i]},${stm32Data.torques.eversion[i]},${stm32Data.torques.extension[i]}\n`;
+      const rowData = `${i + 1},${stm32Data.angles.dorsiflexion[i]},${stm32Data.angles.eversion[i]},${stm32Data.angles.extension[i]},${stm32Data.torques.dorsiflexion[i]},${stm32Data.torques.eversion[i]},${stm32Data.torques.extension[i]},${stm32Data.speeds.dorsiflexion[i]},${stm32Data.speeds.eversion[i]},${stm32Data.speeds.extension[i]}\n`;
       csvContent += rowData;
     }
 
@@ -218,7 +218,7 @@ export default function Manual() {
     a.click();
     window.URL.revokeObjectURL(url);
   };
-
+  
   return (
     <div className="custom-height flex flex-col">
       <CustomScrollbar>
@@ -277,7 +277,7 @@ export default function Manual() {
                     hoverColor="blueAccent.hover"
                     socket={socket}
                   />
-                  <IconButton
+                                    <IconButton
                     onClick={(e) => {
                       exportCsv();
                     }}
