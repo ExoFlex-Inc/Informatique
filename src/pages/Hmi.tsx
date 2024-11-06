@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import ProgressionWidget from "../components/ProgressionWidget.tsx";
 import { usePlan } from "../hooks/use-plan.ts";
 import useStm32 from "../hooks/use-stm32.ts";
 
-import { useMediaQuery, useTheme, Box, Grid } from "@mui/material";
+import { useTheme, Box, Grid } from "@mui/material";
 import { useUser } from "../hooks/use-user.ts";
 import LineChart from "../components/LineChart.tsx";
 import { tokens } from "../hooks/theme.ts";
@@ -13,6 +13,8 @@ import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import ManualControl from "../components/ManualControl.tsx";
 import Button from "../components/Button.tsx";
 import { Pause, PlayArrow, Refresh, Stop, Home } from "@mui/icons-material";
+import { useStats } from "../hooks/use-stats.ts";
+import { useQueryClient } from "@tanstack/react-query";
 interface ChartData {
   datasets: {
     label: string;
@@ -27,6 +29,11 @@ interface Stm32Data {
   Torques: number[];
   Repetitions: number;
   ExerciseIdx: number;
+  ErrorCode: number;
+  Mode: string;
+  HomingState: string;
+  CurrentLegSide: string;
+  Current: number[];
 }
 
 interface PlanData {
@@ -75,9 +82,12 @@ interface Movement {
 
 export default function HMI() {
   const { user } = useUser();
+  const { stats } = useStats();
   const { planData } = usePlan(user?.user_id) as {
     planData: PlanData | undefined;
   };
+  const queryClient = useQueryClient();
+
   const { stm32Data, socket, errorFromStm32 } = useStm32() as {
     stm32Data: Stm32Data | null | undefined;
     socket: any;
@@ -88,8 +98,6 @@ export default function HMI() {
   const [openDialogPainScale, setOpenDialogPainScale] =
     useState<boolean>(false);
   const [painScale, setPainScale] = useState<number>(0);
-
-  const isTablet = useMediaQuery("(max-width: 768px)");
 
   const hasExecute = useRef(false);
   const [chartData, setChartData] = useState<ChartData>({
@@ -115,7 +123,7 @@ export default function HMI() {
       !hasExecute.current
     ) {
       const message = "{Auto;Resetplan;}";
-      socket.emit("planData", message);
+      socket.emit("sendDataToStm32", message);
       hasExecute.current = true;
       console.log("Reset", message);
     }
@@ -134,7 +142,8 @@ export default function HMI() {
         message += `;${set.movement.length}`;
         for (let i = 0; i < 3; i++) {
           if (i <= set.movement.length - 1) {
-            message += `;${set.movement[i].exercise};${set.movement[i].target_angle};${set.movement[i].target_torque}`;
+            const movement = set.movement[i];
+            message += `;${movement?.exercise ?? 0};${movement?.target_angle ?? 0};${movement?.target_torque ?? 0}`;
           } else {
             message += `;${0};${0};${0}`;
           }
@@ -143,13 +152,13 @@ export default function HMI() {
       });
       message += "}";
       console.log("plan", message);
-      socket.emit("planData", message);
+      socket.emit("sendDataToStm32", message);
     }
   }, [stm32Data, planData, socket]);
 
   useEffect(() => {
     const stopRecording = async () => {
-      if (stm32Data?.AutoState === "Stop" && socket) {
+      if (stm32Data?.AutoState === "Stop" || stm32Data?.Mode === "Error") {
         try {
           const response = await fetch("http://localhost:3001/stm32/record", {
             method: "POST",
@@ -159,6 +168,7 @@ export default function HMI() {
             body: JSON.stringify({
               start: false,
             }),
+            credentials: "include",
           });
 
           if (response.ok) {
@@ -173,7 +183,7 @@ export default function HMI() {
     };
 
     stopRecording();
-  }, [stm32Data, socket]);
+  }, [stm32Data]);
 
   useEffect(() => {
     if (
@@ -181,7 +191,9 @@ export default function HMI() {
       planData?.plan &&
       stm32Data.ExerciseIdx < planData.plan.length
     ) {
-      const currentSet = planData.plan[stm32Data.ExerciseIdx];
+      const currentSet = planData.plan[stm32Data.ExerciseIdx] ?? {
+        movement: [],
+      };
       const currentExercise = currentSet.movement[0]?.exercise;
 
       if (
@@ -190,27 +202,31 @@ export default function HMI() {
       ) {
         setChartData((prevChartData) => {
           const newData = [...prevChartData.datasets];
-          newData[0].data.push({
-            x: stm32Data.Repetitions,
-            y: stm32Data.Positions[1],
-          });
-          newData[1].data.push({
-            x: stm32Data.Repetitions,
-            y: stm32Data.Torques[1],
-          });
+          if (newData[0] && newData[1]) {
+            newData[0].data.push({
+              x: stm32Data.Repetitions,
+              y: stm32Data.Positions[1] ?? 0,
+            });
+            newData[1].data.push({
+              x: stm32Data.Repetitions,
+              y: stm32Data.Torques[1] ?? 0,
+            });
+          }
           return { ...prevChartData, datasets: newData };
         });
       } else if (currentExercise === "Extension") {
         setChartData((prevChartData) => {
           const newData = [...prevChartData.datasets];
-          newData[0].data.push({
-            x: stm32Data.Repetitions,
-            y: stm32Data.Positions[2],
-          });
-          newData[1].data.push({
-            x: stm32Data.Repetitions,
-            y: stm32Data.Torques[2],
-          });
+          if (newData[0] && newData[1]) {
+            newData[0].data.push({
+              x: stm32Data.Repetitions,
+              y: stm32Data.Positions[2] ?? 0,
+            });
+            newData[1].data.push({
+              x: stm32Data.Repetitions,
+              y: stm32Data.Torques[2] ?? 0,
+            });
+          }
           return { ...prevChartData, datasets: newData };
         });
       }
@@ -219,28 +235,34 @@ export default function HMI() {
 
   useEffect(() => {
     if (stm32Data?.Repetitions === 0) {
-      setChartData((prevChartData) => ({
-        datasets: [
-          { ...prevChartData.datasets[0], data: [] },
-          { ...prevChartData.datasets[1], data: [] },
-        ],
-      }));
+      setChartData((prevChartData) => {
+        if (prevChartData.datasets[0] && prevChartData.datasets[1]) {
+          return {
+            datasets: [
+              {
+                ...prevChartData.datasets[0],
+                data: [],
+                label: prevChartData.datasets[0].label,
+                borderColor: prevChartData.datasets[0].borderColor,
+              },
+              {
+                ...prevChartData.datasets[1],
+                data: [],
+                label: prevChartData.datasets[1].label,
+                borderColor: prevChartData.datasets[1].borderColor,
+              },
+            ],
+          };
+        }
+        return prevChartData;
+      });
     }
   }, [stm32Data?.Repetitions]);
 
   useEffect(() => {
     if (painScale && user?.user_id) {
-      const date = Date.now();
-      const formattedDate = new Date(date).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "numeric",
-      });
       const requestBody = {
-        date: formattedDate,
+        stats: stats,
         rated_pain: painScale,
         user_id: user.user_id,
       };
@@ -254,11 +276,16 @@ export default function HMI() {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify(requestBody),
+              credentials: "include",
             },
           );
 
           if (exerciseData.ok) {
             console.log("Data saved successfully.");
+            queryClient.invalidateQueries({ queryKey: ["topUsers"] });
+            queryClient.invalidateQueries({
+              queryKey: ["stats", user.user_id],
+            });
           } else {
             console.error("Failed to save the data.");
           }
@@ -269,7 +296,7 @@ export default function HMI() {
 
       fetchData();
     }
-  }, [painScale, user]);
+  }, [painScale]);
 
   return (
     <div className="flex flex-col custom-height">
@@ -300,6 +327,7 @@ export default function HMI() {
                     action="Control"
                     content="Start"
                     icon={<PlayArrow />}
+                    socket={socket}
                   />
                 ) : (
                   <Button
@@ -309,6 +337,7 @@ export default function HMI() {
                     action="Control"
                     content="Pause"
                     icon={<Pause />}
+                    socket={socket}
                   />
                 )}
                 <Button
@@ -323,6 +352,7 @@ export default function HMI() {
                     errorFromStm32 ||
                     stm32Data?.AutoState === "Ready"
                   }
+                  socket={socket}
                 />
                 <Button
                   mainColor="#1ec6e1"
@@ -333,6 +363,7 @@ export default function HMI() {
                     stm32Data?.AutoState !== "WaitingForPlan"
                   }
                   mode="Homing"
+                  socket={socket}
                 />
                 <Button
                   mainColor="#f1910f"
@@ -340,9 +371,14 @@ export default function HMI() {
                   icon={<Refresh />}
                   disabled={!stm32Data?.ErrorCode}
                   mode="Reset"
+                  socket={socket}
                 />
               </Box>
-              <LineChart chartData={chartData} type="line" socket={socket} />
+              <LineChart
+                chartData={chartData}
+                type="line"
+                title="Exercise Progression"
+              />
             </Grid>
             <Grid item>
               <Box padding={1} bgcolor="white" sx={{ borderRadius: "16px" }}>
@@ -367,7 +403,11 @@ export default function HMI() {
         setPainScale={setPainScale}
         openDialogPainScale={openDialogPainScale}
       />
-      <ManualControl errorFromStm32={errorFromStm32} stm32Data={stm32Data} />
+      <ManualControl
+        errorFromStm32={errorFromStm32}
+        stm32Data={stm32Data ?? null}
+        socket={socket}
+      />
     </div>
   );
 }

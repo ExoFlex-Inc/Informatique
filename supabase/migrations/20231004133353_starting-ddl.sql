@@ -61,6 +61,15 @@ CREATE TABLE exercise_data (
   created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE stats (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+  user_id uuid REFERENCES user_profiles(user_id),
+  current_streak INTEGER,
+  longest_streak INTEGER,
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE notifications (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
   sender_id UUID REFERENCES auth.users(id) NOT NULL,
@@ -93,6 +102,30 @@ execute function "supabase_functions"."http_request"(
 */
 
 INSERT INTO storage.buckets(id, name, public, file_size_limit) VALUES ('avatars', 'avatars', true, 52428800);
+
+/*
+.########.##.....##.##....##..######..########.####..#######..##....##..######.
+.##.......##.....##.###...##.##....##....##.....##..##.....##.###...##.##....##
+.##.......##.....##.####..##.##..........##.....##..##.....##.####..##.##......
+.######...##.....##.##.##.##.##..........##.....##..##.....##.##.##.##..######.
+.##.......##.....##.##..####.##..........##.....##..##.....##.##..####.......##
+.##.......##.....##.##...###.##....##....##.....##..##.....##.##...###.##....##
+.##........#######..##....##..######.....##....####..#######..##....##..######.
+*/
+
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER set_updated_at
+BEFORE UPDATE ON stats
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
 
 /*
 .########...#######..##.......####..######..####.########..######.

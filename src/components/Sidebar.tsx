@@ -19,7 +19,6 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import FeedOutlinedIcon from "@mui/icons-material/FeedOutlined";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import GroupIcon from "@mui/icons-material/Group";
-import Icon from "../../assets/user.png";
 import CustomScrollbar from "./CustomScrollbars";
 import { useUser } from "../hooks/use-user";
 
@@ -60,7 +59,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected, setSelected] = useState("");
   const { user } = useUser();
-  const isTablet = useMediaQuery("(max-width: 768px)");
+  const isTablet = useMediaQuery("(max-width: 1024px)");
   const location = useLocation();
   const page = location.pathname.split("/").pop() || "";
 
@@ -157,7 +156,11 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
               <Box mb="25px">
                 <Box display="flex" justifyContent="center" alignItems="center">
                   <Avatar
-                    src={user.avatar_blob_url ? user.avatar_blob_url : Icon}
+                    src={
+                      user.avatar_blob_url
+                        ? user.avatar_blob_url
+                        : "/assets/user.png"
+                    }
                     sx={
                       isTablet
                         ? { width: 50, height: 50 }
@@ -245,7 +248,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
                 alt="logo"
                 width={"200px"}
                 height={"200px"}
-                src={`../assets/logo.png`}
+                src="/assets/logo.png"
                 style={{ paddingTop: "50px" }}
               />
             </Box>

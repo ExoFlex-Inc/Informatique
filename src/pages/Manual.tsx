@@ -9,6 +9,8 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { Refresh, PlayArrow, Pause, Home } from "@mui/icons-material";
+import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import LineChart from "../components/LineChart";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import useStm32 from "../hooks/use-stm32.ts";
@@ -69,19 +71,12 @@ export default function Manual() {
   });
   const [recordCsv, setRecordCsv] = useState(false);
 
-  useEffect(() => {
-    if (stm32Data?.ErrorCode !== undefined) {
-      const errorNames = decodeErrorCode(stm32Data.ErrorCode);
-      setErrorDescription(errorNames.join("\n") || "");
-    }
-  }, [stm32Data]);
-
-  const decodeErrorCode = (errorCode) => {
+  const decodeErrorCode = (errorCode: number) => {
     const errorNames = [];
     for (let i = 0; i < 32; i++) {
       if (errorCode & (1 << i)) {
-        if (errorMap[i]) {
-          errorNames.push(errorMap[i]);
+        if (errorMap[i as keyof typeof errorMap]) {
+          errorNames.push(errorMap[i as keyof typeof errorMap]);
         }
       }
     }
@@ -107,26 +102,30 @@ export default function Manual() {
         setLatestMotorData({
           motor1: {
             x: currentTime,
-            position: stm32Data.Positions[0],
-            torque: stm32Data.Torques[0],
-            current: stm32Data.Current[0],
+            position: stm32Data.Positions[0] ?? 0,
+            torque: stm32Data.Torques[0] ?? 0,
+            current: stm32Data.Current[0] ?? 0,
           },
           motor2: {
             x: currentTime,
-            position: stm32Data.Positions[1],
-            torque: stm32Data.Torques[1],
-            current: stm32Data.Current[1],
+            position: stm32Data.Positions[1] ?? 0,
+            torque: stm32Data.Torques[1] ?? 0,
+            current: stm32Data.Current[1] ?? 0,
           },
           motor3: {
             x: currentTime,
-            position: stm32Data.Positions[2],
-            torque: stm32Data.Torques[2],
-            current: stm32Data.Current[2],
+            position: stm32Data.Positions[2] ?? 0,
+            torque: stm32Data.Torques[2] ?? 0,
+            current: stm32Data.Current[2] ?? 0,
           },
         });
       }
     }
-  }, [stm32Data, socket, graphPause]);
+    if (stm32Data?.ErrorCode !== undefined) {
+      const errorNames = decodeErrorCode(stm32Data.ErrorCode);
+      setErrorDescription(errorNames.join("\n") || "");
+    }
+  }, [stm32Data, graphPause]);
 
   const getChartData = () => ({
     datasets: [
@@ -161,13 +160,17 @@ export default function Manual() {
     try {
       if (!recordCsv) {
         // Clear previous data
-        await fetch("http://localhost:3001/stm32/clear-data", {
+        const response = await fetch("http://localhost:3001/stm32/clear-data", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: "include",
         });
-        setRecordCsv(true);
+        if (response.ok) {
+          console.log("Data cleared successfully.");
+          setRecordCsv(true);
+        }
       } else {
         // Fetch saved STM32 data locally
         const response = await fetch("http://localhost:3001/stm32/saved-data", {
@@ -193,7 +196,7 @@ export default function Manual() {
     }
   };
 
-  const generateAndDownloadCsv = (stm32Data) => {
+  const generateAndDownloadCsv = (stm32Data: any) => {
     let csvContent =
       "Index,Dorsiflexion Angle,Eversion Angle,Extension Angle,Dorsiflexion Torque,Eversion Torque,Extension Torque\n";
 
@@ -236,36 +239,66 @@ export default function Manual() {
               >
                 <Box sx={{ width: 50 }} />
                 <Box gap={4} sx={{ display: "flex" }}>
-                  <Button
+                  <IconButton
                     onClick={() => setGraphPause(false)}
-                    icon={<PlayArrow />}
                     disabled={!graphPause}
-                    mainColor="#2fb73d"
-                    hoverColor="#33a63f"
-                  />
-
-                  <Button
+                    size="large"
+                    sx={{
+                      backgroundColor: "blueAccent.main",
+                      "&:hover": { backgroundColor: "blueAccent.hover" },
+                    }}
+                  >
+                    <PlayArrow />
+                  </IconButton>
+                  <IconButton
                     onClick={() => setGraphPause(true)}
                     disabled={graphPause}
-                    icon={<Pause />}
-                    mainColor="#f5d50b"
-                    hoverColor="#dcc21d"
-                  />
-
+                    size="large"
+                    sx={{
+                      backgroundColor: "blueAccent.main",
+                      "&:hover": { backgroundColor: "blueAccent.hover" },
+                    }}
+                  >
+                    <Pause />
+                  </IconButton>
                   <Button
                     icon={<Home />}
                     mode="Homing"
-                    mainColor="#1ec6e1"
-                    hoverColor="#2aa6ba"
+                    mainColor="blueAccent.main"
+                    hoverColor="blueAccent.hover"
+                    socket={socket}
                   />
 
                   <Button
                     icon={<Refresh />}
                     disabled={!stm32Data?.ErrorCode}
                     mode="Reset"
-                    mainColor="#f1910f"
-                    hoverColor="#d08622"
+                    mainColor="blueAccent.main"
+                    hoverColor="blueAccent.hover"
+                    socket={socket}
                   />
+                  <IconButton
+                    onClick={(e) => {
+                      exportCsv();
+                    }}
+                    onTouchStart={(e) => {
+                      exportCsv();
+                    }}
+                    size="large"
+                    sx={{
+                      backgroundColor: "blueAccent.main",
+                      "&:hover": {
+                        backgroundColor: "blueAccent.hover",
+                      },
+                    }}
+                    disabled={!stm32Data?.ErrorCode}
+                  >
+                    {recordCsv ? (
+                      <RadioButtonUncheckedIcon />
+                    ) : (
+                      <RadioButtonCheckedIcon />
+                    )}
+                  </IconButton>
                 </Box>
                 <Box sx={{ width: 50 }} />
                 <FormControlLabel
@@ -298,8 +331,8 @@ export default function Manual() {
               </Box>
               <LineChart
                 chartData={getChartData()}
-                mode="Manual"
                 type="realtime"
+                title="Motor Data"
                 graphPause={graphPause}
               />
             </Grid>
@@ -326,14 +359,17 @@ export default function Manual() {
                       whiteSpace: "pre",
                     },
                   }}
-                  sx={{ marginRight: 5 }}
                 />
               </Box>
             </Grid>
           </Grid>
         </Box>
       </CustomScrollbar>
-      <ManualControl stm32Data={stm32Data} errorFromStm32={errorFromStm32} />
+      <ManualControl
+        stm32Data={stm32Data}
+        socket={socket}
+        errorFromStm32={errorFromStm32}
+      />
     </div>
   );
 }

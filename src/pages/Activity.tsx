@@ -5,7 +5,7 @@ import { FilterAlt } from "@mui/icons-material";
 import GraphFilters from "../components/GraphFilters.tsx";
 import { DateRangePicker } from "rsuite";
 import "rsuite/DateRangePicker/styles/index.css";
-import { ChartData } from "chart.js";
+import type { ChartData } from "chart.js";
 import {
   Box,
   ThemeProvider,
@@ -61,41 +61,47 @@ function onGraphTypeChange(
   titles: string[],
   colors: string[],
   dates: string[],
-  ...args: (number[][] | undefined)[][]
+  ...args: (number[] | undefined)[]
 ) {
-  const mappedArgs = args.map(
-    (arg: (number[][] | undefined)[], index: number) => {
-      const dataPoints = [];
-      let cumulativeIndex = 0;
+  const mappedArgs = args.map((arg: number[] | undefined, index: number) => {
+    const dataPoints = [];
+    let cumulativeIndex = 0;
 
-      for (let i = 0; i < arg.length; i++) {
-        const valueArray = arg[i] ?? [];
-        const date = dates[i];
-
-        for (let j = 0; j < valueArray.length; j++) {
-          const yValue = valueArray[j];
-          if (yValue !== undefined && yValue !== null) {
-            dataPoints.push({
-              x: cumulativeIndex + 1,
-              y: yValue,
-              recorded_date: date,
-            });
-          }
-          cumulativeIndex++;
-        }
-      }
-
+    if (!arg)
       return {
         label: labels[index],
-        data: dataPoints,
+        data: [],
         borderColor: colors[index],
         fill: false,
         tension: 0.1,
         pointRadius: show_points ? 5 : 2,
         pointHoverRadius: 7,
       };
-    },
-  );
+
+    const recordedDate = dates[index] ?? ""; // Use the date at the args index
+
+    for (let i = 0; i < arg.length; i++) {
+      const yValue = arg[i];
+      if (yValue !== undefined && yValue !== null) {
+        dataPoints.push({
+          x: cumulativeIndex + 1,
+          y: yValue,
+          recorded_date: recordedDate, // Apply the same date to all points in this arg
+        });
+      }
+      cumulativeIndex++;
+    }
+
+    return {
+      label: labels[index],
+      data: dataPoints,
+      borderColor: colors[index],
+      fill: false,
+      tension: 0.1,
+      pointRadius: show_points ? 5 : 2,
+      pointHoverRadius: 7,
+    };
+  });
 
   // Update x-axis labels based on the cumulative data points
   const xAxisLabels = mappedArgs[0]?.data?.map((point) => point.x) ?? [];
@@ -105,7 +111,7 @@ function onGraphTypeChange(
       labels: xAxisLabels,
       datasets: mappedArgs,
     },
-    title: titles[0],
+    title: titles[0] || "",
   };
 }
 
@@ -148,7 +154,7 @@ export default function Activity() {
         const result = await response.json();
 
         if (response.ok) {
-          setData(result);
+          setData(result ?? []);
 
           // Put the date in the client timezone
           const startDate = date[0].toLocaleDateString("en-CA");
@@ -157,9 +163,9 @@ export default function Activity() {
           // Check if the selected date range is only one day
           if (startDate === endDate) {
             // Extract available sessions for this day
-            const sessionTimes = result.map(
-              (item: any) => item.data.recorded_date,
-            );
+            const sessionTimes = result
+              .filter((item: any) => item?.data)
+              .map((item: any) => item.data.recorded_date ?? "");
             setAvailableSessions(sessionTimes); // Set available sessions for dropdown
             setSelectedSession(
               sessionTimes.length > 0 ? sessionTimes[0] : null,
@@ -172,7 +178,7 @@ export default function Activity() {
           console.error(result.message);
         }
       } catch (error) {
-        console.error(error.message);
+        console.error((error as any).message);
       }
     };
 
@@ -187,7 +193,7 @@ export default function Activity() {
           ? data.filter((item) => item.data.recorded_date === selectedSession)
           : data;
 
-        const dates = filteredData.map((item) => item.data.recorded_date);
+        const dates = filteredData.map((item) => item?.data?.recorded_date);
         const colors = [
           "rgb(99, 255, 132)",
           "rgb(255, 99, 132)",
@@ -195,43 +201,35 @@ export default function Activity() {
         ];
 
         const angle_stretch = {
-          dorsiflexion: filteredData.map((item) =>
-            item.data.angles.dorsiflexion.map((angle) => angle),
+          dorsiflexion: filteredData.flatMap(
+            (item) => item?.data?.angles.dorsiflexion,
           ),
-          eversion: filteredData.map((item) =>
-            item.data.angles.eversion.map((angle) => angle),
-          ),
-          extension: filteredData.map((item) =>
-            item.data.angles.extension.map((angle) => angle),
+          eversion: filteredData.flatMap((item) => item?.data?.angles.eversion),
+          extension: filteredData.flatMap(
+            (item) => item?.data?.angles.extension,
           ),
         };
 
         const force_stretch = {
-          dorsiflexion: filteredData.map((item) =>
-            item.data.torques.dorsiflexion.map((torque) => torque),
+          dorsiflexion: filteredData.flatMap(
+            (item) => item?.data?.torques.dorsiflexion,
           ),
-          eversion: filteredData.map((item) =>
-            item.data.torques.eversion.map((torque) => torque),
+          eversion: filteredData.flatMap(
+            (item) => item?.data?.torques.eversion,
           ),
-          extension: filteredData.map((item) =>
-            item.data.torques.extension.map((torque) => torque),
+          extension: filteredData.flatMap(
+            (item) => item?.data?.torques.extension,
           ),
         };
 
         const repetitions_done = filteredData?.map(
-          (item) => item.data.repetitions_done,
+          (item) => item?.data?.repetitions_done,
         );
         const repetitions_target = filteredData?.map(
-          (item) => item.data.repetitions_target,
+          (item) => item?.data?.repetitions_target,
         );
-        // Wrap the repetitions data in an array for the graph
-        const repetitions_done_wrapped = repetitions_done.map((item) => [item]);
-        const repetitions_target_wrapped = repetitions_target.map((item) => [
-          item,
-        ]);
 
         const rated_pain = filteredData?.map((element) => [element.rated_pain]);
-        const rated_pain_wrapped = rated_pain.map((item) => [item]);
 
         switch (graphType) {
           case "Amplitude":
@@ -277,8 +275,8 @@ export default function Activity() {
                 ["Number of Repetitions"],
                 colors,
                 dates,
-                repetitions_done_wrapped,
-                repetitions_target_wrapped,
+                repetitions_done.flat(),
+                repetitions_target.flat(),
               );
               setDataset1(chartData);
               setTitle1(title);
@@ -293,7 +291,9 @@ export default function Activity() {
                 ["Pain Scale from 1 to 5"],
                 colors,
                 dates,
-                rated_pain_wrapped,
+                rated_pain
+                  .flat()
+                  .filter((item): item is number => item !== undefined),
               );
               setDataset1(chartData);
               setTitle1(title);
@@ -347,9 +347,9 @@ export default function Activity() {
       case "Amplitude":
         // Compute average of angles
         const angles = {
-          dorsiflexion: data.flatMap((item) => item.data.angles.dorsiflexion),
-          eversion: data.flatMap((item) => item.data.angles.eversion),
-          extension: data.flatMap((item) => item.data.angles.extension),
+          dorsiflexion: data.flatMap((item) => item?.data?.angles.dorsiflexion),
+          eversion: data.flatMap((item) => item?.data?.angles.eversion),
+          extension: data.flatMap((item) => item?.data?.angles.extension),
         };
         const angleAverages: AngleMaxAverages = {
           dorsiflexion: calculateAverage(angles.dorsiflexion),
@@ -362,9 +362,11 @@ export default function Activity() {
       case "Rigidity":
         // Compute average of torques
         const torques = {
-          dorsiflexion: data.flatMap((item) => item.data.torques.dorsiflexion),
-          eversion: data.flatMap((item) => item.data.torques.eversion),
-          extension: data.flatMap((item) => item.data.torques.extension),
+          dorsiflexion: data.flatMap(
+            (item) => item?.data?.torques.dorsiflexion,
+          ),
+          eversion: data.flatMap((item) => item?.data?.torques.eversion),
+          extension: data.flatMap((item) => item?.data?.torques.extension),
         };
         const torqueAverages: AngleMaxAverages = {
           dorsiflexion: calculateAverage(torques.dorsiflexion),
@@ -376,9 +378,11 @@ export default function Activity() {
 
       case "Number of repetitions":
         // Compute average of repetitions
-        const repetitionsDone = data.map((item) => item.data.repetitions_done);
+        const repetitionsDone = data.map(
+          (item) => item?.data?.repetitions_done,
+        );
         const repetitionsTarget = data.map(
-          (item) => item.data.repetitions_target,
+          (item) => item?.data?.repetitions_target,
         );
         const averageRepetitionsDone = calculateAverage(repetitionsDone);
         const averageRepetitionsTarget = calculateAverage(repetitionsTarget);
@@ -406,10 +410,33 @@ export default function Activity() {
     const startDate = new Date(dateRange[0]);
     const endDate = new Date(dateRange[1]);
 
-    const dates = data.map((item) => {
-      const date = new Date(item.data.recorded_date);
-      return date.toISOString().split("T")[0];
-    });
+    const dates = data
+      .map((item) => {
+        // Ensure recorded_date exists before processing
+        if (!item?.data?.recorded_date) {
+          return null; // Return null for missing dates to handle later
+        }
+
+        // Remove the timezone abbreviation
+        const cleanedDateString = item.data.recorded_date.replace(
+          /\s*\b[A-Z]{3}\b$/,
+          "",
+        );
+        // Replace ', ' with 'T' to create an ISO string
+        const isoDateString = cleanedDateString.replace(", ", "T");
+        const date = new Date(isoDateString);
+
+        // Format the date as 'YYYY-MM-DD'
+        const formattedDate =
+          date.getFullYear() +
+          "-" +
+          String(date.getMonth() + 1).padStart(2, "0") +
+          "-" +
+          String(date.getDate()).padStart(2, "0");
+
+        return formattedDate;
+      })
+      .filter(Boolean); // Filter out any null values from missing dates
 
     const missingDates: string[] = [];
 
@@ -420,7 +447,7 @@ export default function Activity() {
       currentDate.setUTCDate(currentDate.getUTCDate() + 1)
     ) {
       const formattedDate = currentDate.toISOString().split("T")[0];
-      if (!dates.includes(formattedDate)) {
+      if (formattedDate && !dates.includes(formattedDate)) {
         missingDates.push(formattedDate);
       }
     }
@@ -505,16 +532,8 @@ export default function Activity() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="loading-container">
-        <Loading />
-      </div>
-    );
-  }
-
   return (
-    <div className=" mx-auto max-w-7xl">
+    <div className="relative mx-auto max-w-7xl flex flex-col custom-height">
       <div className="mb-4 flex flex-wrap items-center gap-4">
         {/* User Search Bar */}
         <div className="flex-grow max-w-md">
@@ -572,8 +591,7 @@ export default function Activity() {
           {graphType}
         </Typography>
       </div>
-      {/* <CustomScrollbar> */}
-      <>
+      <CustomScrollbar>
         <div className="mb-4 basis-full">
           <LineChart type="activity" chartData={dataset1} title={title1} />
         </div>
@@ -600,8 +618,8 @@ export default function Activity() {
             </Paper>
           </Box>
         </ThemeProvider>
-      </>
-      {/* </CustomScrollbar> */}
+      </CustomScrollbar>
+      {isLoading && <Loading />}
     </div>
   );
 }

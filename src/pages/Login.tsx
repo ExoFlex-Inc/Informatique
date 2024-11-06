@@ -9,24 +9,28 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useUser } from "../hooks/use-user.ts";
 
 async function registerFCMToken() {
-  let fcmToken = "";
   try {
-    const permission = await Notification.requestPermission();
-    if (permission === "granted") {
-      const registration = await navigator.serviceWorker.register(
-        "/firebase-messaging-sw.js",
-      );
-      fcmToken = await getToken(messaging, {
-        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-        serviceWorkerRegistration: registration,
-      });
-    } else {
-      console.warn("Notification permission not granted");
-    }
+    // Register the service worker with the correct path
+    // const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+
+    // Wait for the service worker to be ready
+    // await navigator.serviceWorker.ready;
+
+    // Retrieve the token with the service worker registration and VAPID key
+    const token = await getToken(messaging, {
+      // serviceWorkerRegistration: registration,
+      vapidKey: import.meta.env["VITE_FIREBASE_VAPID_KEY"], // Insert your VAPID key here
+    });
+
+    console.log("Token received:", token);
+    return token;
   } catch (error) {
-    console.error("Error fetching FCM token:", error);
+    console.error(
+      "Service worker registration or token retrieval failed:",
+      error,
+    );
+    return null;
   }
-  return fcmToken;
 }
 
 export default function Login() {
@@ -35,9 +39,9 @@ export default function Login() {
   const [showSignUpModal, setShowSignUpModal] = useState(false);
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const { user, updateProfile } = useUser();
+  const { updateProfile } = useUser();
 
-  async function handleLogin(event: React.FormEvent) {
+  async function handleLogin(event) {
     event.preventDefault();
     try {
       const response = await fetch("http://localhost:3001/auth/login", {
@@ -66,8 +70,8 @@ export default function Login() {
         fcm_token: fcmToken,
       });
 
-      navigate("/dashboard");
-    } catch (error: any) {
+      navigate("/dashboard", { replace: true });
+    } catch (error) {
       console.error("Login error:", error.message);
       alert(`Login failed: ${error.message}`);
     }

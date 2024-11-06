@@ -4,7 +4,7 @@ import "chartjs-adapter-luxon";
 import Chart from "chart.js/auto";
 import { CategoryScale } from "chart.js";
 import StreamingPlugin from "chartjs-plugin-streaming";
-import {
+import type {
   ChartData,
   ChartOptions,
   ScatterDataPoint,
@@ -18,7 +18,7 @@ interface LineChartProps {
   chartData: ChartData<"line">;
   type: string;
   title: string;
-  graphPause: boolean;
+  graphPause?: boolean;
 }
 
 const LineChart: React.FC<LineChartProps> = ({
@@ -89,7 +89,7 @@ const LineChart: React.FC<LineChartProps> = ({
                         dataset: ChartDataset<
                           "line",
                           (number | ScatterDataPoint | null)[]
-                        >[],
+                        >,
                         index: number,
                       ) => {
                         const xValue = chartData.datasets[index]?.data[
@@ -118,7 +118,7 @@ const LineChart: React.FC<LineChartProps> = ({
           },
           pointRadius: 2,
           pointHoverRadius: 7,
-        };
+        } as Partial<ChartOptions<"line">>;
       } else if (type === "activity") {
         return {
           scales: {
@@ -143,16 +143,17 @@ const LineChart: React.FC<LineChartProps> = ({
                   const dataPoint = context.raw as ScatterDataPoint;
                   const label = context.dataset.label || "";
                   const value = context.formattedValue;
-                  const recordedDate = dataPoint?.recorded_date || "N/A";
+                  const recordedDate =
+                    (dataPoint as any)?.recorded_date || "N/A";
 
                   return `${label}: ${value}\nRecorded Date: ${recordedDate}`;
                 },
               },
             },
           },
-        };
+        } as Partial<ChartOptions<"line">>;
       } else {
-        return {};
+        return {} as Partial<ChartOptions<"line">>;
       }
     },
   );
@@ -163,9 +164,9 @@ const LineChart: React.FC<LineChartProps> = ({
         ...prevOptions,
         scales: {
           x: {
-            ...prevOptions.scales?.x,
+            ...prevOptions.scales?.["x"],
             realtime: {
-              ...prevOptions?.scales?.x?.realtime,
+              ...(prevOptions?.scales?.["x"] as any)?.realtime,
               pause: graphPause,
               onRefresh: (chart: any) => {
                 if (!graphPause) {
@@ -195,7 +196,7 @@ const LineChart: React.FC<LineChartProps> = ({
             },
           },
           y: {
-            ...prevOptions.scales?.y,
+            ...prevOptions.scales?.["y"],
             ...getYAxisLimits(
               chartData.datasets as ChartDataset<
                 "line",
@@ -214,7 +215,7 @@ const LineChart: React.FC<LineChartProps> = ({
       scales: {
         ...prevOptions.scales,
         y: {
-          ...prevOptions.scales?.y,
+          ...prevOptions.scales?.["y"],
           title: {
             display: true,
             text: title,
@@ -231,7 +232,12 @@ const LineChart: React.FC<LineChartProps> = ({
           ref={chartRef}
           data={
             type === "realtime"
-              ? { datasets: chartOptions.datasets || [] }
+              ? {
+                  datasets: chartOptions.datasets as ChartDataset<
+                    "line",
+                    (number | ScatterDataPoint | null)[]
+                  >[],
+                }
               : chartData
           }
           options={chartOptions}

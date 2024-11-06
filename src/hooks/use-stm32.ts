@@ -5,6 +5,7 @@ import socketIOClient, { Socket } from "socket.io-client";
 interface MyEvents {
   stm32Data: stm32DataType;
   serialPortClosed: string;
+  sendDataToStm32: string;
 }
 
 export type stm32DataType = {
@@ -37,6 +38,7 @@ const useStm32 = () => {
         "http://localhost:3001/stm32/initialize-serial-port",
         {
           method: "POST",
+          credentials: "include",
         },
       );
 
@@ -61,38 +63,52 @@ const useStm32 = () => {
     }
   };
 
+  // Effect to handle serial port initialization and socket connection
   useEffect(() => {
+    let newSocket: Socket<MyEvents> | null = null;
+
     if (retrySerial) {
       initializeSerialPort();
     } else {
       // Create the new Socket.IO connection to the server on port 3001
-      const newSocket = socketIOClient(ENDPOINT, {
+      newSocket = socketIOClient(ENDPOINT, {
         transports: ["websocket"], // Use WebSocket transport
         reconnectionAttempts: 5,
         reconnectionDelay: 1000,
       }) as Socket<MyEvents>;
 
       setSocket(newSocket);
-
-      return () => {
-        newSocket.disconnect(); // Clean up socket when component unmounts or on retry
-      };
     }
+
+    return () => {
+      // Clean up socket when component unmounts or on retry
+      if (newSocket) {
+        newSocket.disconnect();
+      }
+    };
   }, [retrySerial]);
 
-  if (socket) {
-    // Listen for stm32Data event and update state
-    socket.on("stm32Data", (message) => {
-      // console.log("Received STM32 data:", message); // For debugging
-      setStm32Data(message);
-    });
+  // Effect to handle socket event listeners
+  useEffect(() => {
+    if (socket) {
+      const handleStm32Data = (message: stm32DataType) => {
+        setStm32Data(message);
+      };
 
-    // Handle serial port closed event
-    socket.on("serialPortClosed", () => {
-      setErrorFromStm32(true);
-      setRetrySerial(true);
-    });
-  }
+      const handleSerialPortClosed = () => {
+        setErrorFromStm32(true);
+        setRetrySerial(true);
+      };
+
+      socket.on("stm32Data", handleStm32Data);
+      socket.on("serialPortClosed", handleSerialPortClosed);
+
+      return () => {
+        socket.off("stm32Data", handleStm32Data);
+        socket.off("serialPortClosed", handleSerialPortClosed);
+      };
+    }
+  }, [socket]);
 
   return { stm32Data, socket, errorFromStm32 };
 };

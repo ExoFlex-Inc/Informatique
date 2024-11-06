@@ -1,5 +1,6 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { IconButton, Button as MuiButton, Typography } from "@mui/material";
+import useStm32 from "../hooks/use-stm32";
 
 interface ButtonProps {
   label?: string;
@@ -13,6 +14,7 @@ interface ButtonProps {
   hoverColor?: string;
   textColor?: string;
   disabled?: boolean;
+  socket?: any;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -22,37 +24,41 @@ const Button: React.FC<ButtonProps> = ({
   content,
   mainColor,
   hoverColor,
-  textColor,
+  socket,
   disabled,
   icon,
   onClick,
 }) => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  let message = content;
 
-  const sendingRequests = async () => {
+  const sendingRequests = async (
+    mode: string | undefined,
+    action: string | undefined,
+    content: string | undefined,
+  ) => {
     try {
-      const response = await fetch("http://localhost:3001/stm32/button", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          mode: mode,
-          action: action,
-          content: message,
-        }),
-      });
+      let dataToSend = "{";
 
-      if (response.ok) {
-        console.log("Button click sent successfully.");
-      } else {
-        console.error("Failed to send button click.");
-        clearInterval(intervalRef.current!);
+      if (mode) {
+        dataToSend += `${mode};`;
       }
+
+      if (action) {
+        dataToSend += `${action};`;
+      }
+
+      if (content) {
+        dataToSend += `${content};`;
+      }
+
+      dataToSend += "}";
+
+      console.log(`Button clicked: ${dataToSend}`);
+
+      socket.emit("sendDataToStm32", dataToSend);
     } catch (error) {
       console.error("An error occurred:", error);
-      clearInterval(intervalRef.current!);
+      clearIntervalRef();
     }
   };
 
@@ -66,6 +72,7 @@ const Button: React.FC<ButtonProps> = ({
         body: JSON.stringify({
           start: true,
         }),
+        credentials: "include",
       });
 
       if (response.ok) {
@@ -88,6 +95,7 @@ const Button: React.FC<ButtonProps> = ({
         body: JSON.stringify({
           start: false,
         }),
+        credentials: "include",
       });
 
       if (response.ok) {
@@ -102,46 +110,53 @@ const Button: React.FC<ButtonProps> = ({
 
   const clearIntervalRef = () => {
     if (intervalRef.current !== null) {
-      clearInterval(intervalRef.current!);
+      clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
   };
 
-  const handleMouseUp = () => {
+  const handleEnd = () => {
     clearIntervalRef();
-    window.removeEventListener("mouseup", handleMouseUp);
+    window.removeEventListener("mouseup", handleEnd);
+    window.removeEventListener("touchend", handleEnd);
   };
 
-  const handleMouseDown = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (e.button === 2) {
-      handleMouseUp();
-    }
-
-    if (e.button === 0) {
-      if (action === "Increment") {
-        intervalRef.current = setInterval(sendingRequests, 20);
-        window.addEventListener("mouseup", handleMouseUp);
-      } else if (content === "Start") {
-        // sendingStm32RecordingRequests();
-        sendingRequests();
-      } else if (content === "Stop" || content === "Pause") {
-        // sendingStm32StopRecordingRequests();
-        sendingRequests();
-      } else {
-        sendingRequests();
-      }
+  const handleStart = (
+    e:
+      | React.MouseEvent<HTMLButtonElement>
+      | React.TouchEvent<HTMLButtonElement>,
+  ) => {
+    e.preventDefault(); // Prevent any unintended default behaviors
+    if (action === "Increment") {
+      intervalRef.current = setInterval(
+        () => sendingRequests(mode, action, content),
+        20,
+      );
+      window.addEventListener("mouseup", handleEnd);
+      window.addEventListener("touchend", handleEnd);
+    } else if (content === "Start") {
+      sendingStm32RecordingRequests();
+      sendingRequests(mode, action, content);
+    } else if (content === "Stop" || content === "Pause") {
+      sendingStm32StopRecordingRequests();
+      sendingRequests(mode, action, content);
+    } else {
+      sendingRequests(mode, action, content);
     }
   };
 
   return icon ? (
     <IconButton
-      onMouseDown={handleMouseDown}
+      onMouseDown={handleStart}
+      onMouseUp={handleEnd}
+      onTouchStart={handleStart}
+      onTouchEnd={handleEnd}
+      onContextMenu={(e) => e.preventDefault()}
       size="large"
       sx={{
         backgroundColor: mainColor,
         "&:hover": {
           backgroundColor: hoverColor,
-          color: textColor,
         },
       }}
       disabled={disabled}
@@ -151,6 +166,11 @@ const Button: React.FC<ButtonProps> = ({
     </IconButton>
   ) : (
     <MuiButton
+      onMouseDown={handleStart}
+      onMouseUp={handleEnd}
+      onTouchStart={handleStart}
+      onTouchEnd={handleEnd}
+      onContextMenu={(e) => e.preventDefault()}
       fullWidth
       variant="contained"
       disabled={disabled}
@@ -161,10 +181,9 @@ const Button: React.FC<ButtonProps> = ({
         fontSize: "1rem",
         backgroundColor: "blueAccent.main",
         "&:hover": {
-          backgroundColor: "#1e3a8a",
+          backgroundColor: "blueAccent.hover",
         },
       }}
-      onMouseDown={handleMouseDown}
     >
       <Typography>{label}</Typography>
     </MuiButton>
