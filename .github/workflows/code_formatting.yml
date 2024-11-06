@@ -37,7 +37,9 @@ jobs:
       - name: Get Last Commit Message
         id: get_commit_msg
         run: |
-          echo "msg=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
+          echo "msg<<EOF" >> $GITHUB_OUTPUT
+          git log -1 --pretty=%B >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
           
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v5
