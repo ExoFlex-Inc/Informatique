@@ -14,6 +14,7 @@ interface ButtonProps {
   hoverColor?: string;
   textColor?: string;
   disabled?: boolean;
+  socket?: any;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -23,12 +24,11 @@ const Button: React.FC<ButtonProps> = ({
   content,
   mainColor,
   hoverColor,
-  textColor,
+  socket,
   disabled,
   icon,
   onClick,
 }) => {
-  const { socket } = useStm32();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const sendingRequests = async (
@@ -36,10 +36,6 @@ const Button: React.FC<ButtonProps> = ({
     action: string | undefined,
     content: string | undefined,
   ) => {
-    if (!socket) {
-      console.error("Socket is not available.");
-      return;
-    }
 
     try {
       let dataToSend = "{";
@@ -153,7 +149,10 @@ const Button: React.FC<ButtonProps> = ({
   return icon ? (
     <IconButton
       onMouseDown={handleStart}
+      onMouseUp={handleEnd}
       onTouchStart={handleStart}
+      onTouchEnd={handleEnd}
+      onContextMenu={(e) => e.preventDefault()}
       size="large"
       sx={{
         backgroundColor: mainColor,
@@ -168,6 +167,11 @@ const Button: React.FC<ButtonProps> = ({
     </IconButton>
   ) : (
     <MuiButton
+      onMouseDown={handleStart}
+      onMouseUp={handleEnd}
+      onTouchStart={handleStart}
+      onTouchEnd={handleEnd}
+      onContextMenu={(e) => e.preventDefault()}
       fullWidth
       variant="contained"
       disabled={disabled}
@@ -181,8 +185,6 @@ const Button: React.FC<ButtonProps> = ({
           backgroundColor: "blueAccent.hover",
         },
       }}
-      onMouseDown={handleStart}
-      onTouchStart={handleStart}
     >
       <Typography>{label}</Typography>
     </MuiButton>

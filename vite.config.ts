@@ -18,15 +18,17 @@ export default defineConfig({
   },
   // Plugins
   plugins: [
-    react(),
+    react({
+      include: "**/*.tsx",
+    }),
     VitePWA({
       strategies: "injectManifest",
       injectManifest: {
         rollupFormat: "iife",
       },
       registerType: "autoUpdate",
-      srcDir: "public",
-      filename: "firebase-messaging-sw.js",
+      // srcDir: "public",
+      // filename: "firebase-messaging-sw.js",
 
       devOptions: {
         enabled: true,
@@ -41,7 +43,6 @@ export default defineConfig({
   },
   // Server settings
   server: {
-    hmr: {},
     port: 1338,
   },
 });

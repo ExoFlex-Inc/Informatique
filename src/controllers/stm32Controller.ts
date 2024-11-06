@@ -324,6 +324,7 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
       console.log("Serial port error:", error.message);
       togglePushInterval(false);
       resetSaveData();
+      setSerialPort(null);
     });
 
     newSerialPort.on("close", () => {
@@ -398,7 +399,7 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
         setReceivedDataBuffer(receivedDataBuffer);
       }
     });
-
+    
     setSerialPort(newSerialPort);
   } else {
     setSerialPort(null);

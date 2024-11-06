@@ -23,9 +23,9 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "public/firebase-messaging-sw.js"],
+  "include": ["src", "public/firebase-messaging-sw.js"],
   "exclude": ["node_modules", "dist"],
-  "references": [{ "path": "./tsconfig.node.json" }],
+  // "references": [{ "path": "./tsconfig.node.json" }],
   "ts-node": {
     "esm": true,
     "transpileOnly": true,

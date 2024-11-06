@@ -64,19 +64,13 @@ export default function Manual() {
   const [graphPause, setGraphPause] = useState(false);
   const { stm32Data, socket, errorFromStm32 } = useStm32();
 
+
   const [latestMotorData, setLatestMotorData] = useState({
     motor1: { x: 0, position: 0, torque: 0, current: 0 },
     motor2: { x: 0, position: 0, torque: 0, current: 0 },
     motor3: { x: 0, position: 0, torque: 0, current: 0 },
   });
   const [recordCsv, setRecordCsv] = useState(false);
-
-  useEffect(() => {
-    if (stm32Data?.ErrorCode !== undefined) {
-      const errorNames = decodeErrorCode(stm32Data.ErrorCode);
-      setErrorDescription(errorNames.join("\n") || "");
-    }
-  }, [stm32Data]);
 
   const decodeErrorCode = (errorCode: number) => {
     const errorNames = [];
@@ -128,7 +122,11 @@ export default function Manual() {
         });
       }
     }
-  }, [stm32Data, socket, graphPause]);
+    if (stm32Data?.ErrorCode !== undefined) {
+      const errorNames = decodeErrorCode(stm32Data.ErrorCode);
+      setErrorDescription(errorNames.join("\n") || "");
+    }
+  }, [stm32Data, graphPause]);
 
   const getChartData = () => ({
     datasets: [
@@ -242,27 +240,28 @@ export default function Manual() {
               >
                 <Box sx={{ width: 50 }} />
                 <Box gap={4} sx={{ display: "flex" }}>
-                  <Button
+                <IconButton
                     onClick={() => setGraphPause(false)}
-                    icon={<PlayArrow />}
                     disabled={!graphPause}
-                    mainColor="blueAccent.main"
-                    hoverColor="blueAccent.hover"
-                  />
-
-                  <Button
+                    size="large"
+                    sx={{ backgroundColor: "blueAccent.main", "&:hover": { backgroundColor: "blueAccent.hover" } }}
+                  >
+                    <PlayArrow />
+                  </IconButton>
+                  <IconButton
                     onClick={() => setGraphPause(true)}
                     disabled={graphPause}
-                    icon={<Pause />}
-                    mainColor="blueAccent.main"
-                    hoverColor="blueAccent.hover"
-                  />
-
+                    size="large"
+                    sx={{ backgroundColor: "blueAccent.main", "&:hover": { backgroundColor: "blueAccent.hover" } }}
+                  >
+                    <Pause />
+                  </IconButton>
                   <Button
                     icon={<Home />}
                     mode="Homing"
                     mainColor="blueAccent.main"
                     hoverColor="blueAccent.hover"
+                    socket={socket}
                   />
 
                   <Button
@@ -271,6 +270,7 @@ export default function Manual() {
                     mode="Reset"
                     mainColor="blueAccent.main"
                     hoverColor="blueAccent.hover"
+                    socket={socket}
                   />
                   <IconButton
                     onClick={(e) => {
@@ -360,7 +360,7 @@ export default function Manual() {
           </Grid>
         </Box>
       </CustomScrollbar>
-      <ManualControl stm32Data={stm32Data} errorFromStm32={errorFromStm32} />
+      <ManualControl stm32Data={stm32Data} socket={socket} errorFromStm32={errorFromStm32} />
     </div>
   );
 }

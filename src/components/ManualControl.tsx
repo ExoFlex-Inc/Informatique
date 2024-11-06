@@ -30,9 +30,10 @@ import { tokens } from "../hooks/theme";
 interface ManualControlProps {
   errorFromStm32: boolean;
   stm32Data: stm32DataType | null;
+  socket: any;
 }
 
-const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
+const ManualControl = ({ errorFromStm32, stm32Data, socket }: ManualControlProps) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [isManualControlOpen, setIsManualControlOpen] = useState(false);
@@ -155,10 +156,11 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
                                 : "EversionI"
                             }
                             mainColor="blueAccent.main"
-                            hoverColor="#1D4ED8"
+                            hoverColor="blueAccent.hover"
                             textColor="text-white"
                             disabled={errorFromStm32 || changeSideDisabled}
                             icon={<ArrowBack />}
+                            socket={socket}
                           />
 
                           <Button
@@ -170,10 +172,11 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
                                 : "EversionO"
                             }
                             mainColor="blueAccent.main"
-                            hoverColor="#1D4ED8"
+                            hoverColor="blueAccent.hover"
                             textColor="text-white"
                             disabled={errorFromStm32 || changeSideDisabled}
                             icon={<ArrowForward />}
+                            socket={socket}
                           />
                         </Box>
                       </Grid>
@@ -196,20 +199,22 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
                             action={action}
                             content="DorsiflexionU"
                             mainColor="blueAccent.main"
-                            hoverColor="#1D4ED8"
+                            hoverColor="blueAccent.hover"
                             textColor="text-white"
                             disabled={errorFromStm32 || changeSideDisabled}
                             icon={<ArrowUpward />}
+                            socket={socket}
                           />
                           <Button
                             mode={buttonMode}
                             action={action}
                             content="DorsiflexionD"
                             mainColor="blueAccent.main"
-                            hoverColor="#1D4ED8"
+                            hoverColor="blueAccent.hover"
                             textColor="text-white"
                             disabled={errorFromStm32 || changeSideDisabled}
                             icon={<ArrowDownward />}
+                            socket={socket}
                           />
                         </Box>
                       </Grid>
@@ -232,20 +237,22 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
                             action={action}
                             content="ExtensionU"
                             mainColor="blueAccent.main"
-                            hoverColor="#1D4ED8"
+                            hoverColor="blueAccent.hover"
                             textColor="text-white"
                             disabled={errorFromStm32 || changeSideDisabled}
                             icon={<ArrowUpward />}
+                            socket={socket}
                           />
                           <Button
                             mode={buttonMode}
                             action={action}
                             content="ExtensionD"
                             mainColor="blueAccent.main"
-                            hoverColor="#1D4ED8"
+                            hoverColor="blueAccent.hover"
                             textColor="text-white"
                             disabled={errorFromStm32 || changeSideDisabled}
                             icon={<ArrowDownward />}
+                            socket={socket}
                           />
                         </Box>
                       </Grid>
@@ -285,20 +292,22 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
                         action="Tightening"
                         content="Forward"
                         mainColor="blueAccent.main"
-                        hoverColor="#1D4ED8"
+                        hoverColor="blueAccent.hover"
                         textColor="text-white"
                         disabled={errorFromStm32 || changeSideDisabled}
                         icon={<Compress />}
+                        socket={socket}
                       />
                       <Button
                         mode={buttonMode}
                         action="Tightening"
                         content="Backward"
                         mainColor="blueAccent.main"
-                        hoverColor="#1D4ED8"
+                        hoverColor="blueAccent.hover"
                         textColor="text-white"
                         disabled={errorFromStm32 || changeSideDisabled}
                         icon={<Expand />}
+                        socket={socket}
                       />
                     </Box>
                   </Box>
@@ -340,7 +349,7 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
                         }
                         hoverColor={
                           stm32Data?.CurrentLegSide == "LegIsRight"
-                            ? "#1D4ED8"
+                            ? "blueAccent.hover"
                             : ""
                         }
                         textColor={"text-white"}
@@ -350,6 +359,7 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
                           stm32Data?.CurrentLegSide == "LegIsLeft"
                         }
                         icon={<ArrowBack />}
+                        socket={socket}
                       />
                       <Button
                         mode="ChangeSide"
@@ -360,7 +370,7 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
                         }
                         hoverColor={
                           stm32Data?.CurrentLegSide == "LegIsLeft"
-                            ? "#1D4ED8"
+                            ? "blueAccent.hover"
                             : ""
                         }
                         textColor={"text-white"}
@@ -370,6 +380,7 @@ const ManualControl = ({ errorFromStm32, stm32Data }: ManualControlProps) => {
                           stm32Data?.CurrentLegSide == "LegIsRight"
                         }
                         icon={<ArrowForward />}
+                        socket={socket}
                       />
                     </Box>
                     {stm32Data?.Mode == "ChangeSide" && (
