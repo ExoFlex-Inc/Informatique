@@ -27,8 +27,6 @@ export default defineConfig({
         rollupFormat: "iife",
       },
       registerType: "autoUpdate",
-      // srcDir: "public",
-      // filename: "firebase-messaging-sw.js",
 
       devOptions: {
         enabled: true,
