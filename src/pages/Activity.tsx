@@ -16,6 +16,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  IconButton,
 } from "@mui/material";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import { useRelations } from "../hooks/use-relations.ts";
@@ -514,7 +515,7 @@ export default function Activity() {
   }
 
   return (
-    <div className=" mx-auto max-w-7xl">
+    <Box sx={{maxWidth: "80rem", marginLeft: "auto", marginRight: "auto"}}>
       <div className="mb-4 flex flex-wrap items-center gap-4">
         {/* User Search Bar */}
         <div className="flex-grow max-w-md">
@@ -549,12 +550,9 @@ export default function Activity() {
       </div>
       <div className="relative flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <button
-            className="p-2 rounded-full hover:bg-gray-700"
-            onClick={() => setIsGraphFilterOpen(!isGraphFilterOpen)}
-          >
+          <IconButton onClick={() => setIsGraphFilterOpen(!isGraphFilterOpen)}>
             <FilterAlt />
-          </button>
+          </IconButton>
           <DateRangePicker onChange={setDate} />
 
           {isGraphFilterOpen && (
@@ -567,16 +565,17 @@ export default function Activity() {
           )}
         </div>
       </div>
-      <div className="flex items-center justify-center mb-4">
-        <Typography variant="h6" className="text-white">
+      <Box sx={{display: "flex", alignContent: "center", justifyContent: "center", marginBottom: "16px"}}>
+        <Typography variant="h6">
           {graphType}
         </Typography>
-      </div>
+
+      </Box>
       {/* <CustomScrollbar> */}
       <>
-        <div className="mb-4 basis-full">
+        <Box sx={{marginBottom: "16px", flexBasis: "100%"}}>
           <LineChart type="activity" chartData={dataset1} title={title1} />
-        </div>
+        </Box>
         <ThemeProvider theme={createTheme({ palette: { mode: "light" } })}>
           <Box className="flex justify-center gap-4">
             <Paper className="p-4 w-1/3">
@@ -602,6 +601,6 @@ export default function Activity() {
         </ThemeProvider>
       </>
       {/* </CustomScrollbar> */}
-    </div>
+    </Box>
   );
 }

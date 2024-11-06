@@ -5,6 +5,7 @@ import {
   CircularProgressProps,
   Typography,
   LinearProgress,
+  Paper
 } from "@mui/material";
 
 function CircularProgressWithLabel(
@@ -100,26 +101,27 @@ export default function ProgressionWidget({
   }, [planData]);
 
   return (
-    <div className="">
-      <div className="flex justify-center mb-2.5">
-        <CircularProgressWithLabel
-          value={(stretchProgress / totalStretch) * 100}
-        />
-      </div>
-      <p className="text-black justify-center flex mb-7">Stretch Progress</p>
-      <p className="text-black justify-center flex mb-1 text-xl">
-        {repetitionProgress + "/" + totalRepetition}
-      </p>
-      <div className="flex justify-center mb-1">
-        <Box sx={{ width: "75%" }}>
-          <LinearProgress
-            color="success"
-            variant="determinate"
-            value={(repetitionProgress / totalRepetition) * 100}
+    <Box>
+      <Paper sx={{padding: "10px", backgroundColor: "white"}}>
+        <Box sx={{display: "flex", justifyContent: "center", marginBottom: "10px"}}>
+          <CircularProgressWithLabel
+            value={(stretchProgress / totalStretch) * 100}
           />
         </Box>
-      </div>
-      <p className="text-black justify-center flex">Repetitions Progress</p>
-    </div>
+        <Typography color="black" justifyContent="center" display="flex" marginBottom="28px">Stretch Progress</Typography>
+        <Typography color="black" justifyContent="center" display="flex" marginBottom="4px" fontSize="20px">
+          {repetitionProgress + "/" + totalRepetition}
+        </Typography>
+        <Box sx={{display: "flex", justifyContent: "center", marginBottom: "4px"}}>
+          <Box sx={{ width: "75%" }}>
+            <LinearProgress
+              color="success"
+              variant="determinate"
+              value={(repetitionProgress / totalRepetition) * 100}
+            />
+          </Box>
+        </Box>
+      </Paper>
+    </Box>
   );
 }

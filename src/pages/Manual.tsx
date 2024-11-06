@@ -5,28 +5,13 @@ import {
   FormControlLabel,
   Grid,
   TextField,
-  IconButton,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import { Refresh, PlayArrow, Pause, Home } from "@mui/icons-material";
 import LineChart from "../components/LineChart";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import useStm32 from "../hooks/use-stm32.ts";
 import Button from "../components/Button.tsx";
 import ManualControl from "../components/ManualControl.tsx";
-
-const WhiteBorderCheckbox = styled(Checkbox)(() => ({
-  color: "white",
-  "&.Mui-checked": {
-    color: "white",
-  },
-  "& .MuiSvgIcon-root": {
-    fontSize: 28,
-  },
-  "& .MuiCheckbox-root": {
-    border: "1px solid white",
-  },
-}));
 
 const errorMap = {
   0: "ERROR_0_MSEC",
@@ -270,7 +255,7 @@ export default function Manual() {
                 <Box sx={{ width: 50 }} />
                 <FormControlLabel
                   control={
-                    <WhiteBorderCheckbox
+                    <Checkbox
                       checked={graphDataType === "position"}
                       onChange={() => setGraphDataType("position")}
                     />
@@ -279,7 +264,7 @@ export default function Manual() {
                 />
                 <FormControlLabel
                   control={
-                    <WhiteBorderCheckbox
+                    <Checkbox
                       checked={graphDataType === "torque"}
                       onChange={() => setGraphDataType("torque")}
                     />
@@ -288,7 +273,7 @@ export default function Manual() {
                 />
                 <FormControlLabel
                   control={
-                    <WhiteBorderCheckbox
+                    <Checkbox
                       checked={graphDataType === "current"}
                       onChange={() => setGraphDataType("current")}
                     />

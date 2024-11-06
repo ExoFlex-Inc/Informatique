@@ -3,7 +3,7 @@ import ProgressionWidget from "../components/ProgressionWidget.tsx";
 import { usePlan } from "../hooks/use-plan.ts";
 import useStm32 from "../hooks/use-stm32.ts";
 
-import { useMediaQuery, useTheme, Box, Grid } from "@mui/material";
+import { useMediaQuery, useTheme, Box, Grid, Paper } from "@mui/material";
 import { useUser } from "../hooks/use-user.ts";
 import LineChart from "../components/LineChart.tsx";
 import { tokens } from "../hooks/theme.ts";
@@ -345,19 +345,19 @@ export default function HMI() {
               <LineChart chartData={chartData} type="line" socket={socket} />
             </Grid>
             <Grid item>
-              <Box padding={1} bgcolor="white" sx={{ borderRadius: "16px" }}>
-                <ProgressionWidget
-                  setOpenDialogPainScale={setOpenDialogPainScale}
-                  stm32Data={stm32Data}
-                  planData={planData}
-                />
-              </Box>
-            </Grid>
-            <Grid item>
-              <ExerciseOverviewWidget
+              <ProgressionWidget
+                setOpenDialogPainScale={setOpenDialogPainScale}
                 stm32Data={stm32Data}
                 planData={planData}
               />
+            </Grid>
+            <Grid item>
+              <Paper>
+                <ExerciseOverviewWidget
+                  stm32Data={stm32Data}
+                  planData={planData}
+                />
+              </Paper>
             </Grid>
           </Grid>
         </Box>

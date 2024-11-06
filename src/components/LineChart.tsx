@@ -10,6 +10,7 @@ import {
   ScatterDataPoint,
   ChartDataset,
 } from "chart.js";
+import { Box, Paper } from "@mui/material";
 
 Chart.register(CategoryScale);
 Chart.register(StreamingPlugin);
@@ -225,8 +226,8 @@ const LineChart: React.FC<LineChartProps> = ({
   }, [title]);
 
   return (
-    <div className="graph-container">
-      <div className="bg-white rounded-lg">
+    <Box sx={{margin: "24px"}}>
+      <Paper sx={{borderRadius: "8px", backgroundColor: "white"}}>
         <Line
           ref={chartRef}
           data={
@@ -236,8 +237,8 @@ const LineChart: React.FC<LineChartProps> = ({
           }
           options={chartOptions}
         />
-      </div>
-    </div>
+      </Paper>
+    </Box>
   );
 };
 

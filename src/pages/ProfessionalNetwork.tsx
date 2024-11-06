@@ -60,6 +60,7 @@ const ProfessionalNetwork = () => {
 
         {user?.permissions == "dev" || user?.permissions == "client" ? (
           <Button
+            sx={{marginBottom: "8px"}}
             variant="contained"
             color="inherit"
             endIcon={<CloseIcon color="error" />}

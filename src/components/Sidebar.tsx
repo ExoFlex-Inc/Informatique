@@ -44,9 +44,6 @@ const Item: React.FC<ItemProps> = ({ title, to, icon, selected }) => {
   return (
     <MenuItem
       active={selected === title}
-      style={{
-        color: "white",
-      }}
       onClick={handleClick}
       icon={icon}
       prefix={title}

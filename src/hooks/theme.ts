@@ -170,6 +170,21 @@ export const themeSettings = (mode) => {
             },
           }),
     },
+    components: {
+      MuiCheckbox: {
+        styleOverrides: {
+          root: {
+            color: mode === "dark" ? "white" : "black",
+            "&.Mui-checked": {
+              color: mode === "dark" ? "white" : "black",
+            },
+            "& .MuiSvgIcon-root": {
+              fontSize: 28,
+            },
+          }
+        }
+      }
+    },
     typography: {
       fontFamily: ["Sofia Pro", "sans-serif"].join(","),
       fontSize: 16,
@@ -179,42 +194,36 @@ export const themeSettings = (mode) => {
         fontSize: 24,
         lineHeight: 1.3333,
         fontWeight: 400,
-        color: "rgb(255, 255, 255)",
       },
       h2: {
         fontFamily: ["Cubano", "sans-serif"].join(","),
         fontSize: 24,
         lineHeight: 1.3333,
         fontWeight: 400,
-        color: "rgb(255, 255, 255)",
       },
       h3: {
         fontFamily: ["Cubano", "sans-serif"].join(","),
         fontSize: 24,
         lineHeight: 1.3333,
         fontWeight: 400,
-        color: "rgb(255, 255, 255)",
       },
       h4: {
         fontFamily: ["Cubano", "sans-serif"].join(","),
         fontSize: 24,
         lineHeight: 1.3333,
         fontWeight: 400,
-        color: "rgb(255, 255, 255)",
       },
       h5: {
         fontFamily: ["Cubano", "sans-serif"].join(","),
         fontSize: 24,
         lineHeight: 1.3333,
         fontWeight: 400,
-        color: "rgb(255, 255, 255)",
       },
       h6: {
         fontFamily: ["Cubano", "sans-serif"].join(","),
         fontSize: 24,
         lineHeight: 1.3333,
         fontWeight: 400,
-        color: "rgb(255, 255, 255)",
       },
 
       // Body text styled with Sofia Pro font
@@ -223,14 +232,12 @@ export const themeSettings = (mode) => {
         fontSize: 16,
         lineHeight: 1.5,
         fontWeight: 400,
-        color: "rgb(255, 255, 255)",
       },
       body2: {
         fontFamily: ["Sofia Pro", "sans-serif"].join(","),
         fontSize: 14,
         lineHeight: 1.4286,
         fontWeight: 400,
-        color: "rgb(255, 255, 255)",
       },
 
       // Button text styled with Cubano font
