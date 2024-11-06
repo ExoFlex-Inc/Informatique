@@ -7,8 +7,12 @@ stm32/h7a3zi-q/Debug/
 stm32/h7a3zi-q/UnitTests/build/*
 
 #HMI
-package-lock.json
 node_modules/
+
+dist/
+dev-dist/
+
+dev-dist/registerSW.js
 
 #Unit Testing
 venv/
@@ -22,3 +26,5 @@ stm32/.metadata
 #Env variables
 .env
 .env.production
+
+dev-dist/registerSW.js

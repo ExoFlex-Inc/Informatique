@@ -17,17 +17,22 @@ import {
   createTheme,
 } from "@mui/material";
 import { useNotification } from "../hooks/use-notification.ts";
-import { useUserProfile } from "../hooks/use-profile.ts";
+import { useUser } from "../hooks/use-user.ts";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Notification = () => {
   const [isNotifications, setIsNotifications] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [responseMessage, setResponseMessage] = useState({});
-  const dropdownRef = useRef(null);
-  const buttonRef = useRef(null);
+  const [responseMessage, setResponseMessage] = useState<{
+    [key: string]: string;
+  }>({});
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  const queryClient = useQueryClient();
 
   const { notifications } = useNotification();
-  const { profile } = useUserProfile();
+  const { user } = useUser();
 
   useEffect(() => {
     if (notifications && notifications.length > 0) {
@@ -36,7 +41,7 @@ const Notification = () => {
   }, [notifications]);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node) &&
@@ -55,7 +60,7 @@ const Notification = () => {
 
   // Handle Accept action
   const handleAccept = async (notification: any) => {
-    if (!profile?.user_id) {
+    if (!user?.user_id) {
       console.error("User profile is missing");
       return;
     }
@@ -74,13 +79,16 @@ const Notification = () => {
         credentials: "include",
         body: JSON.stringify({
           client_id: notification.sender_id,
-          admin_id: profile.user_id,
+          admin_id: user.user_id,
         }),
       });
 
       if (!responseRelation.ok) {
         throw new Error("Error accepting relation request");
       }
+
+      //Invalidate relation query to refetch the updated data
+      queryClient.invalidateQueries({ queryKey: ["relations"] });
 
       const response = await fetch(
         `http://localhost:3001/notification/${notification.id}`,
@@ -187,7 +195,7 @@ const Notification = () => {
             <Paper sx={{ width: "30vw", padding: 2 }}>
               <List>
                 {notifications && notifications.length > 0 ? (
-                  notifications.map((notification, index) => (
+                  notifications.map((notification: any, index: number) => (
                     <ListItem
                       key={notification.id || index}
                       alignItems="flex-start"

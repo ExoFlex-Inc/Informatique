@@ -43,6 +43,7 @@ extern "C" {
 extern FDCAN_HandleTypeDef   hfdcan1;
 extern UART_HandleTypeDef huart3;
 extern DMA_HandleTypeDef hdma_usart3_rx;
+extern TIM_HandleTypeDef htim1;
 
 
 /* USER CODE END ET */
@@ -57,6 +58,8 @@ extern DMA_HandleTypeDef hdma_usart3_rx;
 /* USER CODE BEGIN EM */
 
 /* USER CODE END EM */
+
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
