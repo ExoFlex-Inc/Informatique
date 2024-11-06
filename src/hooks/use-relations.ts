@@ -1,18 +1,18 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useUserProfile } from "../hooks/use-profile.ts";
+import { useUser } from "./use-user.ts";
 
 export function useRelations() {
-  const { profile } = useUserProfile();
+  const { user } = useUser();
 
   const {
     data: relations,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["relations", profile?.user_id],
+    queryKey: ["relations"],
     queryFn: async () => {
       const responseRelations = await fetch(
-        `http://localhost:3001/relations/${profile.user_id}`,
+        `http://localhost:3001/relations/${user.user_id}`,
         {
           method: "GET",
           credentials: "include",
@@ -26,11 +26,10 @@ export function useRelations() {
       }
 
       const relationData = await responseRelations.json();
-      console.log("Relations data response:", relationData);
 
       return relationData;
     },
-    enabled: !!profile?.user_id,
+    enabled: !!user?.user_id,
   });
 
   return {
@@ -41,7 +40,7 @@ export function useRelations() {
 }
 
 export function useFetchPendingRelations() {
-  const { profile } = useUserProfile();
+  const { user } = useUser();
 
   const {
     data: notifications,
@@ -50,9 +49,9 @@ export function useFetchPendingRelations() {
   } = useQuery({
     queryKey: ["pendingRelations"],
     queryFn: async () => {
-      if (!profile?.user_id) return [];
+      if (!user?.user_id) return [];
       const response = await fetch(
-        `http://localhost:3001/relations/notifications/${profile.user_id}`,
+        `http://localhost:3001/relations/notifications/${user.user_id}`,
         {
           method: "GET",
           credentials: "include",
@@ -62,8 +61,7 @@ export function useFetchPendingRelations() {
       return await response.json();
     },
     staleTime: 1000 * 60 * 5,
-    cacheTime: 1000 * 60 * 10,
-    enabled: !!profile?.user_id,
+    enabled: !!user?.user_id,
   });
 
   return { notifications, isLoading, error };

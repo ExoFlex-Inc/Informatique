@@ -1,5 +1,15 @@
+import {
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableBody,
+  Table,
+  TableCell,
+  Typography,
+  Box,
+} from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import React, { useState, useRef } from "react";
+import React from "react";
 
 interface ExercisesPlanTableProps {
   setPlan: React.Dispatch<React.SetStateAction<any>>;
@@ -20,7 +30,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
 
   // Function to handle removing an exercise from the plan
   const removeExercise = (setIndex: number, exerciseIndex?: number) => {
-    setPlan((prevPlan) => {
+    setPlan((prevPlan: any) => {
       // Create a shallow copy of the entire prevPlan object (which includes plan and limits)
       const updatedPlan = { ...prevPlan };
 
@@ -88,7 +98,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
       parsedValue = 0;
     }
 
-    setPlan((prevPlan) => {
+    setPlan((prevPlan: any) => {
       // Create a shallow copy of the entire prevPlan object (including plan and limits)
       const updatedPlan = { ...prevPlan };
 
@@ -119,212 +129,241 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
         };
       }
 
-      // Update the plan with the new plan array, while keeping limits unchanged
       updatedPlan.plan = updatedPlanArray;
 
-      return updatedPlan; // Return the entire updated object, including plan and limits
+      return updatedPlan;
     });
   };
 
   return (
-    <div className="mt-4 ml-10 mr-10 rounded-lg overflow-hidden">
-      {"movement" in set ? (
-        <table className="min-w-full divide-y divide-gray-200">
-          {/* Table Headings */}
-          <thead className="bg-gray-50">
-            <tr className="divide-x divide-gray-200">
-              <th className="px-6 py-3"></th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Exercise
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Target Angle (Degrees)
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Target Torque (Nm)
-              </th>
-              <th className="px-6 py-3"></th>
-            </tr>
-          </thead>
-          {/* Table Body */}
-          <tbody className="bg-white">
-            {set.movement.map((element, exerciseIndex) => (
-              <tr key={exerciseIndex}>
-                {/* First Column */}
-                {exerciseIndex === 0 && (
-                  <td
-                    className="px-6 py-4 text-center whitespace-nowrap"
-                    rowSpan={set.movement.length}
-                  >
+    <Box>
+      {set.movement.length > 0 ? (
+        <TableContainer
+          sx={{ borderRadius: "12px", bgcolor: "white", marginTop: "20px" }}
+        >
+          <Table>
+            <TableHead className="bg-gray-50">
+              <TableRow>
+                <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }} />
+                <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}>
+                  <Typography align="center" sx={{ color: "gray" }}>
+                    Exercise
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}>
+                  <Typography align="center" sx={{ color: "gray" }}>
+                    Target Angle (Degrees)
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}>
+                  <Typography align="center" sx={{ color: "gray" }}>
+                    Target Torque (Nm)
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }} />
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {set.movement.map((element, exerciseIndex: number) => (
+                <TableRow key={exerciseIndex}>
+                  {exerciseIndex === 0 && (
+                    <TableCell
+                      sx={{ border: "none" }}
+                      className="px-6 py-4 text-center whitespace-nowrap"
+                      rowSpan={set.movement.length}
+                    >
+                      <input
+                        ref={(el) => (checkboxRefs.current[setIndex] = el)}
+                        type="checkbox"
+                        className="mr-4 size-5"
+                        onChange={() => setChecked((prev) => !prev)}
+                      />
+                    </TableCell>
+                  )}
+                  <TableCell sx={{ border: "none" }}>
+                    <select
+                      name="exercise"
+                      value={element.exercise}
+                      onChange={(e) =>
+                        handleInputChange(setIndex, e, exerciseIndex)
+                      }
+                      className="text-black border border-gray-300 rounded text-center px-2 py-1 w-full"
+                    >
+                      <option value="">Select Exercise</option>
+                      {exerciseOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  </TableCell>
+                  <TableCell sx={{ border: "none" }}>
                     <input
-                      ref={(el) => (checkboxRefs.current[setIndex] = el)}
-                      type="checkbox"
-                      className="mr-4 size-5"
-                      onChange={() => setChecked((prev) => !prev)}
+                      type="number"
+                      name="target_angle"
+                      placeholder="Angle"
+                      value={element.target_angle}
+                      onChange={(e) =>
+                        handleInputChange(setIndex, e, exerciseIndex)
+                      }
+                      className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                     />
-                  </td>
-                )}
-                {/* Exercise Select */}
-                <td className="px-4 py-4 whitespace-nowrap">
-                  <select
-                    name="exercise"
-                    value={element.exercise}
-                    onChange={(e) =>
-                      handleInputChange(setIndex, e, exerciseIndex)
-                    }
+                  </TableCell>
+                  <TableCell sx={{ border: "none" }}>
+                    <input
+                      type="number"
+                      name="target_torque"
+                      placeholder="Torque"
+                      value={element.target_torque}
+                      onChange={(e) =>
+                        handleInputChange(setIndex, e, exerciseIndex)
+                      }
+                      className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
+                    />
+                  </TableCell>
+                  <TableCell sx={{ border: "none" }}>
+                    <button
+                      className="text-black"
+                      onClick={() => removeExercise(setIndex, exerciseIndex)}
+                    >
+                      <DeleteIcon />
+                    </button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+            <TableHead className="bg-gray-50" sx={{ borderColor: "lightgrey" }}>
+              <TableRow>
+                <TableCell
+                  sx={{
+                    borderRight: 1,
+                    borderTop: 1,
+                    borderColor: "lightgrey",
+                  }}
+                >
+                  <Typography align="center" sx={{ color: "gray" }}>
+                    Repetitions
+                  </Typography>
+                </TableCell>
+                <TableCell
+                  sx={{
+                    borderRight: 1,
+                    borderTop: 1,
+                    borderColor: "lightgrey",
+                  }}
+                >
+                  <Typography align="center" sx={{ color: "gray" }}>
+                    Rest (Sec)
+                  </Typography>
+                </TableCell>
+                <TableCell
+                  sx={{
+                    borderRight: 1,
+                    borderTop: 1,
+                    borderColor: "lightgrey",
+                  }}
+                >
+                  <Typography align="center" sx={{ color: "gray" }}>
+                    Time (Sec)
+                  </Typography>
+                </TableCell>
+                <TableCell
+                  colSpan={2}
+                  sx={{ borderTop: 1, borderColor: "lightgrey" }}
+                >
+                  <Typography align="center" sx={{ color: "gray" }}>
+                    Speed (Degrees/Sec)
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              <TableRow>
+                <TableCell>
+                  <input
+                    type="number"
+                    name="repetitions"
+                    placeholder="Repetitions"
+                    value={set.repetitions}
+                    onChange={(e) => handleInputChange(setIndex, e)}
                     className="text-black border border-gray-300 rounded text-center px-2 py-1 w-full"
-                  >
-                    <option value="">Select Exercise</option>
-                    {exerciseOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                  />
+                </TableCell>
+                <TableCell>
                   <input
                     type="number"
-                    name="target_angle"
-                    placeholder="Angle"
-                    value={element.target_angle}
-                    onChange={(e) =>
-                      handleInputChange(setIndex, e, exerciseIndex)
-                    }
-                    className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
+                    name="rest"
+                    placeholder="Rest"
+                    value={set.rest}
+                    onChange={(e) => handleInputChange(setIndex, e)}
+                    className="text-black border border-gray-300 rounded text-center px-2 py-1 w-full"
                   />
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                </TableCell>
+                <TableCell>
                   <input
                     type="number"
-                    name="target_torque"
-                    placeholder="Torque"
-                    value={element.target_torque}
-                    onChange={(e) =>
-                      handleInputChange(setIndex, e, exerciseIndex)
-                    }
+                    name="time"
+                    placeholder="Time"
+                    value={set.time}
+                    onChange={(e) => handleInputChange(setIndex, e)}
                     className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
                   />
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right">
+                </TableCell>
+                <TableCell colSpan={2}>
+                  <input
+                    type="number"
+                    name="speed"
+                    placeholder="Speed"
+                    value={set.speed}
+                    onChange={(e) => handleInputChange(setIndex, e)}
+                    className="text-black border border-gray-300 rounded text-center px-2 py-1 w-full"
+                  />
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      ) : (
+        <TableContainer
+          sx={{ borderRadius: "12px", bgcolor: "white", marginTop: "20px" }}
+        >
+          <Table>
+            <TableHead className="bg-gray-50">
+              <TableRow>
+                <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}>
+                  <Typography align="center" sx={{ color: "gray" }}>
+                    Set Rest (Sec)
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }} />
+              </TableRow>
+            </TableHead>
+            <TableBody className="bg-white">
+              <TableRow>
+                <TableCell>
+                  <input
+                    type="number"
+                    name="setRest"
+                    placeholder="Set Rest"
+                    value={set.setRest}
+                    onChange={(e) => handleInputChange(setIndex, e)}
+                    className="text-black border border-gray-300 rounded text-center px-2 py-1 w-full"
+                  />
+                </TableCell>
+                <TableCell sx={{ textAlign: "center" }}>
                   <button
                     className="text-black"
-                    onClick={() => removeExercise(setIndex, exerciseIndex)}
+                    onClick={() => removeExercise(setIndex)}
                   >
                     <DeleteIcon />
                   </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-          <thead className="bg-gray-50">
-            <tr className="divide-x divide-gray-200">
-              <th
-                colSpan={1}
-                className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Repetitions
-              </th>
-              <th
-                colSpan={1}
-                className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Rest (Sec)
-              </th>
-              <th
-                colSpan={1}
-                className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Time (Sec)
-              </th>
-              <th
-                colSpan={2}
-                className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Speed (Degrees/Sec)
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white">
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <input
-                  type="number"
-                  name="repetitions"
-                  placeholder="Repetitions"
-                  value={set.repetitions}
-                  onChange={(e) => handleInputChange(setIndex, e)}
-                  className="text-black border border-gray-300 rounded text-center px-2 py-1 w-full"
-                />
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <input
-                  type="number"
-                  name="rest"
-                  placeholder="Rest"
-                  value={set.rest}
-                  onChange={(e) => handleInputChange(setIndex, e)}
-                  className="text-black border border-gray-300 rounded text-center px-2 py-1 w-full"
-                />
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <input
-                  type="number"
-                  name="time"
-                  placeholder="Time"
-                  value={set.time}
-                  onChange={(e) => handleInputChange(setIndex, e)}
-                  className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
-                />
-              </td>
-              <td colSpan={2} className="px-6 py-4 whitespace-nowrap">
-                <input
-                  type="number"
-                  name="speed"
-                  placeholder="Speed"
-                  value={set.speed}
-                  onChange={(e) => handleInputChange(setIndex, e)}
-                  className="text-black border border-gray-300 rounded text-center px-2 py-1 w-full"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      ) : (
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr className="divide-x divide-gray-200">
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Set Rest (Sec)
-              </th>
-              <th className="px-6 py-3"></th>
-            </tr>
-          </thead>
-          <tbody className="bg-white">
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <input
-                  type="number"
-                  name="setRest"
-                  placeholder="Set Rest"
-                  value={set.setRest}
-                  onChange={(e) => handleInputChange(setIndex, e)}
-                  className="text-black border border-gray-300 rounded text-center px-2 py-1 w-full"
-                />
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right">
-                <button
-                  className="text-black"
-                  onClick={() => removeExercise(setIndex)}
-                >
-                  <DeleteIcon />
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
-    </div>
+    </Box>
   );
 };
 

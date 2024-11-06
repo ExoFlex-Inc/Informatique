@@ -1,7 +1,16 @@
 import React, { ChangeEvent } from "react";
+import {
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableBody,
+  Table,
+  TableCell,
+  Typography,
+} from "@mui/material";
+import type { Side } from "./ToggleSide.tsx";
 
 // Define types for better type safety
-type Side = "Right" | "Left";
 type LimitType = "torque" | "angle";
 type Stretch = "dorsiflexion" | "extension" | "eversion";
 
@@ -62,56 +71,67 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
 
     // Update the appropriate state based on side and limit type
     if (side === "Right") {
-      setLimitRight(limitType, name as Stretch, parsedValue);
+      setLimitRight(limitType, name as Stretch, parsedValue ?? 0);
     } else {
-      setLimitLeft(limitType, name as Stretch, parsedValue);
+      setLimitLeft(limitType, name as Stretch, parsedValue ?? 0);
     }
   };
 
   return (
-    <div className="mt-4 ml-10 mr-10 rounded-lg overflow-hidden">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50 divide-y divide-gray-200">
-          <tr className="bg-gray-50 divide-x divide-gray-200">
-            <th
-              className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+    <TableContainer sx={{ borderRadius: "12px", bgcolor: "white" }}>
+      <Table>
+        <TableHead className="bg-gray-50">
+          <TableRow>
+            <TableCell
+              sx={{ borderRight: 1, borderColor: "lightgrey" }}
               colSpan={3}
             >
-              Max Torque {side} (Nm)
-            </th>
-            <th
-              className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-              colSpan={3}
-            >
-              Max Angle {side} (degrees)
-            </th>
-          </tr>
-          <tr className="bg-gray-50 divide-x divide-gray-200">
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Dorsiflexion Ankle
-            </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Extension Knee
-            </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Eversion Ankle
-            </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Dorsiflexion Ankle
-            </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Extension Knee
-            </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Eversion Ankle
-            </th>
-          </tr>
-        </thead>
-
-        <tbody className="bg-white divide-y divide-gray-200">
-          <tr>
-            {/* Torque Dorsiflexion */}
-            <td className="px-6 py-4 whitespace-nowrap">
+              <Typography align="center" sx={{ color: "gray" }}>
+                Max Torque {side} (Nm)
+              </Typography>
+            </TableCell>
+            <TableCell sx={{ borderColor: "lightgrey" }} colSpan={3}>
+              <Typography align="center" sx={{ color: "gray" }}>
+                Max Angle {side} (degrees)
+              </Typography>
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}>
+              <Typography align="center" sx={{ color: "gray" }}>
+                Dorsiflexion Ankle
+              </Typography>
+            </TableCell>
+            <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}>
+              <Typography align="center" sx={{ color: "gray" }}>
+                Extension Knee
+              </Typography>
+            </TableCell>
+            <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}>
+              <Typography align="center" sx={{ color: "gray" }}>
+                Eversion Ankle
+              </Typography>
+            </TableCell>
+            <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}>
+              <Typography align="center" sx={{ color: "gray" }}>
+                Dorsiflexion Ankle
+              </Typography>
+            </TableCell>
+            <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}>
+              <Typography align="center" sx={{ color: "gray" }}>
+                Extension Knee
+              </Typography>
+            </TableCell>
+            <TableCell sx={{ borderColor: "lightgrey" }}>
+              <Typography align="center" sx={{ color: "gray" }}>
+                Eversion Ankle
+              </Typography>
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          <TableRow>
+            <TableCell>
               <input
                 type="number"
                 name="dorsiflexion"
@@ -125,9 +145,8 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
                 min={0}
                 max={TORQUE_LIMIT}
               />
-            </td>
-            {/* Torque Extension */}
-            <td className="px-6 py-4 whitespace-nowrap">
+            </TableCell>
+            <TableCell>
               <input
                 type="number"
                 name="extension"
@@ -141,9 +160,8 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
                 min={0}
                 max={TORQUE_LIMIT}
               />
-            </td>
-            {/* Torque Eversion */}
-            <td className="px-6 py-4 whitespace-nowrap">
+            </TableCell>
+            <TableCell>
               <input
                 type="number"
                 name="eversion"
@@ -157,9 +175,8 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
                 min={0}
                 max={TORQUE_LIMIT}
               />
-            </td>
-            {/* Angle Dorsiflexion */}
-            <td className="px-6 py-4 whitespace-nowrap">
+            </TableCell>
+            <TableCell>
               <input
                 type="number"
                 name="dorsiflexion"
@@ -173,9 +190,8 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
                 min={0}
                 max={ANGLE_LIMIT}
               />
-            </td>
-            {/* Angle Extension */}
-            <td className="px-6 py-4 whitespace-nowrap">
+            </TableCell>
+            <TableCell>
               <input
                 type="number"
                 name="extension"
@@ -189,9 +205,8 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
                 min={0}
                 max={ANGLE_LIMIT}
               />
-            </td>
-            {/* Angle Eversion */}
-            <td className="px-6 py-4 whitespace-nowrap">
+            </TableCell>
+            <TableCell>
               <input
                 type="number"
                 name="eversion"
@@ -205,11 +220,11 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
                 min={0}
                 max={ANGLE_LIMIT}
               />
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 };
 

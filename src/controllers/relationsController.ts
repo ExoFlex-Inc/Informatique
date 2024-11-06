@@ -1,8 +1,8 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import supaClient from "../utils/supabaseClient.ts";
 
-const fetchRelation = async (req: Request, res: Response) => {
-  const user_id = req.params.userId;
+export const fetchRelation = async (req: Request, res: Response) => {
+  const user_id = req.params["userId"];
 
   if (!user_id) {
     return res
@@ -46,13 +46,14 @@ const fetchRelation = async (req: Request, res: Response) => {
     return res.status(200).json(userProfiles);
   } catch (error) {
     console.error("Error fetching relations:", error);
-    return res
-      .status(500)
-      .json({ message: "Error fetching relations", error: error.message });
+    return res.status(500).json({
+      message: "Error fetching relations",
+      error: (error as any).message,
+    });
   }
 };
 
-const postRelation = async (req: Request, res: Response) => {
+export const postRelation = async (req: Request, res: Response) => {
   const { client_id, admin_id } = req.body;
 
   // Validate input
@@ -84,12 +85,12 @@ const postRelation = async (req: Request, res: Response) => {
     return res.status(500).json({
       success: false,
       message: "Error creating relation",
-      error: error.message,
+      error: (error as any).message,
     });
   }
 };
 
-const removeRelation = async (req: Request, res: Response) => {
+export const removeRelation = async (req: Request, res: Response) => {
   const { relationId } = req.params;
 
   if (!relationId) {
@@ -119,13 +120,16 @@ const removeRelation = async (req: Request, res: Response) => {
     return res.status(500).json({
       success: false,
       message: "Error refusing relation",
-      error: error.message,
+      error: (error as any).message,
     });
   }
 };
 
-const getPendingAdminNotifications = async (req: Request, res: Response) => {
-  const userId = req.params.userId;
+export const getPendingAdminNotifications = async (
+  req: Request,
+  res: Response,
+) => {
+  const userId = req.params["userId"];
 
   if (!userId) {
     return res.status(400).json({ message: "User ID is required" });
@@ -150,11 +154,4 @@ const getPendingAdminNotifications = async (req: Request, res: Response) => {
   } catch (error) {
     return res.status(500).json({ message: "Internal server error", error });
   }
-};
-
-export {
-  removeRelation,
-  fetchRelation,
-  postRelation,
-  getPendingAdminNotifications,
 };

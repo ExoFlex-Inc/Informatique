@@ -1,94 +1,176 @@
-import React, { useRef, useState } from "react";
-import { Button as MuiButton } from "@mui/material";
+import React, { useRef } from "react";
+import { IconButton, Button as MuiButton, Typography } from "@mui/material";
+import useStm32 from "../hooks/use-stm32";
 
 interface ButtonProps {
-  label: string;
+  label?: string;
   icon?: React.ReactNode;
   mode?: string;
   action?: string;
   content?: string;
   onMouseDown?: () => void;
   onClick?: () => void;
-  color?: string;
+  mainColor?: string;
+  hoverColor?: string;
+  textColor?: string;
   disabled?: boolean;
+  socket?: any;
 }
 
 const Button: React.FC<ButtonProps> = ({
   label,
-  icon,
   mode,
   action,
   content,
-  color,
+  mainColor,
+  hoverColor,
+  socket,
   disabled,
+  icon,
   onClick,
 }) => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  let message = content;
 
-  const sendingRequests = async () => {
+  const sendingRequests = async (
+    mode: string | undefined,
+    action: string | undefined,
+    content: string | undefined,
+  ) => {
     try {
-      const response = await fetch(
-        "http://localhost:3001/api/hmi-button-click",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            mode: mode,
-            action: action,
-            content: message,
-          }),
+      let dataToSend = "{";
+
+      if (mode) {
+        dataToSend += `${mode};`;
+      }
+
+      if (action) {
+        dataToSend += `${action};`;
+      }
+
+      if (content) {
+        dataToSend += `${content};`;
+      }
+
+      dataToSend += "}";
+
+      console.log(`Button clicked: ${dataToSend}`);
+
+      socket.emit("sendDataToStm32", dataToSend);
+    } catch (error) {
+      console.error("An error occurred:", error);
+      clearIntervalRef();
+    }
+  };
+
+  const sendingStm32RecordingRequests = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/stm32/record", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          start: true,
+        }),
+        credentials: "include",
+      });
 
       if (response.ok) {
-        console.log("Button click sent successfully.");
+        console.log("Recording started successfully.");
       } else {
-        console.error("Failed to send button click.");
-        clearInterval(intervalRef.current!);
+        console.error("Failed to start recording.");
       }
     } catch (error) {
       console.error("An error occurred:", error);
-      clearInterval(intervalRef.current!);
+    }
+  };
+
+  const sendingStm32StopRecordingRequests = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/stm32/record", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          start: false,
+        }),
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        console.log("Recording stopped successfully.");
+      } else {
+        console.error("Failed to stop recording.");
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
     }
   };
 
   const clearIntervalRef = () => {
     if (intervalRef.current !== null) {
-      clearInterval(intervalRef.current!);
+      clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
   };
 
-  const handleMouseUp = () => {
+  const handleEnd = () => {
     clearIntervalRef();
-    window.removeEventListener("mouseup", handleMouseUp);
+    window.removeEventListener("mouseup", handleEnd);
+    window.removeEventListener("touchend", handleEnd);
   };
 
-  const handleMouseDown = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (e.button === 2) {
-      handleMouseUp();
-    }
-
-    if (e.button === 0) {
-      // Start sending requests with interval for mouse down event
-      if (action === "Increment") {
-        intervalRef.current = setInterval(sendingRequests, 20);
-        // Add event listener for mouseup
-        const handleMouseUpWithIntervalClear = () => {
-          handleMouseUp();
-        };
-        window.addEventListener("mouseup", handleMouseUpWithIntervalClear);
-      } else if (action === "Control" || "Homing") {
-        sendingRequests();
-      }
+  const handleStart = (
+    e:
+      | React.MouseEvent<HTMLButtonElement>
+      | React.TouchEvent<HTMLButtonElement>,
+  ) => {
+    e.preventDefault(); // Prevent any unintended default behaviors
+    if (action === "Increment") {
+      intervalRef.current = setInterval(
+        () => sendingRequests(mode, action, content),
+        20,
+      );
+      window.addEventListener("mouseup", handleEnd);
+      window.addEventListener("touchend", handleEnd);
+    } else if (content === "Start") {
+      sendingStm32RecordingRequests();
+      sendingRequests(mode, action, content);
+    } else if (content === "Stop" || content === "Pause") {
+      sendingStm32StopRecordingRequests();
+      sendingRequests(mode, action, content);
+    } else {
+      sendingRequests(mode, action, content);
     }
   };
 
-  return (
+  return icon ? (
+    <IconButton
+      onMouseDown={handleStart}
+      onMouseUp={handleEnd}
+      onTouchStart={handleStart}
+      onTouchEnd={handleEnd}
+      onContextMenu={(e) => e.preventDefault()}
+      size="large"
+      sx={{
+        backgroundColor: mainColor,
+        "&:hover": {
+          backgroundColor: hoverColor,
+        },
+      }}
+      disabled={disabled}
+      onClick={onClick}
+    >
+      {icon}
+    </IconButton>
+  ) : (
     <MuiButton
+      onMouseDown={handleStart}
+      onMouseUp={handleEnd}
+      onTouchStart={handleStart}
+      onTouchEnd={handleEnd}
+      onContextMenu={(e) => e.preventDefault()}
       fullWidth
       variant="contained"
       disabled={disabled}
@@ -99,12 +181,11 @@ const Button: React.FC<ButtonProps> = ({
         fontSize: "1rem",
         backgroundColor: "blueAccent.main",
         "&:hover": {
-          backgroundColor: "#1e3a8a",
+          backgroundColor: "blueAccent.hover",
         },
       }}
-      onMouseDown={handleMouseDown}
     >
-      {label}
+      <Typography>{label}</Typography>
     </MuiButton>
   );
 };

@@ -2,9 +2,9 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Launch Server with Debugger (ts-node)",
       "type": "node",
       "request": "launch",
-      "name": "Launch Server with Debugger",
       "runtimeExecutable": "npx",
       "runtimeArgs": ["nodemon", "--config", "nodemon.json"],
       "skipFiles": ["<node_internals>/**"],
@@ -17,25 +17,28 @@
       "runtimeExecutable": "yarn",
       "runtimeArgs": ["dev"],
       "type": "node",
-      "serverReadyAction": {
-        "action": "debugWithChrome",
-        "pattern": "Local: http://localhost:([0-9]+)",
-        "uriFormat": "http://localhost:%s"
-      }
+      "skipFiles": ["<node_internals>/**"]
     },
     {
       "type": "chrome",
       "request": "launch",
       "name": "Launch Chrome against localhost",
-      "url": "http://localhost:1337",
+      "url": "http://localhost:1338/",
       "webRoot": "${workspaceFolder}/src"
     }
   ],
   "compounds": [
     {
+      "name": "Launch Server and Vite",
+      "configurations": [
+        "Launch Server with Debugger (ts-node)",
+        "Launch Vite DEV server"
+      ]
+    },
+    {
       "name": "Launch Full Stack",
       "configurations": [
-        "Launch Server with Debugger",
+        "Launch Server with Debugger (ts-node)",
         "Launch Vite DEV server",
         "Launch Chrome against localhost"
       ]

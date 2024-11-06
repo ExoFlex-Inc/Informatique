@@ -3,13 +3,11 @@ import react from "@vitejs/plugin-react";
 import dotenv from "dotenv";
 import { VitePWA } from "vite-plugin-pwa";
 
+// Load environment variables from .env
 dotenv.config();
 
-// https://vitejs.dev/config/
 export default defineConfig({
-  css: {
-    devSourcemap: false,
-  },
+  // Define environment variables for Vite
   define: {
     "process.env.SUPABASE_API_URL": JSON.stringify(
       process.env.SUPABASE_API_URL,
@@ -18,33 +16,31 @@ export default defineConfig({
       process.env.SUPABASE_ANON_KEY,
     ),
   },
+  // Plugins
   plugins: [
-    react(),
+    react({
+      include: "**/*.tsx",
+    }),
     VitePWA({
-      mode:
-        process.env.NODE_ENV === "production" ? "production" : "development",
-      injectManifest: {
-        globPatterns: ["**/*.{js,css,html,png,svg,jpg}"], // Adjust for asset types you want cached
-      },
       strategies: "injectManifest",
-      srcDir: "public",
-      filename: "firebase-messaging-sw.js", // Make sure this file exists and is set up correctly
-      manifest: {
-        name: "exoflex",
-        short_name: "exoflex",
-        start_url: "",
-        display: "standalone",
-        background_color: "#ffffff",
-        theme_color: "#3eaf7c",
+      injectManifest: {
+        rollupFormat: "iife",
       },
+      registerType: "autoUpdate",
+
       devOptions: {
         enabled: true,
-        type: undefined,
+        type: "classic",
       },
     }),
   ],
+  build: {
+    rollupOptions: {
+      input: "./index.html",
+    },
+  },
+  // Server settings
   server: {
-    hmr: {},
-    port: 1337,
+    port: 1338,
   },
 });
