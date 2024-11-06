@@ -7,13 +7,13 @@ float   PeriphMotors_ConvUintToFloat(int32_t val, float min, float max,
 
 /// @brief AK10-9
 // AmpPerNm = 1/R/Kt/expermientalFactor = 1/9/0.16/18 = 0.0385 A/Nm
-const MotorParameters ak10_9 = {-12.5, 12.5, -50, 50, -65,   65,
-                                0,     500,  0,   5,  0.0385};
+const MotorParameters ak10_9 = {-12.5, 12.5, -50, 50,     -65, 65, 0,
+                                500,   0,    5,   0.0385, 1,   0};
 
 /// @brief AK80-64 (AK80-80/64)
 // AmpPerNm = 1/R/Kt/expermientalFactor = 1/64/0.119/???(18) = ???(0.0073) A/Nm
-const MotorParameters ak80_64 = {-12.5, 12.5, -8, 8, -144,  144,
-                                 0,     500,  0,  5, 0.0073};
+const MotorParameters ak80_64 = {-12.5, 12.5, -8, 8,      -144, 144, 0,
+                                 500,   0,    5,  0.0073, 1,    0};
 
 SendCanDataFunction PeriphMotors_SendCanData;
 
@@ -22,7 +22,8 @@ void PeriphMotors_Init(SendCanDataFunction sendCanFunc)
     PeriphMotors_SendCanData = sendCanFunc;
 }
 
-bool PeriphMotors_InitMotor(Motor* pMotor, uint8_t id, uint8_t model)
+bool PeriphMotors_InitMotor(Motor* pMotor, uint8_t id, uint8_t model,
+                            float ratio)
 {
     pMotor->id = id;
 
@@ -39,6 +40,9 @@ bool PeriphMotors_InitMotor(Motor* pMotor, uint8_t id, uint8_t model)
         return false;
     }
 
+    pMotor->parameters.ratio = ratio;
+
+    PeriphMotors_Move(pMotor, 0, 0, 0, 0, 0);
     PeriphMotors_Disable(pMotor);
 
     return true;
@@ -68,9 +72,35 @@ void PeriphMotors_SetZeroPosition(Motor* pMotor)
     PeriphMotors_SendCanData(pMotor->id, data);
 }
 
+void PeriphMotors_SoftwareOrigin(Motor* pMotor)
+{
+    pMotor->parameters.offset += pMotor->position;
+    pMotor->position = 0;
+}
+
+bool PeriphMotors_IsSoftwareOrigin(Motor* pMotor)
+{
+    if (pMotor->parameters.offset != 0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 void PeriphMotors_Move(Motor* pMotor, float position, float velocity,
                        float torque, float kp, float kd)
 {
+    // Apply offset
+    position = position + pMotor->parameters.offset;
+
+    // Apply ratio
+    position *= pMotor->parameters.ratio;
+    velocity *= pMotor->parameters.ratio;
+    torque /= pMotor->parameters.ratio;
+
     int32_t pInt =
         PeriphMotors_ConvFloatToUint(position, pMotor->parameters.positionMin,
                                      pMotor->parameters.positionMax, 16);
@@ -103,21 +133,31 @@ void PeriphMotors_ParseMotorState(Motor* pMotor, uint8_t* canData)
     uint16_t vInt = (canData[3] << 4) | (canData[4] >> 4);
     uint16_t tInt = ((canData[4] & 0xF) << 8) | canData[5];
 
-    pMotor->position =
+    float position =
         PeriphMotors_ConvUintToFloat(pInt, pMotor->parameters.positionMin,
                                      pMotor->parameters.positionMax, 16);
-    pMotor->velocity =
+    float velocity =
         PeriphMotors_ConvUintToFloat(vInt, pMotor->parameters.velocityMin,
                                      pMotor->parameters.velocityMax, 12);
-    pMotor->torque = PeriphMotors_ConvUintToFloat(
+    float torque = PeriphMotors_ConvUintToFloat(
         tInt, -pMotor->parameters.torqueMax, pMotor->parameters.torqueMax, 12);
 
-    if (pMotor->torque < 0)
+    float current = torque * pMotor->parameters.AmpPerNm;
+
+    if (current < 0)
     {
-        pMotor->torque = -1 * pMotor->torque;
+        current *= -1;
     }
 
-    pMotor->current = pMotor->torque * pMotor->parameters.AmpPerNm;
+    // Apply ratio
+    position         = position / pMotor->parameters.ratio;
+    pMotor->velocity = velocity / pMotor->parameters.ratio;
+    pMotor->torque   = torque * pMotor->parameters.ratio;
+
+    // Apply offset
+    pMotor->position = position - pMotor->parameters.offset;
+
+    pMotor->current = current;
 }
 
 int32_t PeriphMotors_ConvFloatToUint(float val, float min, float max,

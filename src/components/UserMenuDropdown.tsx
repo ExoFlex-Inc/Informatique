@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { removeRelation } from "../controllers/relationsController.ts";
-import { useUserProfile } from "../hooks/use-profile.ts";
+import { useUser } from "../hooks/use-user.ts";
 
 interface UserMenuDropdownProps {
   clientId: string;
@@ -20,10 +20,10 @@ const UserMenuDropdown: React.FC<UserMenuDropdownProps> = ({
   buttonRef,
 }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { profile } = useUserProfile();
+  const { user } = useUser();
 
   const removeUser = async () => {
-    const unlinkSuccessful = await removeRelation(clientId, profile);
+    const unlinkSuccessful = await removeRelation(clientId, user);
 
     if (unlinkSuccessful) {
       const newList = [

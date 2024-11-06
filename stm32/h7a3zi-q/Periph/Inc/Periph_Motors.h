@@ -33,6 +33,9 @@ typedef struct
     float kdMax;
 
     float AmpPerNm;
+
+    float ratio;
+    float offset;
 } MotorParameters;
 
 typedef struct
@@ -46,11 +49,14 @@ typedef struct
 } Motor;
 
 void PeriphMotors_Init(SendCanDataFunction sendCanFunc);
-bool PeriphMotors_InitMotor(Motor* pMotor, uint8_t id, uint8_t model);
+bool PeriphMotors_InitMotor(Motor* pMotor, uint8_t id, uint8_t model,
+                            float ratio);
 void PeriphMotors_Enable(Motor* pMotor);
 void PeriphMotors_SubscribeToRx(Motor* pMotor);
 void PeriphMotors_Disable(Motor* pMotor);
 void PeriphMotors_SetZeroPosition(Motor* pMotor);
+void PeriphMotors_SoftwareOrigin(Motor* pMotor);
+bool PeriphMotors_IsSoftwareOrigin(Motor* pMotor);
 void PeriphMotors_Move(Motor* pMotor, float position, float velocity,
                        float torque, float kp, float kd);
 void PeriphMotors_ParseMotorState(Motor* pMotor, uint8_t* canData);
