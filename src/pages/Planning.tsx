@@ -5,21 +5,25 @@ import {
   Radio,
   FormControl,
   FormLabel,
+  Typography,
+  Box,
 } from "@mui/material";
 import UserSearchBar from "../components/UserSearchBar.tsx";
-import { blue } from "@mui/material/colors";
 import ExercisesLimitsTable from "../components/ExercisesLimitsTable.tsx";
 import ExercisesPlanTable from "../components/ExercisesPlanTable.tsx";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import { useRelations } from "../hooks/use-relations.ts";
 import { usePlan } from "../hooks/use-plan.ts";
 import Loading from "../components/Loading.tsx";
+import type { Side } from "../components/ToggleSide.tsx";
+import ToggleSide from "../components/ToggleSide.tsx";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Planning() {
   const [selectedUser, setSelectedUser] = useState<any[]>([]);
   const [isDisabled, setIsDisabled] = useState(true);
   const [addExerciseDisable, setAddExerciseDisable] = useState(true);
-  const [side, setSide] = useState("Left");
+  const [side, setSide] = useState<Side>(null);
   const [checked, setChecked] = useState(false);
   const checkboxRefs = useRef<(HTMLInputElement | null)[]>([]);
   const { relations, isLoading: isLoadingRelations } = useRelations();
@@ -33,6 +37,8 @@ export default function Planning() {
     setLimitRight,
     setPlan,
   } = usePlan(selectedUser.length === 1 ? selectedUser[0]?.user_id : null);
+  const queryClient = useQueryClient();
+  const isLoading = isLoadingPlan || isLoadingRelations;
 
   useEffect(() => {
     if (planData) {
@@ -79,10 +85,6 @@ export default function Planning() {
     }
   };
 
-  const handleToggleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSide((event.target as HTMLInputElement).value);
-  };
-
   // Function to save plan to Supabase
   const savePlanToSupabase = async (plan: any) => {
     try {
@@ -111,42 +113,10 @@ export default function Planning() {
     }
   };
 
-  if (isLoadingRelations || isLoadingPlan) {
-    return (
-      <div className="loading-container">
-        <Loading />
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-col custom-height">
+    <div className="flex relative flex-col custom-height">
       <div className="flex justify-center items-center">
-        <FormControl>
-          <FormLabel
-            sx={{ "&.Mui-focused": { color: blue[600] } }}
-            id="demo-controlled-radio-buttons-group"
-          >
-            Side
-          </FormLabel>
-          <RadioGroup
-            aria-labelledby="demo-controlled-radio-buttons-group"
-            name="controlled-radio-buttons-group"
-            onChange={handleToggleChange}
-            value={side}
-          >
-            <FormControlLabel
-              value="Left"
-              control={<Radio sx={{ "&.Mui-checked": { color: blue[600] } }} />}
-              label="Left"
-            />
-            <FormControlLabel
-              value="Right"
-              control={<Radio sx={{ "&.Mui-checked": { color: blue[600] } }} />}
-              label="Right"
-            />
-          </RadioGroup>
-        </FormControl>
+        <ToggleSide side={side} setSide={setSide} />
         <UserSearchBar
           sx={{ width: 500 }}
           setSearchQuery={setSelectedUser}
@@ -154,7 +124,7 @@ export default function Planning() {
         />
       </div>
       <CustomScrollbar>
-        <div className="overflow-auto">
+        <div className="overflow-auto m-6">
           <ExercisesLimitsTable
             limitsLeft={planData?.limits?.left}
             limitsRight={planData?.limits?.right}
@@ -164,7 +134,7 @@ export default function Planning() {
           />
 
           {planData && planData.plan ? (
-            planData.plan.map((set, setIndex) => (
+            planData.plan.map((set: any, setIndex: number) => (
               <ExercisesPlanTable
                 key={setIndex}
                 setPlan={setPlan}
@@ -175,49 +145,58 @@ export default function Planning() {
               />
             ))
           ) : (
-            <div className="flex justify-center items-center">
-              <p className="text-gray-500 text-lg">
+            <Box className="flex justify-center items-center">
+              <Typography sx={{ color: "gray" }} fontSize={"30px"}>
                 No plan available for the selected user.
-              </p>
-            </div>
+              </Typography>
+            </Box>
+            // <div className="flex justify-center items-center">
+            //   <p className="text-gray-500 text-lg">
+            //   </p>
+            // </div>
           )}
         </div>
-        <div className="flex justify-center my-4">
-          <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mr-4 rounded"
-            onClick={addSet}
-          >
-            Add Set
-          </button>
+        {planData && planData.plan ? (
+          <div className="flex justify-center my-4">
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mr-4 rounded"
+              onClick={addSet}
+            >
+              Add Set
+            </button>
 
-          <button
-            className="bg-rose-500 hover:bg-rose-700 text-white font-bold py-2 px-4 mr-4 rounded"
-            onClick={addSetRest}
-          >
-            Add Set Rest
-          </button>
+            <button
+              className="bg-rose-500 hover:bg-rose-700 text-white font-bold py-2 px-4 mr-4 rounded"
+              onClick={addSetRest}
+            >
+              Add Set Rest
+            </button>
 
-          <button
-            disabled={addExerciseDisable}
-            className={
-              addExerciseDisable
-                ? "bg-gray-500 text-white font-bold py-2 px-4 mr-4 rounded cursor-not-allowed"
-                : "bg-cyan-500 hover:bg-cyan-700 text-white font-bold py-2 px-4 mr-4 rounded"
-            }
-            onClick={handleAddExercise}
-          >
-            Add Exercise
-          </button>
-          <button
-            className={`text-white font-bold py-2 px-4 rounded
-              ${isDisabled ? "bg-gray-500 cursor-not-allowed" : "bg-green-500 hover:bg-green-700"}`}
-            onClick={savePlan}
-            disabled={isDisabled}
-          >
-            Save Plan
-          </button>
-        </div>
+            <button
+              disabled={addExerciseDisable}
+              className={
+                addExerciseDisable
+                  ? "bg-gray-500 text-white font-bold py-2 px-4 mr-4 rounded cursor-not-allowed"
+                  : "bg-cyan-500 hover:bg-cyan-700 text-white font-bold py-2 px-4 mr-4 rounded"
+              }
+              onClick={handleAddExercise}
+            >
+              Add Exercise
+            </button>
+            <button
+              className={`text-white font-bold py-2 px-4 rounded
+                ${isDisabled ? "bg-gray-500 cursor-not-allowed" : "bg-green-500 hover:bg-green-700"}`}
+              onClick={savePlan}
+              disabled={isDisabled}
+            >
+              Save Plan
+            </button>
+          </div>
+        ) : (
+          true
+        )}
       </CustomScrollbar>
+      {isLoading && <Loading />}
     </div>
   );
 }
