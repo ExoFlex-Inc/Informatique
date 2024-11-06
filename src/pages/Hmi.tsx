@@ -327,6 +327,7 @@ export default function HMI() {
                     action="Control"
                     content="Start"
                     icon={<PlayArrow />}
+                    socket={socket}
                   />
                 ) : (
                   <Button
@@ -336,6 +337,7 @@ export default function HMI() {
                     action="Control"
                     content="Pause"
                     icon={<Pause />}
+                    socket={socket}
                   />
                 )}
                 <Button
@@ -350,6 +352,7 @@ export default function HMI() {
                     errorFromStm32 ||
                     stm32Data?.AutoState === "Ready"
                   }
+                  socket={socket}
                 />
                 <Button
                   mainColor="#1ec6e1"
@@ -360,6 +363,7 @@ export default function HMI() {
                     stm32Data?.AutoState !== "WaitingForPlan"
                   }
                   mode="Homing"
+                  socket={socket}
                 />
                 <Button
                   mainColor="#f1910f"
@@ -367,6 +371,7 @@ export default function HMI() {
                   icon={<Refresh />}
                   disabled={!stm32Data?.ErrorCode}
                   mode="Reset"
+                  socket={socket}
                 />
               </Box>
               <LineChart
@@ -401,6 +406,7 @@ export default function HMI() {
       <ManualControl
         errorFromStm32={errorFromStm32}
         stm32Data={stm32Data ?? null}
+        socket={socket}
       />
     </div>
   );
