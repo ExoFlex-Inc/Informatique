@@ -32,14 +32,18 @@ function generateRandomData(numMotors) {
   const currents = Array.from({ length: numMotors }, () =>
     Math.floor(Math.random() * 21),
   );
-  return { positions, torques, currents };
+  const speeds = Array.from({ length: numMotors }, () =>
+    Math.floor(Math.random() * 21),
+  );
+  return { positions, torques, currents, speeds };
 }
 
 // Function to create a JSON message similar to the C function's output
 function createJsonMessage() {
-  const { positions, torques, currents } = generateRandomData(3);
+  const { positions, torques, currents, speeds } = generateRandomData(4);
   const message = {
     Mode: "Manual",
+    CurrentLegSide: "",
     AutoState: "Ready",
     HomingState: "",
     ExerciseIdx: 0,
@@ -48,6 +52,7 @@ function createJsonMessage() {
     Positions: positions,
     Torques: torques,
     Current: currents,
+    Speed: speeds
   };
   return JSON.stringify(message);
 }
