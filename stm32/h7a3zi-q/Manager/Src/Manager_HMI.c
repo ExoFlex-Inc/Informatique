@@ -109,7 +109,7 @@ void ManagerHMI_SendJSON()
         positions[i] = ManagerHMI_Radians2Degrees(motorsData[i]->position);
         torques[i]   = motorsData[i]->torque;
         current[i]   = motorsData[i]->current;
-        speed[i]     = motorsData[i]->velocity;
+        speed[i]     = ManagerHMI_Radians2Degrees(motorsData[i]->velocity);
     }
 
     // Manually build the JSON string using snprintf
