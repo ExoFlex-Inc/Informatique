@@ -46,12 +46,10 @@ export const fetchRelation = async (req: Request, res: Response) => {
     return res.status(200).json(userProfiles);
   } catch (error) {
     console.error("Error fetching relations:", error);
-    return res
-      .status(500)
-      .json({
-        message: "Error fetching relations",
-        error: (error as any).message,
-      });
+    return res.status(500).json({
+      message: "Error fetching relations",
+      error: (error as any).message,
+    });
   }
 };
 

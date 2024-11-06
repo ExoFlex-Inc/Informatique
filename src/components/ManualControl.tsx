@@ -33,7 +33,11 @@ interface ManualControlProps {
   socket: any;
 }
 
-const ManualControl = ({ errorFromStm32, stm32Data, socket }: ManualControlProps) => {
+const ManualControl = ({
+  errorFromStm32,
+  stm32Data,
+  socket,
+}: ManualControlProps) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [isManualControlOpen, setIsManualControlOpen] = useState(false);

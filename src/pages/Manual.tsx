@@ -64,7 +64,6 @@ export default function Manual() {
   const [graphPause, setGraphPause] = useState(false);
   const { stm32Data, socket, errorFromStm32 } = useStm32();
 
-
   const [latestMotorData, setLatestMotorData] = useState({
     motor1: { x: 0, position: 0, torque: 0, current: 0 },
     motor2: { x: 0, position: 0, torque: 0, current: 0 },
@@ -240,11 +239,14 @@ export default function Manual() {
               >
                 <Box sx={{ width: 50 }} />
                 <Box gap={4} sx={{ display: "flex" }}>
-                <IconButton
+                  <IconButton
                     onClick={() => setGraphPause(false)}
                     disabled={!graphPause}
                     size="large"
-                    sx={{ backgroundColor: "blueAccent.main", "&:hover": { backgroundColor: "blueAccent.hover" } }}
+                    sx={{
+                      backgroundColor: "blueAccent.main",
+                      "&:hover": { backgroundColor: "blueAccent.hover" },
+                    }}
                   >
                     <PlayArrow />
                   </IconButton>
@@ -252,7 +254,10 @@ export default function Manual() {
                     onClick={() => setGraphPause(true)}
                     disabled={graphPause}
                     size="large"
-                    sx={{ backgroundColor: "blueAccent.main", "&:hover": { backgroundColor: "blueAccent.hover" } }}
+                    sx={{
+                      backgroundColor: "blueAccent.main",
+                      "&:hover": { backgroundColor: "blueAccent.hover" },
+                    }}
                   >
                     <Pause />
                   </IconButton>
@@ -360,7 +365,11 @@ export default function Manual() {
           </Grid>
         </Box>
       </CustomScrollbar>
-      <ManualControl stm32Data={stm32Data} socket={socket} errorFromStm32={errorFromStm32} />
+      <ManualControl
+        stm32Data={stm32Data}
+        socket={socket}
+        errorFromStm32={errorFromStm32}
+      />
     </div>
   );
 }

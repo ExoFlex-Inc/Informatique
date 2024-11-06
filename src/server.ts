@@ -24,8 +24,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 dotenv.config();
-if (process.env["ROBOT"] === "false")
-{
+if (process.env["ROBOT"] === "false") {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
 

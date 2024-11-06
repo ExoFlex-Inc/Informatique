@@ -182,16 +182,19 @@ function App() {
   const [theme, colorMode] = useMode();
 
   useEffect(() => {
-    if ('serviceWorker' in navigator) {
+    if ("serviceWorker" in navigator) {
       navigator.serviceWorker.getRegistrations().then((registrations) => {
         // Unregister any existing service workers
         registrations.forEach((registration) => registration.unregister());
-        
+
         // Register the appropriate service worker based on the environment
-        const swFile = process.env.NODE_ENV === 'development' ? '/dev-sw.js' : '/firebase-messaging-sw.js';
-  
+        const swFile =
+          process.env.NODE_ENV === "development"
+            ? "/dev-sw.js"
+            : "/firebase-messaging-sw.js";
+
         navigator.serviceWorker
-          .register(swFile, { scope: '/' })
+          .register(swFile, { scope: "/" })
           .then((registration) => {
             console.log(`${swFile} registered`, registration);
           })

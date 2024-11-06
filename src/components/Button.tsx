@@ -36,7 +36,6 @@ const Button: React.FC<ButtonProps> = ({
     action: string | undefined,
     content: string | undefined,
   ) => {
-
     try {
       let dataToSend = "{";
 

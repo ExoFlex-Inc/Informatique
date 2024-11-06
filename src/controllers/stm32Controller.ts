@@ -399,7 +399,7 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
         setReceivedDataBuffer(receivedDataBuffer);
       }
     });
-    
+
     setSerialPort(newSerialPort);
   } else {
     setSerialPort(null);

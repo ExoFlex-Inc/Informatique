@@ -68,12 +68,10 @@ export const createNotification = async (req: Request, res: Response) => {
     return res.status(201).json(newNotification);
   } catch (error) {
     console.error("Server error:", error);
-    return res
-      .status(500)
-      .json({
-        message: "Internal server error",
-        error: (error as Error).message,
-      });
+    return res.status(500).json({
+      message: "Internal server error",
+      error: (error as Error).message,
+    });
   }
 };
 
@@ -101,11 +99,9 @@ export const deleteNotification = async (req: Request, res: Response) => {
       deletedNotification,
     });
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        message: "Internal server error",
-        error: (error as Error).message,
-      });
+    return res.status(500).json({
+      message: "Internal server error",
+      error: (error as Error).message,
+    });
   }
 };
