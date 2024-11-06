@@ -155,7 +155,7 @@ export default function Manual() {
       },
     ],
   });
-  
+
   const exportCsv = async () => {
     try {
       if (!recordCsv) {
@@ -215,19 +215,21 @@ export default function Manual() {
     a.href = url;
 
     const date = new Date();
-    const fileName = 
-    (date.getMonth() + 1).toString().padStart(2, '0') + // Month (MM)
-    date.getDate().toString().padStart(2, '0') + "_" +   // Day (DD)
-    date.getHours().toString().padStart(2, '0') + "h" +  // Hour (HH)
-    date.getMinutes().toString().padStart(2, '0') +      // Minute (MM)
-    ".csv";
+    const fileName =
+      (date.getMonth() + 1).toString().padStart(2, "0") + // Month (MM)
+      date.getDate().toString().padStart(2, "0") +
+      "_" + // Day (DD)
+      date.getHours().toString().padStart(2, "0") +
+      "h" + // Hour (HH)
+      date.getMinutes().toString().padStart(2, "0") + // Minute (MM)
+      ".csv";
 
     a.download = fileName;
     document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);
   };
-  
+
   return (
     <div className="custom-height flex flex-col">
       <CustomScrollbar>
@@ -286,7 +288,7 @@ export default function Manual() {
                     hoverColor="blueAccent.hover"
                     socket={socket}
                   />
-                                    <IconButton
+                  <IconButton
                     onClick={(e) => {
                       exportCsv();
                     }}

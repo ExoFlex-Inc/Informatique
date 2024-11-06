@@ -3,7 +3,7 @@ import ProgressionWidget from "../components/ProgressionWidget.tsx";
 import { usePlan } from "../hooks/use-plan.ts";
 import useStm32 from "../hooks/use-stm32.ts";
 
-import { useTheme, Box, Grid, IconButton, } from "@mui/material";
+import { useTheme, Box, Grid, IconButton } from "@mui/material";
 import { useUser } from "../hooks/use-user.ts";
 import LineChart from "../components/LineChart.tsx";
 import { tokens } from "../hooks/theme.ts";
@@ -359,14 +359,16 @@ export default function HMI() {
     const a = document.createElement("a");
     a.style.display = "none";
     a.href = url;
-    
+
     const date = new Date();
-    const fileName = 
-    (date.getMonth() + 1).toString().padStart(2, '0') + // Month (MM)
-    date.getDate().toString().padStart(2, '0') + "_" +   // Day (DD)
-    date.getHours().toString().padStart(2, '0') + "h" +  // Hour (HH)
-    date.getMinutes().toString().padStart(2, '0') +      // Minute (MM)
-    ".csv";
+    const fileName =
+      (date.getMonth() + 1).toString().padStart(2, "0") + // Month (MM)
+      date.getDate().toString().padStart(2, "0") +
+      "_" + // Day (DD)
+      date.getHours().toString().padStart(2, "0") +
+      "h" + // Hour (HH)
+      date.getMinutes().toString().padStart(2, "0") + // Minute (MM)
+      ".csv";
     a.download = fileName;
 
     document.body.appendChild(a);
@@ -451,26 +453,26 @@ export default function HMI() {
                 />
 
                 <IconButton
-                    onClick={(e) => {
-                      exportCsv();
-                    }}
-                    onTouchStart={(e) => {
-                      exportCsv();
-                    }}
-                    size="large"
-                    sx={{
-                      backgroundColor: "blueAccent.main",
-                      "&:hover": {
-                        backgroundColor: "blueAccent.hover",
-                      },
-                    }}
-                    disabled={!stm32Data?.ErrorCode}
-                  >
-                    {recordCsv ? (
-                      <RadioButtonUncheckedIcon />
-                    ) : (
-                      <RadioButtonCheckedIcon />
-                    )}
+                  onClick={(e) => {
+                    exportCsv();
+                  }}
+                  onTouchStart={(e) => {
+                    exportCsv();
+                  }}
+                  size="large"
+                  sx={{
+                    backgroundColor: "blueAccent.main",
+                    "&:hover": {
+                      backgroundColor: "blueAccent.hover",
+                    },
+                  }}
+                  disabled={!stm32Data?.ErrorCode}
+                >
+                  {recordCsv ? (
+                    <RadioButtonUncheckedIcon />
+                  ) : (
+                    <RadioButtonCheckedIcon />
+                  )}
                 </IconButton>
               </Box>
               <LineChart

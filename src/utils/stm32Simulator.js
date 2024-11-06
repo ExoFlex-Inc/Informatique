@@ -52,7 +52,7 @@ function createJsonMessage() {
     Positions: positions,
     Torques: torques,
     Current: currents,
-    Speed: speeds
+    Speed: speeds,
   };
   return JSON.stringify(message);
 }
