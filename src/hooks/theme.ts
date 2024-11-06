@@ -2,7 +2,7 @@ import { createContext, useState, useMemo } from "react";
 import { createTheme } from "@mui/material/styles";
 
 // color design tokens export
-export const tokens = (mode) => ({
+export const tokens = (mode: string) => ({
   ...(mode === "dark"
     ? {
         grey: {
@@ -26,6 +26,7 @@ export const tokens = (mode) => ({
           700: "#0c101b",
           800: "#080b12",
           900: "#040509",
+          hover: "#1F2A40", // Hover color
         },
         greenAccent: {
           100: "#d5f0e3",
@@ -37,6 +38,7 @@ export const tokens = (mode) => ({
           700: "#1a6d45",
           800: "#11492e",
           900: "#092417",
+          hover: "#55c58f", // Hover color
         },
         redAccent: {
           100: "#f8dcdb",
@@ -48,6 +50,7 @@ export const tokens = (mode) => ({
           700: "#832f2c",
           800: "#58201e",
           900: "#2c100f",
+          hover: "#e2726e", // Hover color
         },
         blueAccent: {
           100: "#cce5fb",
@@ -59,6 +62,7 @@ export const tokens = (mode) => ({
           700: "#014a8c",
           800: "#00315e",
           900: "#00192f",
+          hover: "#3495ee", // Hover color
         },
       }
     : {
@@ -83,6 +87,7 @@ export const tokens = (mode) => ({
           700: "#727681",
           800: "#a1a4ab",
           900: "#d0d1d5",
+          hover: "#f2f0f0", // Hover color
         },
         greenAccent: {
           100: "#092417",
@@ -94,6 +99,7 @@ export const tokens = (mode) => ({
           700: "#80d3ab",
           800: "#aae2c7",
           900: "#d5f0e3",
+          hover: "#22925c", // Hover color
         },
         redAccent: {
           100: "#2c100f",
@@ -105,6 +111,7 @@ export const tokens = (mode) => ({
           700: "#e99592",
           800: "#f1b9b7",
           900: "#f8dcdb",
+          hover: "#af3f3b", // Hover color
         },
         blueAccent: {
           100: "#00192f",
@@ -116,19 +123,19 @@ export const tokens = (mode) => ({
           700: "#67b0f2",
           800: "#99caf7",
           900: "#cce5fb",
+          hover: "#0162bb", // Hover color
         },
       }),
 });
 
 // mui theme settings
-export const themeSettings = (mode) => {
+export const themeSettings = (mode: string) => {
   const colors = tokens(mode);
   return {
     palette: {
       mode: mode,
       ...(mode === "dark"
         ? {
-            // palette values for dark mode
             primary: {
               main: colors.primary[500],
             },
@@ -138,18 +145,22 @@ export const themeSettings = (mode) => {
             blueAccent: {
               main: colors.blueAccent[500],
               contrastText: "#fff",
+              hover: colors.blueAccent.hover,
             },
-            neutral: {
-              dark: colors.grey[700],
-              main: colors.grey[500],
-              light: colors.grey[100],
+            greenAccent: {
+              main: colors.greenAccent[500],
+              contrastText: "#fff",
+              hover: colors.greenAccent.hover,
+            },
+            redAccent: {
+              main: colors.redAccent[500],
+              hover: colors.redAccent.hover,
             },
             background: {
               default: colors.primary[500],
             },
           }
         : {
-            // palette values for light mode
             primary: {
               main: colors.primary[100],
             },
@@ -159,11 +170,16 @@ export const themeSettings = (mode) => {
             blueAccent: {
               main: colors.blueAccent[500],
               contrastText: "#fff",
+              hover: colors.blueAccent.hover,
             },
-            neutral: {
-              dark: colors.grey[700],
-              main: colors.grey[500],
-              light: colors.grey[100],
+            greenAccent: {
+              main: colors.greenAccent[500],
+              contrastText: "#fff",
+              hover: colors.greenAccent.hover,
+            },
+            redAccent: {
+              main: colors.redAccent[500],
+              hover: colors.redAccent.hover,
             },
             background: {
               default: "#fcfcfc",
