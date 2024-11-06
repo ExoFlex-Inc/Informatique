@@ -24,26 +24,28 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 dotenv.config();
+if (process.env["ROBOT"] === "false")
+{
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+  const scriptPath = path.resolve(__dirname, "../src/utils/stm32Simulator.sh");
 
-const scriptPath = path.resolve(__dirname, "../src/utils/stm32Simulator.sh");
-
-// Run socat for the STM32 simulator
-const myShellScript = exec(`bash ${scriptPath} 2>&1`, (error, stdout, _) => {
-  if (error) {
-    console.error(`Error executing script: ${error.message}`);
-    return;
-  }
-  console.log(`Script output: ${stdout}`);
-});
-
-// Capture and log stdout data in real-time from socat
-if (myShellScript.stdout) {
-  myShellScript.stdout.on("data", (data) => {
-    console.log(`Output: ${data}`);
+  // Run socat for the STM32 simulator
+  const myShellScript = exec(`bash ${scriptPath} 2>&1`, (error, stdout, _) => {
+    if (error) {
+      console.error(`Error executing script: ${error.message}`);
+      return;
+    }
+    console.log(`Script output: ${stdout}`);
   });
+
+  // Capture and log stdout data in real-time from socat
+  if (myShellScript.stdout) {
+    myShellScript.stdout.on("data", (data) => {
+      console.log(`Output: ${data}`);
+    });
+  }
 }
 
 const app: Application = express();
