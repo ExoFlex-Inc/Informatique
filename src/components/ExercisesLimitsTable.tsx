@@ -79,7 +79,10 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
   };
 
   return (
-    <TableContainer component={Paper} sx={{ borderRadius: "12px", bgcolor: "white" }}>
+    <TableContainer
+      component={Paper}
+      sx={{ borderRadius: "12px", bgcolor: "white" }}
+    >
       <Table>
         <TableHead className="bg-gray-100">
           <TableRow>

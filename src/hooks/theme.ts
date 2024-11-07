@@ -197,9 +197,9 @@ export const themeSettings = (mode: string) => {
             "& .MuiSvgIcon-root": {
               fontSize: 28,
             },
-          }
-        }
-      }
+          },
+        },
+      },
     },
     typography: {
       fontFamily: ["Sofia Pro", "sans-serif"].join(","),
