@@ -197,8 +197,7 @@ export default function Manual() {
   };
 
   const generateAndDownloadCsv = (stm32Data: any) => {
-    let csvContent =
-      "I,Dor_A,Dor_T,Dor_S,Ev_A,Ev_T,Eve_S,Ext_A,Ext_T,Ext_S\n";
+    let csvContent = "I,Dor_A,Dor_T,Dor_S,Ev_A,Ev_T,Eve_S,Ext_A,Ext_T,Ext_S\n";
 
     const dataLength = stm32Data.angles.dorsiflexion.length;
 

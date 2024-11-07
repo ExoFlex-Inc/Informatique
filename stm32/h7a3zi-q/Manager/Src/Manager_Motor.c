@@ -555,12 +555,11 @@ void ManagerMotor_NextCmdPosSpeedTorque(uint8_t id)
 float ManagerMotor_CalcSpeedFromTorque(float torque, float torqueGoal,
                                        float wMin, float wMax)
 {
-	if (wMin > wMax)
-	{
-		ManagerError_SetError(ERROR_2_MMOT);
-		managerMotor.state = MMOT_STATE_ERROR;
-
-	}
+    if (wMin > wMax)
+    {
+        ManagerError_SetError(ERROR_2_MMOT);
+        managerMotor.state = MMOT_STATE_ERROR;
+    }
 
     float w           = 0;
     float decelFactor = 0.1;
@@ -596,8 +595,8 @@ float ManagerMotor_CalcSpeedFromTorque(float torque, float torqueGoal,
 
     if (w > wMax)
     {
-		ManagerError_SetError(ERROR_2_MMOT);
-		managerMotor.state = MMOT_STATE_ERROR;
+        ManagerError_SetError(ERROR_2_MMOT);
+        managerMotor.state = MMOT_STATE_ERROR;
     }
 
     return w;
@@ -712,12 +711,12 @@ void ManagerMotor_MovePosSpeed(uint8_t id, float pos, float speed)
     motors[id].goalReady    = true;
 }
 
-void ManagerMotor_MovePosSpeedTorque(uint8_t id, float pos, float minSpeed,float maxSpeed,
-                                     float torque)
+void ManagerMotor_MovePosSpeedTorque(uint8_t id, float pos, float minSpeed,
+                                     float maxSpeed, float torque)
 {
     if (fabsf(maxSpeed) > MMOT_MAX_SPEED_CMD)
     {
-    	maxSpeed = MMOT_MAX_SPEED_CMD;
+        maxSpeed = MMOT_MAX_SPEED_CMD;
     }
 
     if (fabsf(torque) > MMOT_MAX_TORQUE_CMD)

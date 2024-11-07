@@ -1292,7 +1292,7 @@ void ManagerMovement_AutoTorque(uint8_t mouvType, float posLimit,
         ManagerMotor_MovePosSpeedTorque(
             MMOT_MOTOR_1, managerMovement.mPosGoal[MMOT_MOTOR_1],
             managerMovement.mSpeedMin[MMOT_MOTOR_1],
-			managerMovement.mSpeedGoal[MMOT_MOTOR_1],
+            managerMovement.mSpeedGoal[MMOT_MOTOR_1],
             managerMovement.mTorqueGoal[MMOT_MOTOR_1]);
     }
     else if (mouvType == MMOV_EVERSION)  // Set goalPosition for motor 2 and
@@ -1310,7 +1310,7 @@ void ManagerMovement_AutoTorque(uint8_t mouvType, float posLimit,
         ManagerMotor_MovePosSpeedTorque(
             MMOT_MOTOR_2, managerMovement.mPosGoal[MMOT_MOTOR_2],
             managerMovement.mSpeedMin[MMOT_MOTOR_2],
-			managerMovement.mSpeedGoal[MMOT_MOTOR_2],
+            managerMovement.mSpeedGoal[MMOT_MOTOR_2],
             managerMovement.mTorqueGoal[MMOT_MOTOR_2]);
     }
     else if (mouvType ==
@@ -1321,7 +1321,7 @@ void ManagerMovement_AutoTorque(uint8_t mouvType, float posLimit,
         ManagerMotor_MovePosSpeedTorque(
             MMOT_MOTOR_3, managerMovement.mPosGoal[MMOT_MOTOR_3],
             managerMovement.mSpeedMin[MMOT_MOTOR_3],
-			managerMovement.mSpeedGoal[MMOT_MOTOR_3],
+            managerMovement.mSpeedGoal[MMOT_MOTOR_3],
             managerMovement.mTorqueGoal[MMOT_MOTOR_3]);
     }
 }
