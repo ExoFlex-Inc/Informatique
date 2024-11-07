@@ -5,6 +5,9 @@ int32_t PeriphMotors_ConvFloatToUint(float val, float min, float max,
 float   PeriphMotors_ConvUintToFloat(int32_t val, float min, float max,
                                      uint8_t bits);
 
+void PeriphMotors_AppendBuf(float *buf, float data);
+float PeriphMotors_SumBuf(float *buf);
+
 /// @brief AK10-9
 // AmpPerNm = 1/R/Kt/expermientalFactor = 1/9/0.16/18 = 0.0385 A/Nm
 const MotorParameters ak10_9 = {-12.5, 12.5, -50, 50,     -65, 65, 0,
@@ -142,22 +145,50 @@ void PeriphMotors_ParseMotorState(Motor* pMotor, uint8_t* canData)
     float torque = PeriphMotors_ConvUintToFloat(
         tInt, -pMotor->parameters.torqueMax, pMotor->parameters.torqueMax, 12);
 
-    float current = torque * pMotor->parameters.AmpPerNm;
+    // Apply ratio
+    position = position / pMotor->parameters.ratio;
+    velocity = velocity / pMotor->parameters.ratio;
+    torque   = torque * pMotor->parameters.ratio;
 
+    // Apply offset
+    position = position - pMotor->parameters.offset;
+
+    PeriphMotors_AppendBuf(pMotor->posBuf, position);
+    PeriphMotors_AppendBuf(pMotor->velBuf, velocity);
+    PeriphMotors_AppendBuf(pMotor->torBuf, torque);
+
+    pMotor->position = PeriphMotors_SumBuf(pMotor->posBuf);
+    pMotor->velocity = PeriphMotors_SumBuf(pMotor->velBuf);
+	pMotor->torque = PeriphMotors_SumBuf(pMotor->torBuf);
+
+	float current = pMotor->torque * pMotor->parameters.AmpPerNm;
     if (current < 0)
     {
         current *= -1;
     }
-
-    // Apply ratio
-    position         = position / pMotor->parameters.ratio;
-    pMotor->velocity = velocity / pMotor->parameters.ratio;
-    pMotor->torque   = torque * pMotor->parameters.ratio;
-
-    // Apply offset
-    pMotor->position = position - pMotor->parameters.offset;
-
     pMotor->current = current;
+
+}
+
+void PeriphMotors_AppendBuf(float *buf, float data)
+{
+	for (uint8_t i = 0; i < NOISE_BUF_SIZE - 1; i++)
+	{
+		buf[i] = buf[i+1];
+	}
+
+	buf[NOISE_BUF_SIZE] = data;
+}
+
+float PeriphMotors_SumBuf(float *buf)
+{
+	float sum = 0;
+	for (uint8_t i = 0; i < NOISE_BUF_SIZE - 1; i++)
+	{
+		sum += buf[i];
+	}
+
+	return sum;
 }
 
 int32_t PeriphMotors_ConvFloatToUint(float val, float min, float max,

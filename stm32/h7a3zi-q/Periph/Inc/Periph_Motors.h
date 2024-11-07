@@ -13,6 +13,8 @@
 #define MOTOR_AK10_9  0
 #define MOTOR_AK80_64 1
 
+#define NOISE_BUF_SIZE 10
+
 typedef void (*SendCanDataFunction)(uint32_t id, uint8_t* data);
 
 typedef struct
@@ -45,6 +47,11 @@ typedef struct
     float           velocity;
     float           torque;
     float           current;
+
+    float posBuf[NOISE_BUF_SIZE];
+    float velBuf[NOISE_BUF_SIZE];
+    float torBuf[NOISE_BUF_SIZE];
+
     MotorParameters parameters;
 } Motor;
 
