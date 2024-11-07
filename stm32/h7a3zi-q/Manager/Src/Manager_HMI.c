@@ -3,6 +3,7 @@
 #include <Manager_Motor.h>
 #include <Manager_Movement.h>
 #include <Periph_UartRingBuf.h>
+#include <Periph_Solenoid.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -197,6 +198,17 @@ void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
                 {
                     ManagerHMI_ExecuteManualIncrement(
                         ParsedMsg[M_HMI_CONTENT_SECTION]);
+                }
+                else if (strcmp(ParsedMsg[M_HMI_CONTENT_SECTION], "Tightening") == 0)
+                {
+                	if (strcmp(ParsedMsg[M_HMI_CONTENT_SECTION], "Forward") == 0)
+					{
+                		periphSolenoid_FootThight();
+					}
+                	else if (strcmp(ParsedMsg[M_HMI_CONTENT_SECTION], "Backward") == 0)
+					{
+                		periphSolenoid_FootLoose();
+					}
                 }
             }
             else
