@@ -2,6 +2,7 @@
 #include <Manager_HMI.h>
 #include <Manager_Motor.h>
 #include <Manager_Movement.h>
+#include <Manager_Security.h>
 #include <Periph_UartRingBuf.h>
 #include <stdio.h>
 #include <stdlib.h>
