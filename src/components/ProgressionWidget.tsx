@@ -5,7 +5,7 @@ import {
   type CircularProgressProps,
   Typography,
   LinearProgress,
-  Paper
+  Paper,
 } from "@mui/material";
 
 function CircularProgressWithLabel(
@@ -91,16 +91,33 @@ export default function ProgressionWidget({
 
   return (
     <Box>
-      <Box sx={{display: "flex", justifyContent: "center", marginBottom: "10px"}}>
+      <Box
+        sx={{ display: "flex", justifyContent: "center", marginBottom: "10px" }}
+      >
         <CircularProgressWithLabel
           value={(stretchProgress / totalStretch) * 100}
         />
       </Box>
-      <Typography color="black" justifyContent="center" display="flex" marginBottom="28px">Stretch Progress</Typography>
-      <Typography color="black" justifyContent="center" display="flex" marginBottom="4px" fontSize="20px">
+      <Typography
+        color="black"
+        justifyContent="center"
+        display="flex"
+        marginBottom="28px"
+      >
+        Stretch Progress
+      </Typography>
+      <Typography
+        color="black"
+        justifyContent="center"
+        display="flex"
+        marginBottom="4px"
+        fontSize="20px"
+      >
         {repetitionProgress + "/" + totalRepetition}
       </Typography>
-      <Box sx={{display: "flex", justifyContent: "center", marginBottom: "4px"}}>
+      <Box
+        sx={{ display: "flex", justifyContent: "center", marginBottom: "4px" }}
+      >
         <Box sx={{ width: "75%" }}>
           <LinearProgress
             color="success"

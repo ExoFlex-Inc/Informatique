@@ -534,12 +534,15 @@ export default function Activity() {
   }
 
   return (
-    <Box sx={{maxWidth: "80rem",
-      marginLeft: "auto", 
-      marginRight: "auto", 
-      display: "flex",
-      flexDirection: "column", 
-      height: "calc(100vh - 100px)"}}
+    <Box
+      sx={{
+        maxWidth: "80rem",
+        marginLeft: "auto",
+        marginRight: "auto",
+        display: "flex",
+        flexDirection: "column",
+        height: "calc(100vh - 100px)",
+      }}
     >
       <div className="flex flex-wrap items-center gap-4">
         {/* User Search Bar */}
@@ -590,14 +593,17 @@ export default function Activity() {
           )}
         </div>
       </div>
-      <Box sx={{display: "flex", alignContent: "center", justifyContent: "center"}}>
-        <Typography variant="h6">
-          {graphType}
-        </Typography>
-
+      <Box
+        sx={{
+          display: "flex",
+          alignContent: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Typography variant="h6">{graphType}</Typography>
       </Box>
       <CustomScrollbar>
-        <Box paddingX={15} sx={{flexBasis: "100%"}}>
+        <Box paddingX={15} sx={{ flexBasis: "100%" }}>
           <LineChart type="activity" chartData={dataset1} title={title1} />
         </Box>
         <ThemeProvider theme={createTheme({ palette: { mode: "light" } })}>

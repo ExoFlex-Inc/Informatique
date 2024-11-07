@@ -1,4 +1,11 @@
-import { List, ListItem, ListItemButton, ListItemText, Box, Paper } from "@mui/material";
+import {
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Box,
+  Paper,
+} from "@mui/material";
 import React from "react";
 import useDropdown from "../hooks/use-dropdown.ts";
 
@@ -19,7 +26,15 @@ const GraphFilters: React.FC<GraphFiltersProps> = ({
   }
 
   return (
-    <Box ref={dropdownRef} sx={{display: "flex", zIndex: 30, marginTop: "8px", position: "absolute"}} >
+    <Box
+      ref={dropdownRef}
+      sx={{
+        display: "flex",
+        zIndex: 30,
+        marginTop: "8px",
+        position: "absolute",
+      }}
+    >
       <Paper>
         <List className="rounded-md ml-4">
           <ListItem disablePadding>

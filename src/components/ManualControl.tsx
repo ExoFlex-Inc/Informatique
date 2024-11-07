@@ -128,7 +128,7 @@ const ManualControl = ({
                     flexDirection: "column",
                   }}
                 >
-                  <Typography sx={{color: "white"}} noWrap variant="button">
+                  <Typography sx={{ color: "white" }} noWrap variant="button">
                     Anatomical Movement
                   </Typography>
                   <Box
@@ -141,7 +141,11 @@ const ManualControl = ({
                     <Grid container>
                       <Grid item xs={4}>
                         <Typography
-                          sx={{ justifyContent: "center", display: "flex", color: "white" }}
+                          sx={{
+                            justifyContent: "center",
+                            display: "flex",
+                            color: "white",
+                          }}
                           variant="subtitle1"
                         >
                           Eversion
@@ -188,7 +192,11 @@ const ManualControl = ({
                       </Grid>
                       <Grid item xs={4}>
                         <Typography
-                          sx={{ justifyContent: "center", display: "flex", color: "white" }}
+                          sx={{
+                            justifyContent: "center",
+                            display: "flex",
+                            color: "white",
+                          }}
                           variant="subtitle1"
                         >
                           Dorsiflexion
@@ -226,7 +234,11 @@ const ManualControl = ({
                       </Grid>
                       <Grid item xs={4} sx={{ justifyItems: "center" }}>
                         <Typography
-                          sx={{ justifyContent: "center", display: "flex", color: "white" }}
+                          sx={{
+                            justifyContent: "center",
+                            display: "flex",
+                            color: "white",
+                          }}
                           variant="subtitle1"
                         >
                           Extension
@@ -276,7 +288,11 @@ const ManualControl = ({
                     flexDirection: "column",
                   }}
                 >
-                  <Typography variant="button" gutterBottom sx={{color: "white"}}>
+                  <Typography
+                    variant="button"
+                    gutterBottom
+                    sx={{ color: "white" }}
+                  >
                     Foot Fastening
                   </Typography>
                   <Box
@@ -329,7 +345,11 @@ const ManualControl = ({
                     flexDirection: "column",
                   }}
                 >
-                  <Typography variant="button" gutterBottom sx={{color: "white"}}>
+                  <Typography
+                    variant="button"
+                    gutterBottom
+                    sx={{ color: "white" }}
+                  >
                     Switch Side
                   </Typography>
                   <Box

@@ -7,7 +7,7 @@ import {
   TableCell,
   Typography,
   Box,
-  Paper
+  Paper,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import React from "react";
@@ -234,7 +234,10 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                 </TableRow>
               ))}
             </TableBody>
-            <TableHead className="bg-gray-100" sx={{ borderColor: "lightgrey" }}>
+            <TableHead
+              className="bg-gray-100"
+              sx={{ borderColor: "lightgrey" }}
+            >
               <TableRow>
                 <TableCell
                   sx={{

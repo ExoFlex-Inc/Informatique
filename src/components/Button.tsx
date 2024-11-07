@@ -158,7 +158,7 @@ const Button: React.FC<ButtonProps> = ({
         color: textColor,
         backgroundColor: mainColor,
         "&.Mui-disabled": {
-          color: "gray"
+          color: "gray",
         },
         "&:hover": {
           backgroundColor: hoverColor,
