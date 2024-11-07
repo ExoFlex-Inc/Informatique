@@ -23,6 +23,8 @@ export default defineConfig({
     }),
     VitePWA({
       strategies: "injectManifest",
+      srcDir: "public",
+      filename: "firebase-messaging-sw.js",
       injectManifest: {
         rollupFormat: "iife",
       },
