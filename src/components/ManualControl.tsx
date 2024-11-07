@@ -339,57 +339,58 @@ const ManualControl = ({
                       flexDirection: "column",
                     }}
                   >
-                    <Box
-                      sx={{
-                        justifyContent: "center",
-                        display: "flex",
-                        gap: "40px",
-                      }}
-                    >
-                      <Button
-                        mode="ChangeSide"
-                        mainColor={
-                          stm32Data?.CurrentLegSide == "LegIsRight"
-                            ? "blueAccent.main"
-                            : ""
-                        }
-                        hoverColor={
-                          stm32Data?.CurrentLegSide == "LegIsRight"
-                            ? "blueAccent.hover"
-                            : ""
-                        }
-                        textColor="white"
-                        disabled={
-                          changeSideDisabled ||
-                          errorFromStm32 ||
-                          stm32Data?.CurrentLegSide == "LegIsLeft"
-                        }
-                        icon={<ArrowBack />}
-                        socket={socket}
-                      />
-                      <Button
-                        mode="ChangeSide"
-                        mainColor={
-                          stm32Data?.CurrentLegSide == "LegIsLeft"
-                            ? "blueAccent.main"
-                            : ""
-                        }
-                        hoverColor={
-                          stm32Data?.CurrentLegSide == "LegIsLeft"
-                            ? "blueAccent.hover"
-                            : ""
-                        }
-                        textColor="white"
-                        disabled={
-                          changeSideDisabled ||
-                          errorFromStm32 ||
-                          stm32Data?.CurrentLegSide == "LegIsRight"
-                        }
-                        icon={<ArrowForward />}
-                        socket={socket}
-                      />
-                    </Box>
-                    {stm32Data?.Mode == "ChangeSide" && (
+                    {stm32Data?.Mode !== "ChangeSide" ? (
+                      <Box
+                        sx={{
+                          justifyContent: "center",
+                          display: "flex",
+                          gap: "40px",
+                        }}
+                      >
+                        <Button
+                          mode="ChangeSide"
+                          mainColor={
+                            stm32Data?.CurrentLegSide == "LegIsRight"
+                              ? "blueAccent.main"
+                              : ""
+                          }
+                          hoverColor={
+                            stm32Data?.CurrentLegSide == "LegIsRight"
+                              ? "blueAccent.hover"
+                              : ""
+                          }
+                          textColor="white"
+                          disabled={
+                            changeSideDisabled ||
+                            errorFromStm32 ||
+                            stm32Data?.CurrentLegSide == "LegIsLeft"
+                          }
+                          icon={<ArrowBack />}
+                          socket={socket}
+                        />
+                        <Button
+                          mode="ChangeSide"
+                          mainColor={
+                            stm32Data?.CurrentLegSide == "LegIsLeft"
+                              ? "blueAccent.main"
+                              : ""
+                          }
+                          hoverColor={
+                            stm32Data?.CurrentLegSide == "LegIsLeft"
+                              ? "blueAccent.hover"
+                              : ""
+                          }
+                          textColor="white"
+                          disabled={
+                            changeSideDisabled ||
+                            errorFromStm32 ||
+                            stm32Data?.CurrentLegSide == "LegIsRight"
+                          }
+                          icon={<ArrowForward />}
+                          socket={socket}
+                        />
+                      </Box>
+                    ) : (
                       <Box
                         sx={{
                           display: "flex",
