@@ -32,7 +32,7 @@ bool   ManagerMotor_IsGoalStateReady(uint8_t id);
 void ManagerMotor_MovePosOld(uint8_t id, float pos);
 void ManagerMotor_MoveSpeed(uint8_t id, float speed);
 void ManagerMotor_MovePosSpeed(uint8_t id, float pos, float speed);
-void ManagerMotor_MovePosSpeedTorque(uint8_t id, float pos, float speed,
+void ManagerMotor_MovePosSpeedTorque(uint8_t id, float pos, float minSpeed, float maxSpeed,
                                      float torque);
 
 bool    ManagerMotor_IsWaitingSecurity();

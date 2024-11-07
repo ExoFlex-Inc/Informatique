@@ -20,7 +20,11 @@
 
 #define MMOV_SPEED_M1 0.5  // rad/s
 #define MMOV_SPEED_M2 0.5  // rad/s
-#define MMOV_SPEED_M3 0.1  // rad/s
+#define MMOV_SPEED_M3 0.2  // rad/s
+
+#define MMOV_SPEED_MIN_M1 0.1  // rad/s
+#define MMOV_SPEED_MIN_M2 0.1  // rad/s
+#define MMOV_SPEED_MIN_M3 0.05  // rad/s
 
 #define MANUAL_MAX_TRANSMIT_TIME 200  // ms
 
@@ -38,6 +42,7 @@ typedef struct
 
     float mPosGoal[MMOT_MOTOR_NBR];
     float mSpeedGoal[MMOT_MOTOR_NBR];
+    float mSpeedMin[MMOT_MOTOR_NBR];
     float mTorqueGoal[MMOT_MOTOR_NBR];
 
     bool    reset;
@@ -172,6 +177,10 @@ void ManagerMovement_Reset()
     managerMovement.mSpeedGoal[MMOT_MOTOR_1] = MMOV_SPEED_M1;
     managerMovement.mSpeedGoal[MMOT_MOTOR_2] = MMOV_SPEED_M2;
     managerMovement.mSpeedGoal[MMOT_MOTOR_3] = MMOV_SPEED_M3;
+
+    managerMovement.mSpeedMin[MMOT_MOTOR_1] = MMOV_SPEED_MIN_M1;
+    managerMovement.mSpeedMin[MMOT_MOTOR_2] = MMOV_SPEED_MIN_M2;
+    managerMovement.mSpeedMin[MMOT_MOTOR_3] = MMOV_SPEED_MIN_M3;
 
     // Init exercises tables
     for (uint8_t i = 0; i < MAX_EXERCISES; i++)
@@ -1282,7 +1291,8 @@ void ManagerMovement_AutoTorque(uint8_t mouvType, float posLimit,
         managerMovement.mTorqueGoal[MMOT_MOTOR_1] = targetTorque;
         ManagerMotor_MovePosSpeedTorque(
             MMOT_MOTOR_1, managerMovement.mPosGoal[MMOT_MOTOR_1],
-            managerMovement.mSpeedGoal[MMOT_MOTOR_1],
+            managerMovement.mSpeedMin[MMOT_MOTOR_1],
+			managerMovement.mSpeedGoal[MMOT_MOTOR_1],
             managerMovement.mTorqueGoal[MMOT_MOTOR_1]);
     }
     else if (mouvType == MMOV_EVERSION)  // Set goalPosition for motor 2 and
@@ -1299,7 +1309,8 @@ void ManagerMovement_AutoTorque(uint8_t mouvType, float posLimit,
         managerMovement.mTorqueGoal[MMOT_MOTOR_2] = targetTorque;
         ManagerMotor_MovePosSpeedTorque(
             MMOT_MOTOR_2, managerMovement.mPosGoal[MMOT_MOTOR_2],
-            managerMovement.mSpeedGoal[MMOT_MOTOR_2],
+            managerMovement.mSpeedMin[MMOT_MOTOR_2],
+			managerMovement.mSpeedGoal[MMOT_MOTOR_2],
             managerMovement.mTorqueGoal[MMOT_MOTOR_2]);
     }
     else if (mouvType ==
@@ -1309,7 +1320,8 @@ void ManagerMovement_AutoTorque(uint8_t mouvType, float posLimit,
         managerMovement.mTorqueGoal[MMOT_MOTOR_3] = targetTorque;
         ManagerMotor_MovePosSpeedTorque(
             MMOT_MOTOR_3, managerMovement.mPosGoal[MMOT_MOTOR_3],
-            managerMovement.mSpeedGoal[MMOT_MOTOR_3],
+            managerMovement.mSpeedMin[MMOT_MOTOR_3],
+			managerMovement.mSpeedGoal[MMOT_MOTOR_3],
             managerMovement.mTorqueGoal[MMOT_MOTOR_3]);
     }
 }
