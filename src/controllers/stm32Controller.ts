@@ -74,6 +74,7 @@ let saveData = {
 };
 
 let exerciseId: number | null = null;
+let recodState = "start";
 
 const getSavedData = asyncHandler(async (_: Request, res: Response) => {
   try {
@@ -243,8 +244,8 @@ const updateDataToSupabase = async () => {
 };
 
 // Function to toggle the push interval for periodic updates
-const togglePushInterval = (start: boolean) => {
-  if (start && !pushInterval) {
+const togglePushInterval = (state: string) => {
+  if (state === 'start' && !pushInterval) {
     if (!exerciseId) {
       console.error(
         "Cannot start push interval. Initial data has not been inserted.",
@@ -256,7 +257,7 @@ const togglePushInterval = (start: boolean) => {
       updateDataToSupabase();
     }, PUSH_INTERVAL_MS);
     console.log("Push interval started");
-  } else if (!start && pushInterval) {
+  } else if (state === 'stop' && pushInterval) {
     clearInterval(pushInterval);
     pushInterval = null;
     console.log("Push interval stopped");
@@ -266,37 +267,48 @@ const togglePushInterval = (start: boolean) => {
 // Function to handle recording start/stop
 const recordingStm32Data = async (req: Request, res: Response) => {
   try {
-    const { start } = req.body;
+    const { state } = req.body;
 
     // Validate request body
-    if (typeof start !== "boolean") {
+    if (typeof state !== "string") {
       return res
         .status(400)
         .send(
-          "Invalid request. Please provide a 'start' field with a boolean value.",
+          "Invalid request. Please provide a 'state' field with a string value.",
         );
     }
 
-    if (start) {
+    if (state === "start") {
       // Clear previous data if needed
       resetSaveData();
 
       // Insert initial JSON data
-      const initialInsertSuccess = await insertInitialDataToSupabase();
-      if (!initialInsertSuccess) {
-        return res
-          .status(500)
-          .send("Failed to start recording. Initial data insert failed.");
-      }
+      if (recodState !== "pause") {
 
+        const initialInsertSuccess = await insertInitialDataToSupabase();
+        if (!initialInsertSuccess) {
+          return res
+            .status(500)
+            .send("Failed to start recording. Initial data insert failed.");
+        }
+      }
       // Start recording
-      togglePushInterval(true);
+      recodState = "start";
+      togglePushInterval("start");
       return res
         .status(200)
         .send({ exercise_id: exerciseId, message: "Recording started." });
-    } else {
+    } else if (state === "pause"){
+      recodState = "pause";
+      togglePushInterval("stop");
+      return res
+      .status(200)
+      .send({ exercise_id: exerciseId, message: "Recording paused." });
+
+    } else if (state === "stop") {
       // Stop recording
-      togglePushInterval(false);
+      recodState = "stop";
+      togglePushInterval("stop");
       return res
         .status(200)
         .send({ exercise_id: exerciseId, message: "Recording stopped." });
@@ -343,7 +355,7 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
 
     newSerialPort.on("error", (error) => {
       console.log("Serial port error:", error.message);
-      togglePushInterval(false);
+      togglePushInterval("stop");
       resetSaveData();
       setSerialPort(null);
     });
@@ -351,7 +363,7 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
     newSerialPort.on("close", () => {
       console.log("Serial port closed");
       io.emit("serialPortClosed", "Serial port closed");
-      togglePushInterval(false);
+      togglePushInterval("stop");
       resetSaveData();
       setSerialPort(null);
     });
@@ -374,6 +386,9 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
         const jsonDataString = receivedDataBuffer.substring(startIdx, endIdx);
 
         try {
+          if (recodState === "stop" || recodState === "pause") {
+            return;
+          }
           const parsedData = JSON.parse(jsonDataString);
           io.emit("stm32Data", parsedData);
 

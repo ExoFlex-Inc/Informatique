@@ -131,7 +131,7 @@ export default function HMI() {
       hasExecute.current = true;
       console.log("Reset", message);
     }
-  }, [socket, stm32Data]);
+  }, [stm32Data]);
 
   useEffect(() => {
     if (
@@ -158,7 +158,7 @@ export default function HMI() {
       console.log("plan", message);
       socket.emit("sendDataToStm32", message);
     }
-  }, [stm32Data, planData, socket]);
+  }, [stm32Data, planData]);
 
   useEffect(() => {
     const stopRecording = async () => {
@@ -170,7 +170,7 @@ export default function HMI() {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              start: false,
+              state: "stop",
             }),
             credentials: "include",
           });
@@ -179,6 +179,28 @@ export default function HMI() {
             console.log("Recording stopped successfully.");
           } else {
             console.error("Failed to stop recording.");
+          }
+        } catch (error) {
+          console.error("An error occurred:", error);
+        }
+      }
+      else if (stm32Data?.AutoState === "Ready") {
+        try {
+          const response = await fetch("http://localhost:3001/stm32/record", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              state: "pause",
+            }),
+            credentials: "include",
+          });
+
+          if (response.ok) {
+            console.log("Recording paused successfully.");
+          } else {
+            console.error("Failed to pause recording.");
           }
         } catch (error) {
           console.error("An error occurred:", error);

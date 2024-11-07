@@ -70,7 +70,7 @@ const Button: React.FC<ButtonProps> = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          start: true,
+          state: "start",
         }),
         credentials: "include",
       });
@@ -93,7 +93,7 @@ const Button: React.FC<ButtonProps> = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          start: false,
+          state: "stop",
         }),
         credentials: "include",
       });
@@ -102,6 +102,29 @@ const Button: React.FC<ButtonProps> = ({
         console.log("Recording stopped successfully.");
       } else {
         console.error("Failed to stop recording.");
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
+    }
+  };
+
+  const sendingStm32PauseRecordingRequests = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/stm32/record", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          state: "pause",
+        }),
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        console.log("Recording paused successfully.");
+      } else {
+        console.error("Failed to pause recording.");
       }
     } catch (error) {
       console.error("An error occurred:", error);
@@ -137,7 +160,10 @@ const Button: React.FC<ButtonProps> = ({
     } else if (content === "Start") {
       sendingStm32RecordingRequests();
       sendingRequests(mode, action, content);
-    } else if (content === "Stop" || content === "Pause") {
+    } else if (content === "Pause") {
+      sendingStm32PauseRecordingRequests();
+      sendingRequests(mode, action, content);
+    } else if (content === "Stop") {
       sendingStm32StopRecordingRequests();
       sendingRequests(mode, action, content);
     } else {
