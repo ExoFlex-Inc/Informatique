@@ -184,12 +184,12 @@ export default function Manual() {
 
   const generateAndDownloadCsv = (stm32Data: any) => {
     let csvContent =
-      "Index,Dorsiflexion Angle,Eversion Angle,Extension Angle,Dorsiflexion Torque,Eversion Torque,Extension Torque\n";
+      "Index,Dorsiflexion Angle,Eversion Angle,Extension Angle,Dorsiflexion Torque,Eversion Torque,Extension Torque,Dorsiflexion Speed,Eversion Speed,Extension Speed\n";
 
     const dataLength = stm32Data.angles.dorsiflexion.length;
 
     for (let i = 0; i < dataLength; i++) {
-      const rowData = `${i + 1},${stm32Data.angles.dorsiflexion[i]},${stm32Data.angles.eversion[i]},${stm32Data.angles.extension[i]},${stm32Data.torques.dorsiflexion[i]},${stm32Data.torques.eversion[i]},${stm32Data.torques.extension[i]}\n`;
+      const rowData = `${i + 1},${stm32Data.angles.dorsiflexion[i]},${stm32Data.angles.eversion[i]},${stm32Data.angles.extension[i]},${stm32Data.torques.dorsiflexion[i]},${stm32Data.torques.eversion[i]},${stm32Data.torques.extension[i]},${stm32Data.speeds.dorsiflexion[i]},${stm32Data.speeds.eversion[i]},${stm32Data.speeds.extension[i]}\n`;
       csvContent += rowData;
     }
 
@@ -199,7 +199,18 @@ export default function Manual() {
     const a = document.createElement("a");
     a.style.display = "none";
     a.href = url;
-    a.download = "stm32_data.csv";
+
+    const date = new Date();
+    const fileName =
+      (date.getMonth() + 1).toString().padStart(2, "0") + // Month (MM)
+      date.getDate().toString().padStart(2, "0") +
+      "_" + // Day (DD)
+      date.getHours().toString().padStart(2, "0") +
+      "h" + // Hour (HH)
+      date.getMinutes().toString().padStart(2, "0") + // Minute (MM)
+      ".csv";
+
+    a.download = fileName;
     document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);
