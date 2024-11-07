@@ -534,7 +534,13 @@ export default function Activity() {
   }
 
   return (
-    <Box sx={{maxWidth: "80rem", marginLeft: "auto", marginRight: "auto"}}>
+    <Box sx={{maxWidth: "80rem",
+      marginLeft: "auto", 
+      marginRight: "auto", 
+      display: "flex", 
+      flexDirection: "column", 
+      height: "calc(100vh - 100px)"}}
+    >
       <div className="mb-4 flex flex-wrap items-center gap-4">
         {/* User Search Bar */}
         <div className="flex-grow max-w-md">

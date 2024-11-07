@@ -24,6 +24,7 @@ const Button: React.FC<ButtonProps> = ({
   content,
   mainColor,
   hoverColor,
+  textColor,
   socket,
   disabled,
   icon,
@@ -154,7 +155,11 @@ const Button: React.FC<ButtonProps> = ({
       onContextMenu={(e) => e.preventDefault()}
       size="large"
       sx={{
+        color: textColor,
         backgroundColor: mainColor,
+        "&.Mui-disabled": {
+          color: "gray"
+        },
         "&:hover": {
           backgroundColor: hoverColor,
         },
@@ -177,6 +182,7 @@ const Button: React.FC<ButtonProps> = ({
       sx={{
         mt: 3,
         mb: 2,
+        color: textColor,
         textTransform: "none",
         fontSize: "1rem",
         backgroundColor: "blueAccent.main",

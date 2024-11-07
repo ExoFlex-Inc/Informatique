@@ -7,6 +7,7 @@ import {
   Table,
   TableCell,
   Typography,
+  Paper,
 } from "@mui/material";
 import type { Side } from "./ToggleSide.tsx";
 
@@ -78,9 +79,9 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
   };
 
   return (
-    <TableContainer sx={{ borderRadius: "12px", bgcolor: "white" }}>
+    <TableContainer component={Paper} sx={{ borderRadius: "12px", bgcolor: "white" }}>
       <Table>
-        <TableHead className="bg-gray-50">
+        <TableHead className="bg-gray-100">
           <TableRow>
             <TableCell
               sx={{ borderRight: 1, borderColor: "lightgrey" }}

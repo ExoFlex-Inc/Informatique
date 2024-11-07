@@ -7,6 +7,7 @@ import {
   TableCell,
   Typography,
   Box,
+  Paper
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import React from "react";
@@ -139,10 +140,11 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
     <Box>
       {set.movement.length > 0 ? (
         <TableContainer
+          component={Paper}
           sx={{ borderRadius: "12px", bgcolor: "white", marginTop: "20px" }}
         >
           <Table>
-            <TableHead className="bg-gray-50">
+            <TableHead className="bg-gray-100">
               <TableRow>
                 <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }} />
                 <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}>
@@ -232,7 +234,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                 </TableRow>
               ))}
             </TableBody>
-            <TableHead className="bg-gray-50" sx={{ borderColor: "lightgrey" }}>
+            <TableHead className="bg-gray-100" sx={{ borderColor: "lightgrey" }}>
               <TableRow>
                 <TableCell
                   sx={{
@@ -328,7 +330,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
           sx={{ borderRadius: "12px", bgcolor: "white", marginTop: "20px" }}
         >
           <Table>
-            <TableHead className="bg-gray-50">
+            <TableHead className="bg-gray-100">
               <TableRow>
                 <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}>
                   <Typography align="center" sx={{ color: "gray" }}>

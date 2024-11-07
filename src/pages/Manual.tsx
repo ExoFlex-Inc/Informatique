@@ -5,6 +5,7 @@ import {
   FormControlLabel,
   Grid,
   TextField,
+  IconButton
 } from "@mui/material";
 import { Refresh, PlayArrow, Pause, Home } from "@mui/icons-material";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
@@ -229,8 +230,8 @@ export default function Manual() {
                     disabled={!graphPause}
                     size="large"
                     sx={{
-                      backgroundColor: "blueAccent.main",
-                      "&:hover": { backgroundColor: "blueAccent.hover" },
+                      backgroundColor: "#2fb73d",
+                      "&:hover": { backgroundColor: "#33a63f" },
                     }}
                   >
                     <PlayArrow />
@@ -240,8 +241,8 @@ export default function Manual() {
                     disabled={graphPause}
                     size="large"
                     sx={{
-                      backgroundColor: "blueAccent.main",
-                      "&:hover": { backgroundColor: "blueAccent.hover" },
+                      backgroundColor: "#f5d50b",
+                      "&:hover": { backgroundColor: "#dcc21d" },
                     }}
                   >
                     <Pause />
