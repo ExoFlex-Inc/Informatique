@@ -227,7 +227,7 @@ const LineChart: React.FC<LineChartProps> = ({
   }, [title]);
 
   return (
-    <Box sx={{margin: "24px"}}>
+    <Box sx={{margin: "10px"}}>
       <Paper sx={{borderRadius: "8px", backgroundColor: "white"}}>
         <Line
           ref={chartRef}

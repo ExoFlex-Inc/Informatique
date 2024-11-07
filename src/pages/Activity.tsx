@@ -537,11 +537,11 @@ export default function Activity() {
     <Box sx={{maxWidth: "80rem",
       marginLeft: "auto", 
       marginRight: "auto", 
-      display: "flex", 
+      display: "flex",
       flexDirection: "column", 
       height: "calc(100vh - 100px)"}}
     >
-      <div className="mb-4 flex flex-wrap items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         {/* User Search Bar */}
         <div className="flex-grow max-w-md">
           <UserSearchBar
@@ -573,7 +573,7 @@ export default function Activity() {
             </FormControl>
           )}
       </div>
-      <div className="relative flex items-center justify-between mb-4">
+      <div className="relative flex items-center justify-between">
         <div className="flex items-center gap-2">
           <IconButton onClick={() => setIsGraphFilterOpen(!isGraphFilterOpen)}>
             <FilterAlt />
@@ -590,14 +590,14 @@ export default function Activity() {
           )}
         </div>
       </div>
-      <Box sx={{display: "flex", alignContent: "center", justifyContent: "center", marginBottom: "16px"}}>
+      <Box sx={{display: "flex", alignContent: "center", justifyContent: "center"}}>
         <Typography variant="h6">
           {graphType}
         </Typography>
 
       </Box>
       <CustomScrollbar>
-        <Box sx={{marginBottom: "16px", flexBasis: "100%"}}>
+        <Box paddingX={15} sx={{flexBasis: "100%"}}>
           <LineChart type="activity" chartData={dataset1} title={title1} />
         </Box>
         <ThemeProvider theme={createTheme({ palette: { mode: "light" } })}>

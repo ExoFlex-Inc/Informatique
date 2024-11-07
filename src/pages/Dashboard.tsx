@@ -33,7 +33,7 @@ export default function Dashboard() {
     >
       <CustomScrollbar>
         {hasPermissions && (
-          <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+          <Container maxWidth="lg" sx={{ mt: 2, mb: 2 }}>
             <Grid container spacing={3}>
               {stats && (
                 <StretchStreak

@@ -381,10 +381,10 @@ export default function HMI() {
       <CustomScrollbar>
         <Box>
           <Grid
-            padding={5}
+            paddingX={12}
             container
             spacing={2}
-            sx={{ justifyContent: "center", alignItems: "center" }}
+            sx={{ justifyContent: "center", alignItems: "stretch" }}
           >
             <Grid item xs={12}>
               <Box
@@ -482,14 +482,16 @@ export default function HMI() {
               />
             </Grid>
             <Grid item>
-              <ProgressionWidget
-                setOpenDialogPainScale={setOpenDialogPainScale}
-                stm32Data={stm32Data}
-                planData={planData}
-              />
+              <Paper sx={{padding: "10px", backgroundColor: "white", height: "100%"}}>
+                <ProgressionWidget
+                  setOpenDialogPainScale={setOpenDialogPainScale}
+                  stm32Data={stm32Data}
+                  planData={planData}
+                />
+              </Paper>
             </Grid>
             <Grid item>
-              <Paper>
+              <Paper sx={{height: "100%", backgroundColor: "white"}} >
                 <ExerciseOverviewWidget
                   stm32Data={stm32Data}
                   planData={planData}

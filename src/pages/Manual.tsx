@@ -222,6 +222,7 @@ export default function Manual() {
         <Box>
           <Grid
             container
+            paddingX={12}
             spacing={2}
             sx={{ justifyContent: "center", alignItems: "center" }}
           >
