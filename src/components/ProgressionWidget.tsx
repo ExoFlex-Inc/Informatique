@@ -58,17 +58,17 @@ export default function ProgressionWidget({
 
   useEffect(() => {
     let stretchDone = 0;
-    for(let i = stm32Data?.ExerciseIdx - 1; i > -1; i--) {
+    for (let i = stm32Data?.ExerciseIdx - 1; i > -1; i--) {
       stretchDone = stretchDone + planData.plan[i].repetitions;
     }
     setStretchProgress(stretchDone);
-  }, [stm32Data?.ExerciseIdx])
+  }, [stm32Data?.ExerciseIdx]);
 
   useEffect(() => {
-    if(stm32Data?.AutoState === "Resting") {
+    if (stm32Data?.AutoState === "Resting") {
       setStretchProgress(stretchProgress + 1);
     }
-  }, [stm32Data?.AutoState])
+  }, [stm32Data?.AutoState]);
 
   // Memoize totalStretch calculation
   const totalStretch = useMemo(() => {
