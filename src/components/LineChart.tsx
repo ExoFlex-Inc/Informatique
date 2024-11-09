@@ -241,6 +241,7 @@ const LineChart: React.FC<LineChartProps> = ({
               }
             }}
               onClick={() => setIsFullScreen(false)}
+              onTouchStart={() => setIsFullScreen(false)}
             >
               <FullscreenExitIcon />
             </IconButton>
@@ -251,6 +252,7 @@ const LineChart: React.FC<LineChartProps> = ({
               }
             }}
               onClick={() => setIsFullScreen(true)}
+              onTouchStart={() => setIsFullScreen(true)}
             >
               <FullscreenIcon />
             </IconButton>
