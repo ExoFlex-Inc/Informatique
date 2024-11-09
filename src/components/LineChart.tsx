@@ -1,9 +1,12 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Line } from "react-chartjs-2";
 import "chartjs-adapter-luxon";
 import Chart from "chart.js/auto";
 import { CategoryScale } from "chart.js";
 import StreamingPlugin from "chartjs-plugin-streaming";
+import { IconButton, Box } from "@mui/material";
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import type {
   ChartData,
   ChartOptions,
@@ -46,6 +49,8 @@ const LineChart: React.FC<LineChartProps> = ({
 
     return { min, max };
   };
+
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   const [chartOptions, setChartOptions] = React.useState<ChartOptions<"line">>(
     () => {
@@ -227,8 +232,32 @@ const LineChart: React.FC<LineChartProps> = ({
 
   return (
     <div className="graph-container">
-      <div className="bg-white rounded-lg">
+      <div className={`bg-white rounded-lg ${isFullScreen ? "h-screen w-screen top-0 left-0 fixed z-20" : ""}`}>
+        <Box sx={{justifyContent: "right", display: "flex", paddingRight:1, paddingTop: 1}}>
+          {isFullScreen ? 
+            <IconButton sx={{color: "gray",
+              "&:hover": {
+                backgroundColor: "lightgray",
+              }
+            }}
+              onClick={() => setIsFullScreen(false)}
+            >
+              <FullscreenExitIcon />
+            </IconButton>
+          :
+            <IconButton sx={{color: "gray",
+              "&:hover": {
+                backgroundColor: "lightgray",
+              }
+            }}
+              onClick={() => setIsFullScreen(true)}
+            >
+              <FullscreenIcon />
+            </IconButton>
+          }
+        </Box>
         <Line
+          key={isFullScreen ? 'fullscreen' : 'normal'}
           ref={chartRef}
           data={
             type === "realtime"
