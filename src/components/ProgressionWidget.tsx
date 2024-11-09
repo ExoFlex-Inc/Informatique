@@ -56,6 +56,20 @@ export default function ProgressionWidget({
   const [repetitionProgress, setRepetitionProgress] = useState(0);
   const [totalRepetition, setTotalRepetition] = useState(-1);
 
+  useEffect(() => {
+    let stretchDone = 0;
+    for(let i = stm32Data?.ExerciseIdx - 1; i > -1; i--) {
+      stretchDone = stretchDone + planData.plan[i].repetitions;
+    }
+    setStretchProgress(stretchDone);
+  }, [stm32Data?.ExerciseIdx])
+
+  useEffect(() => {
+    if(stm32Data?.AutoState === "Resting") {
+      setStretchProgress(stretchProgress + 1);
+    }
+  }, [stm32Data?.AutoState])
+
   // Memoize totalStretch calculation
   const totalStretch = useMemo(() => {
     console.log(planData);
@@ -68,11 +82,11 @@ export default function ProgressionWidget({
   useEffect(() => {
     if (stm32Data?.Repetitions !== undefined) {
       setRepetitionProgress(stm32Data.Repetitions);
-      setStretchProgress(stm32Data.Repetitions);
 
       // Open pain scale dialog if repetitions are complete
-      if (stm32Data.Repetitions === totalRepetition) {
+      if (stretchProgress === totalStretch) {
         setOpenDialogPainScale(true);
+        setStretchProgress(0);
       }
     }
   }, [stm32Data?.Repetitions, totalRepetition, setOpenDialogPainScale]);
@@ -104,7 +118,7 @@ export default function ProgressionWidget({
           marginBottom: "28px",
         }}
       >
-        Stretch Progress
+        Session Progress
       </Typography>
       <Typography
         fontSize={"20px"}
