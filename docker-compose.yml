@@ -9,6 +9,12 @@ services:
     ports:
       - "1338:1338"
       - "3001:3001"
+    devices:
+      - "/dev/tty.usbmodem1103:/dev/tty.usbmodem1103"
+    privileged: true
+    group_add:
+      - dialout
+      - tty
     restart: always
     environment:
       - NODE_ENV=production
