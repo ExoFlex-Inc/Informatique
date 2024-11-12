@@ -20,10 +20,10 @@ if (workbox) {
   const assetsToCache = [
     '/',
     '/index.html',
-    '/assets/exoflex_team.jpg',
-    '/assets/logo_only.png',
-    '/assets/logo.png',
-    '/assets/user.png',
+    '/exoflex_team.jpg',
+    '/logo_only.png',
+    '/logo.png',
+    '/user.png',
   ];
 
   // Cache custom assets during service worker installation

@@ -1,18 +1,17 @@
 services:
   app:
-    image: exoflex
+    image: exoflex_image
     build:
       context: .
       dockerfile: ./Dockerfile
     env_file:
       - .env.production
     ports:
-      - "1388:1388"
-      - "3001:3001"  # Expose this port only for internal access
+      - "1338:1338"
+      - "3001:3001"
     restart: always
-    volumes:
-      - .:/app
-      - node_modules:/app/node_modules
+    environment:
+      - NODE_ENV=production
 
   watchtower:
     image: containrrr/watchtower
@@ -20,8 +19,5 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - WATCHTOWER_CLEANUP=true
-      - WATCHTOWER_POLL_INTERVAL=300 # Checks for updates every 5 minutes
+      - WATCHTOWER_POLL_INTERVAL=300
     restart: always
-
-volumes:
-  node_modules:

@@ -4,11 +4,11 @@ FROM node:18 AS builder
 # Set working directory
 WORKDIR /app
 
-# Copy package.json and yarn.lock to install dependencies
+# Copy package.json and yarn.lock for dependency installation
 COPY package.json yarn.lock ./
 
-# Install all dependencies
-RUN yarn install --verbose
+# Install dependencies
+RUN yarn install
 
 # Copy all application files
 COPY . .
@@ -17,24 +17,24 @@ COPY . .
 RUN yarn build
 
 # Stage 2: Production Stage
-FROM node:18-alpine AS production
+FROM node:18
 
-# Set working directory
 WORKDIR /app
 
-# Set NODE_ENV to production for optimized runtime performance
-ENV NODE_ENV=production
+# Copy package.json and yarn.lock
+COPY package.json yarn.lock ./
 
-# Copy only the necessary files from the builder stage
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/yarn.lock ./
-COPY --from=builder /app/node_modules ./node_modules
+# Install all dependencies (since we need both frontend and backend deps)
+RUN yarn install
+
+# Copy the built files from builder stage
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/public/* ./dist/
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/src/server.ts ./src/server.ts
+COPY --from=builder /app/src ./src
 
-# Expose the port(s) the application will run on
 EXPOSE 1338
 EXPOSE 3001
 
-# Start the server
+# Start both servers
 CMD ["yarn", "start"]

@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "concurrently \"yarn preview\" \"yarn server\"",
+    "start": "NODE_ENV=production concurrently \"vite preview --host --port 1338\" \"yarn server\"",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
