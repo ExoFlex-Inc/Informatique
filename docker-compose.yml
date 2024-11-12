@@ -10,7 +10,7 @@ services:
       - "1338:1338"
       - "3001:3001"
     devices:
-      - "/dev/tty.usbmodem1103:/dev/tty.usbmodem1103"
+      - "/dev/ttyACM0:/dev/ttyACM0"
     privileged: true
     group_add:
       - dialout

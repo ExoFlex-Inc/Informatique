@@ -330,18 +330,22 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
     return;
   }
   let scannerPort: string | undefined;
-
-  if (process.env["ROBOT"] === "true") {
-    const ports = await SerialPort.list();
-    const foundPort = ports.find(
-      (port) => port.manufacturer === "STMicroelectronics",
-    );
-
-    if (foundPort) {
-      scannerPort = foundPort.path;
-    }
+  if(process.env["NODE_ENV"] === "production"){
+    scannerPort = "/dev/ttyACM0"
   } else {
-    scannerPort = process.env["HMI_SERIAL_PORT"];
+
+    if (process.env["ROBOT"] === "true") {
+      const ports = await SerialPort.list();
+      const foundPort = ports.find(
+        (port) => port.manufacturer === "STMicroelectronics",
+      );
+  
+      if (foundPort) {
+        scannerPort = foundPort.path;
+      }
+    } else {
+      scannerPort = process.env["HMI_SERIAL_PORT"];
+    }
   }
 
   if (scannerPort) {
