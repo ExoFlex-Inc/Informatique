@@ -7,7 +7,6 @@ export interface UserProfile {
   permissions?: string[];
   fcm_token?: string | null;
   avatar_url?: string;
-  avatar_blob_url?: string;
 }
 
 export function useUser() {
@@ -70,29 +69,6 @@ export function useUser() {
         }
 
         const profileData = await profileResponse.json();
-
-        // Fetch the avatar if it exists
-        if (profileData.avatar_url) {
-          const avatarResponse = await fetch(
-            `http://localhost:3001/user/avatar/${data.user.id}?path=${encodeURIComponent(
-              profileData.avatar_url,
-            )}`,
-            {
-              method: "GET",
-              credentials: "include",
-            },
-          );
-
-          if (avatarResponse.ok) {
-            const avatarBlob = await avatarResponse.blob();
-            const avatarBlobUrl = URL.createObjectURL(avatarBlob);
-            if (avatarBlobUrl) {
-              profileData.avatar_blob_url = avatarBlobUrl;
-            } else {
-              profileData.avatar_blob_url = null;
-            }
-          }
-        }
 
         return profileData;
       }
@@ -195,77 +171,5 @@ export function useUser() {
     status,
     updateProfile,
     uploadAvatar,
-  };
-}
-
-export function useTopUsers() {
-  const {
-    data: users,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["topUsers"],
-    queryFn: async () => {
-      // Fetch top users from your backend
-      const response = await fetch("http://localhost:3001/stat/top_users", {
-        method: "GET",
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(
-          `Error fetching top users: ${response.status} ${errorText}`,
-        );
-      }
-
-      const data = await response.json();
-
-      // Fetch avatars for each user and augment the user data
-      const updatedData = await Promise.all(
-        data.map(async (profileData: UserProfile) => {
-          if (profileData.avatar_url) {
-            try {
-              const avatarResponse = await fetch(
-                `http://localhost:3001/user/avatar/${profileData.user_id}?path=${encodeURIComponent(
-                  profileData.avatar_url,
-                )}`,
-                {
-                  method: "GET",
-                },
-              );
-
-              if (avatarResponse.ok) {
-                const avatarBlob = await avatarResponse.blob();
-                const avatarBlobUrl = URL.createObjectURL(avatarBlob);
-                return {
-                  ...profileData,
-                  avatar_blob_url: avatarBlobUrl,
-                };
-              }
-            } catch (error) {
-              console.error(
-                `Error fetching avatar for user ${profileData.user_id}:`,
-                error,
-              );
-            }
-          }
-
-          return {
-            ...profileData,
-            avatar_blob_url: null,
-          };
-        }),
-      );
-
-      return updatedData;
-    },
-    staleTime: 1000 * 60 * 15, // 15 min
-    refetchOnMount: true,
-  });
-
-  return {
-    users,
-    isLoading,
-    error,
   };
 }

@@ -18,7 +18,7 @@ interface User {
   id: string;
   first_name: string;
   last_name: string;
-  avatar_blob_url: string;
+  avatar_url: string;
   stats: {
     current_streak: number;
     longest_streak: number;
@@ -166,8 +166,8 @@ export default function Leaderboard({ users, currentUser }: LeaderboardProps) {
                 <Avatar
                   alt={user.first_name}
                   src={
-                    user.avatar_blob_url
-                      ? user.avatar_blob_url
+                    user.avatar_url
+                      ? user.avatar_url
                       : "/assets/user.png"
                   }
                 />
@@ -222,8 +222,8 @@ export default function Leaderboard({ users, currentUser }: LeaderboardProps) {
               <Avatar
                 alt={currentUser.first_name}
                 src={
-                  currentUser.avatar_blob_url
-                    ? currentUser.avatar_blob_url
+                  currentUser.avatar_url
+                    ? currentUser.avatar_url
                     : "/assets/user.png"
                 }
                 sx={{ mr: 2 }}

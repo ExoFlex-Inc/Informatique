@@ -99,7 +99,7 @@ function Profile() {
         >
           <Avatar
             src={
-              user?.avatar_blob_url ? user.avatar_blob_url : "/assets/user.png"
+              user?.avatar_url ? user.avatar_url : "/assets/user.png"
             }
             sx={{ width: "25vw", height: "25vw" }}
           />
