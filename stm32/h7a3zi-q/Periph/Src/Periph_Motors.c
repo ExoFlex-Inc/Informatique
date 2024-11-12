@@ -5,8 +5,7 @@ int32_t PeriphMotors_ConvFloatToUint(float val, float min, float max,
 float   PeriphMotors_ConvUintToFloat(int32_t val, float min, float max,
                                      uint8_t bits);
 
-void PeriphMotors_AppendBuf(float *buf, float data);
-float PeriphMotors_SumBuf(float *buf);
+float PeriphMotors_SumBuf(float *buf, uint8_t size);
 
 /// @brief AK10-9
 // AmpPerNm = 1/R/Kt/expermientalFactor = 1/9/0.16/18 = 0.0385 A/Nm
@@ -45,6 +44,21 @@ bool PeriphMotors_InitMotor(Motor* pMotor, uint8_t id, uint8_t model,
 
     pMotor->parameters.ratio = ratio;
 
+
+    pMotor->noiseSmallIndex = 0;
+    for (uint8_t i = 0; i < NOISE_SMALL_BUF_SIZE; i++)
+    {
+    	pMotor->posBuf[i] = 0;
+    }
+
+    pMotor->noiseBigIndex = 0;
+    for (uint8_t i = 0; i < NOISE_BIG_BUF_SIZE; i++)
+    {
+    	pMotor->velBuf[i] = 0;
+    	pMotor->torBuf[i] = 0;
+    }
+
+
     PeriphMotors_Move(pMotor, 0, 0, 0, 0, 0);
     PeriphMotors_Disable(pMotor);
 
@@ -79,6 +93,13 @@ void PeriphMotors_SoftwareOrigin(Motor* pMotor)
 {
     pMotor->parameters.offset += pMotor->position;
     pMotor->position = 0;
+
+    //Reset position noise buf
+    for (uint8_t i = 0; i < NOISE_SMALL_BUF_SIZE; i++)
+    {
+    	pMotor->posBuf[i] = 0;
+    }
+
 }
 
 bool PeriphMotors_IsSoftwareOrigin(Motor* pMotor)
@@ -153,13 +174,27 @@ void PeriphMotors_ParseMotorState(Motor* pMotor, uint8_t* canData)
     // Apply offset
     position = position - pMotor->parameters.offset;
 
-    PeriphMotors_AppendBuf(pMotor->posBuf, position);
-    PeriphMotors_AppendBuf(pMotor->velBuf, velocity);
-    PeriphMotors_AppendBuf(pMotor->torBuf, torque);
+    // Add data to noise buffer
+    pMotor->posBuf[pMotor->noiseSmallIndex] = position;
+    pMotor->velBuf[pMotor->noiseBigIndex] = velocity;
+    pMotor->torBuf[pMotor->noiseBigIndex] = torque;
 
-    pMotor->position = PeriphMotors_SumBuf(pMotor->posBuf);
-    pMotor->velocity = PeriphMotors_SumBuf(pMotor->velBuf);
-	pMotor->torque = PeriphMotors_SumBuf(pMotor->torBuf);
+    pMotor->noiseSmallIndex += 1;
+    if (pMotor->noiseSmallIndex >= NOISE_SMALL_BUF_SIZE)
+    {
+    	pMotor->noiseSmallIndex = 0;
+    }
+
+    pMotor->noiseBigIndex += 1;
+    if (pMotor->noiseBigIndex >= NOISE_BIG_BUF_SIZE)
+    {
+    	pMotor->noiseBigIndex = 0;
+    }
+
+    //Get noise parsed data
+    pMotor->position = PeriphMotors_SumBuf(pMotor->posBuf, NOISE_SMALL_BUF_SIZE);
+    pMotor->velocity = PeriphMotors_SumBuf(pMotor->velBuf, NOISE_BIG_BUF_SIZE);
+	pMotor->torque = PeriphMotors_SumBuf(pMotor->torBuf, NOISE_BIG_BUF_SIZE);
 
 	float current = pMotor->torque * pMotor->parameters.AmpPerNm;
     if (current < 0)
@@ -170,26 +205,18 @@ void PeriphMotors_ParseMotorState(Motor* pMotor, uint8_t* canData)
 
 }
 
-void PeriphMotors_AppendBuf(float *buf, float data)
-{
-	for (uint8_t i = 0; i < NOISE_BUF_SIZE - 1; i++)
-	{
-		buf[i] = buf[i+1];
-	}
 
-	buf[NOISE_BUF_SIZE] = data;
-}
-
-float PeriphMotors_SumBuf(float *buf)
+float PeriphMotors_SumBuf(float *buf, uint8_t size)
 {
 	float sum = 0;
-	for (uint8_t i = 0; i < NOISE_BUF_SIZE - 1; i++)
+	for (uint8_t i = 0; i < size - 1; i++)
 	{
 		sum += buf[i];
 	}
 
-	return sum;
+	return sum / size;
 }
+
 
 int32_t PeriphMotors_ConvFloatToUint(float val, float min, float max,
                                      uint8_t bits)
