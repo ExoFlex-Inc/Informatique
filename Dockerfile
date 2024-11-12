@@ -21,27 +21,10 @@ FROM ubuntu:22.04
 # Install Node.js and required packages
 RUN apt-get update && apt-get install -y \
     curl \
-    udev \
-    setserial \
     && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y \
     nodejs \
     && npm install -g yarn
-
-# Create non-root user and group with specific IDs
-RUN groupadd -r -g 1000 serialgroup && \
-    useradd -r -u 1000 -g serialgroup serialuser
-
-# Add user to required groups
-RUN usermod -a -G dialout serialuser && \
-    usermod -a -G tty serialuser && \
-    usermod -a -G plugdev serialuser
-
-# Create udev rules directory
-RUN mkdir -p /etc/udev/rules.d
-
-# Add udev rule for serial device
-RUN echo 'KERNEL=="ttyACM[0-9]*", MODE="0666", GROUP="dialout"' > /etc/udev/rules.d/99-serial.rules
 
 WORKDIR /app
 
@@ -52,11 +35,8 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/src ./src
 
-# # Set proper permissions
-# RUN chown -R serialuser:serialgroup /app
 
 EXPOSE 1338
 EXPOSE 3001
 
-USER serialuser
 CMD ["yarn", "start"]
