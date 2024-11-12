@@ -15,6 +15,26 @@ if (workbox) {
   workbox.core.clientsClaim();
   self.skipWaiting();
 
+  // Define custom cache name and assets to cache
+  const customCacheName = 'custom-cache';
+  const assetsToCache = [
+    '/',
+    '/index.html',
+    '/assets/exoflex_team.jpg',
+    '/assets/logo_only.png',
+    '/assets/logo.png',
+    '/assets/user.png',
+  ];
+
+  // Cache custom assets during service worker installation
+  self.addEventListener('install', (event) => {
+    event.waitUntil(
+      caches.open(customCacheName).then((cache) => {
+        return cache.addAll(assetsToCache);
+      })
+    );
+  });
+
   // Access the pre-defined cache names for use in this app
   const data = {
     race: false,
@@ -24,17 +44,17 @@ if (workbox) {
     fallback: "index.html",
   };
 
-  const cacheName = "runtime-cache";
+  const workboxCacheName = "runtime-cache";
 
   // Strategy for handling requests
   const buildStrategy = () => {
     if (data.networkTimeoutSeconds > 0) {
       return new workbox.strategies.NetworkFirst({
-        cacheName,
+        cacheName: workboxCacheName,
         networkTimeoutSeconds: data.networkTimeoutSeconds,
       });
     } else {
-      return new workbox.strategies.NetworkFirst({ cacheName });
+      return new workbox.strategies.NetworkFirst({ cacheName: workboxCacheName });
     }
   };
 
@@ -44,11 +64,11 @@ if (workbox) {
     (entry) => new URL(entry.url, self.location.href).href,
   );
 
-  // Cache resources during service worker installation
+  // Cache manifest resources during service worker installation
   self.addEventListener("install", (event) => {
     event.waitUntil(
       caches
-        .open(cacheName)
+        .open(workboxCacheName)
         .then((cache) =>
           cache.addAll(
             manifestURLs.map(
@@ -62,10 +82,10 @@ if (workbox) {
   // Activate handler: clear outdated caches
   self.addEventListener("activate", (event) => {
     event.waitUntil(
-      caches.open(cacheName).then((cache) => {
+      caches.open(workboxCacheName).then((cache) => {
         cache.keys().then((keys) => {
           keys.forEach((request) => {
-            if (!manifestURLs.includes(request.url)) {
+            if (!manifestURLs.includes(request.url) && !assetsToCache.includes(request.url)) {
               cache.delete(request);
             }
           });

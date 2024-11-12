@@ -23,10 +23,16 @@ import { exec } from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+if (process.env.NODE_ENV === 'production') {
+  dotenv.config({ path: '.env.production' });
+} else {
+  dotenv.config({ path: '.env' }); // or '.env.development' for dev
+}
+
 if (process.env["ROBOT"] === "false") {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
 
   const scriptPath = path.resolve(__dirname, "../src/utils/stm32Simulator.sh");
 
@@ -49,12 +55,24 @@ if (process.env["ROBOT"] === "false") {
 
 const app: Application = express();
 const httpServer = createServer(app);
+
+// Configure Socket.IO with CORS
 const io = new SocketIOServer(httpServer, {
   cors: {
     origin: "http://localhost:1338",
     methods: ["GET", "POST"],
   },
 });
+
+// Configure Express with CORS
+app.use(
+  cors({
+    origin: "http://localhost:1338",
+    credentials: true,
+  }),
+);
+
+app.use(express.static(path.join(__dirname, '../public')));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -65,13 +83,6 @@ const limiter = rateLimit({
 app.use("/auth", limiter);
 
 app.use(express.json());
-app.use(
-  cors({
-    origin: "http://localhost:1338",
-    credentials: true,
-  }),
-);
-
 app.use(cookieParser());
 app.use(supabaseMiddleware);
 
