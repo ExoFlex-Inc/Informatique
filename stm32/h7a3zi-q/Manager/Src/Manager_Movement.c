@@ -925,7 +925,7 @@ void ManagerMovement_AutoRest()
         }
         else  // Continue exercise with next rep
         {
-            managerMovement.autoState = MMOV_AUTO_STATE_READY;
+            managerMovement.autoState = MMOV_AUTO_STATE_2GOAL;
             repsCount++;
         }
     }
