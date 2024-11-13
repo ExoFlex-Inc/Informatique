@@ -38,7 +38,6 @@ export const createNotification = async (req: Request, res: Response) => {
   }
 
   try {
-
     const { data: newNotification, error: notifInsertError } = await supaClient
       .from("notifications")
       .insert([

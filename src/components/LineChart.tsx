@@ -4,7 +4,7 @@ import "chartjs-adapter-luxon";
 import Chart from "chart.js/auto";
 import { CategoryScale } from "chart.js";
 import StreamingPlugin from "chartjs-plugin-streaming";
-import { IconButton, Box, Paper  } from "@mui/material";
+import { IconButton, Box, Paper } from "@mui/material";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import type {

@@ -26,14 +26,13 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-if (process.env.NODE_ENV === 'production') {
-  dotenv.config({ path: '.env.production' });
+if (process.env.NODE_ENV === "production") {
+  dotenv.config({ path: ".env.production" });
 } else {
-  dotenv.config({ path: '.env' }); // or '.env.development' for dev
+  dotenv.config({ path: ".env" }); // or '.env.development' for dev
 }
 
 if (process.env["ROBOT"] === "false") {
-
   const scriptPath = path.resolve(__dirname, "../src/utils/stm32Simulator.sh");
 
   // Run socat for the STM32 simulator
@@ -72,7 +71,7 @@ app.use(
   }),
 );
 
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, "../public")));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -151,12 +150,12 @@ httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../dist')));
-  
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../dist")));
+
   // Handle client-side routing
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../dist/index.html'));
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../dist/index.html"));
   });
 }
 

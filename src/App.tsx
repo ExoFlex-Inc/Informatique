@@ -100,7 +100,6 @@ function AppLayout() {
   const { user, isLoading, isError, error } = useUser();
   const queryClient = useQueryClient();
 
-
   // Handle loading state
   if (isLoading) {
     return (
@@ -139,7 +138,7 @@ function AppLayout() {
 
 function App() {
   const [theme, colorMode] = useMode();
-  
+
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>

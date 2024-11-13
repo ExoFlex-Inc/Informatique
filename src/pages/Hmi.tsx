@@ -190,8 +190,7 @@ export default function HMI() {
         } catch (error) {
           console.error("An error occurred:", error);
         }
-      }
-      else if (stm32Data?.AutoState === "Ready") {
+      } else if (stm32Data?.AutoState === "Ready") {
         try {
           const response = await fetch("http://localhost:3001/stm32/record", {
             method: "POST",

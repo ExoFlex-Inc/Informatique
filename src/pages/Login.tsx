@@ -11,7 +11,9 @@ import { useUser } from "../hooks/use-user.ts";
 async function registerFCMToken() {
   try {
     // Register the service worker with the correct path
-    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    const registration = await navigator.serviceWorker.register(
+      "/firebase-messaging-sw.js",
+    );
 
     // Wait for the service worker to be ready
     await navigator.serviceWorker.ready;

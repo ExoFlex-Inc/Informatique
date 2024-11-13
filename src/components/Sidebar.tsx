@@ -152,11 +152,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
               <Box mb="25px">
                 <Box display="flex" justifyContent="center" alignItems="center">
                   <Avatar
-                    src={
-                      user.avatar_url
-                        ? user.avatar_url
-                        : "/assets/user.png"
-                    }
+                    src={user.avatar_url ? user.avatar_url : "/assets/user.png"}
                     sx={
                       isTablet
                         ? { width: 50, height: 50 }

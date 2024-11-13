@@ -133,18 +133,18 @@ export const uploadAvatar = async (req: Request, res: Response) => {
   try {
     // Upload to Supabase Storage
     const { data: uploadData, error: uploadError } = await supaClient.storage
-      .from('avatars')
+      .from("avatars")
       .upload(filePath, file.buffer, {
         contentType: file.mimetype,
-        upsert: true
+        upsert: true,
       });
 
     if (uploadError) throw uploadError;
 
     // Get public URL
-    const { data: { publicUrl } } = supaClient.storage
-      .from('avatars')
-      .getPublicUrl(filePath);
+    const {
+      data: { publicUrl },
+    } = supaClient.storage.from("avatars").getPublicUrl(filePath);
 
     // Get existing profile
     const { data: profile, error: profileError } = await supaClient
@@ -167,10 +167,9 @@ export const uploadAvatar = async (req: Request, res: Response) => {
     if (updateError) throw updateError;
 
     return res.status(200).json({ avatar_url: publicUrl });
-
   } catch (error) {
-    return res.status(500).json({ 
-      error: `Error uploading avatar: ${error.message}`
+    return res.status(500).json({
+      error: `Error uploading avatar: ${error.message}`,
     });
   }
 };

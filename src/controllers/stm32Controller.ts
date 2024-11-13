@@ -245,7 +245,7 @@ const updateDataToSupabase = async () => {
 
 // Function to toggle the push interval for periodic updates
 const togglePushInterval = (state: string) => {
-  if (state === 'start' && !pushInterval) {
+  if (state === "start" && !pushInterval) {
     if (!exerciseId) {
       console.error(
         "Cannot start push interval. Initial data has not been inserted.",
@@ -257,7 +257,7 @@ const togglePushInterval = (state: string) => {
       updateDataToSupabase();
     }, PUSH_INTERVAL_MS);
     console.log("Push interval started");
-  } else if (state === 'stop' && pushInterval) {
+  } else if (state === "stop" && pushInterval) {
     clearInterval(pushInterval);
     pushInterval = null;
     console.log("Push interval stopped");
@@ -284,7 +284,6 @@ const recordingStm32Data = async (req: Request, res: Response) => {
 
       // Insert initial JSON data
       if (recodState !== "pause") {
-
         const initialInsertSuccess = await insertInitialDataToSupabase();
         if (!initialInsertSuccess) {
           return res
@@ -298,13 +297,12 @@ const recordingStm32Data = async (req: Request, res: Response) => {
       return res
         .status(200)
         .send({ exercise_id: exerciseId, message: "Recording started." });
-    } else if (state === "pause"){
+    } else if (state === "pause") {
       recodState = "pause";
       togglePushInterval("stop");
       return res
-      .status(200)
-      .send({ exercise_id: exerciseId, message: "Recording paused." });
-
+        .status(200)
+        .send({ exercise_id: exerciseId, message: "Recording paused." });
     } else if (state === "stop") {
       // Stop recording
       recodState = "stop";
@@ -330,16 +328,15 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
     return;
   }
   let scannerPort: string | undefined;
-  if(process.env["NODE_ENV"] === "production"){
-    scannerPort = "/dev/ttyACM0"
+  if (process.env["NODE_ENV"] === "production") {
+    scannerPort = "/dev/ttyACM0";
   } else {
-
     if (process.env["ROBOT"] === "true") {
       const ports = await SerialPort.list();
       const foundPort = ports.find(
         (port) => port.manufacturer === "STMicroelectronics",
       );
-  
+
       if (foundPort) {
         scannerPort = foundPort.path;
       }

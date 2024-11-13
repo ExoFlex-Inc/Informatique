@@ -165,11 +165,7 @@ export default function Leaderboard({ users, currentUser }: LeaderboardProps) {
               <ListItemAvatar>
                 <Avatar
                   alt={user.first_name}
-                  src={
-                    user.avatar_url
-                      ? user.avatar_url
-                      : "/assets/user.png"
-                  }
+                  src={user.avatar_url ? user.avatar_url : "/assets/user.png"}
                 />
               </ListItemAvatar>
               <ListItemText

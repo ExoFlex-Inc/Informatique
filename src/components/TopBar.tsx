@@ -123,11 +123,7 @@ export default function TopBar() {
           <IconButton className="h-14" onClick={onProfileClick}>
             <Avatar
               ref={avatarRef}
-              src={
-                user?.avatar_url
-                  ? user.avatar_url
-                  : "/assets/user.png"
-              }
+              src={user?.avatar_url ? user.avatar_url : "/assets/user.png"}
             />
           </IconButton>
         )}

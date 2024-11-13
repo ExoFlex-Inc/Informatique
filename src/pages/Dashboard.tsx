@@ -26,7 +26,7 @@ export default function Dashboard() {
         if (!response.ok) {
           const errorText = await response.text();
           throw new Error(
-            `Error fetching top users: ${response.status} ${errorText}`
+            `Error fetching top users: ${response.status} ${errorText}`,
           );
         }
 

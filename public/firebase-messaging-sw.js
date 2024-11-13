@@ -16,22 +16,22 @@ if (workbox) {
   self.skipWaiting();
 
   // Define custom cache name and assets to cache
-  const customCacheName = 'custom-cache';
+  const customCacheName = "custom-cache";
   const assetsToCache = [
-    '/',
-    '/index.html',
-    '/exoflex_team.jpg',
-    '/logo_only.png',
-    '/logo.png',
-    '/user.png',
+    "/",
+    "/index.html",
+    "/exoflex_team.jpg",
+    "/logo_only.png",
+    "/logo.png",
+    "/user.png",
   ];
 
   // Cache custom assets during service worker installation
-  self.addEventListener('install', (event) => {
+  self.addEventListener("install", (event) => {
     event.waitUntil(
       caches.open(customCacheName).then((cache) => {
         return cache.addAll(assetsToCache);
-      })
+      }),
     );
   });
 
@@ -54,7 +54,9 @@ if (workbox) {
         networkTimeoutSeconds: data.networkTimeoutSeconds,
       });
     } else {
-      return new workbox.strategies.NetworkFirst({ cacheName: workboxCacheName });
+      return new workbox.strategies.NetworkFirst({
+        cacheName: workboxCacheName,
+      });
     }
   };
 
@@ -85,7 +87,10 @@ if (workbox) {
       caches.open(workboxCacheName).then((cache) => {
         cache.keys().then((keys) => {
           keys.forEach((request) => {
-            if (!manifestURLs.includes(request.url) && !assetsToCache.includes(request.url)) {
+            if (
+              !manifestURLs.includes(request.url) &&
+              !assetsToCache.includes(request.url)
+            ) {
               cache.delete(request);
             }
           });
@@ -119,7 +124,9 @@ if (workbox) {
 // Firebase
 // Import Firebase scripts
 importScripts("https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js");
-importScripts("https://www.gstatic.com/firebasejs/11.0.1/firebase-messaging.js");
+importScripts(
+  "https://www.gstatic.com/firebasejs/11.0.1/firebase-messaging.js",
+);
 
 // Firebase configuration
 const firebaseConfig = {
