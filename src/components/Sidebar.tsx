@@ -94,6 +94,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
               button: ({ level, active, disabled }) => {
                 if (level === 0)
                   return {
+                    // color: disabled ? `${colors.primary[200]}` : undefined,
                     marginRight: "10px",
                     backgroundColor: active
                       ? `${colors.blueAccent[500]}`
@@ -112,6 +113,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
                     "&:hover": {
                       backgroundColor:
                         `${colors.greenAccent[500]}` + " !important",
+                      // color: "white !important",
                       fontWeight: "bold !important",
                     },
                   };
