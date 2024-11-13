@@ -118,10 +118,8 @@ if (workbox) {
 
 // Firebase
 // Import Firebase scripts
-importScripts("https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js");
-importScripts(
-  "https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js",
-);
+importScripts("https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js");
+importScripts("https://www.gstatic.com/firebasejs/11.0.1/firebase-messaging.js");
 
 // Firebase configuration
 const firebaseConfig = {
