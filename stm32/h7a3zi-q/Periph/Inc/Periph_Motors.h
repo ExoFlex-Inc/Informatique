@@ -14,7 +14,7 @@
 #define MOTOR_AK80_64 1
 
 #define NOISE_SMALL_BUF_SIZE 3
-#define NOISE_BIG_BUF_SIZE 10
+#define NOISE_BIG_BUF_SIZE   10
 
 typedef void (*SendCanDataFunction)(uint32_t id, uint8_t* data);
 
@@ -43,15 +43,15 @@ typedef struct
 
 typedef struct
 {
-    uint8_t         id;
-    float           position;
-    float           velocity;
-    float           torque;
-    float           current;
+    uint8_t id;
+    float   position;
+    float   velocity;
+    float   torque;
+    float   current;
 
-    float posBuf[NOISE_SMALL_BUF_SIZE];
-    float velBuf[NOISE_BIG_BUF_SIZE];
-    float torBuf[NOISE_BIG_BUF_SIZE];
+    float   posBuf[NOISE_SMALL_BUF_SIZE];
+    float   velBuf[NOISE_BIG_BUF_SIZE];
+    float   torBuf[NOISE_BIG_BUF_SIZE];
     uint8_t noiseSmallIndex;
     uint8_t noiseBigIndex;
 
