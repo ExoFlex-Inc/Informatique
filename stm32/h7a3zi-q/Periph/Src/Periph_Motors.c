@@ -192,7 +192,7 @@ void PeriphMotors_ParseMotorState(Motor* pMotor, uint8_t* canData)
     }
 
     //Get noise parsed data
-    pMotor->position = PeriphMotors_SumBuf(pMotor->posBuf, NOISE_SMALL_BUF_SIZE);
+    pMotor->position = position;//PeriphMotors_SumBuf(pMotor->posBuf, NOISE_SMALL_BUF_SIZE); //No filtering on position to stay realtime
     pMotor->velocity = PeriphMotors_SumBuf(pMotor->velBuf, NOISE_BIG_BUF_SIZE);
 	pMotor->torque = PeriphMotors_SumBuf(pMotor->torBuf, NOISE_BIG_BUF_SIZE);
 
@@ -209,7 +209,7 @@ void PeriphMotors_ParseMotorState(Motor* pMotor, uint8_t* canData)
 float PeriphMotors_SumBuf(float *buf, uint8_t size)
 {
 	float sum = 0;
-	for (uint8_t i = 0; i < size - 1; i++)
+	for (uint8_t i = 0; i < size; i++)
 	{
 		sum += buf[i];
 	}
