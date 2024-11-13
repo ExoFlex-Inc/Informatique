@@ -48,7 +48,7 @@
 #define MMOT_CONTROL_POS_SPEED        2
 #define MMOT_CONTROL_POS_SPEED_TORQUE 3
 
-#define MMOT_MIN_SPEED_CMD  0.5
+#define MMOT_MIN_SPEED_CMD  0.05
 #define MMOT_MAX_SPEED_CMD  2
 #define MMOT_MAX_TORQUE_CMD 15
 
@@ -69,6 +69,7 @@ typedef struct
     bool    goalReady;
     float   goalPosition;
     float   goalSpeed;
+    float   minSpeed;
     float   goalTorque;
     float   cmdPosition;
     float   cmdSpeed;
@@ -175,6 +176,7 @@ void ManagerMotor_Reset()
         motors[i].controlType  = MMOT_CONTROL_POS_SPEED;
         motors[i].goalPosition = 0.0;
         motors[i].goalSpeed    = 0.0;
+        motors[i].minSpeed     = 0.0;
         motors[i].goalTorque   = 0.0;
         motors[i].cmdPosition  = 0.0;
         motors[i].cmdSpeed     = 0.0;
@@ -553,6 +555,12 @@ void ManagerMotor_NextCmdPosSpeedTorque(uint8_t id)
 float ManagerMotor_CalcSpeedFromTorque(float torque, float torqueGoal,
                                        float wMin, float wMax)
 {
+    if (wMin > wMax)
+    {
+        ManagerError_SetError(ERROR_2_MMOT);
+        managerMotor.state = MMOT_STATE_ERROR;
+    }
+
     float w           = 0;
     float decelFactor = 0.1;
 
@@ -583,6 +591,12 @@ float ManagerMotor_CalcSpeedFromTorque(float torque, float torqueGoal,
         {
             w = -wMax;
         }
+    }
+
+    if (w > wMax)
+    {
+        ManagerError_SetError(ERROR_2_MMOT);
+        managerMotor.state = MMOT_STATE_ERROR;
     }
 
     return w;
@@ -697,12 +711,12 @@ void ManagerMotor_MovePosSpeed(uint8_t id, float pos, float speed)
     motors[id].goalReady    = true;
 }
 
-void ManagerMotor_MovePosSpeedTorque(uint8_t id, float pos, float speed,
-                                     float torque)
+void ManagerMotor_MovePosSpeedTorque(uint8_t id, float pos, float minSpeed,
+                                     float maxSpeed, float torque)
 {
-    if (fabsf(speed) > MMOT_MAX_SPEED_CMD)
+    if (fabsf(maxSpeed) > MMOT_MAX_SPEED_CMD)
     {
-        speed = MMOT_MAX_SPEED_CMD;
+        maxSpeed = MMOT_MAX_SPEED_CMD;
     }
 
     if (fabsf(torque) > MMOT_MAX_TORQUE_CMD)
@@ -712,7 +726,8 @@ void ManagerMotor_MovePosSpeedTorque(uint8_t id, float pos, float speed,
 
     motors[id].controlType  = MMOT_CONTROL_POS_SPEED_TORQUE;
     motors[id].goalPosition = pos;
-    motors[id].goalSpeed    = fabsf(speed);
+    motors[id].goalSpeed    = fabsf(maxSpeed);
+    motors[id].minSpeed     = fabsf(minSpeed);
     motors[id].goalTorque   = fabsf(torque);
     motors[id].cmdPosition  = motors[id].motor.position;
     motors[id].cmdSpeed     = motors[id].motor.velocity;

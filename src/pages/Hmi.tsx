@@ -3,7 +3,14 @@ import ProgressionWidget from "../components/ProgressionWidget.tsx";
 import { usePlan } from "../hooks/use-plan.ts";
 import useStm32 from "../hooks/use-stm32.ts";
 
-import { useTheme, Box, Grid, IconButton } from "@mui/material";
+import {
+  useMediaQuery,
+  useTheme,
+  Box,
+  Grid,
+  Paper,
+  IconButton,
+} from "@mui/material";
 import { useUser } from "../hooks/use-user.ts";
 import LineChart from "../components/LineChart.tsx";
 import { tokens } from "../hooks/theme.ts";
@@ -365,13 +372,12 @@ export default function HMI() {
   };
 
   const generateAndDownloadCsv = (stm32Data: any) => {
-    let csvContent =
-      "Index;Dorsiflexion Angle;Eversion Angle;Extension Angle,Dorsiflexion Torque,Eversion Torque,Extension Torque,Dorsiflexion Speed,Eversion Speed,Extension Speed\n";
+    let csvContent = "I,Dor_A,Dor_T,Dor_S,Ev_A,Ev_T,Eve_S,Ext_A,Ext_T,Ext_S\n";
 
     const dataLength = stm32Data.angles.dorsiflexion.length;
 
     for (let i = 0; i < dataLength; i++) {
-      const rowData = `${i + 1};${stm32Data.angles.dorsiflexion[i]},${stm32Data.angles.eversion[i]},${stm32Data.angles.extension[i]},${stm32Data.torques.dorsiflexion[i]},${stm32Data.torques.eversion[i]},${stm32Data.torques.extension[i]},${stm32Data.speeds.dorsiflexion[i]},${stm32Data.speeds.eversion[i]},${stm32Data.speeds.extension[i]}\n`;
+      const rowData = `${i + 1},${stm32Data.angles.dorsiflexion[i]},${stm32Data.torques.dorsiflexion[i]},${stm32Data.speeds.dorsiflexion[i]},${stm32Data.angles.eversion[i]},${stm32Data.torques.eversion[i]},${stm32Data.speeds.eversion[i]},${stm32Data.angles.extension[i]},${stm32Data.torques.extension[i]},${stm32Data.speeds.extension[i]}\n`;
       csvContent += rowData;
     }
 
@@ -403,10 +409,10 @@ export default function HMI() {
       <CustomScrollbar>
         <Box>
           <Grid
-            padding={5}
+            paddingX={12}
             container
             spacing={2}
-            sx={{ justifyContent: "center", alignItems: "center" }}
+            sx={{ justifyContent: "center", alignItems: "stretch" }}
           >
             <Grid item xs={12}>
               <Box
@@ -504,19 +510,27 @@ export default function HMI() {
               />
             </Grid>
             <Grid item>
-              <Box padding={1} bgcolor="white" sx={{ borderRadius: "16px" }}>
+              <Paper
+                sx={{
+                  padding: "10px",
+                  backgroundColor: "white",
+                  height: "100%",
+                }}
+              >
                 <ProgressionWidget
                   setOpenDialogPainScale={setOpenDialogPainScale}
                   stm32Data={stm32Data}
                   planData={planData}
                 />
-              </Box>
+              </Paper>
             </Grid>
             <Grid item>
-              <ExerciseOverviewWidget
-                stm32Data={stm32Data}
-                planData={planData}
-              />
+              <Paper sx={{ height: "100%", backgroundColor: "white" }}>
+                <ExerciseOverviewWidget
+                  stm32Data={stm32Data}
+                  planData={planData}
+                />
+              </Paper>
             </Grid>
           </Grid>
         </Box>

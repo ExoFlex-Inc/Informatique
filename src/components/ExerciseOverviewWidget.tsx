@@ -10,7 +10,7 @@ const ExerciseOverviewWidget: React.FC<ExerciseOverviewWidgetProps> = ({
   planData,
 }) => {
   return (
-    <div className="bg-white rounded-lg p-4 max-h-96 overflow-auto overflow-x-hidden">
+    <div className="bg-white rounded-lg p-4 overflow-auto overflow-x-hidden">
       <label
         style={{ fontSize: "clamp(0rem, 2.5vw, 1.5rem)" }}
         className="text-blue-600"

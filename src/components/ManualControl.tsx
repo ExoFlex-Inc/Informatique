@@ -69,6 +69,7 @@ const ManualControl = ({
           <IconButton
             onClick={() => setIsManualControlOpen(!isManualControlOpen)}
             sx={{
+              color: "white",
               backgroundColor: "blueAccent.main",
               "&:hover": {
                 backgroundColor: "#1D4ED8",
@@ -97,13 +98,14 @@ const ManualControl = ({
         <Box
           sx={{
             p: 1,
-            background: `linear-gradient(45deg, ${colors.primary[400]} 5%, #140f80 90%)`,
+            background: `linear-gradient(45deg, #1F2A40 5%, #140f80 90%)`,
           }}
         >
           <Box sx={{ display: "flex", justifyContent: "center" }}>
             <IconButton
               onClick={() => setIsManualControlOpen(!isManualControlOpen)}
               sx={{
+                color: "white",
                 backgroundColor: "blueAccent.main",
                 "&:hover": {
                   backgroundColor: "#1D4ED8",
@@ -126,7 +128,7 @@ const ManualControl = ({
                     flexDirection: "column",
                   }}
                 >
-                  <Typography noWrap variant="button">
+                  <Typography sx={{ color: "white" }} noWrap variant="button">
                     Anatomical Movement
                   </Typography>
                   <Box
@@ -139,7 +141,11 @@ const ManualControl = ({
                     <Grid container>
                       <Grid item xs={4}>
                         <Typography
-                          sx={{ justifyContent: "center", display: "flex" }}
+                          sx={{
+                            justifyContent: "center",
+                            display: "flex",
+                            color: "white",
+                          }}
                           variant="subtitle1"
                         >
                           Eversion
@@ -161,7 +167,7 @@ const ManualControl = ({
                             }
                             mainColor="blueAccent.main"
                             hoverColor="blueAccent.hover"
-                            textColor="text-white"
+                            textColor="white"
                             disabled={errorFromStm32 || changeSideDisabled}
                             icon={<ArrowBack />}
                             socket={socket}
@@ -177,7 +183,7 @@ const ManualControl = ({
                             }
                             mainColor="blueAccent.main"
                             hoverColor="blueAccent.hover"
-                            textColor="text-white"
+                            textColor="white"
                             disabled={errorFromStm32 || changeSideDisabled}
                             icon={<ArrowForward />}
                             socket={socket}
@@ -186,7 +192,11 @@ const ManualControl = ({
                       </Grid>
                       <Grid item xs={4}>
                         <Typography
-                          sx={{ justifyContent: "center", display: "flex" }}
+                          sx={{
+                            justifyContent: "center",
+                            display: "flex",
+                            color: "white",
+                          }}
                           variant="subtitle1"
                         >
                           Dorsiflexion
@@ -204,7 +214,7 @@ const ManualControl = ({
                             content="DorsiflexionU"
                             mainColor="blueAccent.main"
                             hoverColor="blueAccent.hover"
-                            textColor="text-white"
+                            textColor="white"
                             disabled={errorFromStm32 || changeSideDisabled}
                             icon={<ArrowUpward />}
                             socket={socket}
@@ -215,7 +225,7 @@ const ManualControl = ({
                             content="DorsiflexionD"
                             mainColor="blueAccent.main"
                             hoverColor="blueAccent.hover"
-                            textColor="text-white"
+                            textColor="white"
                             disabled={errorFromStm32 || changeSideDisabled}
                             icon={<ArrowDownward />}
                             socket={socket}
@@ -224,7 +234,11 @@ const ManualControl = ({
                       </Grid>
                       <Grid item xs={4} sx={{ justifyItems: "center" }}>
                         <Typography
-                          sx={{ justifyContent: "center", display: "flex" }}
+                          sx={{
+                            justifyContent: "center",
+                            display: "flex",
+                            color: "white",
+                          }}
                           variant="subtitle1"
                         >
                           Extension
@@ -274,7 +288,11 @@ const ManualControl = ({
                     flexDirection: "column",
                   }}
                 >
-                  <Typography variant="button" gutterBottom>
+                  <Typography
+                    variant="button"
+                    gutterBottom
+                    sx={{ color: "white" }}
+                  >
                     Foot Fastening
                   </Typography>
                   <Box
@@ -297,7 +315,7 @@ const ManualControl = ({
                         content="Forward"
                         mainColor="blueAccent.main"
                         hoverColor="blueAccent.hover"
-                        textColor="text-white"
+                        textColor="white"
                         disabled={errorFromStm32 || changeSideDisabled}
                         icon={<Compress />}
                         socket={socket}
@@ -308,7 +326,7 @@ const ManualControl = ({
                         content="Backward"
                         mainColor="blueAccent.main"
                         hoverColor="blueAccent.hover"
-                        textColor="text-white"
+                        textColor="white"
                         disabled={errorFromStm32 || changeSideDisabled}
                         icon={<Expand />}
                         socket={socket}
@@ -327,7 +345,11 @@ const ManualControl = ({
                     flexDirection: "column",
                   }}
                 >
-                  <Typography variant="button" gutterBottom>
+                  <Typography
+                    variant="button"
+                    gutterBottom
+                    sx={{ color: "white" }}
+                  >
                     Switch Side
                   </Typography>
                   <Box
@@ -337,57 +359,58 @@ const ManualControl = ({
                       flexDirection: "column",
                     }}
                   >
-                    <Box
-                      sx={{
-                        justifyContent: "center",
-                        display: "flex",
-                        gap: "40px",
-                      }}
-                    >
-                      <Button
-                        mode="ChangeSide"
-                        mainColor={
-                          stm32Data?.CurrentLegSide == "LegIsRight"
-                            ? "blueAccent.main"
-                            : ""
-                        }
-                        hoverColor={
-                          stm32Data?.CurrentLegSide == "LegIsRight"
-                            ? "blueAccent.hover"
-                            : ""
-                        }
-                        textColor={"text-white"}
-                        disabled={
-                          changeSideDisabled ||
-                          errorFromStm32 ||
-                          stm32Data?.CurrentLegSide == "LegIsLeft"
-                        }
-                        icon={<ArrowBack />}
-                        socket={socket}
-                      />
-                      <Button
-                        mode="ChangeSide"
-                        mainColor={
-                          stm32Data?.CurrentLegSide == "LegIsLeft"
-                            ? "blueAccent.main"
-                            : ""
-                        }
-                        hoverColor={
-                          stm32Data?.CurrentLegSide == "LegIsLeft"
-                            ? "blueAccent.hover"
-                            : ""
-                        }
-                        textColor={"text-white"}
-                        disabled={
-                          changeSideDisabled ||
-                          errorFromStm32 ||
-                          stm32Data?.CurrentLegSide == "LegIsRight"
-                        }
-                        icon={<ArrowForward />}
-                        socket={socket}
-                      />
-                    </Box>
-                    {stm32Data?.Mode == "ChangeSide" && (
+                    {stm32Data?.Mode !== "ChangeSide" ? (
+                      <Box
+                        sx={{
+                          justifyContent: "center",
+                          display: "flex",
+                          gap: "40px",
+                        }}
+                      >
+                        <Button
+                          mode="ChangeSide"
+                          mainColor={
+                            stm32Data?.CurrentLegSide == "LegIsRight"
+                              ? "blueAccent.main"
+                              : ""
+                          }
+                          hoverColor={
+                            stm32Data?.CurrentLegSide == "LegIsRight"
+                              ? "blueAccent.hover"
+                              : ""
+                          }
+                          textColor="white"
+                          disabled={
+                            changeSideDisabled ||
+                            errorFromStm32 ||
+                            stm32Data?.CurrentLegSide == "LegIsLeft"
+                          }
+                          icon={<ArrowBack />}
+                          socket={socket}
+                        />
+                        <Button
+                          mode="ChangeSide"
+                          mainColor={
+                            stm32Data?.CurrentLegSide == "LegIsLeft"
+                              ? "blueAccent.main"
+                              : ""
+                          }
+                          hoverColor={
+                            stm32Data?.CurrentLegSide == "LegIsLeft"
+                              ? "blueAccent.hover"
+                              : ""
+                          }
+                          textColor="white"
+                          disabled={
+                            changeSideDisabled ||
+                            errorFromStm32 ||
+                            stm32Data?.CurrentLegSide == "LegIsRight"
+                          }
+                          icon={<ArrowForward />}
+                          socket={socket}
+                        />
+                      </Box>
+                    ) : (
                       <Box
                         sx={{
                           display: "flex",
@@ -398,7 +421,7 @@ const ManualControl = ({
                         <CircularProgress color="secondary" />
                         <Typography
                           variant="subtitle1"
-                          sx={{ alignContent: "center" }}
+                          sx={{ alignContent: "center", color: "white" }}
                         >
                           Changing side
                         </Typography>
