@@ -26,6 +26,7 @@ export function useNotification() {
       if (!response.ok) throw new Error("Error fetching notification");
       return await response.json();
     },
+    staleTime: 0,
     enabled: !!user?.user_id,
   });
 
