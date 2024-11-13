@@ -386,9 +386,9 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
         const jsonDataString = receivedDataBuffer.substring(startIdx, endIdx);
 
         try {
-          if (recodState === "stop" || recodState === "pause") {
-            return;
-          }
+          // if (recodState === "stop" || recodState === "pause") {
+          //   return;
+          // }
           const parsedData = JSON.parse(jsonDataString);
           io.emit("stm32Data", parsedData);
 
