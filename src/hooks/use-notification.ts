@@ -50,7 +50,7 @@ export function useNotification() {
       };
 
       // Update the cache directly
-      queryClient.setQueryData(["notification", user.user_id], (old = []) => [
+      queryClient.setQueryData(["notification"], (old = []) => [
         newNotification,
         ...old,
       ]);
