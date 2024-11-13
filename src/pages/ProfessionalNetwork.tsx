@@ -21,6 +21,7 @@ const ProfessionalNetwork = () => {
 
   const isLoading = adminLoading || relationsLoading || notificationsLoading;
   const [filteredUsers, setFilteredUsers] = useState(admins);
+  const [filteredSearchBarUsers, setFilteredSearchBarUsers] = useState(admins);
 
   useEffect(() => {
     let filteredAdmin = admins;
@@ -40,6 +41,7 @@ const ProfessionalNetwork = () => {
       });
     }
     setFilteredUsers(filteredAdmin);
+    setFilteredSearchBarUsers(filteredAdmin)
   }, [admins, notifications, relations]);
 
   return (
@@ -48,7 +50,7 @@ const ProfessionalNetwork = () => {
         <UserSearchBar
           sx={{ width: 500 }}
           setSearchQuery={setFilteredUsers}
-          users={admins}
+          users={filteredSearchBarUsers}
         />
 
         {user?.permissions == "dev" || user?.permissions == "client" ? (

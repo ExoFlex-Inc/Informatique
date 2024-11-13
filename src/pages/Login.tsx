@@ -112,7 +112,6 @@ export default function Login() {
             fullWidth
             variant="outlined"
             label="Email"
-            value={email}
             onChange={(e) => setEmail(e.target.value)}
             sx={textFieldSx}
           />
@@ -124,7 +123,6 @@ export default function Login() {
             fullWidth
             variant="outlined"
             label="Password"
-            value={password}
             onChange={(e) => setPassword(e.target.value)}
             sx={textFieldSx}
             InputProps={{

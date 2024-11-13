@@ -105,7 +105,7 @@ const UserList: React.FC<UserListProps> = ({
       </label>
 
       <ul className="divide-y rounded-b-2xl col-span-4 divide-gray-400 bg-white">
-        {listOfUsers?.slice(0, 10).map((user, index) => (
+        {listOfUsers?.slice(0, 6).map((user, index) => (
           <div key={index} className="grid grid-cols-4 items-center">
             <li className="text-black p-2">{user.first_name}</li>
             <li className="text-black p-2">{user.last_name}</li>

@@ -1,17 +1,17 @@
 import { List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 import React from "react";
-import useDropdown from "../hooks/use-dropdown.ts";
 
 interface GraphFiltersProps {
   setGraphType: React.Dispatch<React.SetStateAction<string>>;
   setIsGraphFilterOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  dropdownRef: React.RefObject<HTMLDivElement>;
 }
 
 const GraphFilters: React.FC<GraphFiltersProps> = ({
   setGraphType,
   setIsGraphFilterOpen,
+  dropdownRef,
 }) => {
-  const dropdownRef = useDropdown(setIsGraphFilterOpen);
 
   function changeGraphType(type: string) {
     setGraphType(type);

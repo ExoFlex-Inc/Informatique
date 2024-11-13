@@ -63,7 +63,7 @@ const ManualControl = ({
   }, [stm32Data?.AutoState, stm32Data?.Mode]);
 
   return (
-    <Box sx={{ justifyContent: "center", display: "flex", marginY: "10px" }}>
+    <Box sx={{ justifyContent: "center", display: "flex", marginY: "5px" }}>
       <Box sx={{ display: "flex", flexDirection: "column" }}>
         <Box sx={{ display: "flex", justifyContent: "center" }}>
           <IconButton

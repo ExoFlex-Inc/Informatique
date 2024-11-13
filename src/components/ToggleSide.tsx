@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import { blue } from "@mui/material/colors";
 
-export type Side = "Right" | "Left" | null;
+export type Side = "Right" | "Left" ;
 
 interface ToggleSideProps {
   setSide: React.Dispatch<React.SetStateAction<Side>>;

@@ -380,7 +380,6 @@ export default function HMI() {
       <CustomScrollbar>
         <Box>
           <Grid
-            padding={5}
             container
             spacing={2}
             sx={{ justifyContent: "center", alignItems: "center" }}

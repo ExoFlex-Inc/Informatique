@@ -425,22 +425,22 @@ BEGIN
         new_id,
         '{
             "plan": [{
-                "rest": 30,
+                "rest": 2,
                 "speed": 1,
-                "repetitions": 10,
-                "time": 60,
+                "repetitions": 3,
+                "time": 2,
                 "movement": [{
                     "exercise": "Dorsiflexion",
                     "target_angle": 30,
-                    "target_torque": 50
+                    "target_torque": 25
                 }]
             }],
             "limits": {
                 "left": {
                     "torque": {
-                        "dorsiflexion": 50,
+                        "dorsiflexion": 30,
                         "extension": 50,
-                        "eversion": 50
+                        "eversion": 15
                     },
                     "angles": {
                         "dorsiflexion": 30,
@@ -450,9 +450,9 @@ BEGIN
                 },
                 "right": {
                     "torque": {
-                        "dorsiflexion": 50,
+                        "dorsiflexion": 30,
                         "extension": 50,
-                        "eversion": 50
+                        "eversion": 15
                     },
                     "angles": {
                         "dorsiflexion": 30,

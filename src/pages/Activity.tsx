@@ -1,5 +1,5 @@
 import UserSearchBar from "../components/UserSearchBar.tsx";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import LineChart from "../components/LineChart.tsx";
 import { FilterAlt } from "@mui/icons-material";
 import GraphFilters from "../components/GraphFilters.tsx";
@@ -117,7 +117,7 @@ function onGraphTypeChange(
 
 export default function Activity() {
   const [selectedUser, setSelectedUser] = useState<any[]>([]);
-  const [isGraphFilterOpen, setIsGraphFilterOpen] = useState(false);
+  const [isGraphFilterOpen, setIsGraphFilterOpen] = useState<boolean>(false);
   const [graphType, setGraphType] = useState("Amplitude");
   const [date, setDate] = useState<DateRange | null>();
   const [data, setData] = useState<dataStructure[]>([]);
@@ -132,6 +132,9 @@ export default function Activity() {
   const { relations, isLoading } = useRelations();
   const [availableSessions, setAvailableSessions] = useState<string[]>([]);
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -332,6 +335,24 @@ export default function Activity() {
       setAverageData(null);
     }
   }, [data, graphType]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        setIsGraphFilterOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownRef, buttonRef]);
 
   function getAverage(data: dataStructure[], graphType: string) {
     // Helper function to calculate the average
@@ -569,6 +590,7 @@ export default function Activity() {
       <div className="relative flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <button
+            ref={buttonRef}
             className="p-2 rounded-full hover:bg-gray-700"
             onClick={() => setIsGraphFilterOpen(!isGraphFilterOpen)}
           >
@@ -579,6 +601,7 @@ export default function Activity() {
           {isGraphFilterOpen && (
             <div className="absolute top-full mt-2 left-0 z-50">
               <GraphFilters
+                dropdownRef={dropdownRef}
                 setGraphType={setGraphType}
                 setIsGraphFilterOpen={setIsGraphFilterOpen}
               />
