@@ -15,6 +15,26 @@ if (workbox) {
   workbox.core.clientsClaim();
   self.skipWaiting();
 
+  // Define custom cache name and assets to cache
+  const customCacheName = "custom-cache";
+  const assetsToCache = [
+    "/",
+    "/index.html",
+    "/exoflex_team.jpg",
+    "/logo_only.png",
+    "/logo.png",
+    "/user.png",
+  ];
+
+  // Cache custom assets during service worker installation
+  self.addEventListener("install", (event) => {
+    event.waitUntil(
+      caches.open(customCacheName).then((cache) => {
+        return cache.addAll(assetsToCache);
+      }),
+    );
+  });
+
   // Access the pre-defined cache names for use in this app
   const data = {
     race: false,
@@ -24,17 +44,19 @@ if (workbox) {
     fallback: "index.html",
   };
 
-  const cacheName = "runtime-cache";
+  const workboxCacheName = "runtime-cache";
 
   // Strategy for handling requests
   const buildStrategy = () => {
     if (data.networkTimeoutSeconds > 0) {
       return new workbox.strategies.NetworkFirst({
-        cacheName,
+        cacheName: workboxCacheName,
         networkTimeoutSeconds: data.networkTimeoutSeconds,
       });
     } else {
-      return new workbox.strategies.NetworkFirst({ cacheName });
+      return new workbox.strategies.NetworkFirst({
+        cacheName: workboxCacheName,
+      });
     }
   };
 
@@ -44,11 +66,11 @@ if (workbox) {
     (entry) => new URL(entry.url, self.location.href).href,
   );
 
-  // Cache resources during service worker installation
+  // Cache manifest resources during service worker installation
   self.addEventListener("install", (event) => {
     event.waitUntil(
       caches
-        .open(cacheName)
+        .open(workboxCacheName)
         .then((cache) =>
           cache.addAll(
             manifestURLs.map(
@@ -62,10 +84,13 @@ if (workbox) {
   // Activate handler: clear outdated caches
   self.addEventListener("activate", (event) => {
     event.waitUntil(
-      caches.open(cacheName).then((cache) => {
+      caches.open(workboxCacheName).then((cache) => {
         cache.keys().then((keys) => {
           keys.forEach((request) => {
-            if (!manifestURLs.includes(request.url)) {
+            if (
+              !manifestURLs.includes(request.url) &&
+              !assetsToCache.includes(request.url)
+            ) {
               cache.delete(request);
             }
           });
@@ -98,9 +123,9 @@ if (workbox) {
 
 // Firebase
 // Import Firebase scripts
-importScripts("https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js");
+importScripts("https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js");
 importScripts(
-  "https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js",
+  "https://www.gstatic.com/firebasejs/11.0.1/firebase-messaging.js",
 );
 
 // Firebase configuration

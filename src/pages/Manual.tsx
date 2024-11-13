@@ -7,7 +7,6 @@ import {
   TextField,
   IconButton,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import { Refresh, PlayArrow, Pause, Home } from "@mui/icons-material";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
@@ -16,19 +15,6 @@ import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import useStm32 from "../hooks/use-stm32.ts";
 import Button from "../components/Button.tsx";
 import ManualControl from "../components/ManualControl.tsx";
-
-const WhiteBorderCheckbox = styled(Checkbox)(() => ({
-  color: "white",
-  "&.Mui-checked": {
-    color: "white",
-  },
-  "& .MuiSvgIcon-root": {
-    fontSize: 28,
-  },
-  "& .MuiCheckbox-root": {
-    border: "1px solid white",
-  },
-}));
 
 const errorMap = {
   0: "ERROR_0_MSEC",
@@ -235,6 +221,7 @@ export default function Manual() {
         <Box>
           <Grid
             container
+            paddingX={12}
             spacing={2}
             sx={{ justifyContent: "center", alignItems: "center" }}
           >
@@ -254,8 +241,8 @@ export default function Manual() {
                     disabled={!graphPause}
                     size="large"
                     sx={{
-                      backgroundColor: "blueAccent.main",
-                      "&:hover": { backgroundColor: "blueAccent.hover" },
+                      backgroundColor: "#2fb73d",
+                      "&:hover": { backgroundColor: "#33a63f" },
                     }}
                   >
                     <PlayArrow />
@@ -265,8 +252,8 @@ export default function Manual() {
                     disabled={graphPause}
                     size="large"
                     sx={{
-                      backgroundColor: "blueAccent.main",
-                      "&:hover": { backgroundColor: "blueAccent.hover" },
+                      backgroundColor: "#f5d50b",
+                      "&:hover": { backgroundColor: "#dcc21d" },
                     }}
                   >
                     <Pause />
@@ -313,7 +300,7 @@ export default function Manual() {
                 <Box sx={{ width: 50 }} />
                 <FormControlLabel
                   control={
-                    <WhiteBorderCheckbox
+                    <Checkbox
                       checked={graphDataType === "position"}
                       onChange={() => setGraphDataType("position")}
                     />
@@ -322,7 +309,7 @@ export default function Manual() {
                 />
                 <FormControlLabel
                   control={
-                    <WhiteBorderCheckbox
+                    <Checkbox
                       checked={graphDataType === "torque"}
                       onChange={() => setGraphDataType("torque")}
                     />
@@ -331,7 +318,7 @@ export default function Manual() {
                 />
                 <FormControlLabel
                   control={
-                    <WhiteBorderCheckbox
+                    <Checkbox
                       checked={graphDataType === "current"}
                       onChange={() => setGraphDataType("current")}
                     />

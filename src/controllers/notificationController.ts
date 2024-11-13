@@ -38,10 +38,6 @@ export const createNotification = async (req: Request, res: Response) => {
   }
 
   try {
-    const { data: imageUrl } = supaClient.storage
-      .from("avatars")
-      .getPublicUrl(image_url);
-
     const { data: newNotification, error: notifInsertError } = await supaClient
       .from("notifications")
       .insert([
@@ -49,7 +45,7 @@ export const createNotification = async (req: Request, res: Response) => {
           sender_id: sender_id,
           receiver_id: receiver_id,
           user_name: user_name,
-          image: imageUrl.publicUrl,
+          image: image_url,
           type: type,
           body: message,
           created_at: new Date(),

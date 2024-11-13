@@ -3,7 +3,14 @@ import ProgressionWidget from "../components/ProgressionWidget.tsx";
 import { usePlan } from "../hooks/use-plan.ts";
 import useStm32 from "../hooks/use-stm32.ts";
 
-import { useTheme, Box, Grid, IconButton } from "@mui/material";
+import {
+  useMediaQuery,
+  useTheme,
+  Box,
+  Grid,
+  Paper,
+  IconButton,
+} from "@mui/material";
 import { useUser } from "../hooks/use-user.ts";
 import LineChart from "../components/LineChart.tsx";
 import { tokens } from "../hooks/theme.ts";
@@ -131,7 +138,7 @@ export default function HMI() {
       hasExecute.current = true;
       console.log("Reset", message);
     }
-  }, [socket, stm32Data]);
+  }, [stm32Data]);
 
   useEffect(() => {
     if (
@@ -158,7 +165,7 @@ export default function HMI() {
       console.log("plan", message);
       socket.emit("sendDataToStm32", message);
     }
-  }, [stm32Data, planData, socket]);
+  }, [stm32Data, planData]);
 
   useEffect(() => {
     const stopRecording = async () => {
@@ -170,7 +177,7 @@ export default function HMI() {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              start: false,
+              state: "stop",
             }),
             credentials: "include",
           });
@@ -179,6 +186,27 @@ export default function HMI() {
             console.log("Recording stopped successfully.");
           } else {
             console.error("Failed to stop recording.");
+          }
+        } catch (error) {
+          console.error("An error occurred:", error);
+        }
+      } else if (stm32Data?.AutoState === "Ready") {
+        try {
+          const response = await fetch("http://localhost:3001/stm32/record", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              state: "pause",
+            }),
+            credentials: "include",
+          });
+
+          if (response.ok) {
+            console.log("Recording paused successfully.");
+          } else {
+            console.error("Failed to pause recording.");
           }
         } catch (error) {
           console.error("An error occurred:", error);
@@ -382,7 +410,7 @@ export default function HMI() {
           <Grid
             container
             spacing={2}
-            sx={{ justifyContent: "center", alignItems: "center" }}
+            sx={{ justifyContent: "center", alignItems: "stretch" }}
           >
             <Grid item xs={12}>
               <Box
@@ -480,19 +508,27 @@ export default function HMI() {
               />
             </Grid>
             <Grid item>
-              <Box padding={1} bgcolor="white" sx={{ borderRadius: "16px" }}>
+              <Paper
+                sx={{
+                  padding: "10px",
+                  backgroundColor: "white",
+                  height: "100%",
+                }}
+              >
                 <ProgressionWidget
                   setOpenDialogPainScale={setOpenDialogPainScale}
                   stm32Data={stm32Data}
                   planData={planData}
                 />
-              </Box>
+              </Paper>
             </Grid>
             <Grid item>
-              <ExerciseOverviewWidget
-                stm32Data={stm32Data}
-                planData={planData}
-              />
+              <Paper sx={{ height: "100%", backgroundColor: "white" }}>
+                <ExerciseOverviewWidget
+                  stm32Data={stm32Data}
+                  planData={planData}
+                />
+              </Paper>
             </Grid>
           </Grid>
         </Box>

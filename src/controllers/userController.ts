@@ -26,7 +26,6 @@ export const getUserProfile = async (req: Request, res: Response) => {
 export const updateUserProfile = async (req: Request, res: Response) => {
   const userId = req.params["userId"];
   const newProfile = req.body;
-  const { avatar_blob_url, ...profileToUpdate } = newProfile;
 
   const { error: authError } = await supaClient.auth.updateUser({
     data: {
@@ -47,7 +46,7 @@ export const updateUserProfile = async (req: Request, res: Response) => {
 
   const { data: profileData, error: profileError } = await supaClient
     .from("user_profiles")
-    .update(profileToUpdate)
+    .update(newProfile)
     .eq("user_id", userId)
     .select("*");
 
@@ -128,43 +127,49 @@ export const uploadAvatar = async (req: Request, res: Response) => {
   }
 
   const fileExt = file.originalname.split(".").pop();
-  const fileName = `${Math.random()}.${fileExt}`;
-  const filePath = `${fileName}`;
+  const fileName = `${userId}_${Date.now()}.${fileExt}`;
+  const filePath = `avatars/${fileName}`;
 
-  const { data: profile, error: profileError } = await supaClient
-    .from("user_profiles")
-    .select("avatar_url")
-    .eq("user_id", userId)
-    .single();
+  try {
+    // Upload to Supabase Storage
+    const { data: uploadData, error: uploadError } = await supaClient.storage
+      .from("avatars")
+      .upload(filePath, file.buffer, {
+        contentType: file.mimetype,
+        upsert: true,
+      });
 
-  if (profileError) {
+    if (uploadError) throw uploadError;
+
+    // Get public URL
+    const {
+      data: { publicUrl },
+    } = supaClient.storage.from("avatars").getPublicUrl(filePath);
+
+    // Get existing profile
+    const { data: profile, error: profileError } = await supaClient
+      .from("user_profiles")
+      .select("avatar_url")
+      .eq("user_id", userId)
+      .single();
+
+    if (profileError) throw profileError;
+
+    // Delete old avatar if exists
+    await deleteOldImage(profile?.avatar_url);
+
+    // Update profile with new avatar URL
+    const { error: updateError } = await supaClient
+      .from("user_profiles")
+      .update({ avatar_url: publicUrl })
+      .eq("user_id", userId);
+
+    if (updateError) throw updateError;
+
+    return res.status(200).json({ avatar_url: publicUrl });
+  } catch (error) {
     return res.status(500).json({
-      error: `Error fetching user profile: ${profileError.message}`,
+      error: `Error uploading avatar: ${error.message}`,
     });
   }
-
-  await deleteOldImage(profile?.avatar_url);
-
-  const { data: avatarUrl, error: uploadError } = await supaClient.storage
-    .from("avatars")
-    .upload(filePath, file.buffer, { contentType: file.mimetype });
-
-  if (uploadError) {
-    return res
-      .status(500)
-      .json({ error: `Error uploading avatar: ${uploadError.message}` });
-  }
-
-  const { error: updateError } = await supaClient
-    .from("user_profiles")
-    .update({ avatar_url: filePath })
-    .eq("user_id", userId);
-
-  if (updateError) {
-    return res
-      .status(500)
-      .json({ error: `Error updating user profile: ${updateError.message}` });
-  }
-
-  res.status(200).json({ avatar_url: avatarUrl.path });
 };

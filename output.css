@@ -1471,25 +1471,10 @@ body {
   @include scrollbar;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: cubano, sans-serif;
-  font-size: 1.5rem;
-  line-height: 2rem;
-  font-weight: 400;
-  --tw-text-opacity: 1;
-  color: rgb(255 255 255 / var(--tw-text-opacity));
-}
-
 p {
   font-family: cubano, sans-serif;
   font-weight: 400;
   --tw-text-opacity: 1;
-  color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
 svg {

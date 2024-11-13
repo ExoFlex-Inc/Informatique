@@ -425,39 +425,50 @@ BEGIN
         new_id,
         '{
             "plan": [{
-                "rest": 2,
+                "rest": 3,
                 "speed": 1,
                 "repetitions": 3,
-                "time": 2,
+                "time": 3,
                 "movement": [{
+                    "exercise": "Eversion",
+                    "target_angle": 0,
+                    "target_torque": 8
+                },
+                {
+                    "exercise": "Extension",
+                    "target_angle": 45,
+                    "target_torque": 18
+                },
+                {
                     "exercise": "Dorsiflexion",
-                    "target_angle": 30,
-                    "target_torque": 25
-                }]
+                    "target_angle": 15,
+                    "target_torque": 8
+                }
+                ]
             }],
             "limits": {
                 "left": {
                     "torque": {
-                        "dorsiflexion": 30,
-                        "extension": 50,
-                        "eversion": 15
+                        "dorsiflexion": 8,
+                        "extension": 30,
+                        "eversion": 8
                     },
                     "angles": {
                         "dorsiflexion": 30,
-                        "extension": 30,
-                        "eversion": 30
+                        "extension": 10,
+                        "eversion": 15
                     }
                 },
                 "right": {
                     "torque": {
-                        "dorsiflexion": 30,
-                        "extension": 50,
-                        "eversion": 15
+                        "dorsiflexion": 8,
+                        "extension": 30,
+                        "eversion": 8
                     },
                     "angles": {
                         "dorsiflexion": 30,
-                        "extension": 30,
-                        "eversion": 30
+                        "extension": 10,
+                        "eversion": 15
                     }
                 }
             }

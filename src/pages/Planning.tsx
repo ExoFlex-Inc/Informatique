@@ -124,7 +124,7 @@ export default function Planning() {
         />
       </div>
       <CustomScrollbar>
-        <div className="overflow-auto m-6">
+        <div className=" m-6">
           <ExercisesLimitsTable
             limitsLeft={planData?.limits?.left}
             limitsRight={planData?.limits?.right}
@@ -150,10 +150,6 @@ export default function Planning() {
                 No plan available for the selected user.
               </Typography>
             </Box>
-            // <div className="flex justify-center items-center">
-            //   <p className="text-gray-500 text-lg">
-            //   </p>
-            // </div>
           )}
         </div>
         {planData && planData.plan ? (

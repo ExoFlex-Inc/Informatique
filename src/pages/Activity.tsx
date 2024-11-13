@@ -16,6 +16,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  IconButton,
 } from "@mui/material";
 import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import { useRelations } from "../hooks/use-relations.ts";
@@ -554,8 +555,17 @@ export default function Activity() {
   }
 
   return (
-    <div className="relative mx-auto max-w-7xl flex flex-col custom-height">
-      <div className="mb-4 flex flex-wrap items-center gap-4">
+    <Box
+      sx={{
+        maxWidth: "80rem",
+        marginLeft: "auto",
+        marginRight: "auto",
+        display: "flex",
+        flexDirection: "column",
+        height: "calc(100vh - 100px)",
+      }}
+    >
+      <div className="flex flex-wrap items-center gap-4">
         {/* User Search Bar */}
         <div className="flex-grow max-w-md">
           <UserSearchBar
@@ -587,15 +597,11 @@ export default function Activity() {
             </FormControl>
           )}
       </div>
-      <div className="relative flex items-center justify-between mb-4">
+      <div className="relative flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <button
-            ref={buttonRef}
-            className="p-2 rounded-full hover:bg-gray-700"
-            onClick={() => setIsGraphFilterOpen(!isGraphFilterOpen)}
-          >
+          <IconButton ref={buttonRef} onClick={() => setIsGraphFilterOpen(!isGraphFilterOpen)}>
             <FilterAlt />
-          </button>
+          </IconButton>
           <DateRangePicker onChange={setDate} />
 
           {isGraphFilterOpen && (
@@ -609,15 +615,19 @@ export default function Activity() {
           )}
         </div>
       </div>
-      <div className="flex items-center justify-center mb-4">
-        <Typography variant="h6" className="text-white">
-          {graphType}
-        </Typography>
-      </div>
+      <Box
+        sx={{
+          display: "flex",
+          alignContent: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Typography variant="h6">{graphType}</Typography>
+      </Box>
       <CustomScrollbar>
-        <div className="mb-4 basis-full">
+        <Box paddingX={15} sx={{ flexBasis: "100%", marginBottom: 2 }}>
           <LineChart type="activity" chartData={dataset1} title={title1} />
-        </div>
+        </Box>
         <ThemeProvider theme={createTheme({ palette: { mode: "light" } })}>
           <Box className="flex justify-center gap-4">
             <Paper className="p-4 w-1/3">
@@ -643,6 +653,6 @@ export default function Activity() {
         </ThemeProvider>
       </CustomScrollbar>
       {isLoading && <Loading />}
-    </div>
+    </Box>
   );
 }

@@ -1,0 +1,29 @@
+services:
+  app:
+    image: exoflex_image
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    env_file:
+      - .env.production
+    ports:
+      - "1338:1338"
+      - "3001:3001"
+    devices:
+      - "/dev/ttyACM0:/dev/ttyACM0"
+    privileged: true
+    group_add:
+      - dialout
+      - tty
+    restart: always
+    environment:
+      - NODE_ENV=production
+
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=300
+    restart: always

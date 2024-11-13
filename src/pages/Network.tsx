@@ -29,6 +29,7 @@ export default function Network() {
         />
         {(user?.permissions === "dev" || user?.permissions === "client") && (
           <Button
+            sx={{ marginBottom: "8px" }}
             variant="contained"
             color="info"
             onClick={() => navigate("/professional_network")}
