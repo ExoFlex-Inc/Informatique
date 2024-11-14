@@ -30,6 +30,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - WATCHTOWER_CLEANUP=true                # Remove old images
-      - WATCHTOWER_POLL_INTERVAL=30           # Check every 5 minutes
+      - WATCHTOWER_POLL_INTERVAL=30            # Check every 5 minutes
       - WATCHTOWER_INCLUDE_STOPPED=false       # Don't update stopped containers
       - WATCHTOWER_LABEL_ENABLE=true           # Only update containers with label
+    command: --debug
