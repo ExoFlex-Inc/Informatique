@@ -27,7 +27,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Install dependencies first (better caching)
-COPY package.json yarn.lock ./
+COPY package.json ./
 RUN yarn install
 
 # Copy source and build
@@ -53,7 +53,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy only production dependencies
-COPY package.json yarn.lock ./
+COPY package.json ./
 RUN yarn install --production
 
 # Copy built files from builder stage
