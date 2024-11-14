@@ -1,19 +1,42 @@
-# Use the most recent Node.js image
-FROM node:latest
+# Stage 1: Build Stage
+FROM ubuntu:22.04 AS builder
 
-# Set working directory
+# Install Node.js and yarn
+RUN apt-get update && apt-get install -y \
+    curl \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y \
+    nodejs \
+    && npm install -g yarn
+
 WORKDIR /app
-
-# Copy package.json and yarn.lock, and install dependencies
 COPY package.json yarn.lock ./
 RUN yarn install
+COPY . .
+RUN yarn build
 
-# Copy the src and supabase folders into the container
-COPY src/ src/
-COPY supabase/ supabase/
+# Stage 2: Production Stage
+FROM ubuntu:22.04
 
-# Expose the port the app runs on
+# Install Node.js and required packages
+RUN apt-get update && apt-get install -y \
+    curl \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y \
+    nodejs \
+    && npm install -g yarn
+
+WORKDIR /app
+
+# Copy files
+COPY package.json yarn.lock ./
+RUN yarn install
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/src ./src
+
+
+EXPOSE 1338
 EXPOSE 3001
 
-# Run the app
 CMD ["yarn", "start"]

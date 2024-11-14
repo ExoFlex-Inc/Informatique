@@ -5,6 +5,7 @@ import {
   type CircularProgressProps,
   Typography,
   LinearProgress,
+  Paper,
 } from "@mui/material";
 
 function CircularProgressWithLabel(
@@ -56,6 +57,20 @@ export default function ProgressionWidget({
   const [repetitionProgress, setRepetitionProgress] = useState(0);
   const [totalRepetition, setTotalRepetition] = useState(-1);
 
+  useEffect(() => {
+    let stretchDone = 0;
+    for (let i = stm32Data?.ExerciseIdx - 1; i > -1; i--) {
+      stretchDone = stretchDone + planData.plan[i].repetitions;
+    }
+    setStretchProgress(stretchDone);
+  }, [stm32Data?.ExerciseIdx]);
+
+  useEffect(() => {
+    if (stm32Data?.AutoState === "Resting") {
+      setStretchProgress(stretchProgress + 1);
+    }
+  }, [stm32Data?.AutoState]);
+
   // Memoize totalStretch calculation
   const totalStretch = useMemo(() => {
     console.log(planData);
@@ -68,11 +83,11 @@ export default function ProgressionWidget({
   useEffect(() => {
     if (stm32Data?.Repetitions !== undefined) {
       setRepetitionProgress(stm32Data.Repetitions);
-      setStretchProgress(stm32Data.Repetitions);
 
       // Open pain scale dialog if repetitions are complete
-      if (stm32Data.Repetitions === totalRepetition) {
+      if (stretchProgress === totalStretch) {
         setOpenDialogPainScale(true);
+        setStretchProgress(0);
       }
     }
   }, [stm32Data?.Repetitions, totalRepetition, setOpenDialogPainScale]);
@@ -89,43 +104,42 @@ export default function ProgressionWidget({
   }, [planData, stm32Data?.ExerciseIdx]);
 
   return (
-    <div className="">
-      <div className="flex justify-center mb-2.5">
-        <CircularProgressWithLabel
-          value={(stretchProgress / totalStretch) * 100 || 0}
-        />
-      </div>
-      <Typography
-        fontSize={"20px"}
-        sx={{
-          color: "black",
-          justifyContent: "center",
-          display: "flex",
-          marginBottom: "28px",
-        }}
+    <Box>
+      <Box
+        sx={{ display: "flex", justifyContent: "center", marginBottom: "10px" }}
       >
-        Stretch Progress
+        <CircularProgressWithLabel
+          value={(stretchProgress / totalStretch) * 100}
+        />
+      </Box>
+      <Typography
+        color="black"
+        justifyContent="center"
+        display="flex"
+        marginBottom="28px"
+      >
+        Session Progress
       </Typography>
       <Typography
-        fontSize={"20px"}
-        sx={{ color: "black", justifyContent: "center", display: "flex" }}
+        color="black"
+        justifyContent="center"
+        display="flex"
+        marginBottom="4px"
+        fontSize="20px"
       >
         {repetitionProgress + "/" + totalRepetition}
       </Typography>
-      <div className="flex justify-center mb-1">
+      <Box
+        sx={{ display: "flex", justifyContent: "center", marginBottom: "4px" }}
+      >
         <Box sx={{ width: "75%" }}>
           <LinearProgress
             color="success"
             variant="determinate"
-            value={(repetitionProgress / totalRepetition) * 100 || 0}
+            value={(repetitionProgress / totalRepetition) * 100}
           />
         </Box>
-      </div>
-      <Typography
-        sx={{ color: "black", justifyContent: "center", display: "flex" }}
-      >
-        Repetitions Progress
-      </Typography>
-    </div>
+      </Box>
+    </Box>
   );
 }

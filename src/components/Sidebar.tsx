@@ -43,9 +43,6 @@ const Item: React.FC<ItemProps> = ({ title, to, icon, selected }) => {
   return (
     <MenuItem
       active={selected === title}
-      style={{
-        color: "white",
-      }}
       onClick={handleClick}
       icon={icon}
       prefix={title}
@@ -97,12 +94,11 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
               button: ({ level, active, disabled }) => {
                 if (level === 0)
                   return {
-                    color: disabled ? `${colors.primary[200]}` : undefined,
+                    // color: disabled ? `${colors.primary[200]}` : undefined,
                     marginRight: "10px",
                     backgroundColor: active
                       ? `${colors.blueAccent[500]}`
                       : `${colors.primary[400]}`,
-                    transition: "background-color 0.3s",
                     "&:hover": {
                       backgroundColor: `${colors.blueAccent[400]}`,
                       color: "white !important",
@@ -117,7 +113,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
                     "&:hover": {
                       backgroundColor:
                         `${colors.greenAccent[500]}` + " !important",
-                      color: "white !important",
+                      // color: "white !important",
                       fontWeight: "bold !important",
                     },
                   };
@@ -156,11 +152,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
               <Box mb="25px">
                 <Box display="flex" justifyContent="center" alignItems="center">
                   <Avatar
-                    src={
-                      user.avatar_blob_url
-                        ? user.avatar_blob_url
-                        : "/assets/user.png"
-                    }
+                    src={user.avatar_url ? user.avatar_url : "/assets/user.png"}
                     sx={
                       isTablet
                         ? { width: 50, height: 50 }

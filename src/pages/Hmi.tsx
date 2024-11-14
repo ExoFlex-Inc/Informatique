@@ -3,7 +3,14 @@ import ProgressionWidget from "../components/ProgressionWidget.tsx";
 import { usePlan } from "../hooks/use-plan.ts";
 import useStm32 from "../hooks/use-stm32.ts";
 
-import { useTheme, Box, Grid } from "@mui/material";
+import {
+  useMediaQuery,
+  useTheme,
+  Box,
+  Grid,
+  Paper,
+  IconButton,
+} from "@mui/material";
 import { useUser } from "../hooks/use-user.ts";
 import LineChart from "../components/LineChart.tsx";
 import { tokens } from "../hooks/theme.ts";
@@ -15,6 +22,8 @@ import Button from "../components/Button.tsx";
 import { Pause, PlayArrow, Refresh, Stop, Home } from "@mui/icons-material";
 import { useStats } from "../hooks/use-stats.ts";
 import { useQueryClient } from "@tanstack/react-query";
+import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 interface ChartData {
   datasets: {
     label: string;
@@ -27,6 +36,7 @@ interface Stm32Data {
   AutoState: string;
   Positions: number[];
   Torques: number[];
+  Speed: number[];
   Repetitions: number;
   ExerciseIdx: number;
   ErrorCode: number;
@@ -86,6 +96,7 @@ export default function HMI() {
   const { planData } = usePlan(user?.user_id) as {
     planData: PlanData | undefined;
   };
+  const [recordCsv, setRecordCsv] = useState(false);
   const queryClient = useQueryClient();
 
   const { stm32Data, socket, errorFromStm32 } = useStm32() as {
@@ -127,7 +138,7 @@ export default function HMI() {
       hasExecute.current = true;
       console.log("Reset", message);
     }
-  }, [socket, stm32Data]);
+  }, [stm32Data]);
 
   useEffect(() => {
     if (
@@ -154,7 +165,7 @@ export default function HMI() {
       console.log("plan", message);
       socket.emit("sendDataToStm32", message);
     }
-  }, [stm32Data, planData, socket]);
+  }, [stm32Data, planData]);
 
   useEffect(() => {
     const stopRecording = async () => {
@@ -166,7 +177,7 @@ export default function HMI() {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              start: false,
+              state: "stop",
             }),
             credentials: "include",
           });
@@ -179,11 +190,32 @@ export default function HMI() {
         } catch (error) {
           console.error("An error occurred:", error);
         }
+      } else if (stm32Data?.AutoState === "Ready") {
+        try {
+          const response = await fetch("http://localhost:3001/stm32/record", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              state: "pause",
+            }),
+            credentials: "include",
+          });
+
+          if (response.ok) {
+            console.log("Recording paused successfully.");
+          } else {
+            console.error("Failed to pause recording.");
+          }
+        } catch (error) {
+          console.error("An error occurred:", error);
+        }
       }
     };
 
     stopRecording();
-  }, [stm32Data]);
+  }, [stm32Data?.AutoState, stm32Data?.Mode]);
 
   useEffect(() => {
     if (
@@ -262,14 +294,13 @@ export default function HMI() {
   useEffect(() => {
     if (painScale && user?.user_id) {
       const requestBody = {
-        stats: stats,
         rated_pain: painScale,
         user_id: user.user_id,
       };
       const fetchData = async () => {
         try {
           const exerciseData = await fetch(
-            `http://localhost:3001/exercise-data/${user.user_id}`,
+            `http://localhost:3001/stm32/rated_pain`,
             {
               method: "POST",
               headers: {
@@ -298,15 +329,88 @@ export default function HMI() {
     }
   }, [painScale]);
 
+  const exportCsv = async () => {
+    try {
+      if (!recordCsv) {
+        // Clear previous data
+        const response = await fetch("http://localhost:3001/stm32/clear-data", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        });
+        if (response.ok) {
+          console.log("Data cleared successfully.");
+          setRecordCsv(true);
+        }
+      } else {
+        // Fetch saved STM32 data locally
+        const response = await fetch("http://localhost:3001/stm32/saved-data", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const responseData = await response.json();
+          const stm32Data = responseData.data;
+
+          generateAndDownloadCsv(stm32Data);
+
+          setRecordCsv(false);
+        } else {
+          console.error("Error fetching saved STM32 data.");
+        }
+      }
+    } catch (error) {
+      console.error("Error during CSV export:", error);
+    }
+  };
+
+  const generateAndDownloadCsv = (stm32Data: any) => {
+    let csvContent = "I,Dor_A,Dor_T,Dor_S,Ev_A,Ev_T,Eve_S,Ext_A,Ext_T,Ext_S\n";
+
+    const dataLength = stm32Data.angles.dorsiflexion.length;
+
+    for (let i = 0; i < dataLength; i++) {
+      const rowData = `${i + 1},${stm32Data.angles.dorsiflexion[i]},${stm32Data.torques.dorsiflexion[i]},${stm32Data.speeds.dorsiflexion[i]},${stm32Data.angles.eversion[i]},${stm32Data.torques.eversion[i]},${stm32Data.speeds.eversion[i]},${stm32Data.angles.extension[i]},${stm32Data.torques.extension[i]},${stm32Data.speeds.extension[i]}\n`;
+      csvContent += rowData;
+    }
+
+    // Create a CSV file and trigger download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.style.display = "none";
+    a.href = url;
+
+    const date = new Date();
+    const fileName =
+      (date.getMonth() + 1).toString().padStart(2, "0") + // Month (MM)
+      date.getDate().toString().padStart(2, "0") +
+      "_" + // Day (DD)
+      date.getHours().toString().padStart(2, "0") +
+      "h" + // Hour (HH)
+      date.getMinutes().toString().padStart(2, "0") + // Minute (MM)
+      ".csv";
+    a.download = fileName;
+
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="flex flex-col custom-height">
       <CustomScrollbar>
         <Box>
           <Grid
-            padding={5}
+            paddingX={12}
             container
             spacing={2}
-            sx={{ justifyContent: "center", alignItems: "center" }}
+            sx={{ justifyContent: "center", alignItems: "stretch" }}
           >
             <Grid item xs={12}>
               <Box
@@ -373,6 +477,29 @@ export default function HMI() {
                   mode="Reset"
                   socket={socket}
                 />
+
+                <IconButton
+                  onClick={(e) => {
+                    exportCsv();
+                  }}
+                  onTouchStart={(e) => {
+                    exportCsv();
+                  }}
+                  size="large"
+                  sx={{
+                    backgroundColor: "blueAccent.main",
+                    "&:hover": {
+                      backgroundColor: "blueAccent.hover",
+                    },
+                  }}
+                  disabled={!stm32Data?.ErrorCode}
+                >
+                  {recordCsv ? (
+                    <RadioButtonUncheckedIcon />
+                  ) : (
+                    <RadioButtonCheckedIcon />
+                  )}
+                </IconButton>
               </Box>
               <LineChart
                 chartData={chartData}
@@ -381,19 +508,27 @@ export default function HMI() {
               />
             </Grid>
             <Grid item>
-              <Box padding={1} bgcolor="white" sx={{ borderRadius: "16px" }}>
+              <Paper
+                sx={{
+                  padding: "10px",
+                  backgroundColor: "white",
+                  height: "100%",
+                }}
+              >
                 <ProgressionWidget
                   setOpenDialogPainScale={setOpenDialogPainScale}
                   stm32Data={stm32Data}
                   planData={planData}
                 />
-              </Box>
+              </Paper>
             </Grid>
             <Grid item>
-              <ExerciseOverviewWidget
-                stm32Data={stm32Data}
-                planData={planData}
-              />
+              <Paper sx={{ height: "100%", backgroundColor: "white" }}>
+                <ExerciseOverviewWidget
+                  stm32Data={stm32Data}
+                  planData={planData}
+                />
+              </Paper>
             </Grid>
           </Grid>
         </Box>

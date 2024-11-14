@@ -26,6 +26,7 @@ export function useNotification() {
       if (!response.ok) throw new Error("Error fetching notification");
       return await response.json();
     },
+    staleTime: 0,
     enabled: !!user?.user_id,
   });
 
@@ -49,7 +50,7 @@ export function useNotification() {
       };
 
       // Update the cache directly
-      queryClient.setQueryData(["notification", user.user_id], (old = []) => [
+      queryClient.setQueryData(["notification"], (old = []) => [
         newNotification,
         ...old,
       ]);

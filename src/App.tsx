@@ -100,50 +100,8 @@ function AppLayout() {
   const { user, isLoading, isError, error } = useUser();
   const queryClient = useQueryClient();
 
-  const [avatarLoading, setAvatarLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchAvatar = async () => {
-      if (user?.avatar_url) {
-        setAvatarLoading(true);
-        try {
-          const avatarResponse = await fetch(
-            `http://localhost:3001/user/avatar/${user.user_id}?path=${encodeURIComponent(
-              user.avatar_url,
-            )}`,
-            {
-              method: "GET",
-              credentials: "include",
-            },
-          );
-
-          if (avatarResponse.ok) {
-            const avatarBlob = await avatarResponse.blob();
-            const avatarBlobUrl = URL.createObjectURL(avatarBlob);
-
-            // Update the user data with the avatar blob URL
-            queryClient.setQueryData(["user"], (oldData) => ({
-              ...(typeof oldData === "object" && oldData !== null
-                ? oldData
-                : {}),
-              avatar_blob_url: avatarBlobUrl,
-            }));
-          } else {
-            console.error("Failed to fetch avatar:", avatarResponse.statusText);
-          }
-        } catch (err) {
-          console.error("Error fetching avatar:", err);
-        } finally {
-          setAvatarLoading(false);
-        }
-      }
-    };
-
-    fetchAvatar();
-  }, [user?.avatar_url]);
-
   // Handle loading state
-  if (isLoading || avatarLoading) {
+  if (isLoading) {
     return (
       <div className="relative loading-container">
         <Loading />
@@ -180,30 +138,6 @@ function AppLayout() {
 
 function App() {
   const [theme, colorMode] = useMode();
-
-  useEffect(() => {
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.getRegistrations().then((registrations) => {
-        // Unregister any existing service workers
-        registrations.forEach((registration) => registration.unregister());
-
-        // Register the appropriate service worker based on the environment
-        const swFile =
-          process.env.NODE_ENV === "development"
-            ? "/dev-sw.js"
-            : "/firebase-messaging-sw.js";
-
-        navigator.serviceWorker
-          .register(swFile, { scope: "/" })
-          .then((registration) => {
-            console.log(`${swFile} registered`, registration);
-          })
-          .catch((error) => {
-            console.error("Service worker registration failed:", error);
-          });
-      });
-    }
-  }, []);
 
   return (
     <ColorModeContext.Provider value={colorMode}>

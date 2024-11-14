@@ -23,11 +23,16 @@ import { exec } from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
 
-dotenv.config();
-if (process.env["ROBOT"] === "false") {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
+if (process.env.NODE_ENV === "production") {
+  dotenv.config({ path: ".env.production" });
+} else {
+  dotenv.config({ path: ".env" }); // or '.env.development' for dev
+}
+
+if (process.env["ROBOT"] === "false") {
   const scriptPath = path.resolve(__dirname, "../src/utils/stm32Simulator.sh");
 
   // Run socat for the STM32 simulator
@@ -49,12 +54,24 @@ if (process.env["ROBOT"] === "false") {
 
 const app: Application = express();
 const httpServer = createServer(app);
+
+// Configure Socket.IO with CORS
 const io = new SocketIOServer(httpServer, {
   cors: {
     origin: "http://localhost:1338",
     methods: ["GET", "POST"],
   },
 });
+
+// Configure Express with CORS
+app.use(
+  cors({
+    origin: "http://localhost:1338",
+    credentials: true,
+  }),
+);
+
+app.use(express.static(path.join(__dirname, "../public")));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -65,13 +82,6 @@ const limiter = rateLimit({
 app.use("/auth", limiter);
 
 app.use(express.json());
-app.use(
-  cors({
-    origin: "http://localhost:1338",
-    credentials: true,
-  }),
-);
-
 app.use(cookieParser());
 app.use(supabaseMiddleware);
 
@@ -139,6 +149,15 @@ const PORT = process.env["PORT"] || 3001;
 httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../dist")));
+
+  // Handle client-side routing
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../dist/index.html"));
+  });
+}
 
 process.on("SIGINT", () => {
   console.log("\n Server is shutting down...");

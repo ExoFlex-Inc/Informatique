@@ -19,7 +19,9 @@ export default function StretchStreak({
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          height: 240,
+          justifyContent: "space-evenly",
+          flexGrow: 1,
+          height: "100%",
           position: "relative",
           backgroundColor: "white",
         }}
