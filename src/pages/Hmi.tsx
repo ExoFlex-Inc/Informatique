@@ -3,7 +3,7 @@ import ProgressionWidget from "../components/ProgressionWidget.tsx";
 import { usePlan } from "../hooks/use-plan.ts";
 import useStm32 from "../hooks/use-stm32.ts";
 
-import { useTheme, Box, Grid } from "@mui/material";
+import { useTheme, Box, Grid, IconButton } from "@mui/material";
 import { useUser } from "../hooks/use-user.ts";
 import LineChart from "../components/LineChart.tsx";
 import { tokens } from "../hooks/theme.ts";
@@ -15,6 +15,8 @@ import Button from "../components/Button.tsx";
 import { Pause, PlayArrow, Refresh, Stop, Home } from "@mui/icons-material";
 import { useStats } from "../hooks/use-stats.ts";
 import { useQueryClient } from "@tanstack/react-query";
+import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 interface ChartData {
   datasets: {
     label: string;
@@ -27,6 +29,7 @@ interface Stm32Data {
   AutoState: string;
   Positions: number[];
   Torques: number[];
+  Speed: number[];
   Repetitions: number;
   ExerciseIdx: number;
   ErrorCode: number;
@@ -86,6 +89,7 @@ export default function HMI() {
   const { planData } = usePlan(user?.user_id) as {
     planData: PlanData | undefined;
   };
+  const [recordCsv, setRecordCsv] = useState(false);
   const queryClient = useQueryClient();
 
   const { stm32Data, socket, errorFromStm32 } = useStm32() as {
@@ -298,6 +302,79 @@ export default function HMI() {
     }
   }, [painScale]);
 
+  const exportCsv = async () => {
+    try {
+      if (!recordCsv) {
+        // Clear previous data
+        const response = await fetch("http://localhost:3001/stm32/clear-data", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        });
+        if (response.ok) {
+          console.log("Data cleared successfully.");
+          setRecordCsv(true);
+        }
+      } else {
+        // Fetch saved STM32 data locally
+        const response = await fetch("http://localhost:3001/stm32/saved-data", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const responseData = await response.json();
+          const stm32Data = responseData.data;
+
+          generateAndDownloadCsv(stm32Data);
+
+          setRecordCsv(false);
+        } else {
+          console.error("Error fetching saved STM32 data.");
+        }
+      }
+    } catch (error) {
+      console.error("Error during CSV export:", error);
+    }
+  };
+
+  const generateAndDownloadCsv = (stm32Data: any) => {
+    let csvContent = "I,Dor_A,Dor_T,Dor_S,Ev_A,Ev_T,Eve_S,Ext_A,Ext_T,Ext_S\n";
+
+    const dataLength = stm32Data.angles.dorsiflexion.length;
+
+    for (let i = 0; i < dataLength; i++) {
+      const rowData = `${i + 1},${stm32Data.angles.dorsiflexion[i]},${stm32Data.torques.dorsiflexion[i]},${stm32Data.speeds.dorsiflexion[i]},${stm32Data.angles.eversion[i]},${stm32Data.torques.eversion[i]},${stm32Data.speeds.eversion[i]},${stm32Data.angles.extension[i]},${stm32Data.torques.extension[i]},${stm32Data.speeds.extension[i]}\n`;
+      csvContent += rowData;
+    }
+
+    // Create a CSV file and trigger download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.style.display = "none";
+    a.href = url;
+
+    const date = new Date();
+    const fileName =
+      (date.getMonth() + 1).toString().padStart(2, "0") + // Month (MM)
+      date.getDate().toString().padStart(2, "0") +
+      "_" + // Day (DD)
+      date.getHours().toString().padStart(2, "0") +
+      "h" + // Hour (HH)
+      date.getMinutes().toString().padStart(2, "0") + // Minute (MM)
+      ".csv";
+    a.download = fileName;
+
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="flex flex-col custom-height">
       <CustomScrollbar>
@@ -373,6 +450,29 @@ export default function HMI() {
                   mode="Reset"
                   socket={socket}
                 />
+
+                <IconButton
+                  onClick={(e) => {
+                    exportCsv();
+                  }}
+                  onTouchStart={(e) => {
+                    exportCsv();
+                  }}
+                  size="large"
+                  sx={{
+                    backgroundColor: "blueAccent.main",
+                    "&:hover": {
+                      backgroundColor: "blueAccent.hover",
+                    },
+                  }}
+                  disabled={!stm32Data?.ErrorCode}
+                >
+                  {recordCsv ? (
+                    <RadioButtonUncheckedIcon />
+                  ) : (
+                    <RadioButtonCheckedIcon />
+                  )}
+                </IconButton>
               </Box>
               <LineChart
                 chartData={chartData}

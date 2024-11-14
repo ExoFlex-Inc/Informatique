@@ -25,6 +25,12 @@ let prevTorques = {
   extension: [] as number[],
 };
 
+let prevSpeeds = {
+  dorsiflexion: [] as number[],
+  eversion: [] as number[],
+  extension: [] as number[],
+};
+
 let saveData = {
   recorded_date: new Date()
     .toLocaleString("en-CA", {
@@ -57,6 +63,11 @@ let saveData = {
     dorsiflexion: 0,
     eversion: 0,
     extension: 0,
+  },
+  speeds: {
+    dorsiflexion: [] as number[],
+    eversion: [] as number[],
+    extension: [] as number[],
   },
   repetitions_done: 0,
   repetitions_target: 0,
@@ -125,6 +136,11 @@ function resetSaveData() {
       eversion: 0,
       extension: 0,
     },
+    speeds: {
+      dorsiflexion: [],
+      eversion: [],
+      extension: [],
+    },
     repetitions_done: 0,
     repetitions_target: 0,
   };
@@ -135,6 +151,11 @@ function resetSaveData() {
     extension: [],
   };
   prevTorques = {
+    dorsiflexion: [],
+    eversion: [],
+    extension: [],
+  };
+  prevSpeeds = {
     dorsiflexion: [],
     eversion: [],
     extension: [],
@@ -365,6 +386,10 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
           prevTorques.eversion.push(parsedData.Torques[1]);
           prevTorques.extension.push(parsedData.Torques[2]);
 
+          prevSpeeds.dorsiflexion.push(parsedData.Speed[0]);
+          prevSpeeds.eversion.push(parsedData.Speed[1]);
+          prevSpeeds.extension.push(parsedData.Speed[2]);
+
           // Update saveData with new values
           saveData = {
             ...saveData,
@@ -387,6 +412,11 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
               dorsiflexion: Math.max(...prevTorques.dorsiflexion),
               eversion: Math.max(...prevTorques.eversion),
               extension: Math.max(...prevTorques.extension),
+            },
+            speeds: {
+              dorsiflexion: [...prevSpeeds.dorsiflexion],
+              eversion: [...prevSpeeds.eversion],
+              extension: [...prevSpeeds.extension],
             },
             repetitions_done: parsedData.Repetitions,
           };

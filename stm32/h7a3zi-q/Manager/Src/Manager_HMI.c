@@ -2,6 +2,7 @@
 #include <Manager_HMI.h>
 #include <Manager_Motor.h>
 #include <Manager_Movement.h>
+#include <Manager_Security.h>
 #include <Periph_UartRingBuf.h>
 #include <Periph_Solenoid.h>
 #include <stdio.h>
@@ -110,7 +111,7 @@ void ManagerHMI_SendJSON()
         positions[i] = ManagerHMI_Radians2Degrees(motorsData[i]->position);
         torques[i]   = motorsData[i]->torque;
         current[i]   = motorsData[i]->current;
-        speed[i]     = motorsData[i]->velocity;
+        speed[i]     = ManagerHMI_Radians2Degrees(motorsData[i]->velocity);
     }
 
     // Manually build the JSON string using snprintf
@@ -199,7 +200,7 @@ void ManagerHMI_ExecuteJson(uint8_t sectionNbr)
                     ManagerHMI_ExecuteManualIncrement(
                         ParsedMsg[M_HMI_CONTENT_SECTION]);
                 }
-                else if (strcmp(ParsedMsg[M_HMI_CONTENT_SECTION], "Tightening") == 0)
+                else if (strcmp(ParsedMsg[M_HMI_ACTION_SECTION], "Tightening") == 0)
                 {
                 	if (strcmp(ParsedMsg[M_HMI_CONTENT_SECTION], "Forward") == 0)
 					{

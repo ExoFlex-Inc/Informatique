@@ -37,6 +37,8 @@
 bool isEversionFree;
 bool isChangeSideFree;
 
+bool isFootMotorOn;
+
 void PeriphSolenoid_ActivateSolenoid(TIM_HandleTypeDef* htim, uint32_t channel,
                                      GPIO_TypeDef* GPIO1, uint16_t pin1,
 									 GPIO_TypeDef* GPIO2, uint16_t pin2,
@@ -51,7 +53,7 @@ void PeriphSolenoid_StopPWM(TIM_HandleTypeDef* htim, uint32_t channel);
 
 void PeriphSolenoid_Init()
 {
-    PeriphSolenoid_ResetLocksState();
+    PeriphSolenoid_ResetPWMState();
 }
 
 /********************************************
@@ -114,20 +116,28 @@ bool PeriphSolenoid_UnlockEversion()
  ********************************************/
 void periphSolenoid_FootThight()
 {
-	uint32_t compare_value = PeriphSolenoid_SetDutyCycle(PS_MF_HTIM, PS_MF_CHANNEL, MOTOR_PWM_VALUE);
-	PeriphSolenoid_StartPWM(PS_MF_HTIM, PS_MF_CHANNEL, compare_value);
+	if(!isFootMotorOn)
+	{
+		uint32_t compare_value = PeriphSolenoid_SetDutyCycle(PS_MF_HTIM, PS_MF_CHANNEL, MOTOR_PWM_VALUE);
+		PeriphSolenoid_StartPWM(PS_MF_HTIM, PS_MF_CHANNEL, compare_value);
 
-	HAL_GPIO_WritePin(PS_MF_GPIO1, PS_MF_PIN1, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(PS_MF_GPIO2, PS_MF_PIN2, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(PS_MF_GPIO1, PS_MF_PIN1, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(PS_MF_GPIO2, PS_MF_PIN2, GPIO_PIN_SET);
+		isFootMotorOn = true;
+	}
 }
 
 void periphSolenoid_FootLoose()
 {
-	uint32_t compare_value = PeriphSolenoid_SetDutyCycle(PS_MF_HTIM, PS_MF_CHANNEL, MOTOR_PWM_VALUE);
-	PeriphSolenoid_StartPWM(PS_MF_HTIM, PS_MF_CHANNEL, compare_value);
+	if(!isFootMotorOn)
+	{
+		uint32_t compare_value = PeriphSolenoid_SetDutyCycle(PS_MF_HTIM, PS_MF_CHANNEL, MOTOR_PWM_VALUE);
+		PeriphSolenoid_StartPWM(PS_MF_HTIM, PS_MF_CHANNEL, compare_value);
 
-	HAL_GPIO_WritePin(PS_MF_GPIO1, PS_MF_PIN1, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(PS_MF_GPIO2, PS_MF_PIN2, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(PS_MF_GPIO1, PS_MF_PIN1, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(PS_MF_GPIO2, PS_MF_PIN2, GPIO_PIN_RESET);
+		isFootMotorOn = true;
+	}
 }
 
 /********************************************
@@ -147,12 +157,15 @@ void PeriphSolenoid_StopPWMs()
 	PeriphSolenoid_StopPWM(PS_EV_HTIM, PS_EV_CHANNEL);
 	PeriphSolenoid_StopPWM(PS_CS_HTIM, PS_CS_CHANNEL);
 	PeriphSolenoid_StopPWM(PS_MF_HTIM, PS_MF_CHANNEL);
+
+	PeriphSolenoid_ResetPWMState();
 }
 
-void PeriphSolenoid_ResetLocksState()
+void PeriphSolenoid_ResetPWMState()
 {
     isChangeSideFree = false;
     isEversionFree   = false;
+    isFootMotorOn = false;
 }
 
 void PeriphSolenoid_ActivateSolenoid(TIM_HandleTypeDef* htim, uint32_t channel,
