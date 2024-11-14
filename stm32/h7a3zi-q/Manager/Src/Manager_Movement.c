@@ -120,6 +120,7 @@ void ManagerMovement_Automatic();
 
 // Manual
 void ManagerMovement_ManualIncrement(uint8_t id, int8_t factor);
+void ManagerMovement_StopMotorsCmd();
 
 // Auto mouvements
 void ManagerMovement_Waiting4Plan();
@@ -757,106 +758,107 @@ void ManagerMovement_AutoStrectching()
     // Keep the position until time is over
     // Serait la place ou mettre un commande en force
 
-    // TODO: ajouter gestion du cote de la jambe (Changement de limit)
-#ifndef MMOV_DISABLE_TORQUE_STRETCHING
+	if (stopButton || !startButton)
+	{
+		managerMovement.autoState = MMOV_AUTO_STATE_STOP;
+		ManagerMovement_StopMotorsCmd();
+	}
+	else
+	{
 
-    // cmd flags
-    static bool cmd1Sent = false;
-    static bool cmd2Sent = false;
-    static bool cmd3Sent = false;
-
-    static bool decreaseMvtNbr = false;
-
-    uint8_t movementNbr = mvtNbr[exerciseIdx];
-    if (!decreaseMvtNbr)
-    {
-        movementIdx -= movementNbr - 1;
-        decreaseMvtNbr = true;
-    }
-
-    // Get movement info
-    uint8_t currentMovement = movements[movementIdx];
-    float   goToTorque      = targetTorques[movementIdx];
-
-    float angleLimit = 0.0f;
-
-    // Get Angle limit from legSide
-
-    if (managerMovement.currentLegSide == MMOV_LEG_IS_LEFT)
-    {
-        angleLimit = legLeftLimits[currentMovement - 1].maxAngle;
-    }
-    else if (managerMovement.currentLegSide == MMOV_LEG_IS_RIGHT)
-    {
-        angleLimit = legRightLimits[currentMovement - 1].maxAngle;
-    }
-
-    // Send Torque commandes
-    if (currentMovement == MMOV_EVERSION)
-    {
-        if (movementIdx % 3 == 0)
-        {
-            cmd1Sent = true;
-        }
-        else if (movementIdx % 3 == 1)
-        {
-            cmd2Sent = true;
-        }
-        else if (movementIdx % 3 == 2)
-        {
-            cmd3Sent = true;
-        }
-        movementIdx++;
-    }
-    else
-    {
-        if (!cmd1Sent && movementNbr >= 1)
-        {
-            ManagerMovement_AutoTorque(currentMovement, angleLimit, goToTorque);
-            cmd1Sent = true;
-            movementIdx++;
-        }
-        else if (!cmd2Sent && movementNbr >= 2)
-        {
-            ManagerMovement_AutoTorque(currentMovement, angleLimit, goToTorque);
-            cmd2Sent = true;
-            movementIdx++;
-        }
-        else if (!cmd3Sent && movementNbr >= 3)
-        {
-            ManagerMovement_AutoTorque(currentMovement, angleLimit, goToTorque);
-            cmd3Sent = true;
-            movementIdx++;
-        }
-    }
-
-#endif
-    // TODO: Faire arreter l etirement si le torque ressentit depasse la limit
-    // de couple
-
-    if (stopButton || !startButton)
-    {
-        managerMovement.autoState = MMOV_AUTO_STATE_STOP;
-#ifndef MMOV_DISABLE_TORQUE_STRETCHING
-        movementIdx--;
-#endif
-    }
-    else if (HAL_GetTick() - exerciseTimer >= exercisesTime[exerciseIdx])
-    {
-        ManagerMotor_StopManualMovement(MMOT_MOTOR_1);
-        ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
-        ManagerMotor_StopManualMovement(MMOT_MOTOR_3);
-
-        managerMovement.autoState = MMOV_AUTO_STATE_2FIRST_POS;
 
 #ifndef MMOV_DISABLE_TORQUE_STRETCHING
-        movementIdx--;
-        cmd1Sent       = false;
-        cmd2Sent       = false;
-        cmd3Sent       = false;
-        decreaseMvtNbr = false;
+
+		// cmd flags
+		static bool cmd1Sent = false;
+		static bool cmd2Sent = false;
+		static bool cmd3Sent = false;
+
+		static bool decreaseMvtNbr = false;
+
+
+		uint8_t movementNbr = mvtNbr[exerciseIdx];
+		if (!decreaseMvtNbr)
+		{
+			movementIdx -= movementNbr - 1;
+			decreaseMvtNbr = true;
+		}
+
+		// Get movement info
+		uint8_t currentMovement = movements[movementIdx];
+		float   goToTorque      = targetTorques[movementIdx];
+
+		float angleLimit = 0.0f;
+
+		// Get Angle limit from legSide
+
+		if (managerMovement.currentLegSide == MMOV_LEG_IS_LEFT)
+		{
+			angleLimit = legLeftLimits[currentMovement - 1].maxAngle;
+		}
+		else if (managerMovement.currentLegSide == MMOV_LEG_IS_RIGHT)
+		{
+			angleLimit = legRightLimits[currentMovement - 1].maxAngle;
+		}
+
+		// Send Torque commandes
+		if (currentMovement == MMOV_EVERSION)
+		{
+			if (movementIdx % 3 == 0)
+			{
+				cmd1Sent = true;
+			}
+			else if (movementIdx % 3 == 1)
+			{
+				cmd2Sent = true;
+			}
+			else if (movementIdx % 3 == 2)
+			{
+				cmd3Sent = true;
+			}
+			movementIdx++;
+		}
+		else
+		{
+			if (!cmd1Sent && movementNbr >= 1)
+			{
+				ManagerMovement_AutoTorque(currentMovement, angleLimit, goToTorque);
+				cmd1Sent = true;
+				movementIdx++;
+			}
+			else if (!cmd2Sent && movementNbr >= 2)
+			{
+				ManagerMovement_AutoTorque(currentMovement, angleLimit, goToTorque);
+				cmd2Sent = true;
+				movementIdx++;
+			}
+			else if (!cmd3Sent && movementNbr >= 3)
+			{
+				ManagerMovement_AutoTorque(currentMovement, angleLimit, goToTorque);
+				cmd3Sent = true;
+				movementIdx++;
+			}
+		}
+
 #endif
-    }
+		// TODO: Faire arreter l etirement si le torque ressentit depasse la limit
+		// de couple
+
+		if (HAL_GetTick() - exerciseTimer >= exercisesTime[exerciseIdx])
+		{
+			ManagerMovement_StopMotorsCmd();
+
+			managerMovement.autoState = MMOV_AUTO_STATE_2FIRST_POS;
+
+#ifndef MMOV_DISABLE_TORQUE_STRETCHING
+			movementIdx--;
+			cmd1Sent       = false;
+			cmd2Sent       = false;
+			cmd3Sent       = false;
+			decreaseMvtNbr = false;
+#endif
+		}
+	}
 }
 
 void ManagerMovement_Auto2FirstPos()
@@ -866,6 +868,7 @@ void ManagerMovement_Auto2FirstPos()
      * is incremented to the last movement done, the flags are reset, and the
      * state is changed.
      */
+
     if (!pos3Reached && mvtNbr[exerciseIdx] >= 3)
     {
         if (ManagerMovement_GoToPos(movements[movementIdx], firstPos[2]))
@@ -938,6 +941,7 @@ void ManagerMovement_AutoStop()
 {
     if (!isAtFirstPos)
     {
+    	movementIdx = mvtNbr[exerciseIdx] - 1;
         ManagerMovement_Auto2FirstPos();  // Go to firstPos if not there
     }
     else
@@ -1327,4 +1331,11 @@ void ManagerMovement_AutoTorque(uint8_t mouvType, float posLimit,
             managerMovement.mSpeedGoal[MMOT_MOTOR_3],
             managerMovement.mTorqueGoal[MMOT_MOTOR_3]);
     }
+}
+
+void ManagerMovement_StopMotorsCmd()
+{
+	ManagerMotor_StopManualMovement(MMOT_MOTOR_1);
+	ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
+	ManagerMotor_StopManualMovement(MMOT_MOTOR_3);
 }
