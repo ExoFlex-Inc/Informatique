@@ -61,14 +61,8 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/src ./src
 
-# Create a non-root user for security
-RUN useradd -m -s /bin/bash nodeuser \
-    && chown -R nodeuser:nodeuser /app
-
 EXPOSE 1338
 EXPOSE 3001
 
-# Switch to non-root user
-USER nodeuser
 
 CMD ["yarn", "start"]
