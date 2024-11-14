@@ -1,5 +1,5 @@
 # Stage 1: Build Stage
-FROM ubuntu:22.04 AS builder
+FROM arm64v8/ubuntu:latest AS builder
 
 # Prevent tzdata from asking for user input
 ENV DEBIAN_FRONTEND=noninteractive
@@ -35,7 +35,7 @@ COPY . .
 RUN yarn build
 
 # Stage 2: Production Stage
-FROM ubuntu:22.04
+FROM arm64v8/ubuntu:latest
 
 ENV DEBIAN_FRONTEND=noninteractive
 
