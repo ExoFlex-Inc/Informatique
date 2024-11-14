@@ -8,7 +8,7 @@
 #include <Periph_UartRingBuf.h>
 #include <string.h>
 
-#define MMOV_EXT_RESTPOS 1.0
+#define MMOV_EXT_RESTPOS 1.5
 #define MMOV_EVR_RESTPOS 0.30
 #define MMOV_DOR_RESTPOS 0.0
 
