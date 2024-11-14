@@ -6,7 +6,7 @@ services:
       dockerfile: ./Dockerfile
       platforms:
         - linux/arm64
-    image: bigjack325/exoflex:latest  # Changed to latest
+    image: bigjack325/exoflex:latest
     env_file:
       - .env.production
     ports:
