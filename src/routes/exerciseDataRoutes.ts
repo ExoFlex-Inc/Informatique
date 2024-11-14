@@ -1,7 +1,7 @@
 import express from "express";
 import {
   getExerciseData,
-  getExerciseDataById
+  getExerciseDataById,
 } from "../controllers/exerciseDataController.js";
 
 const router = express.Router();

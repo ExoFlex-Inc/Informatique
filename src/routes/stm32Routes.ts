@@ -4,7 +4,7 @@ import {
   recordingStm32Data,
   getSavedData,
   clearData,
-  addRatedPainExerciseData
+  addRatedPainExerciseData,
 } from "../controllers/stm32Controller.ts";
 
 const router = express.Router();

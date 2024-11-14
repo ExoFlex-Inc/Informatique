@@ -280,7 +280,6 @@ const recordingStm32Data = async (req: Request, res: Response) => {
     }
 
     if (state === "start") {
-      
       // Insert initial JSON data
       if (exerciseId === null) {
         // Clear previous data if needed
@@ -308,11 +307,10 @@ const recordingStm32Data = async (req: Request, res: Response) => {
     } else if (state === "stop") {
       // Stop recording
       togglePushInterval("stop");
-      isRecording = false
+      isRecording = false;
       return res
         .status(200)
         .send({ exercise_id: exerciseId, message: "Recording stopped." });
-
     }
   } catch (error) {
     // Handle unexpected errors
@@ -331,7 +329,7 @@ const addRatedPainExerciseData = async (req: Request, res: Response) => {
     .update({
       rated_pain,
     })
-    .eq('id', exerciseId);
+    .eq("id", exerciseId);
 
   if (exerciseError) {
     return res.status(500).json({
@@ -499,7 +497,6 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
         const jsonDataString = receivedDataBuffer.substring(startIdx, endIdx);
 
         try {
-
           const parsedData = JSON.parse(jsonDataString);
           io.emit("stm32Data", parsedData);
           if (isRecording === true) {
@@ -565,4 +562,10 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
   }
 });
 
-export { initializeSerialPort, recordingStm32Data, getSavedData, clearData, addRatedPainExerciseData };
+export {
+  initializeSerialPort,
+  recordingStm32Data,
+  getSavedData,
+  clearData,
+  addRatedPainExerciseData,
+};
