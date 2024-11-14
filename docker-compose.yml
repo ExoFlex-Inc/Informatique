@@ -19,6 +19,8 @@ services:
     restart: unless-stopped
     environment:
       - NODE_ENV=production
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
 
   watchtower:
     image: containrrr/watchtower
@@ -27,10 +29,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - WATCHTOWER_CLEANUP=true                  # Remove old images
-      - WATCHTOWER_POLL_INTERVAL=30             # Check every 30 seconds
-      - WATCHTOWER_INCLUDE_STOPPED=false         # Don't update stopped containers
-      - WATCHTOWER_LABEL_ENABLE=true            # Only update containers with label
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-    command: --label-enable  
+      - WATCHTOWER_CLEANUP=true                # Remove old images
+      - WATCHTOWER_POLL_INTERVAL=30           # Check every 5 minutes
+      - WATCHTOWER_INCLUDE_STOPPED=false       # Don't update stopped containers
+      - WATCHTOWER_LABEL_ENABLE=true           # Only update containers with label
