@@ -1,6 +1,7 @@
 services:
   app:
-    image: exoflex_image
+    image: bigjack325/exoflex:latest
+    container_name: exoflex-app
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -15,15 +16,21 @@ services:
     group_add:
       - dialout
       - tty
-    restart: always
+    restart: unless-stopped
     environment:
       - NODE_ENV=production
 
   watchtower:
     image: containrrr/watchtower
+    container_name: watchtower
+    restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - WATCHTOWER_CLEANUP=true
-      - WATCHTOWER_POLL_INTERVAL=300
-    restart: always
+      - WATCHTOWER_CLEANUP=true                  # Remove old images
+      - WATCHTOWER_POLL_INTERVAL=30             # Check every 30 seconds
+      - WATCHTOWER_INCLUDE_STOPPED=false         # Don't update stopped containers
+      - WATCHTOWER_LABEL_ENABLE=true            # Only update containers with label
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    command: --label-enable  
