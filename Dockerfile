@@ -1,5 +1,5 @@
 # Stage 1: Build Stage
-FROM arm64v8/ubuntu:22.04 AS builder
+FROM ubuntu:22.04 AS builder
 
 # Prevent tzdata from asking for user input
 ENV DEBIAN_FRONTEND=noninteractive
@@ -28,14 +28,14 @@ WORKDIR /app
 
 # Install dependencies first (better caching)
 COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
+RUN yarn install
 
 # Copy source and build
 COPY . .
 RUN yarn build
 
 # Stage 2: Production Stage
-FROM arm64v8/ubuntu:22.04
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -54,7 +54,7 @@ WORKDIR /app
 
 # Copy only production dependencies
 COPY package.json yarn.lock ./
-RUN yarn install --production --frozen-lockfile
+RUN yarn install --production
 
 # Copy built files from builder stage
 COPY --from=builder /app/dist ./dist
