@@ -215,7 +215,7 @@ export default function HMI() {
     };
 
     stopRecording();
-  }, [stm32Data]);
+  }, [stm32Data?.AutoState, stm32Data?.Mode]);
 
   useEffect(() => {
     if (
@@ -294,14 +294,13 @@ export default function HMI() {
   useEffect(() => {
     if (painScale && user?.user_id) {
       const requestBody = {
-        stats: stats,
         rated_pain: painScale,
         user_id: user.user_id,
       };
       const fetchData = async () => {
         try {
           const exerciseData = await fetch(
-            `http://localhost:3001/exercise-data/${user.user_id}`,
+            `http://localhost:3001/stm32/rated_pain`,
             {
               method: "POST",
               headers: {
