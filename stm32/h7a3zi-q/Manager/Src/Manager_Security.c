@@ -135,13 +135,16 @@ void ManagerSecurity_Error()
 
     if (ManagerSecurity.reset)
     {
-        ManagerMotor_Reset();
-        ManagerMovement_Reset();
-        lastTime              = HAL_GetTick();
-        ManagerSecurity.reset = false;
-        ManagerError_ResetAllErrors();
+    	//Motors do not reset correctly, so quick fix
+    	NVIC_SystemReset();
 
-        ManagerSecurity.state = MS_STATE_IDLE;
+//        ManagerMotor_Reset();
+//        ManagerMovement_Reset();
+//        lastTime              = HAL_GetTick();
+//        ManagerSecurity.reset = false;
+//        ManagerError_ResetAllErrors();
+//
+//        ManagerSecurity.state = MS_STATE_IDLE;
     }
 }
 
