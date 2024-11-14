@@ -837,6 +837,9 @@ void ManagerMovement_AutoStrectching()
     if (stopButton || !startButton)
     {
         managerMovement.autoState = MMOV_AUTO_STATE_STOP;
+#ifndef MMOV_DISABLE_TORQUE_STRETCHING
+        movementIdx--;
+#endif
     }
     else if (HAL_GetTick() - exerciseTimer >= exercisesTime[exerciseIdx])
     {
