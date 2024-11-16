@@ -83,7 +83,7 @@ const UserList: React.FC<UserListProps> = ({
 
   const handleSnackbarClose = (
     event?: React.SyntheticEvent | Event,
-    reason?: string
+    reason?: string,
   ) => {
     if (reason === "clickaway") {
       return;

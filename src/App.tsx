@@ -60,7 +60,9 @@ const checkForUpdates = async () => {
 
 const performUpdate = async () => {
   // Mock API call to perform update
-  const response = await fetch("http://localhost:3001/docker/update", { method: "POST" });
+  const response = await fetch("http://localhost:3001/docker/update", {
+    method: "POST",
+  });
   if (!response.ok) {
     throw new Error("Update failed");
   }
@@ -137,8 +139,8 @@ function AppLayout() {
     return (
       <>
         <UpdateWidget
-            onCheckUpdates={checkForUpdates}
-            onUpdate={performUpdate}
+          onCheckUpdates={checkForUpdates}
+          onUpdate={performUpdate}
         />
         <ProSideBar permissions={user.permissions} />
         <main className="content overflow-hidden">
