@@ -3,7 +3,7 @@ import SendIcon from "@mui/icons-material/Send";
 import UserMenuDropdown from "./UserMenuDropdown.tsx";
 import { useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import { Box, IconButton } from "@mui/material";
+import { Box, IconButton, Snackbar, Alert } from "@mui/material";
 import { useUser } from "../hooks/use-user.ts";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -27,6 +27,11 @@ const UserList: React.FC<UserListProps> = ({
   const { pathname } = useLocation();
   const { user } = useUser();
   const queryClient = useQueryClient();
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<
+    "success" | "error" | "warning" | "info"
+  >("success");
 
   const addToButtonRefs = (el: HTMLButtonElement | null, index: number) => {
     if (el) {
@@ -63,10 +68,27 @@ const UserList: React.FC<UserListProps> = ({
       const newList = listOfUsers.filter((_, i) => i !== index);
       setFilteredUsers(newList);
       queryClient.invalidateQueries({ queryKey: ["pendingRelations"] });
-      window.alert("Invitation sent successfully.");
+
+      setSnackbarMessage("Invitation sent successfully.");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
     } catch (error) {
       console.error("Error sending invitation:", error);
+
+      setSnackbarMessage("Failed to send invitation.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
     }
+  };
+
+  const handleSnackbarClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbarOpen(false);
   };
 
   return (
@@ -151,6 +173,20 @@ const UserList: React.FC<UserListProps> = ({
           </div>
         ))}
       </ul>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

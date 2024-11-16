@@ -23,17 +23,3 @@ services:
       - NODE_ENV=production
     labels:
       - com.centurylinklabs.watchtower.enable=true
-
-  watchtower:
-    image: containrrr/watchtower
-    container_name: watchtower
-    restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - WATCHTOWER_CLEANUP=true
-      - WATCHTOWER_POLL_INTERVAL=10
-      - WATCHTOWER_INCLUDE_STOPPED=false
-      - WATCHTOWER_LABEL_ENABLE=true
-      - WATCHTOWER_PULL_ALWAYS=true
-    command: --debug

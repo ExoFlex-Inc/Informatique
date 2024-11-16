@@ -15,6 +15,7 @@ import relationsRoutes from "./routes/relationsRoutes.ts";
 import statRoutes from "./routes/statRoutes.ts";
 import exerciseDataRoute from "./routes/exerciseDataRoutes.ts";
 import notificationRoute from "./routes/notificationRoutes.ts";
+import dockerRoutes from "./routes/dockerRoutes.ts";
 import { getSerialPort } from "./managers/serialPort.ts";
 import { supabaseMiddleware } from "./middlewares/supabaseMiddleware.ts";
 import "./config/passportConfig.ts";
@@ -29,7 +30,7 @@ const __dirname = path.dirname(__filename);
 if (process.env.NODE_ENV === "production") {
   dotenv.config({ path: ".env.production" });
 } else {
-  dotenv.config({ path: ".env" }); // or '.env.development' for dev
+  dotenv.config({ path: ".env" });
 }
 
 if (process.env["ROBOT"] === "false") {
@@ -105,6 +106,7 @@ app.use("/stat", statRoutes);
 app.use("/notification", notificationRoute);
 app.use("/stm32", serialPortRoutes);
 app.use("/plan", planRoutes);
+app.use("/docker", dockerRoutes);
 
 let lastCallTime = 0;
 
