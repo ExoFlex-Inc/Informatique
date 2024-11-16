@@ -1,4 +1,3 @@
--- Create extension if not already installed
 CREATE EXTENSION IF NOT EXISTS ltree;
 
 /*
@@ -101,8 +100,9 @@ execute function "supabase_functions"."http_request"(
 ..######.....##.....#######..##.....##.##.....##..#######..########
 */
 
-INSERT INTO storage.buckets(id, name, public, file_size_limit) VALUES ('avatars', 'avatars', true, 52428800);
-
+INSERT INTO storage.buckets(id, name, public, file_size_limit)
+VALUES ('avatars', 'avatars', true, 52428800)
+ON CONFLICT (id) DO NOTHING;
 /*
 .########.##.....##.##....##..######..########.####..#######..##....##..######.
 .##.......##.....##.###...##.##....##....##.....##..##.....##.###...##.##....##
