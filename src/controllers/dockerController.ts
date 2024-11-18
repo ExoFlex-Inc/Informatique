@@ -20,28 +20,50 @@ const followProgress = (stream: any) =>
 // Check for image updates
 export const checkImageUpdate = async (req: Request, res: Response) => {
     try {
-        // Get local image digest
+        console.log('Starting checkImageUpdate function...');
+        
+        // Log image name and tag
+        // const imageName = process.env.IMAGE_NAME || 'your-image-name';
+        // const tag = process.env.IMAGE_TAG || 'latest';
+        console.log(`Image Name: ${imageName}`);
+        console.log(`Tag: ${tag}`);
+
+        // Step 1: Get local image digest
+        console.log('Fetching local image digest...');
         const localImage = client.getImage(`${imageName}:${tag}`);
         const { RepoDigests } = await localImage.inspect();
+        console.log(`RepoDigests from local image: ${JSON.stringify(RepoDigests)}`);
         const localDigest = RepoDigests?.[0]?.split('@')[1] || '';
+        console.log(`Local Digest: ${localDigest}`);
 
-        // Fetch remote image digest from Docker Hub
-        const response = await fetch(`https://registry.hub.docker.com/v2/repositories/${imageName}/tags/${tag}`);
+        // Step 2: Fetch remote image digest
+        console.log('Fetching remote image digest from Docker Hub...');
+        const url = `https://registry.hub.docker.com/v2/repositories/${imageName}/tags/${tag}`;
+        console.log(`Fetching URL: ${url}`);
+        const response = await fetch(url);
+        console.log(`HTTP Response Status: ${response.status}`);
         if (!response.ok) {
             throw new Error(`Failed to fetch remote image info: ${response.statusText}`);
         }
+
         const remoteImageInfo = await response.json();
+        console.log(`Remote Image Info: ${JSON.stringify(remoteImageInfo)}`);
         const remoteDigest = remoteImageInfo.digest || '';
+        console.log(`Remote Digest: ${remoteDigest}`);
 
+        // Step 3: Compare digests
         const updateAvailable = localDigest !== remoteDigest;
+        console.log(`Update Available: ${updateAvailable}`);
 
+        // Step 4: Send response
         res.json({
             updateAvailable,
             localDigest,
             remoteDigest,
         });
+        console.log('Response sent successfully.');
     } catch (error) {
-        console.error('Error checking image updates:', error);
+        console.error('Error checking image updates:', error.message);
         res.status(500).json({ error: 'Failed to check image updates' });
     }
 };

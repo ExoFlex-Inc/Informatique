@@ -1,19 +1,14 @@
 # Stage 1: Build Stage
-# FROM arm64v8/ubuntu:latest AS builder
 FROM ubuntu:latest AS builder
-# Prevent tzdata from asking for user input
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Add build arguments
 ARG BUILD_DATE
 ARG GIT_SHA
 
-# Add labels that will change with each build
 LABEL org.opencontainers.image.created="${BUILD_DATE}"
 LABEL org.opencontainers.image.revision="${GIT_SHA}"
 LABEL org.opencontainers.image.version="${BUILD_DATE}"
 
-# Install Node.js and yarn in a single RUN to reduce layers
 RUN apt-get update && apt-get install -y \
     curl \
     git \
@@ -25,22 +20,15 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/cache/apt/*
 
 WORKDIR /app
-
-# Install dependencies first (better caching)
 COPY package.json yarn.lock ./
 RUN yarn install
-
-# Copy source and build
 COPY . .
 RUN yarn build
 
 # Stage 2: Production Stage
-# FROM arm64v8/ubuntu:latest
 FROM ubuntu:latest
-
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install Node.js and yarn in a single RUN
 RUN apt-get update && apt-get install -y \
     curl \
     git \
@@ -52,24 +40,20 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/cache/apt/*
 
 WORKDIR /app
-
-# Copy only production dependencies
 COPY package.json yarn.lock ./
-RUN yarn install --production
-
-# Copy built files from builder stage
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/src ./src
 
-# Create a non-root user for security
-RUN useradd -m -s /bin/bash nodeuser \
-    && chown -R nodeuser:nodeuser /app
+# Create non-root user for security
+RUN groupadd -g 998 docker && \
+    useradd -m -s /bin/bash nodeuser && \
+    usermod -aG docker nodeuser && \
+    chown -R nodeuser:nodeuser /app
 
 EXPOSE 1338
 EXPOSE 3001
 
-# Switch to non-root user
 USER nodeuser
-
 CMD ["yarn", "start"]

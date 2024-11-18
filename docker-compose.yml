@@ -18,8 +18,8 @@ services:
     group_add:
       - dialout
       - tty
-    restart: unless-stopped
+    restart: always
     environment:
       - NODE_ENV=production
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
