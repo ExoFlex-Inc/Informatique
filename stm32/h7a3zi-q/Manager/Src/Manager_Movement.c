@@ -941,7 +941,6 @@ void ManagerMovement_AutoStop()
 {
     if (!isAtFirstPos)
     {
-    	movementIdx = mvtNbr[exerciseIdx] - 1;
         ManagerMovement_Auto2FirstPos();  // Go to firstPos if not there
     }
     else
