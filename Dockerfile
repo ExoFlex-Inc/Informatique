@@ -47,7 +47,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/src ./src
 
 # Create non-root user for security
-RUN groupadd -g 998 docker && \
+RUN groupadd -g 984 docker && \
     useradd -m -s /bin/bash nodeuser && \
     usermod -aG docker nodeuser && \
     chown -R nodeuser:nodeuser /app
