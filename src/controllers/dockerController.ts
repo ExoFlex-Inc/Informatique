@@ -20,97 +20,94 @@ const followProgress = (stream: any) =>
 // Check for image updates
 export const checkImageUpdate = async (req: Request, res: Response) => {
     try {
-        console.log('Starting checkImageUpdate function...');
-        
-        // Log image name and tag
-        // const imageName = process.env.IMAGE_NAME || 'your-image-name';
-        // const tag = process.env.IMAGE_TAG || 'latest';
-        console.log(`Image Name: ${imageName}`);
-        console.log(`Tag: ${tag}`);
-
-        // Step 1: Get local image digest
-        console.log('Fetching local image digest...');
+        // Get local image digest
         const localImage = client.getImage(`${imageName}:${tag}`);
         const { RepoDigests } = await localImage.inspect();
-        console.log(`RepoDigests from local image: ${JSON.stringify(RepoDigests)}`);
         const localDigest = RepoDigests?.[0]?.split('@')[1] || '';
-        console.log(`Local Digest: ${localDigest}`);
 
-        // Step 2: Fetch remote image digest
-        console.log('Fetching remote image digest from Docker Hub...');
-        const url = `https://registry.hub.docker.com/v2/repositories/${imageName}/tags/${tag}`;
-        console.log(`Fetching URL: ${url}`);
-        const response = await fetch(url);
-        console.log(`HTTP Response Status: ${response.status}`);
+        // Fetch remote image digest from Docker Hub
+        const response = await fetch(`https://registry.hub.docker.com/v2/repositories/${imageName}/tags/${tag}`);
         if (!response.ok) {
             throw new Error(`Failed to fetch remote image info: ${response.statusText}`);
         }
-
         const remoteImageInfo = await response.json();
-        console.log(`Remote Image Info: ${JSON.stringify(remoteImageInfo)}`);
         const remoteDigest = remoteImageInfo.digest || '';
-        console.log(`Remote Digest: ${remoteDigest}`);
 
-        // Step 3: Compare digests
         const updateAvailable = localDigest !== remoteDigest;
-        console.log(`Update Available: ${updateAvailable}`);
 
-        // Step 4: Send response
         res.json({
             updateAvailable,
             localDigest,
             remoteDigest,
         });
-        console.log('Response sent successfully.');
     } catch (error) {
-        console.error('Error checking image updates:', error.message);
+        console.error('Error checking image updates:', error);
         res.status(500).json({ error: 'Failed to check image updates' });
     }
 };
 
 // Execute image update and redeployment
 export const executeImageUpdate = async (req: Request, res: Response) => {
+    console.log('Starting the image update and redeployment process...');
     try {
-        // Stop and remove the container if it exists
+        // Step 1: Stop the container
+        console.log('Attempting to stop the container...');
         const container = client.getContainer(containerName);
         try {
             await container.stop();
             console.log(`Container ${containerName} stopped successfully.`);
         } catch (err) {
-            console.warn(`Container ${containerName} was not running or could not be stopped.`);
+            console.warn(`Container ${containerName} was not running or could not be stopped.`, err.message);
         }
 
+        // Step 2: Remove the container
+        console.log('Attempting to remove the container...');
         try {
             await container.remove();
             console.log(`Container ${containerName} removed successfully.`);
         } catch (err) {
-            console.warn(`Container ${containerName} could not be removed.`);
+            console.warn(`Container ${containerName} could not be removed.`, err.message);
         }
 
-        // Pull the latest image
-        console.log(`Pulling the latest image for ${imageName}:${tag}...`);
-        const pullStream = await client.pull(`${imageName}:${tag}`);
-        await followProgress(pullStream);
-        console.log(`Image pulled successfully.`);
+        // Step 3: Pull the latest image
+        console.log(`Pulling the latest image: ${imageName}:${tag}...`);
+        try {
+            const pullStream = await client.pull(`${imageName}:${tag}`);
+            console.log('Image pull started...');
+            await followProgress(pullStream);
+            console.log('Image pulled successfully.');
+        } catch (err) {
+            console.error(`Error pulling the latest image ${imageName}:${tag}:`, err.message);
+            throw err; // Re-throw to handle it in the catch block below
+        }
 
-        // Redeploy the container
-        console.log(`Redeploying container ${containerName}...`);
-        const newContainer = await client.createContainer({
-            Image: `${imageName}:${tag}`,
-            name: containerName,
-            Tty: true,
-            HostConfig: {
-                PortBindings: {
-                    '3000/tcp': [{ HostPort: '3000' }],
+        // Step 4: Redeploy the container
+        console.log(`Redeploying container ${containerName} with image ${imageName}:${tag}...`);
+        try {
+            const newContainer = await client.createContainer({
+                Image: `${imageName}:${tag}`,
+                name: containerName,
+                Tty: true,
+                HostConfig: {
+                    PortBindings: {
+                        '3000/tcp': [{ HostPort: '3000' }],
+                    },
                 },
-            },
-        });
-        await newContainer.start();
-        console.log(`Container ${containerName} redeployed successfully.`);
+            });
+            console.log('Container created successfully.');
+            await newContainer.start();
+            console.log(`Container ${containerName} started successfully.`);
+        } catch (err) {
+            console.error(`Error redeploying container ${containerName}:`, err.message);
+            throw err;
+        }
 
+        console.log('Image update and redeployment process completed successfully.');
         res.json({ message: 'Container updated and redeployed successfully' });
     } catch (error) {
-        console.error('Error during image update or redeployment:', error);
+        console.error('Error during image update or redeployment process:', error.message);
         res.status(500).json({ error: 'Failed to update or redeploy container' });
+    } finally {
+        console.log('Image update process finished (success or error).');
     }
 };

@@ -9,6 +9,7 @@ LABEL org.opencontainers.image.created="${BUILD_DATE}"
 LABEL org.opencontainers.image.revision="${GIT_SHA}"
 LABEL org.opencontainers.image.version="${BUILD_DATE}"
 
+# Install dependencies
 RUN apt-get update && apt-get install -y \
     curl \
     git \
@@ -20,8 +21,12 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/cache/apt/*
 
 WORKDIR /app
+
+# Cache dependencies
 COPY package.json yarn.lock ./
 RUN yarn install
+
+# Copy and build application
 COPY . .
 RUN yarn build
 
@@ -29,6 +34,7 @@ RUN yarn build
 FROM ubuntu:latest
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Install runtime dependencies
 RUN apt-get update && apt-get install -y \
     curl \
     git \
@@ -40,6 +46,8 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/cache/apt/*
 
 WORKDIR /app
+
+# Copy application files from build stage
 COPY package.json yarn.lock ./
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/public ./public
@@ -50,10 +58,12 @@ COPY --from=builder /app/src ./src
 RUN groupadd -g 984 docker && \
     useradd -m -s /bin/bash nodeuser && \
     usermod -aG docker nodeuser && \
-    chown -R nodeuser:nodeuser /app
+    chown -R nodeuser:docker /app
 
+# Expose ports
 EXPOSE 1338
 EXPOSE 3001
 
+# Run as non-root user
 USER nodeuser
 CMD ["yarn", "start"]
