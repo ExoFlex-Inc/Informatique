@@ -1,5 +1,6 @@
 services:
   app:
+    container_name: exoflex-app
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -24,6 +25,7 @@ services:
       - com.centurylinklabs.watchtower.enable=true
 
   watchtower:
+    container_name: watchtower
     image: containrrr/watchtower:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
