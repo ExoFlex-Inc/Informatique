@@ -1,6 +1,5 @@
 services:
   app:
-    container_name: exoflex-app
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -21,5 +20,17 @@ services:
     restart: always
     environment:
       - NODE_ENV=production
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+  watchtower:
+    image: containrrr/watchtower:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_POLL_INTERVAL=30
+      - WATCHTOWER_NOTIFICATIONS=slack
+      - WATCHTOWER_NOTIFICATION_SLACK_HOOK_URL=https://hooks.slack.com/services/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
+      - WATCHTOWER_NOTIFICATION_SLACK_CHANNEL=#dev-info
+      - WATCHTOWER_DEBUG=true
+    restart: always

@@ -51,20 +51,20 @@ const localStoragePersister = createSyncStoragePersister({
   storage: window.localStorage,
 });
 
-const checkForUpdates = async () => {
-  // Mock API call for checking updates
-  const response = await fetch("http://localhost:3001/docker/check-updates");
-  const data = await response.json();
-  return data.updateAvailable;
-};
+// const checkForUpdates = async () => {
+//   // Mock API call for checking updates
+//   const response = await fetch("http://localhost:3001/docker/check-updates");
+//   const data = await response.json();
+//   return data.updateAvailable;
+// };
 
-const performUpdate = async () => {
-  // Mock API call to perform update
-  const response = await fetch("http://localhost:3001/docker/update", { method: "POST" });
-  if (!response.ok) {
-    throw new Error("Update failed");
-  }
-};
+// const performUpdate = async () => {
+//   // Mock API call to perform update
+//   const response = await fetch("http://localhost:3001/docker/update", { method: "POST" });
+//   if (!response.ok) {
+//     throw new Error("Update failed");
+//   }
+// };
 
 // Create the router for your app
 const router = createBrowserRouter(
@@ -136,10 +136,10 @@ function AppLayout() {
   if (user) {
     return (
       <>
-        <UpdateWidget
+        {/* <UpdateWidget
             onCheckUpdates={checkForUpdates}
             onUpdate={performUpdate}
-        />
+        /> */}
         <ProSideBar permissions={user.permissions} />
         <main className="content overflow-hidden">
           <TopBar />
