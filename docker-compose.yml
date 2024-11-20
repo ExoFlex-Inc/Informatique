@@ -27,12 +27,14 @@ services:
   watchtower:
     container_name: watchtower
     image: containrrr/watchtower:latest
+    env_file:
+      - .env.production
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - WATCHTOWER_POLL_INTERVAL=30
       - WATCHTOWER_NOTIFICATIONS=slack
-      - WATCHTOWER_NOTIFICATION_SLACK_HOOK_URL=https://hooks.slack.com/services/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
+      - WATCHTOWER_NOTIFICATION_SLACK_HOOK_URL=${SLACK_WEBHOOK_URL}
       - WATCHTOWER_NOTIFICATION_SLACK_CHANNEL=#dev-info
       - WATCHTOWER_DEBUG=true
     restart: always
