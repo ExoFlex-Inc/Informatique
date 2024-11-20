@@ -36,4 +36,6 @@ services:
       - WATCHTOWER_NOTIFICATIONS=slack
       - WATCHTOWER_NOTIFICATION_SLACK_CHANNEL=#dev-info
       - WATCHTOWER_DEBUG=true
+      - WATCHTOWER_CLEANUP=true
     restart: always
+    command: --no-startup-message
