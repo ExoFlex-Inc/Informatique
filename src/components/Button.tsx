@@ -179,7 +179,7 @@ const Button: React.FC<ButtonProps> = ({
       onTouchStart={handleStart}
       onTouchEnd={handleEnd}
       onContextMenu={(e) => e.preventDefault()}
-      
+      size="large"
       sx={{
         color: textColor,
         backgroundColor: mainColor,

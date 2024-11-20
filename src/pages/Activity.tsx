@@ -18,7 +18,6 @@ import {
   MenuItem,
   IconButton,
 } from "@mui/material";
-import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import { useRelations } from "../hooks/use-relations.ts";
 import Loading from "../components/Loading.tsx";
 
@@ -560,9 +559,11 @@ export default function Activity() {
         maxWidth: "80rem",
         marginLeft: "auto",
         marginRight: "auto",
+        paddingTop: "6px",
         display: "flex",
         flexDirection: "column",
         height: "calc(100vh - 100px)",
+        overflow: "auto"
       }}
     >
       <div className="flex flex-wrap items-center gap-4">
@@ -598,14 +599,14 @@ export default function Activity() {
           )}
       </div>
       <div className="relative flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center ml-4 gap-2">
           <IconButton ref={buttonRef} onClick={() => setIsGraphFilterOpen(!isGraphFilterOpen)}>
             <FilterAlt />
           </IconButton>
           <DateRangePicker onChange={setDate} />
 
           {isGraphFilterOpen && (
-            <div className="absolute top-full mt-2 left-0 z-50">
+            <div className="absolute top-full ml-4 mt-2 left-0 z-50">
               <GraphFilters
                 dropdownRef={dropdownRef}
                 setGraphType={setGraphType}
@@ -624,34 +625,32 @@ export default function Activity() {
       >
         <Typography variant="h6">{graphType}</Typography>
       </Box>
-      <CustomScrollbar>
-        <Box paddingX={15} sx={{ flexBasis: "100%", marginBottom: 2 }}>
-          <LineChart type="activity" chartData={dataset1} title={title1} />
-        </Box>
-        <ThemeProvider theme={createTheme({ palette: { mode: "light" } })}>
-          <Box className="flex justify-center gap-4">
-            <Paper className="p-4 w-1/3">
-              <Typography variant="h6" className="mb-2 text-black">
-                Missing exercise days
-              </Typography>
-              <div className="flex flex-wrap gap-2">
-                {missingDates.map((date) => (
-                  <Typography key={date} variant="body2" className="text-black">
-                    {date}
-                  </Typography>
-                ))}
-              </div>
-            </Paper>
+      <Box paddingX={15} sx={{ marginBottom: 2 }}>
+        <LineChart type="activity" chartData={dataset1} title={title1} />
+      </Box>
+      <ThemeProvider theme={createTheme({ palette: { mode: "light" } })}>
+        <Box className="flex justify-center gap-4">
+          <Paper className="p-4 w-1/3">
+            <Typography variant="h6" className="mb-2 text-black">
+              Missing exercise days
+            </Typography>
+            <div className="flex flex-wrap gap-2">
+              {missingDates.map((date) => (
+                <Typography key={date} variant="body2" className="text-black">
+                  {date}
+                </Typography>
+              ))}
+            </div>
+          </Paper>
 
-            <Paper className="p-4 w-1/3">
-              <Typography variant="h6" className="mb-2 text-black">
-                {getAverageTitle(graphType)}
-              </Typography>
-              {renderAverageData(averageData, graphType)}
-            </Paper>
-          </Box>
-        </ThemeProvider>
-      </CustomScrollbar>
+          <Paper className="p-4 w-1/3">
+            <Typography variant="h6" className="mb-2 text-black">
+              {getAverageTitle(graphType)}
+            </Typography>
+            {renderAverageData(averageData, graphType)}
+          </Paper>
+        </Box>
+      </ThemeProvider>
       {isLoading && <Loading />}
     </Box>
   );

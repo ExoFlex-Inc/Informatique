@@ -1,4 +1,5 @@
 import type { stm32DataType } from "../hooks/use-stm32.ts";
+import { TableContainer, Table, TableCell, TableHead, TableRow, TableBody, Box, Typography, CssBaseline } from "@mui/material";
 
 interface ExerciseOverviewWidgetProps {
   stm32Data?: stm32DataType | null;
@@ -10,63 +11,67 @@ const ExerciseOverviewWidget: React.FC<ExerciseOverviewWidgetProps> = ({
   planData,
 }) => {
   return (
-    <div className="bg-white rounded-lg p-4 overflow-auto overflow-x-hidden">
-      <label
-        style={{ fontSize: "clamp(0rem, 2.5vw, 1.5rem)" }}
-        className="text-blue-600"
-      >
-        Today's exercises
-      </label>
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr className="divide-x divide-gray-200">
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Exercise
-            </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Repetitions
-            </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Rest (sec)
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {planData && Array.isArray(planData.plan)
-            ? planData.plan.map(
-                (
-                  item: { movement: any[]; repetitions: number; rest: number },
-                  index: number,
-                ) =>
-                  "movement" in item && (
-                    <tr
-                      key={index}
-                      className={
-                        index === stm32Data?.ExerciseIdx
-                          ? "bg-green-200"
-                          : index % 2 === 0
-                            ? "bg-gray-50"
-                            : "bg-white"
-                      }
-                    >
-                      <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
-                        {item.movement.map((movement: any, index: number) => (
-                          <div key={index}>{movement.exercise}</div>
-                        ))}
-                      </td>
-                      <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
-                        {item.repetitions}
-                      </td>
-                      <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-900">
-                        {item.rest}
-                      </td>
-                    </tr>
-                  ),
-              )
-            : true}
-        </tbody>
-      </table>
-    </div>
+    <Box sx={{display: "flex", flexDirection: "column", height: "calc(100vh - 100px)"}} className="max-h-40">
+      <TableContainer sx={{borderRadius: "4px", overflowX: "hidden" }}>
+        <Table stickyHeader aria-label="sticky table">
+          <TableHead>
+            <TableRow sx={{borderColor: "#e5e7eb"}}>
+              <TableCell sx={{backgroundColor: "#f9fafb",
+                borderColor: "#e5e7eb", 
+                color: "black", 
+                textAlign: "center", 
+                borderRight: 1, 
+                borderRightColor: "#e5e7eb"
+              }}>
+                <Typography>
+                  Exercise
+                </Typography>
+              </TableCell>
+              <TableCell sx={{backgroundColor: "#f9fafb", 
+                color: "black", 
+                textAlign: "center", 
+                borderColor: "#e5e7eb"
+              }}>
+                <Typography>
+                  Repetitions
+                </Typography>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {planData && Array.isArray(planData.plan)
+              ? planData.plan.map(
+                  (
+                    item: { movement: any[]; repetitions: number; rest: number },
+                    index: number,
+                  ) =>
+                    "movement" in item && (
+                      <TableRow
+                        key={index}
+                        className={
+                          index === stm32Data?.ExerciseIdx
+                            ? "bg-green-200"
+                            : index % 2 === 0
+                              ? "bg-gray-50"
+                              : "bg-white"
+                        }
+                      >
+                        <TableCell sx={{ borderBottomColor: "#e5e7eb", color: "black", textAlign: "center"}}>
+                          {item.movement.map((movement: any, index: number) => (
+                            <Typography key={index}>{movement.exercise}</Typography>
+                          ))}
+                        </TableCell>
+                        <TableCell sx={{ borderBottomColor: "#e5e7eb", color: "black", textAlign: "center"}}>
+                          {item.repetitions}
+                        </TableCell>
+                      </TableRow>
+                    ),
+                )
+              : true}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
   );
 };
 

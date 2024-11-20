@@ -16,7 +16,6 @@ import LineChart from "../components/LineChart.tsx";
 import { tokens } from "../hooks/theme.ts";
 import ExerciseOverviewWidget from "../components/ExerciseOverviewWidget.tsx";
 import RatingPopUp from "../components/RatingPopUp.tsx";
-import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import ManualControl from "../components/ManualControl.tsx";
 import Button from "../components/Button.tsx";
 import { Pause, PlayArrow, Refresh, Stop, Home } from "@mui/icons-material";
@@ -404,135 +403,136 @@ export default function HMI() {
   };
 
   return (
-    <div className="flex flex-col custom-height">
-      <CustomScrollbar>
-        <Box>
-          <Grid
-            container
-            spacing={2}
-            sx={{ justifyContent: "center", alignItems: "stretch" }}
-          >
-            <Grid item xs={12}>
-              <Box
-                gap={4}
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  mb: 2,
-                }}
-              >
-                {stm32Data?.AutoState == "WaitingForPlan" ||
-                stm32Data?.AutoState == "Ready" ? (
-                  <Button
-                    mainColor="#2fb73d"
-                    hoverColor="#33a63f"
-                    mode="Auto"
-                    action="Control"
-                    content="Start"
-                    icon={<PlayArrow />}
-                    socket={socket}
-                  />
-                ) : (
-                  <Button
-                    mainColor="#f5d50b"
-                    hoverColor="#dcc21d"
-                    mode="Auto"
-                    action="Control"
-                    content="Pause"
-                    icon={<Pause />}
-                    socket={socket}
-                  />
-                )}
+    <Box>
+      <Box>
+        <Grid
+          container
+          spacing={2}
+          sx={{ justifyContent: "center", alignItems: "stretch" }}
+        >
+          <Grid item xs={12}>
+            <Box
+              gap={4}
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                mb: 1,
+              }}
+            >
+              {stm32Data?.AutoState == "WaitingForPlan" ||
+              stm32Data?.AutoState == "Ready" ? (
                 <Button
-                  icon={<Stop />}
+                  mainColor="#2fb73d"
+                  hoverColor="#33a63f"
                   mode="Auto"
                   action="Control"
-                  content="Stop"
-                  mainColor="#e41b1b"
-                  hoverColor="#cb2626"
-                  disabled={
-                    !stm32Data ||
-                    errorFromStm32 ||
-                    stm32Data?.AutoState === "Ready"
-                  }
+                  content="Start"
+                  icon={<PlayArrow />}
                   socket={socket}
                 />
+              ) : (
                 <Button
-                  mainColor="#1ec6e1"
-                  hoverColor="#2aa6ba"
-                  icon={<Home />}
-                  disabled={
-                    stm32Data?.AutoState !== "Ready" &&
-                    stm32Data?.AutoState !== "WaitingForPlan"
-                  }
-                  mode="Homing"
+                  mainColor="#f5d50b"
+                  hoverColor="#dcc21d"
+                  mode="Auto"
+                  action="Control"
+                  content="Pause"
+                  icon={<Pause />}
                   socket={socket}
                 />
-                <Button
-                  mainColor="#f1910f"
-                  hoverColor="#d08622"
-                  icon={<Refresh />}
-                  disabled={!stm32Data?.ErrorCode}
-                  mode="Reset"
-                  socket={socket}
-                />
-
-                <IconButton
-                  onClick={(e) => {
-                    exportCsv();
-                  }}
-                  onTouchStart={(e) => {
-                    exportCsv();
-                  }}
-                  size="large"
-                  sx={{
-                    backgroundColor: "blueAccent.main",
-                    "&:hover": {
-                      backgroundColor: "blueAccent.hover",
-                    },
-                  }}
-                  disabled={!stm32Data?.ErrorCode}
-                >
-                  {recordCsv ? (
-                    <RadioButtonUncheckedIcon />
-                  ) : (
-                    <RadioButtonCheckedIcon />
-                  )}
-                </IconButton>
-              </Box>
-              <LineChart
-                chartData={chartData}
-                type="line"
-                title="Exercise Progression"
+              )}
+              <Button
+                icon={<Stop />}
+                mode="Auto"
+                action="Control"
+                content="Stop"
+                mainColor="#e41b1b"
+                hoverColor="#cb2626"
+                disabled={
+                  !stm32Data ||
+                  errorFromStm32 ||
+                  stm32Data?.AutoState === "Ready"
+                }
+                socket={socket}
               />
-            </Grid>
-            <Grid item>
-              <Paper
-                sx={{
-                  padding: "10px",
-                  backgroundColor: "white",
-                  height: "100%",
+              <Button
+                mainColor="#1ec6e1"
+                hoverColor="#2aa6ba"
+                icon={<Home />}
+                disabled={
+                  stm32Data?.AutoState !== "Ready" &&
+                  stm32Data?.AutoState !== "WaitingForPlan"
+                }
+                mode="Homing"
+                socket={socket}
+              />
+              <Button
+                mainColor="#f1910f"
+                hoverColor="#d08622"
+                icon={<Refresh />}
+                disabled={!stm32Data?.ErrorCode}
+                mode="Reset"
+                socket={socket}
+              />
+
+              <IconButton
+                onClick={(e) => {
+                  exportCsv();
                 }}
+                onTouchStart={(e) => {
+                  exportCsv();
+                }}
+                size="large"
+                sx={{
+                  backgroundColor: "blueAccent.main",
+                  "&:hover": {
+                    backgroundColor: "blueAccent.hover",
+                  },
+                }}
+                disabled={!stm32Data?.ErrorCode}
               >
-                <ProgressionWidget
-                  setOpenDialogPainScale={setOpenDialogPainScale}
-                  stm32Data={stm32Data}
-                  planData={planData}
+                {recordCsv ? (
+                  <RadioButtonUncheckedIcon />
+                ) : (
+                  <RadioButtonCheckedIcon />
+                )}
+              </IconButton>
+            </Box>
+            <Grid spacing={1} container sx={{display: "flex", paddingX: 4}}>
+              <Grid item xs={8} sx={{gridRow: 'span 2'}}>
+                <LineChart
+                  chartData={chartData}
+                  type="line"
+                  title="Exercise Progression"
                 />
-              </Paper>
-            </Grid>
-            <Grid item>
-              <Paper sx={{ height: "100%", backgroundColor: "white" }}>
-                <ExerciseOverviewWidget
-                  stm32Data={stm32Data}
-                  planData={planData}
-                />
-              </Paper>
+              </Grid>
+              <Grid xs={4} item>
+                <Paper
+                  sx={{
+                    padding: "10px",
+                    backgroundColor: "white",
+                    marginBottom: 1,
+                  }}
+                >
+                  <ProgressionWidget
+                    setOpenDialogPainScale={setOpenDialogPainScale}
+                    stm32Data={stm32Data}
+                    planData={planData}
+                  />
+                </Paper>
+                <Paper sx={{ backgroundColor: "white" }}>
+                  <ExerciseOverviewWidget
+                    stm32Data={stm32Data}
+                    planData={planData}
+                  />
+                </Paper>
+              </Grid>
+
             </Grid>
           </Grid>
-        </Box>
-      </CustomScrollbar>
+        </Grid>
+      </Box>
       <RatingPopUp
         setOpenDialogPainScale={setOpenDialogPainScale}
         setPainScale={setPainScale}
@@ -543,6 +543,6 @@ export default function HMI() {
         stm32Data={stm32Data ?? null}
         socket={socket}
       />
-    </div>
+    </Box>
   );
 }

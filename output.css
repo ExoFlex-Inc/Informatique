@@ -1632,12 +1632,6 @@ svg {
 
 /* LineChart Graph */
 
-.graph-container {
-  width: 90%;
-  max-width: 750px;
-  margin: 0 auto;
-}
-
 /* signup component styles  */
 
 .signup-button {

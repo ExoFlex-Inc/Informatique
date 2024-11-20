@@ -11,7 +11,6 @@ import {
 import UserSearchBar from "../components/UserSearchBar.tsx";
 import ExercisesLimitsTable from "../components/ExercisesLimitsTable.tsx";
 import ExercisesPlanTable from "../components/ExercisesPlanTable.tsx";
-import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import { useRelations } from "../hooks/use-relations.ts";
 import { usePlan } from "../hooks/use-plan.ts";
 import Loading from "../components/Loading.tsx";
@@ -123,7 +122,7 @@ export default function Planning() {
           users={relations}
         />
       </div>
-      <CustomScrollbar>
+      <div className="overflow-auto">
         <div className=" m-6">
           <ExercisesLimitsTable
             limitsLeft={planData?.limits?.left}
@@ -191,7 +190,7 @@ export default function Planning() {
         ) : (
           true
         )}
-      </CustomScrollbar>
+      </div>
       {isLoading && <Loading />}
     </div>
   );
