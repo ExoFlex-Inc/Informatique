@@ -20,6 +20,7 @@ void PeriphUartRingBuf_AdvanceHead(uint32_t bytesReceived);
 void PeriphUartRingBuf_GetJsonStart();
 void PeriphUartRingBuf_GetJsonEnd();
 void PeriphUartRingBuf_ReadTailToPeak(char* buf, uint32_t* size);
+void PeriphUartRingBuf_ResetRxTimerDelay();
 
 void PeriphUartRingBuf_Init()
 {

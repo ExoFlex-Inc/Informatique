@@ -274,6 +274,8 @@ void ManagerMovement_Manual()
         ManagerMotor_StopManualMovement(MMOT_MOTOR_1);
         ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
         ManagerMotor_StopManualMovement(MMOT_MOTOR_3);
+
+        PeriphSolenoid_StopPWMs();
     }
 }
 
@@ -1029,7 +1031,7 @@ void ManagerMovement_HomingEversion()
 
                 if (managerMovement.state == MMOV_STATE_CHANGESIDE)
                 {
-                    PeriphSolenoid_ResetLocksState();
+                    PeriphSolenoid_ResetPWMState();
                     managerMovement.changeSideState =
                         MMOV_CHANGESIDE_STATE_STARTINGPOS;
                     managerMovement.state = MMOV_STATE_MANUAL;
