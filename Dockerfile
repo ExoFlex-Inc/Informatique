@@ -47,6 +47,14 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
+# Create a user and add to the dialout group for serial port access
+RUN useradd -m serialuser \
+    && usermod -aG dialout serialuser \
+    && chown -R serialuser:serialuser /app
+
+# Switch to the created user
+USER serialuser
+
 # Copy application files from build stage
 COPY package.json yarn.lock ./
 COPY --from=builder /app/dist ./dist
@@ -54,16 +62,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/src ./src
 
-# Create non-root user for security
-# RUN groupadd -g 984 docker && \
-#     useradd -m -s /bin/bash nodeuser && \
-#     usermod -aG docker nodeuser && \
-#     chown -R nodeuser:docker /app
-
 # Expose ports
 EXPOSE 1338
 EXPOSE 3001
 
-# Run as non-root user
-# USER nodeuser
 CMD ["yarn", "start"]
