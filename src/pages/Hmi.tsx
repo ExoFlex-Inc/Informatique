@@ -124,6 +124,12 @@ export default function HMI() {
       },
     ],
   });
+  const [latestMotorData, setLatestMotorData] = useState({
+    motor1: { x: 0, position: 0, torque: 0, current: 0 },
+    motor2: { x: 0, position: 0, torque: 0, current: 0 },
+    motor3: { x: 0, position: 0, torque: 0, current: 0 },
+  });
+  const [graphDataType, setGraphDataType] = useState("position");
 
   useEffect(() => {
     if (
@@ -328,6 +334,73 @@ export default function HMI() {
     }
   }, [painScale]);
 
+  useEffect(() => {
+    if (
+      stm32Data &&
+      stm32Data.Positions &&
+      stm32Data.Torques &&
+      stm32Data.Current
+    ) {
+      if (
+        stm32Data &&
+        stm32Data.Positions &&
+        stm32Data.Torques &&
+        stm32Data.Current
+      ) {
+        const currentTime = Date.now();
+        setLatestMotorData({
+          motor1: {
+            x: currentTime,
+            position: stm32Data.Positions[0] ?? 0,
+            torque: stm32Data.Torques[0] ?? 0,
+            current: stm32Data.Current[0] ?? 0,
+          },
+          motor2: {
+            x: currentTime,
+            position: stm32Data.Positions[1] ?? 0,
+            torque: stm32Data.Torques[1] ?? 0,
+            current: stm32Data.Current[1] ?? 0,
+          },
+          motor3: {
+            x: currentTime,
+            position: stm32Data.Positions[2] ?? 0,
+            torque: stm32Data.Torques[2] ?? 0,
+            current: stm32Data.Current[2] ?? 0,
+          },
+        });
+      }
+    }
+  }, [stm32Data]);
+
+  const getChartData = () => ({
+    datasets: [
+      {
+        data: [
+          {
+            x: latestMotorData.motor1.x,
+            y: latestMotorData.motor1[graphDataType],
+          },
+        ],
+      },
+      {
+        data: [
+          {
+            x: latestMotorData.motor2.x,
+            y: latestMotorData.motor2[graphDataType],
+          },
+        ],
+      },
+      {
+        data: [
+          {
+            x: latestMotorData.motor3.x,
+            y: latestMotorData.motor3[graphDataType],
+          },
+        ],
+      },
+    ],
+  });
+
   const exportCsv = async () => {
     try {
       if (!recordCsv) {
@@ -501,9 +574,9 @@ export default function HMI() {
             <Grid spacing={1} container sx={{display: "flex", paddingX: 4}}>
               <Grid item xs={8} sx={{gridRow: 'span 2'}}>
                 <LineChart
-                  chartData={chartData}
-                  type="line"
-                  title="Exercise Progression"
+                chartData={getChartData()}
+                type="realtime"
+                title="Motor Data"
                 />
               </Grid>
               <Grid xs={4} item>
