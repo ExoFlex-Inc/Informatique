@@ -7,6 +7,8 @@ import {
   FormLabel,
   Typography,
   Box,
+  Alert,
+  Snackbar,
 } from "@mui/material";
 import UserSearchBar from "../components/UserSearchBar.tsx";
 import ExercisesLimitsTable from "../components/ExercisesLimitsTable.tsx";
@@ -38,6 +40,13 @@ export default function Planning() {
   } = usePlan(selectedUser.length === 1 ? selectedUser[0]?.user_id : null);
   const queryClient = useQueryClient();
   const isLoading = isLoadingPlan || isLoadingRelations;
+
+  // State variables for the Snackbar
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<
+    "success" | "error" | "warning" | "info"
+  >("success");
 
   useEffect(() => {
     if (planData) {
@@ -81,6 +90,9 @@ export default function Planning() {
       await savePlanToSupabase(planData);
     } catch (error) {
       console.error("Error saving plan and limits:", error);
+      setSnackbarMessage("Error saving plan and limits.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
     }
   };
 
@@ -102,14 +114,31 @@ export default function Planning() {
 
       if (response.ok) {
         console.log("Plan pushed to Supabase");
-        window.alert("Plan and limits saved successfully.");
+        setSnackbarMessage("Plan and limits saved successfully.");
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
       } else {
         console.error("Failed to send plan to Supabase");
-        window.alert("Failed to send plan to Supabase");
+        setSnackbarMessage("Failed to send plan to Supabase.");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
       }
     } catch (error) {
       console.error("Error saving plan to Supabase:", error);
+      setSnackbarMessage("Error saving plan to Supabase.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
     }
+  };
+
+  const handleSnackbarClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbarOpen(false);
   };
 
   return (
@@ -179,8 +208,11 @@ export default function Planning() {
               Add Exercise
             </button>
             <button
-              className={`text-white font-bold py-2 px-4 rounded
-                ${isDisabled ? "bg-gray-500 cursor-not-allowed" : "bg-green-500 hover:bg-green-700"}`}
+              className={`text-white font-bold py-2 px-4 rounded ${
+                isDisabled
+                  ? "bg-gray-500 cursor-not-allowed"
+                  : "bg-green-500 hover:bg-green-700"
+              }`}
               onClick={savePlan}
               disabled={isDisabled}
             >
@@ -192,6 +224,20 @@ export default function Planning() {
         )}
       </div>
       {isLoading && <Loading />}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={5000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

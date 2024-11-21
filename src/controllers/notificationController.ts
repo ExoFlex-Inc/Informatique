@@ -45,7 +45,7 @@ export const createNotification = async (req: Request, res: Response) => {
           sender_id: sender_id,
           receiver_id: receiver_id,
           user_name: user_name,
-          image: image_url,
+          image: image_url || "/assets/user.png",
           type: type,
           body: message,
           created_at: new Date(),

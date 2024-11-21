@@ -24,7 +24,7 @@
 
 #define MMOV_SPEED_MIN_M1 0.1  // rad/s
 #define MMOV_SPEED_MIN_M2 0.1  // rad/s
-#define MMOV_SPEED_MIN_M3 0.05  // rad/s
+#define MMOV_SPEED_MIN_M3 0.1  // rad/s
 
 #define MANUAL_MAX_TRANSMIT_TIME 200  // ms
 
@@ -925,7 +925,7 @@ void ManagerMovement_AutoRest()
         }
         else  // Continue exercise with next rep
         {
-            managerMovement.autoState = MMOV_AUTO_STATE_READY;
+            managerMovement.autoState = MMOV_AUTO_STATE_2GOAL;
             repsCount++;
         }
     }
