@@ -762,10 +762,10 @@ void ManagerMovement_AutoStrectching()
 	{
 		managerMovement.autoState = MMOV_AUTO_STATE_STOP;
 		ManagerMovement_StopMotorsCmd();
+		movementIdx = mvtNbr[exerciseIdx]-1;
 	}
 	else
 	{
-
 
 #ifndef MMOV_DISABLE_TORQUE_STRETCHING
 
