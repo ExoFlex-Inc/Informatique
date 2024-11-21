@@ -1,10 +1,9 @@
-// dev-sw.js
+self.__WB_MANIFEST;
+
 self.addEventListener("install", (event) => {
-  console.log("Development Service Worker installed.");
-  self.skipWaiting();
+  console.log("Service Worker installed in development mode");
 });
 
-self.addEventListener("activate", (event) => {
-  console.log("Service Worker activated.");
-  self.clients.claim();
+self.addEventListener("fetch", (event) => {
+  console.log("Intercepted fetch request for:", event.request.url);
 });

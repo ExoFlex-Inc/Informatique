@@ -12,6 +12,7 @@ import supaClient from "../utils/supabaseClient.ts";
 
 const PUSH_INTERVAL_MS = 5000; // Push data every 5 seconds
 let pushInterval: NodeJS.Timeout | null = null;
+let isRecording = false;
 
 let prevAngles = {
   dorsiflexion: [] as number[],
@@ -74,6 +75,7 @@ let saveData = {
 };
 
 let exerciseId: number | null = null;
+// let recodState = "stop";
 
 const getSavedData = asyncHandler(async (_: Request, res: Response) => {
   try {
@@ -243,8 +245,8 @@ const updateDataToSupabase = async () => {
 };
 
 // Function to toggle the push interval for periodic updates
-const togglePushInterval = (start: boolean) => {
-  if (start && !pushInterval) {
+const togglePushInterval = (state: string) => {
+  if (state === "start" && !pushInterval) {
     if (!exerciseId) {
       console.error(
         "Cannot start push interval. Initial data has not been inserted.",
@@ -256,7 +258,7 @@ const togglePushInterval = (start: boolean) => {
       updateDataToSupabase();
     }, PUSH_INTERVAL_MS);
     console.log("Push interval started");
-  } else if (!start && pushInterval) {
+  } else if (state === "stop" && pushInterval) {
     clearInterval(pushInterval);
     pushInterval = null;
     console.log("Push interval stopped");
@@ -266,37 +268,46 @@ const togglePushInterval = (start: boolean) => {
 // Function to handle recording start/stop
 const recordingStm32Data = async (req: Request, res: Response) => {
   try {
-    const { start } = req.body;
+    const { state } = req.body;
 
     // Validate request body
-    if (typeof start !== "boolean") {
+    if (typeof state !== "string") {
       return res
         .status(400)
         .send(
-          "Invalid request. Please provide a 'start' field with a boolean value.",
+          "Invalid request. Please provide a 'state' field with a string value.",
         );
     }
 
-    if (start) {
-      // Clear previous data if needed
-      resetSaveData();
-
+    if (state === "start") {
       // Insert initial JSON data
-      const initialInsertSuccess = await insertInitialDataToSupabase();
-      if (!initialInsertSuccess) {
-        return res
-          .status(500)
-          .send("Failed to start recording. Initial data insert failed.");
+      if (exerciseId === null) {
+        // Clear previous data if needed
+        resetSaveData();
+        const initialInsertSuccess = await insertInitialDataToSupabase();
+        if (!initialInsertSuccess) {
+          exerciseId = null;
+          return res
+            .status(500)
+            .send("Failed to start recording. Initial data insert failed.");
+        }
+        isRecording = true;
       }
-
       // Start recording
-      togglePushInterval(true);
+      togglePushInterval("start");
       return res
         .status(200)
         .send({ exercise_id: exerciseId, message: "Recording started." });
-    } else {
+    } else if (state === "pause") {
+      togglePushInterval("stop");
+      isRecording = false;
+      return res
+        .status(200)
+        .send({ exercise_id: exerciseId, message: "Recording paused." });
+    } else if (state === "stop") {
       // Stop recording
-      togglePushInterval(false);
+      togglePushInterval("stop");
+      isRecording = false;
       return res
         .status(200)
         .send({ exercise_id: exerciseId, message: "Recording stopped." });
@@ -304,9 +315,118 @@ const recordingStm32Data = async (req: Request, res: Response) => {
   } catch (error) {
     // Handle unexpected errors
     console.error("Error in recordingStm32Data:", error);
+    exerciseId = null;
     return res.status(500).send("An unexpected error occurred.");
   }
 };
+
+const addRatedPainExerciseData = async (req: Request, res: Response) => {
+  const { user_id, rated_pain } = req.body;
+
+  // Insert exercise data
+  const { error: exerciseError } = await supaClient
+    .from("exercise_data")
+    .update({
+      rated_pain,
+    })
+    .eq("id", exerciseId);
+
+  if (exerciseError) {
+    return res.status(500).json({
+      message: "Failed to send exercise data",
+      error: exerciseError.message,
+    });
+  } else {
+    exerciseId = null;
+  }
+
+  // Fetch the user's stats including 'updated_at'
+  const { data: statsData, error: fetchError } = await supaClient
+    .from("stats")
+    .select("current_streak, longest_streak, updated_at")
+    .eq("user_id", user_id)
+    .single();
+
+  if (fetchError) {
+    return res.status(500).json({
+      message: "Failed to retrieve current streak",
+      error: fetchError.message,
+    });
+  }
+
+  let newCurrentStreak = 1; // Default streak
+
+  if (statsData) {
+    // Convert dates to local date strings (e.g., "2023-10-05")
+    const lastUpdatedDate = new Date(statsData.updated_at).toLocaleDateString();
+    const currentDate = new Date().toLocaleDateString();
+
+    if (lastUpdatedDate !== currentDate) {
+      // Dates are different, calculate the difference in days
+      const lastUpdated = new Date(statsData.updated_at);
+      const now = new Date();
+
+      // Set time to midnight for accurate date comparison
+      lastUpdated.setHours(0, 0, 0, 0);
+      now.setHours(0, 0, 0, 0);
+
+      const diffInDays =
+        (now.getTime() - lastUpdated.getTime()) / (1000 * 60 * 60 * 24);
+
+      if (diffInDays === 1) {
+        // Exactly one day has passed, increment the streak
+        newCurrentStreak = statsData.current_streak + 1;
+      } else {
+        // More than one day has passed, reset the streak
+        newCurrentStreak = 1;
+      }
+
+      // Prepare updates
+      const updates: any = { current_streak: newCurrentStreak };
+
+      // Update longest_streak if necessary
+      if (newCurrentStreak > statsData.longest_streak) {
+        updates.longest_streak = newCurrentStreak;
+      }
+
+      // Update the stats
+      const { error: updateError } = await supaClient
+        .from("stats")
+        .update(updates)
+        .eq("user_id", user_id);
+
+      if (updateError) {
+        return res.status(500).json({
+          message: "Failed to update stats",
+          error: updateError.message,
+        });
+      }
+    } else {
+      // Same day, do not increment the streak
+      newCurrentStreak = statsData.current_streak;
+    }
+  } else {
+    // Create a new stats entry if none exists
+    const { error: insertError } = await supaClient.from("stats").insert({
+      user_id,
+      current_streak: newCurrentStreak,
+      longest_streak: newCurrentStreak,
+    });
+
+    if (insertError) {
+      return res.status(500).json({
+        message: "Failed to create stats entry",
+        error: insertError.message,
+      });
+    }
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "Exercise data sent successfully",
+  });
+};
+
 // Function to initialize serial port
 const initializeSerialPort = asyncHandler(async (_, res: Response) => {
   const serialPort = getSerialPort();
@@ -318,18 +438,21 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
     return;
   }
   let scannerPort: string | undefined;
-
-  if (process.env["ROBOT"] === "true") {
-    const ports = await SerialPort.list();
-    const foundPort = ports.find(
-      (port) => port.manufacturer === "STMicroelectronics",
-    );
-
-    if (foundPort) {
-      scannerPort = foundPort.path;
-    }
+  if (process.env["NODE_ENV"] === "production") {
+    scannerPort = "/dev/ttyACM0";
   } else {
-    scannerPort = process.env["HMI_SERIAL_PORT"];
+    if (process.env["ROBOT"] === "true") {
+      const ports = await SerialPort.list();
+      const foundPort = ports.find(
+        (port) => port.manufacturer === "STMicroelectronics",
+      );
+
+      if (foundPort) {
+        scannerPort = foundPort.path;
+      }
+    } else {
+      scannerPort = process.env["HMI_SERIAL_PORT"];
+    }
   }
 
   if (scannerPort) {
@@ -343,7 +466,7 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
 
     newSerialPort.on("error", (error) => {
       console.log("Serial port error:", error.message);
-      togglePushInterval(false);
+      togglePushInterval("stop");
       resetSaveData();
       setSerialPort(null);
     });
@@ -351,7 +474,7 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
     newSerialPort.on("close", () => {
       console.log("Serial port closed");
       io.emit("serialPortClosed", "Serial port closed");
-      togglePushInterval(false);
+      togglePushInterval("stop");
       resetSaveData();
       setSerialPort(null);
     });
@@ -376,50 +499,51 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
         try {
           const parsedData = JSON.parse(jsonDataString);
           io.emit("stm32Data", parsedData);
+          if (isRecording === true) {
+            // Append new data to prevAngles and prevTorques
+            prevAngles.dorsiflexion.push(parsedData.Positions[0]);
+            prevAngles.eversion.push(parsedData.Positions[1]);
+            prevAngles.extension.push(parsedData.Positions[2]);
 
-          // Append new data to prevAngles and prevTorques
-          prevAngles.dorsiflexion.push(parsedData.Positions[0]);
-          prevAngles.eversion.push(parsedData.Positions[1]);
-          prevAngles.extension.push(parsedData.Positions[2]);
+            prevTorques.dorsiflexion.push(parsedData.Torques[0]);
+            prevTorques.eversion.push(parsedData.Torques[1]);
+            prevTorques.extension.push(parsedData.Torques[2]);
 
-          prevTorques.dorsiflexion.push(parsedData.Torques[0]);
-          prevTorques.eversion.push(parsedData.Torques[1]);
-          prevTorques.extension.push(parsedData.Torques[2]);
+            prevSpeeds.dorsiflexion.push(parsedData.Speed[0]);
+            prevSpeeds.eversion.push(parsedData.Speed[1]);
+            prevSpeeds.extension.push(parsedData.Speed[2]);
 
-          prevSpeeds.dorsiflexion.push(parsedData.Speed[0]);
-          prevSpeeds.eversion.push(parsedData.Speed[1]);
-          prevSpeeds.extension.push(parsedData.Speed[2]);
-
-          // Update saveData with new values
-          saveData = {
-            ...saveData,
-            angles: {
-              dorsiflexion: [...prevAngles.dorsiflexion],
-              eversion: [...prevAngles.eversion],
-              extension: [...prevAngles.extension],
-            },
-            angle_max: {
-              dorsiflexion: Math.max(...prevAngles.dorsiflexion),
-              eversion: Math.max(...prevAngles.eversion),
-              extension: Math.max(...prevAngles.extension),
-            },
-            torques: {
-              dorsiflexion: [...prevTorques.dorsiflexion],
-              eversion: [...prevTorques.eversion],
-              extension: [...prevTorques.extension],
-            },
-            torque_max: {
-              dorsiflexion: Math.max(...prevTorques.dorsiflexion),
-              eversion: Math.max(...prevTorques.eversion),
-              extension: Math.max(...prevTorques.extension),
-            },
-            speeds: {
-              dorsiflexion: [...prevSpeeds.dorsiflexion],
-              eversion: [...prevSpeeds.eversion],
-              extension: [...prevSpeeds.extension],
-            },
-            repetitions_done: parsedData.Repetitions,
-          };
+            // Update saveData with new values
+            saveData = {
+              ...saveData,
+              angles: {
+                dorsiflexion: [...prevAngles.dorsiflexion],
+                eversion: [...prevAngles.eversion],
+                extension: [...prevAngles.extension],
+              },
+              angle_max: {
+                dorsiflexion: Math.max(...prevAngles.dorsiflexion),
+                eversion: Math.max(...prevAngles.eversion),
+                extension: Math.max(...prevAngles.extension),
+              },
+              torques: {
+                dorsiflexion: [...prevTorques.dorsiflexion],
+                eversion: [...prevTorques.eversion],
+                extension: [...prevTorques.extension],
+              },
+              torque_max: {
+                dorsiflexion: Math.max(...prevTorques.dorsiflexion),
+                eversion: Math.max(...prevTorques.eversion),
+                extension: Math.max(...prevTorques.extension),
+              },
+              speeds: {
+                dorsiflexion: [...prevSpeeds.dorsiflexion],
+                eversion: [...prevSpeeds.eversion],
+                extension: [...prevSpeeds.extension],
+              },
+              repetitions_done: parsedData.Repetitions,
+            };
+          }
         } catch (err) {
           console.error("Error parsing JSON:", err);
         }
@@ -438,4 +562,10 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
   }
 });
 
-export { initializeSerialPort, recordingStm32Data, getSavedData, clearData };
+export {
+  initializeSerialPort,
+  recordingStm32Data,
+  getSavedData,
+  clearData,
+  addRatedPainExerciseData,
+};

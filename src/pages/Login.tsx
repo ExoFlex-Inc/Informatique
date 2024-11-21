@@ -10,20 +10,47 @@ import { useUser } from "../hooks/use-user.ts";
 
 async function registerFCMToken() {
   try {
-    // Register the service worker with the correct path
-    // const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    if ("serviceWorker" in navigator) {
+      let registration;
 
-    // Wait for the service worker to be ready
-    // await navigator.serviceWorker.ready;
+      if (process.env.NODE_ENV === "production") {
+        // Register service worker for production
+        registration = await navigator.serviceWorker.register(
+          "/firebase-messaging-sw.js",
+          // { type: "module" } // Optional: Use 'classic' if your SW isn't a module
+        );
+      } else {
+        // Register service worker for development
+        registration = await navigator.serviceWorker.register(
+          "/src/firebase-messaging-sw.js",
+          { type: "module" },
+        );
+      }
 
-    // Retrieve the token with the service worker registration and VAPID key
-    const token = await getToken(messaging, {
-      // serviceWorkerRegistration: registration,
-      vapidKey: import.meta.env["VITE_FIREBASE_VAPID_KEY"], // Insert your VAPID key here
-    });
+      console.log(
+        "Service Worker registered successfully with scope:",
+        registration.scope,
+      );
 
-    console.log("Token received:", token);
-    return token;
+      // Retrieve the FCM token
+      const fcmToken = await getToken(messaging, {
+        serviceWorkerRegistration: registration,
+        vapidKey: import.meta.env["VITE_FIREBASE_VAPID_KEY"],
+      });
+
+      if (fcmToken) {
+        console.log("FCM Token retrieved:", fcmToken);
+        return fcmToken;
+      } else {
+        console.warn(
+          "No registration token available. Request permission to generate one.",
+        );
+        return null;
+      }
+    } else {
+      console.error("Service Workers are not supported in this browser.");
+      return null;
+    }
   } catch (error) {
     console.error(
       "Service worker registration or token retrieval failed:",
@@ -112,7 +139,6 @@ export default function Login() {
             fullWidth
             variant="outlined"
             label="Email"
-            value={email}
             onChange={(e) => setEmail(e.target.value)}
             sx={textFieldSx}
           />
@@ -124,7 +150,6 @@ export default function Login() {
             fullWidth
             variant="outlined"
             label="Password"
-            value={password}
             onChange={(e) => setPassword(e.target.value)}
             sx={textFieldSx}
             InputProps={{

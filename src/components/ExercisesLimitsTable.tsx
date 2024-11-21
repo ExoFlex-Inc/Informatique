@@ -7,6 +7,7 @@ import {
   Table,
   TableCell,
   Typography,
+  Paper,
 } from "@mui/material";
 import type { Side } from "./ToggleSide.tsx";
 
@@ -78,9 +79,12 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
   };
 
   return (
-    <TableContainer sx={{ borderRadius: "12px", bgcolor: "white" }}>
+    <TableContainer
+      component={Paper}
+      sx={{ borderRadius: "12px", bgcolor: "white" }}
+    >
       <Table>
-        <TableHead className="bg-gray-50">
+        <TableHead className="bg-gray-100">
           <TableRow>
             <TableCell
               sx={{ borderRight: 1, borderColor: "lightgrey" }}
@@ -141,7 +145,7 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
                     : (effectiveLimitsLeft.torque.dorsiflexion ?? "")
                 }
                 onChange={(event) => handleLimitChange(event, "torque", side)}
-                className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
+                className="text-black border bg-white border-gray-300 text-center rounded px-2 py-1 w-full"
                 min={0}
                 max={TORQUE_LIMIT}
               />
@@ -156,7 +160,7 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
                     : (effectiveLimitsLeft.torque.extension ?? "")
                 }
                 onChange={(event) => handleLimitChange(event, "torque", side)}
-                className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
+                className="text-black border bg-white border-gray-300 text-center rounded px-2 py-1 w-full"
                 min={0}
                 max={TORQUE_LIMIT}
               />
@@ -171,7 +175,7 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
                     : (effectiveLimitsLeft.torque.eversion ?? "")
                 }
                 onChange={(event) => handleLimitChange(event, "torque", side)}
-                className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
+                className="text-black border bg-white border-gray-300 text-center rounded px-2 py-1 w-full"
                 min={0}
                 max={TORQUE_LIMIT}
               />
@@ -186,7 +190,7 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
                     : (effectiveLimitsLeft.angles.dorsiflexion ?? "")
                 }
                 onChange={(event) => handleLimitChange(event, "angle", side)}
-                className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
+                className="text-black border bg-white border-gray-300 text-center rounded px-2 py-1 w-full"
                 min={0}
                 max={ANGLE_LIMIT}
               />
@@ -201,7 +205,7 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
                     : (effectiveLimitsLeft.angles.extension ?? "")
                 }
                 onChange={(event) => handleLimitChange(event, "angle", side)}
-                className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
+                className="text-black border bg-white border-gray-300 text-center rounded px-2 py-1 w-full"
                 min={0}
                 max={ANGLE_LIMIT}
               />
@@ -216,7 +220,7 @@ const ExercisesLimitsTable: React.FC<ExercisesLimitsTableProps> = ({
                     : (effectiveLimitsLeft.angles.eversion ?? "")
                 }
                 onChange={(event) => handleLimitChange(event, "angle", side)}
-                className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
+                className="text-black border bg-white border-gray-300 text-center rounded px-2 py-1 w-full"
                 min={0}
                 max={ANGLE_LIMIT}
               />

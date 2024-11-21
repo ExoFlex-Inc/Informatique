@@ -7,6 +7,7 @@ import {
   TableCell,
   Typography,
   Box,
+  Paper,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import React from "react";
@@ -139,10 +140,11 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
     <Box>
       {set.movement.length > 0 ? (
         <TableContainer
+          component={Paper}
           sx={{ borderRadius: "12px", bgcolor: "white", marginTop: "20px" }}
         >
           <Table>
-            <TableHead className="bg-gray-50">
+            <TableHead className="bg-gray-100">
               <TableRow>
                 <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }} />
                 <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}>
@@ -175,7 +177,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                       <input
                         ref={(el) => (checkboxRefs.current[setIndex] = el)}
                         type="checkbox"
-                        className="mr-4 size-5"
+                        className="mr-4 size-5 bg-white"
                         onChange={() => setChecked((prev) => !prev)}
                       />
                     </TableCell>
@@ -187,7 +189,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                       onChange={(e) =>
                         handleInputChange(setIndex, e, exerciseIndex)
                       }
-                      className="text-black border border-gray-300 rounded text-center px-2 py-1 w-full"
+                      className="text-black border bg-white border-gray-300 rounded text-center px-2 py-1 w-full"
                     >
                       <option value="">Select Exercise</option>
                       {exerciseOptions.map((option) => (
@@ -206,7 +208,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                       onChange={(e) =>
                         handleInputChange(setIndex, e, exerciseIndex)
                       }
-                      className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
+                      className="text-black border bg-white border-gray-300 text-center rounded px-2 py-1 w-full"
                     />
                   </TableCell>
                   <TableCell sx={{ border: "none" }}>
@@ -218,7 +220,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                       onChange={(e) =>
                         handleInputChange(setIndex, e, exerciseIndex)
                       }
-                      className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
+                      className="text-black border bg-white border-gray-300 text-center rounded px-2 py-1 w-full"
                     />
                   </TableCell>
                   <TableCell sx={{ border: "none" }}>
@@ -232,7 +234,10 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                 </TableRow>
               ))}
             </TableBody>
-            <TableHead className="bg-gray-50" sx={{ borderColor: "lightgrey" }}>
+            <TableHead
+              className="bg-gray-100"
+              sx={{ borderColor: "lightgrey" }}
+            >
               <TableRow>
                 <TableCell
                   sx={{
@@ -286,7 +291,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                     placeholder="Repetitions"
                     value={set.repetitions}
                     onChange={(e) => handleInputChange(setIndex, e)}
-                    className="text-black border border-gray-300 rounded text-center px-2 py-1 w-full"
+                    className="text-black border bg-white border-gray-300 rounded text-center px-2 py-1 w-full"
                   />
                 </TableCell>
                 <TableCell>
@@ -296,7 +301,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                     placeholder="Rest"
                     value={set.rest}
                     onChange={(e) => handleInputChange(setIndex, e)}
-                    className="text-black border border-gray-300 rounded text-center px-2 py-1 w-full"
+                    className="text-black border bg-white border-gray-300 rounded text-center px-2 py-1 w-full"
                   />
                 </TableCell>
                 <TableCell>
@@ -306,7 +311,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                     placeholder="Time"
                     value={set.time}
                     onChange={(e) => handleInputChange(setIndex, e)}
-                    className="text-black border border-gray-300 text-center rounded px-2 py-1 w-full"
+                    className="text-black border bg-white border-gray-300 text-center rounded px-2 py-1 w-full"
                   />
                 </TableCell>
                 <TableCell colSpan={2}>
@@ -316,7 +321,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                     placeholder="Speed"
                     value={set.speed}
                     onChange={(e) => handleInputChange(setIndex, e)}
-                    className="text-black border border-gray-300 rounded text-center px-2 py-1 w-full"
+                    className="text-black border bg-white border-gray-300 rounded text-center px-2 py-1 w-full"
                   />
                 </TableCell>
               </TableRow>
@@ -328,7 +333,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
           sx={{ borderRadius: "12px", bgcolor: "white", marginTop: "20px" }}
         >
           <Table>
-            <TableHead className="bg-gray-50">
+            <TableHead className="bg-gray-100">
               <TableRow>
                 <TableCell sx={{ borderRight: 1, borderColor: "lightgrey" }}>
                   <Typography align="center" sx={{ color: "gray" }}>
@@ -347,7 +352,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                     placeholder="Set Rest"
                     value={set.setRest}
                     onChange={(e) => handleInputChange(setIndex, e)}
-                    className="text-black border border-gray-300 rounded text-center px-2 py-1 w-full"
+                    className="text-black border bg-white border-gray-300 rounded text-center px-2 py-1 w-full"
                   />
                 </TableCell>
                 <TableCell sx={{ textAlign: "center" }}>

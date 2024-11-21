@@ -42,7 +42,7 @@ function generateRandomData(numMotors) {
 function createJsonMessage() {
   const { positions, torques, currents, speeds } = generateRandomData(4);
   const message = {
-    Mode: "Manual",
+    Mode: "Automatic",
     CurrentLegSide: "",
     AutoState: "Ready",
     HomingState: "",

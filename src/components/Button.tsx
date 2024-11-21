@@ -24,6 +24,7 @@ const Button: React.FC<ButtonProps> = ({
   content,
   mainColor,
   hoverColor,
+  textColor,
   socket,
   disabled,
   icon,
@@ -70,7 +71,7 @@ const Button: React.FC<ButtonProps> = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          start: true,
+          state: "start",
         }),
         credentials: "include",
       });
@@ -93,7 +94,7 @@ const Button: React.FC<ButtonProps> = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          start: false,
+          state: "stop",
         }),
         credentials: "include",
       });
@@ -102,6 +103,29 @@ const Button: React.FC<ButtonProps> = ({
         console.log("Recording stopped successfully.");
       } else {
         console.error("Failed to stop recording.");
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
+    }
+  };
+
+  const sendingStm32PauseRecordingRequests = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/stm32/record", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          state: "pause",
+        }),
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        console.log("Recording paused successfully.");
+      } else {
+        console.error("Failed to pause recording.");
       }
     } catch (error) {
       console.error("An error occurred:", error);
@@ -127,7 +151,7 @@ const Button: React.FC<ButtonProps> = ({
       | React.TouchEvent<HTMLButtonElement>,
   ) => {
     e.preventDefault(); // Prevent any unintended default behaviors
-    if (action === "Increment") {
+    if (action === "Increment" || action === "Tightening") {
       intervalRef.current = setInterval(
         () => sendingRequests(mode, action, content),
         20,
@@ -137,7 +161,10 @@ const Button: React.FC<ButtonProps> = ({
     } else if (content === "Start") {
       sendingStm32RecordingRequests();
       sendingRequests(mode, action, content);
-    } else if (content === "Stop" || content === "Pause") {
+    } else if (content === "Pause") {
+      sendingStm32PauseRecordingRequests();
+      sendingRequests(mode, action, content);
+    } else if (content === "Stop") {
       sendingStm32StopRecordingRequests();
       sendingRequests(mode, action, content);
     } else {
@@ -154,7 +181,11 @@ const Button: React.FC<ButtonProps> = ({
       onContextMenu={(e) => e.preventDefault()}
       size="large"
       sx={{
+        color: textColor,
         backgroundColor: mainColor,
+        "&.Mui-disabled": {
+          color: "gray",
+        },
         "&:hover": {
           backgroundColor: hoverColor,
         },
@@ -177,6 +208,7 @@ const Button: React.FC<ButtonProps> = ({
       sx={{
         mt: 3,
         mb: 2,
+        color: textColor,
         textTransform: "none",
         fontSize: "1rem",
         backgroundColor: "blueAccent.main",

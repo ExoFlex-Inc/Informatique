@@ -7,28 +7,13 @@ import {
   TextField,
   IconButton,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import { Refresh, PlayArrow, Pause, Home } from "@mui/icons-material";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import LineChart from "../components/LineChart";
-import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import useStm32 from "../hooks/use-stm32.ts";
 import Button from "../components/Button.tsx";
 import ManualControl from "../components/ManualControl.tsx";
-
-const WhiteBorderCheckbox = styled(Checkbox)(() => ({
-  color: "white",
-  "&.Mui-checked": {
-    color: "white",
-  },
-  "& .MuiSvgIcon-root": {
-    fontSize: 28,
-  },
-  "& .MuiCheckbox-root": {
-    border: "1px solid white",
-  },
-}));
 
 const errorMap = {
   0: "ERROR_0_MSEC",
@@ -39,12 +24,12 @@ const errorMap = {
   5: "ERROR_5_LS_EXT_DOWN",
   6: "ERROR_6_LS_LEFT",
   7: "ERROR_7_LS_RIGHT",
-  8: "ERROR_8_LS_EVER_UP",
-  9: "ERROR_9_LS_EVER_DOWN",
+  8: "ERROR_8_LS_EVER_LEFT",
+  9: "ERROR_9_LS_EVER_RIGHT",
   10: "ERROR_10_LS_DORS_UP",
   11: "ERROR_11_LS_DORS_DOWN",
   12: "ERROR_12_CYCLESMS",
-  13: "ERROR_13",
+  13: "ERROR_13_MAX_TEMPERATURE",
   14: "ERROR_14_MMOT_CAN_CONNECT",
   15: "ERROR_15_MMOT_CAN_MAX_DELAY",
   16: "ERROR_16_MMOT_SET_ORIGIN",
@@ -230,151 +215,150 @@ export default function Manual() {
   };
 
   return (
-    <div className="custom-height flex flex-col">
-      <CustomScrollbar>
-        <Box>
-          <Grid
-            container
-            spacing={2}
-            sx={{ justifyContent: "center", alignItems: "center" }}
-          >
-            <Grid item xs={12}>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  mb: 2,
-                }}
-              >
-                <Box sx={{ width: 50 }} />
-                <Box gap={4} sx={{ display: "flex" }}>
-                  <IconButton
-                    onClick={() => setGraphPause(false)}
-                    disabled={!graphPause}
-                    size="large"
-                    sx={{
-                      backgroundColor: "blueAccent.main",
-                      "&:hover": { backgroundColor: "blueAccent.hover" },
-                    }}
-                  >
-                    <PlayArrow />
-                  </IconButton>
-                  <IconButton
-                    onClick={() => setGraphPause(true)}
-                    disabled={graphPause}
-                    size="large"
-                    sx={{
-                      backgroundColor: "blueAccent.main",
-                      "&:hover": { backgroundColor: "blueAccent.hover" },
-                    }}
-                  >
-                    <Pause />
-                  </IconButton>
-                  <Button
-                    icon={<Home />}
-                    mode="Homing"
-                    mainColor="blueAccent.main"
-                    hoverColor="blueAccent.hover"
-                    socket={socket}
-                  />
-
-                  <Button
-                    icon={<Refresh />}
-                    disabled={!stm32Data?.ErrorCode}
-                    mode="Reset"
-                    mainColor="blueAccent.main"
-                    hoverColor="blueAccent.hover"
-                    socket={socket}
-                  />
-                  <IconButton
-                    onClick={(e) => {
-                      exportCsv();
-                    }}
-                    onTouchStart={(e) => {
-                      exportCsv();
-                    }}
-                    size="large"
-                    sx={{
-                      backgroundColor: "blueAccent.main",
-                      "&:hover": {
-                        backgroundColor: "blueAccent.hover",
-                      },
-                    }}
-                    disabled={!stm32Data?.ErrorCode}
-                  >
-                    {recordCsv ? (
-                      <RadioButtonUncheckedIcon />
-                    ) : (
-                      <RadioButtonCheckedIcon />
-                    )}
-                  </IconButton>
-                </Box>
-                <Box sx={{ width: 50 }} />
-                <FormControlLabel
-                  control={
-                    <WhiteBorderCheckbox
-                      checked={graphDataType === "position"}
-                      onChange={() => setGraphDataType("position")}
-                    />
-                  }
-                  label="Position"
-                />
-                <FormControlLabel
-                  control={
-                    <WhiteBorderCheckbox
-                      checked={graphDataType === "torque"}
-                      onChange={() => setGraphDataType("torque")}
-                    />
-                  }
-                  label="Torque"
-                />
-                <FormControlLabel
-                  control={
-                    <WhiteBorderCheckbox
-                      checked={graphDataType === "current"}
-                      onChange={() => setGraphDataType("current")}
-                    />
-                  }
-                  label="Current"
-                />
-              </Box>
-              <LineChart
-                chartData={getChartData()}
-                type="realtime"
-                title="Motor Data"
-                graphPause={graphPause}
-              />
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  height: "100%",
-                }}
-              >
-                <TextField
-                  value={errorDescription}
-                  multiline
-                  fullWidth
-                  rows={10}
-                  variant="outlined"
-                  InputProps={{
-                    readOnly: true,
+    <div className="custom-height flex flex-col overflow-x-auto">
+      <Box>
+        <Grid
+          container
+          paddingX={12}
+          spacing={2}
+          sx={{ justifyContent: "center", alignItems: "center" }}
+        >
+          <Grid item xs={12}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                mb: 2,
+              }}
+            >
+              <Box sx={{ width: 50 }} />
+              <Box gap={4} sx={{ display: "flex" }}>
+                <IconButton
+                  onClick={() => setGraphPause(false)}
+                  disabled={!graphPause}
+                  size="large"
+                  sx={{
+                    backgroundColor: "#2fb73d",
+                    "&:hover": { backgroundColor: "#33a63f" },
                   }}
-                  inputProps={{
-                    sx: {
-                      whiteSpace: "pre",
+                >
+                  <PlayArrow />
+                </IconButton>
+                <IconButton
+                  onClick={() => setGraphPause(true)}
+                  disabled={graphPause}
+                  size="large"
+                  sx={{
+                    backgroundColor: "#f5d50b",
+                    "&:hover": { backgroundColor: "#dcc21d" },
+                  }}
+                >
+                  <Pause />
+                </IconButton>
+                <Button
+                  icon={<Home />}
+                  mode="Homing"
+                  mainColor="blueAccent.main"
+                  hoverColor="blueAccent.hover"
+                  socket={socket}
+                />
+
+                <Button
+                  icon={<Refresh />}
+                  disabled={!stm32Data?.ErrorCode}
+                  mode="Reset"
+                  mainColor="blueAccent.main"
+                  hoverColor="blueAccent.hover"
+                  socket={socket}
+                />
+                <IconButton
+                  onClick={(e) => {
+                    exportCsv();
+                  }}
+                  onTouchStart={(e) => {
+                    exportCsv();
+                  }}
+                  size="large"
+                  sx={{
+                    backgroundColor: "blueAccent.main",
+                    "&:hover": {
+                      backgroundColor: "blueAccent.hover",
                     },
                   }}
-                />
+                  disabled={!stm32Data?.ErrorCode}
+                >
+                  {recordCsv ? (
+                    <RadioButtonUncheckedIcon />
+                  ) : (
+                    <RadioButtonCheckedIcon />
+                  )}
+                </IconButton>
               </Box>
-            </Grid>
+              <Box sx={{ width: 50 }} />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={graphDataType === "position"}
+                    onChange={() => setGraphDataType("position")}
+                  />
+                }
+                label="Position"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={graphDataType === "torque"}
+                    onChange={() => setGraphDataType("torque")}
+                  />
+                }
+                label="Torque"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={graphDataType === "current"}
+                    onChange={() => setGraphDataType("current")}
+                  />
+                }
+                label="Current"
+              />
+            </Box>
+            <LineChart
+              chartData={getChartData()}
+              type="realtime"
+              title="Motor Data"
+              graphPause={graphPause}
+            />
           </Grid>
-        </Box>
-      </CustomScrollbar>
+          <Grid item xs={12} md={3}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100%",
+              }}
+            >
+              <TextField
+                value={errorDescription}
+                multiline
+                fullWidth
+                rows={10}
+                variant="outlined"
+                InputProps={{
+                  readOnly: true,
+                }}
+                inputProps={{
+                  sx: {
+                    whiteSpace: "pre",
+                  },
+                }}
+              />
+            </Box>
+          </Grid>
+        </Grid>
+      </Box>
       <ManualControl
         stm32Data={stm32Data}
         socket={socket}

@@ -275,6 +275,8 @@ void ManagerMovement_Manual()
         ManagerMotor_StopManualMovement(MMOT_MOTOR_1);
         ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
         ManagerMotor_StopManualMovement(MMOT_MOTOR_3);
+
+        PeriphSolenoid_StopPWMs();
     }
 }
 
@@ -931,7 +933,7 @@ void ManagerMovement_AutoRest()
         }
         else  // Continue exercise with next rep
         {
-            managerMovement.autoState = MMOV_AUTO_STATE_READY;
+            managerMovement.autoState = MMOV_AUTO_STATE_2GOAL;
             repsCount++;
         }
     }
@@ -1035,7 +1037,7 @@ void ManagerMovement_HomingEversion()
 
                 if (managerMovement.state == MMOV_STATE_CHANGESIDE)
                 {
-                    PeriphSolenoid_ResetLocksState();
+                    PeriphSolenoid_ResetPWMState();
                     managerMovement.changeSideState =
                         MMOV_CHANGESIDE_STATE_STARTINGPOS;
                     managerMovement.state = MMOV_STATE_MANUAL;
