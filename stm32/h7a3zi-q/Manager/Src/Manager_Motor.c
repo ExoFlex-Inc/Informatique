@@ -27,8 +27,8 @@
 #define ERROR_MOTOR_MINMAX          -4
 #define ERROR_MOTOR_TEMP            -5
 
-#define MMOT_DT_MS 10
-#define MMOT_DT_S  MMOT_DT_MS / 1000
+#define MMOT_DT_MS 10.0f
+#define MMOT_DT_S  MMOT_DT_MS / 1000.0f
 #define MAX_TRY    50  // 500 ms before flagging an error
 
 #define MOTOR_STEP   0.005
@@ -51,7 +51,8 @@
 #define MMOT_CONTROL_POS_SPEED        2
 #define MMOT_CONTROL_POS_SPEED_TORQUE 3
 
-#define MMOT_ACC 2 //rad/s2 -> 0 à 0.2 rad/s en 100ms
+#define MMOT_ACC 0.5f //rad/s2 -> 0 à 0.2 rad/s en 100ms
+
 #define MMOT_MIN_SPEED_CMD  0.05
 #define MMOT_MAX_SPEED_CMD  2
 #define MMOT_MAX_TORQUE_CMD 20
@@ -498,22 +499,20 @@ void ManagerMotor_NextCmdPosSpeed(uint8_t id)
     {
         int8_t dir = ManagerMotor_GetMotorDirection(id);
 
-        if (motors[id].cmdSpeed != dir * motors[id].goalSpeed)
-        {
-        	motors[id].cmdSpeed = motors[id].cmdSpeed + dir * MMOT_ACC * MMOT_DT_S;
+        float add = dir * MMOT_ACC * MMOT_DT_S;
 
-        	if (dir == 1 && motors[id].cmdSpeed > dir * motors[id].goalSpeed)
-        	{
-        		motors[id].cmdSpeed = dir * motors[id].goalSpeed;
-        	}
-        	else if (dir == -1 && motors[id].cmdSpeed < dir * motors[id].goalSpeed)
-        	{
-        		motors[id].cmdSpeed = dir * motors[id].goalSpeed;
-        	}
+        motors[id].cmdSpeed = motors[id].cmdSpeed + add;
+
+        if (dir == 1 && motors[id].cmdSpeed > dir * motors[id].goalSpeed)
+        {
+        	motors[id].cmdSpeed = dir * motors[id].goalSpeed;
+        }
+        if (dir == -1 && motors[id].cmdSpeed < dir * motors[id].goalSpeed)
+        {
+        	motors[id].cmdSpeed = dir * motors[id].goalSpeed;
         }
 
-        motors[id].cmdPosition =
-            motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
+        motors[id].cmdPosition = motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
 
         // Gravity compensation
         if (id == MMOT_MOTOR_3)
@@ -728,7 +727,7 @@ void ManagerMotor_MovePosSpeed(uint8_t id, float pos, float speed)
     motors[id].goalSpeed    = fabsf(speed);
     motors[id].goalTorque   = 0;
     motors[id].cmdPosition  = motors[id].motor.position;
-    //motors[id].cmdSpeed     = motors[id].motor.velocity;
+    motors[id].cmdSpeed     = motors[id].motor.velocity;
     motors[id].cmdTorque    = 0;
     motors[id].goalReady    = true;
 }
