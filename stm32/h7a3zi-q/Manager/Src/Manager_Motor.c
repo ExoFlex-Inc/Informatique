@@ -901,7 +901,8 @@ void ManagerMotor_VerifyMotorsTemp()
 	#endif
 
 	#ifndef MMOT_DEV_MOTOR_2_DISABLE
-		verifM2 = ManagerMotor_VerifyMotorTemp(MMOT_MOTOR_2);
+		//verifM2 = ManagerMotor_VerifyMotorTemp(MMOT_MOTOR_2);
+		//Sensor is faulty
 	#endif
 
 	#ifndef MMOT_DEV_MOTOR_3_DISABLE
