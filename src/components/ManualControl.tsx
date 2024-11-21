@@ -41,8 +41,6 @@ const ManualControl = ({
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [isManualControlOpen, setIsManualControlOpen] = useState(false);
-  const buttonMode = "Manual";
-  const action = "Increment";
   const [changeSideDisabled, setChangeSideDisable] = useState(true);
 
   useEffect(() => {
@@ -152,8 +150,8 @@ const ManualControl = ({
                           }}
                         >
                           <Button
-                            mode={buttonMode}
-                            action={action}
+                            mode="Manual"
+                            action="Increment"
                             content={
                               stm32Data?.CurrentLegSide == "LegIsLeft"
                                 ? "EversionO"
@@ -168,8 +166,8 @@ const ManualControl = ({
                           />
 
                           <Button
-                            mode={buttonMode}
-                            action={action}
+                            mode="Manual"
+                            action="Increment"
                             content={
                               stm32Data?.CurrentLegSide == "LegIsLeft"
                                 ? "EversionI"
@@ -199,8 +197,8 @@ const ManualControl = ({
                           }}
                         >
                           <Button
-                            mode={buttonMode}
-                            action={action}
+                            mode="Manual"
+                            action="Increment"
                             content="DorsiflexionU"
                             mainColor="blueAccent.main"
                             hoverColor="blueAccent.hover"
@@ -210,8 +208,8 @@ const ManualControl = ({
                             socket={socket}
                           />
                           <Button
-                            mode={buttonMode}
-                            action={action}
+                            mode="Manual"
+                            action="Increment"
                             content="DorsiflexionD"
                             mainColor="blueAccent.main"
                             hoverColor="blueAccent.hover"
@@ -237,8 +235,8 @@ const ManualControl = ({
                           }}
                         >
                           <Button
-                            mode={buttonMode}
-                            action={action}
+                            mode="Manual"
+                            action="Increment"
                             content="ExtensionU"
                             mainColor="blueAccent.main"
                             hoverColor="blueAccent.hover"
@@ -248,8 +246,8 @@ const ManualControl = ({
                             socket={socket}
                           />
                           <Button
-                            mode={buttonMode}
-                            action={action}
+                            mode="Manual"
+                            action="Increment"
                             content="ExtensionD"
                             mainColor="blueAccent.main"
                             hoverColor="blueAccent.hover"
@@ -292,7 +290,7 @@ const ManualControl = ({
                       }}
                     >
                       <Button
-                        mode={buttonMode}
+                        mode="Manual"
                         action="Tightening"
                         content="Forward"
                         mainColor="blueAccent.main"
@@ -303,7 +301,7 @@ const ManualControl = ({
                         socket={socket}
                       />
                       <Button
-                        mode={buttonMode}
+                        mode="Manual"
                         action="Tightening"
                         content="Backward"
                         mainColor="blueAccent.main"
