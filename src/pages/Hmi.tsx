@@ -475,7 +475,7 @@ export default function HMI() {
   };
 
   return (
-    <Box>
+    <Box sx={{display: "flex", flexDirection: "column", height: "calc(100vh - 100px)"}}>
       <Box>
         <Grid
           container
@@ -610,11 +610,13 @@ export default function HMI() {
         setPainScale={setPainScale}
         openDialogPainScale={openDialogPainScale}
       />
-      <ManualControl
-        errorFromStm32={errorFromStm32}
-        stm32Data={stm32Data ?? null}
-        socket={socket}
-      />
+      <Box sx={{height: "100%", alignContent: "end"}}>
+        <ManualControl
+          errorFromStm32={errorFromStm32}
+          stm32Data={stm32Data ?? null}
+          socket={socket}
+        />
+      </Box>
     </Box>
   );
 }

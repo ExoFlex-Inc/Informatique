@@ -13,7 +13,6 @@ import {
   ListItemText,
   List,
   styled,
-  Toolbar
 } from "@mui/material";
 
 import MuiDrawer from '@mui/material/Drawer';
@@ -25,14 +24,12 @@ import { tokens } from "../hooks/theme";
 import {
   ChevronLeft,
   HomeOutlined,
-  MenuOutlined,
   Tv,
-  NavigateNext,
   FeedOutlined,
   FitnessCenter,
   Group,
   Menu,
-  VideogameAsset
+  VideogameAsset,
 } from '@mui/icons-material';
 import { useUser } from "../hooks/use-user";
 
@@ -42,20 +39,22 @@ interface ProSidebarProps {
 
 interface ItemProps {
   text: string;
-  index: number;
   to: string;
   open: boolean;
 }
 
-const Item: React.FC<ItemProps> = ({ text, index, to, open}) => {
+const Item: React.FC<ItemProps> = ({ text, to, open}) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const theme = useTheme();
+  const backgroundColor = theme.palette.mode === "dark" ? "#2B5BB6" : "#7da9f7"
 
   const handleClick = () => {
     navigate(to);
   };
 
   return (
-    <ListItem key={text} disablePadding sx={{ display: 'block' }}>
+    <ListItem key={text} disablePadding sx={{ display: 'block', backgroundColor: location.pathname === to ? backgroundColor : "" }}>
       <ListItemButton
         sx={[
           {
@@ -87,7 +86,14 @@ const Item: React.FC<ItemProps> = ({ text, index, to, open}) => {
                 },
           ]}
         >
-          {index === 0 ? <HomeOutlined /> : index === 1 ? <Group /> : <Tv />}
+          {}
+          {text === "Dashboard" ? <HomeOutlined /> :
+            text === "Network" ? <Group /> :
+            text === "HMI" ? <Tv /> :
+            text === "Planning" ? <FitnessCenter /> :
+            text === "Activity" ? <FeedOutlined /> :
+            <VideogameAsset />
+          }
         </ListItemIcon>
         <ListItemText
           primary={text}
@@ -109,34 +115,15 @@ const Item: React.FC<ItemProps> = ({ text, index, to, open}) => {
 const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [selected, setSelected] = useState("");
   const { user } = useUser();
   const isTablet = useMediaQuery("(max-width: 1024px)");
   const location = useLocation();
-  const navigate = useNavigate();
   const page = location.pathname.split("/").pop() || "";
 
   const [open, setOpen] = useState(true);
   const allAccessPages: string[] = ["/dashboard", "/network", "/hmi"];
   const adminAndDevPages: string[] = ["/planning", "/activity", "/manual"]
   const drawerWidth = 240;
-
-  useEffect(() => {
-    let upperCasePage;
-    if (page === "hmi") {
-      upperCasePage = "HMI";
-    } else if (page === "network" || page === "professional_network") {
-      upperCasePage = "Network";
-    } else {
-      upperCasePage = page.charAt(0).toUpperCase() + page.slice(1);
-    }
-    setSelected(upperCasePage);
-  }, [page]);
-
-  useEffect(() => {
-    setIsCollapsed(isTablet);
-  }, [isTablet]);
 
   const openedMixin = (theme: Theme): CSSObject => ({
     width: drawerWidth,
@@ -195,11 +182,13 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <Drawer variant="permanent" open={open}>
+      <Drawer variant="permanent" sx={{zIndex: 30}} open={open}>
         <DrawerHeader>
-          <IconButton onClick={() => setOpen(!open)}>
-            {open ? <ChevronLeft /> : <Menu />}
-          </IconButton>
+          <Box sx={{width: "100%", display: "flex", justifyContent: open ? "end" : "center"}}>
+            <IconButton onClick={() => setOpen(!open)}>
+              {open ? <ChevronLeft /> : <Menu />}
+            </IconButton>
+          </Box>
         </DrawerHeader>
         {open && 
           <Box mb="25px">
@@ -235,11 +224,10 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
             </Box>
           </Box>        
         }
-        <List>
+        <List sx={{paddingY: "0px"}}>
           {['Dashboard', 'Network', 'HMI'].map((text, index) => (
             <Item
-              text={text}
-              index={index} 
+              text={text} 
               to={allAccessPages[index] as string}
               open={open}  
             />
@@ -248,195 +236,27 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
             ['Planning', 'Activity', 'Manual'].map((text, index) => (
               <Item
                 text={text}
-                index={index}
                 to={adminAndDevPages[index] as string}
                 open={open}
               />
           ))}
         </List>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="end"
+          height="100%"
+          paddingBottom="10px"
+        >
+          <img
+            alt="logo"
+            src="/assets/logo.png"
+            style={{ paddingTop: "10px", height: "auto", maxWidth: open ? "45%" : "80%"}}
+          />
+        </Box>
       </Drawer>
     </Box>
   );
 }
-  // return (
-  //   <Box
-  //     sx={{
-  //       display: "flex",
-  //       height: "100%",
-  //     }}
-  //   >
-      {/* <Sidebar
-        className="sidebar-no-border"
-        backgroundColor={colors.primary[400]}
-        collapsed={isCollapsed}
-      >
-        <Menu
-          // menuItemStyles={{
-          //   button: ({ level, active, disabled }) => {
-          //     if (level === 0)
-          //       return {
-          //         // color: disabled ? `${colors.primary[200]}` : undefined,
-          //         marginRight: "10px",
-          //         backgroundColor: active
-          //           ? `${colors.blueAccent[500]}`
-          //           : `${colors.primary[400]}`,
-          //         "&:hover": {
-          //           backgroundColor: `${colors.blueAccent[400]}`,
-          //           color: "white !important",
-          //           fontWeight: "bold !important",
-          //         },
-          //       };
-          //     if (level === 1)
-          //       return {
-          //         backgroundColor: active
-          //           ? `${colors.greenAccent[500]}`
-          //           : `${colors.primary[400]}`,
-          //         "&:hover": {
-          //           backgroundColor:
-          //             `${colors.greenAccent[500]}` + " !important",
-          //           // color: "white !important",
-          //           fontWeight: "bold !important",
-          //         },
-          //       };
-          //   },
-          // }}
-        >
-          <MenuItem
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            icon={isCollapsed ? <MenuOutlinedIcon /> : undefined}
-            style={{
-              margin: "10px 0 20px 0",
-              color: colors.grey[100],
-              backgroundColor: "transparent",
-            }}
-            rootStyles={{
-              "&:hover": {
-                backgroundColor: "transparent !important",
-              },
-            }}
-          >
-            {!isCollapsed && (
-              <Box
-                display="flex"
-                justifyContent="end"
-                alignItems="center"
-                ml="15px"
-              >
-                <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
-                  <MenuOutlinedIcon />
-                </IconButton>
-              </Box>
-            )}
-          </MenuItem>
-
-          {!isCollapsed && (
-            <Box mb="25px">
-              <Box display="flex" justifyContent="center" alignItems="center">
-                <Avatar
-                  src={user.avatar_url ? user.avatar_url : "/assets/user.png"}
-                  sx={
-                    isTablet
-                      ? { width: 50, height: 50 }
-                      : { width: 100, height: 100 }
-                  }
-                />
-              </Box>
-
-              <Box textAlign="center">
-                <Typography
-                  className={
-                    user?.first_name.length < 15 ? "text-4xl" : "text-xl"
-                  }
-                  variant={isTablet ? "h3" : "h2"}
-                  color={colors.grey[100]}
-                  fontWeight="bold"
-                  sx={{ m: "10px 0 0 0" }}
-                >
-                  {user?.first_name || "Client"}
-                </Typography>
-                <Typography
-                  variant={isTablet ? "h6" : "h5"}
-                  color={colors.greenAccent[500]}
-                >
-                  {user?.speciality || "Speciality"}
-                </Typography>
-              </Box>
-            </Box>
-          )}
-
-          <Box paddingLeft={isCollapsed ? undefined : "10%"}>
-            <Item
-              title="Dashboard"
-              to="/dashboard"
-              icon={<HomeOutlinedIcon />}
-
-
-
-
-
-
-
-
-              selected={selected}
-            />
-            {(permissions === "dev" || permissions === "admin") && (
-              <Item
-                title="Planning"
-                to="/planning"
-                icon={<FitnessCenterIcon />}
-                selected={selected}
-              />
-            )}
-            <Item
-              title="Network"
-              to="/network"
-              icon={<GroupIcon />}
-              selected={selected}
-            />
-            {(permissions === "dev" || permissions === "admin") && (
-              <Item
-                title="Activity"
-                to="/activity"
-                icon={<FeedOutlinedIcon />}
-                selected={selected}
-              />
-            )}
-
-            <SubMenu label="Control Page" icon={<TvIcon />}>
-              <Item
-                title="HMI"
-                to="/hmi"
-                icon={<NavigateNextIcon style={{ fontSize: "small" }} />}
-                selected={selected}
-              />
-              {(permissions === "dev" || permissions === "admin") && (
-                <Item
-                  title="Manual"
-                  to="/manual"
-                  icon={<NavigateNextIcon style={{ fontSize: "small" }} />}
-                  selected={selected}
-                />
-              )}
-            </SubMenu>
-          </Box>
-          <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            width="100%"
-          >
-            <img
-              alt="logo"
-              width={"200px"}
-              height={"200px"}
-              src="/assets/logo.png"
-              style={{ paddingTop: "50px" }}
-            />
-          </Box>
-        </Menu>
-      </Sidebar> */}
-    {/* </Box>
-  );
-}; */}
 
 export default ProSidebar;

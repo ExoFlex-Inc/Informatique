@@ -31,6 +31,7 @@ export default function StretchStreak({
           variant="h6"
           color="blueAccent.main"
           gutterBottom
+          textAlign="center"
         >
           Stretch Streak
         </Typography>

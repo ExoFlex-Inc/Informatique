@@ -234,7 +234,7 @@ const LineChart: React.FC<LineChartProps> = ({
     <Box>
       <Paper
         sx={{position: "relative"}}
-        className={`bg-white rounded-lg ${isFullScreen ? "h-screen w-screen top-0 left-0 fixed z-20" : ""}`}
+        className={`bg-white rounded-lg ${isFullScreen ? "h-screen w-screen top-0 left-0 fixed z-50" : ""}`}
       >
         <Box
           sx={{
