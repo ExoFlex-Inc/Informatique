@@ -23,7 +23,7 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
   },
-  "include": ["src", "public/firebase-messaging-sw.js"],
+  "include": ["src", "src/firebase-messaging-sw.js"],
   "exclude": ["node_modules", "dist"],
   "ts-node": {
     "esm": true,

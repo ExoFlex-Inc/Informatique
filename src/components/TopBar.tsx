@@ -1,6 +1,4 @@
-import { useContext, useState, useRef, useEffect } from "react";
-import { ColorModeContext } from "../hooks/theme.ts";
-
+import React, { useContext, useState, useRef, useEffect } from "react";
 import {
   Box,
   IconButton,
@@ -14,34 +12,37 @@ import {
   ListItem,
   ListItemButton,
   ListItemIcon,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
-
 import Notification from "./Notification.tsx";
-
 import Login from "./Signup.tsx";
 import { useNavigate } from "react-router-dom";
 import { deleteToken } from "firebase/messaging";
 import { messaging } from "../utils/firebaseClient.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUser } from "../hooks/use-user.ts";
+import { ColorModeContext } from "../hooks/theme.ts";
 
 export default function TopBar() {
   const { user } = useUser();
   const theme = useTheme();
-  // const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
-
   const menuRef = useRef<HTMLDivElement>(null);
   const avatarRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-
   const queryClient = useQueryClient();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
+    "success"
+  );
 
   useEffect(() => {
     const handleClickOutside = (event: any) => {
@@ -64,40 +65,44 @@ export default function TopBar() {
   const handleLogout = async (event: React.MouseEvent<HTMLDivElement>) => {
     event.preventDefault();
 
-    if (window.confirm("Are you sure you want to log out?")) {
-      try {
-        setIsMenuOpen(false);
+    setSnackbarMessage("Logging out...");
+    setSnackbarSeverity("success");
+    setSnackbarOpen(true);
 
-        const response = await fetch("http://localhost:3001/auth/logout", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            user_id: user?.user_id,
-          }),
-        });
+    try {
+      setIsMenuOpen(false);
 
-        if (!response.ok) {
-          throw new Error("Failed to log out");
-        }
+      const response = await fetch("http://localhost:3001/auth/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          user_id: user?.user_id,
+        }),
+      });
 
-        queryClient.clear();
-
-        await deleteToken(messaging);
-
-        navigate("/login", { replace: true });
-      } catch (error) {
-        if (error instanceof Error) {
-          console.error("Error logging out:", error.message);
-        } else {
-          console.error("Error logging out:", error);
-        }
-
-        alert("An error occurred while logging out. Please try again.");
+      if (!response.ok) {
+        throw new Error("Failed to log out");
       }
+      
+      await deleteToken(messaging);
+
+      queryClient.clear();
+
+      setSnackbarMessage("Logged out successfully!");
+      setSnackbarSeverity("success");
+      navigate("/login", { replace: true });
+    } catch (error) {
+      setSnackbarMessage("An error occurred while logging out. Please try again.");
+      setSnackbarSeverity("error");
+      console.error("Error logging out:", error);
     }
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
   };
 
   const onProfileClick = () => {
@@ -116,14 +121,16 @@ export default function TopBar() {
             )}
           </IconButton>
         )}
-        {user && ( // Check if session exists
-          <Notification />
-        )}
+        {user && <Notification />}
         {user && (
           <IconButton className="h-14" onClick={onProfileClick}>
             <Avatar
               ref={avatarRef}
-              src={user?.avatar_url ? user.avatar_url : "/assets/user.png"}
+              src={
+                user?.avatar_blob_url
+                  ? user.avatar_blob_url
+                  : "/assets/user.png"
+              }
             />
           </IconButton>
         )}
@@ -174,6 +181,21 @@ export default function TopBar() {
       ) : (
         <Login />
       )}
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={5000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
