@@ -41,7 +41,7 @@ export default function TopBar() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
-    "success"
+    "success",
   );
 
   useEffect(() => {
@@ -86,7 +86,7 @@ export default function TopBar() {
       if (!response.ok) {
         throw new Error("Failed to log out");
       }
-      
+
       await deleteToken(messaging);
 
       queryClient.clear();
@@ -95,7 +95,9 @@ export default function TopBar() {
       setSnackbarSeverity("success");
       navigate("/login", { replace: true });
     } catch (error) {
-      setSnackbarMessage("An error occurred while logging out. Please try again.");
+      setSnackbarMessage(
+        "An error occurred while logging out. Please try again.",
+      );
       setSnackbarSeverity("error");
       console.error("Error logging out:", error);
     }
@@ -126,11 +128,7 @@ export default function TopBar() {
           <IconButton className="h-14" onClick={onProfileClick}>
             <Avatar
               ref={avatarRef}
-              src={
-                user?.avatar_url
-                  ? user.avatar_url
-                  : "/assets/user.png"
-              }
+              src={user?.avatar_url ? user.avatar_url : "/assets/user.png"}
             />
           </IconButton>
         )}

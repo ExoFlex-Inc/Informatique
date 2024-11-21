@@ -476,7 +476,13 @@ export default function HMI() {
   };
 
   return (
-    <Box sx={{display: "flex", flexDirection: "column", height: "calc(100vh - 100px)"}}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "calc(100vh - 100px)",
+      }}
+    >
       <Box>
         <Grid
           container
@@ -590,12 +596,27 @@ export default function HMI() {
                 label="Torque"
               />
             </Box>
-            <Grid container spacing={2} sx={{ display: "flex", justifyContent: "center", alignItems: "center", padding: 2 }}>
-              <Grid item xs={12} sm={10} md={8} sx={{ gridRow: 'span 2', height: "100%" }}>
+            <Grid
+              container
+              spacing={2}
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                padding: 2,
+              }}
+            >
+              <Grid
+                item
+                xs={12}
+                sm={10}
+                md={8}
+                sx={{ gridRow: "span 2", height: "100%" }}
+              >
                 <LineChart
-                chartData={getChartData()}
-                type="realtime"
-                title="Motor Data"
+                  chartData={getChartData()}
+                  type="realtime"
+                  title="Motor Data"
                 />
               </Grid>
               <Grid xs={4} item>
@@ -619,7 +640,6 @@ export default function HMI() {
                   />
                 </Paper>
               </Grid>
-
             </Grid>
           </Grid>
         </Grid>
@@ -629,7 +649,7 @@ export default function HMI() {
         setPainScale={setPainScale}
         openDialogPainScale={openDialogPainScale}
       />
-      <Box sx={{height: "100%", alignContent: "end"}}>
+      <Box sx={{ height: "100%", alignContent: "end" }}>
         <ManualControl
           errorFromStm32={errorFromStm32}
           stm32Data={stm32Data ?? null}

@@ -3,7 +3,18 @@ import SendIcon from "@mui/icons-material/Send";
 import UserMenuDropdown from "./UserMenuDropdown.tsx";
 import { useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import { Box, IconButton, Table, TableContainer, TableCell, TableRow, TableHead, TableBody, Typography, Paper } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  Table,
+  TableContainer,
+  TableCell,
+  TableRow,
+  TableHead,
+  TableBody,
+  Typography,
+  Paper,
+} from "@mui/material";
 import { useUser } from "../hooks/use-user.ts";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -83,7 +94,7 @@ const UserList: React.FC<UserListProps> = ({
 
   const handleSnackbarClose = (
     event?: React.SyntheticEvent | Event,
-    reason?: string
+    reason?: string,
   ) => {
     if (reason === "clickaway") {
       return;
@@ -92,27 +103,27 @@ const UserList: React.FC<UserListProps> = ({
   };
 
   return (
-    <TableContainer component={Paper} sx={{borderRadius: "12px"}}>
+    <TableContainer component={Paper} sx={{ borderRadius: "12px" }}>
       <Table>
         <TableHead className="bg-gray-100">
           <TableRow>
-            <TableCell sx={{borderColor: "lightgrey"}}>
-              <Typography sx={{display: "flex", color: "gray"}}>
+            <TableCell sx={{ borderColor: "lightgrey" }}>
+              <Typography sx={{ display: "flex", color: "gray" }}>
                 First Name
               </Typography>
             </TableCell>
-            <TableCell sx={{borderColor: "lightgrey"}}>
-              <Typography sx={{display: "flex" , color: "gray"}}>
+            <TableCell sx={{ borderColor: "lightgrey" }}>
+              <Typography sx={{ display: "flex", color: "gray" }}>
                 Last Name
               </Typography>
             </TableCell>
-            <TableCell sx={{borderColor: "lightgrey"}}>
-              <Typography sx={{display: "flex", color: "gray"}}>
+            <TableCell sx={{ borderColor: "lightgrey" }}>
+              <Typography sx={{ display: "flex", color: "gray" }}>
                 Email
               </Typography>
             </TableCell>
-            <TableCell sx={{borderColor: "lightgrey"}}>
-              <Typography sx={{display: "flex", color: "gray"}}>
+            <TableCell sx={{ borderColor: "lightgrey" }}>
+              <Typography sx={{ display: "flex", color: "gray" }}>
                 Phone Number
               </Typography>
             </TableCell>
@@ -120,30 +131,36 @@ const UserList: React.FC<UserListProps> = ({
         </TableHead>
         <TableBody>
           {listOfUsers?.slice(0, 4).map((user, index) => (
-            <TableRow sx={{backgroundColor: "white"}}>
-              <TableCell sx={{borderColor: "lightgrey"}}>
-                <Typography sx={{display: "flex", color: "black"}}>
+            <TableRow sx={{ backgroundColor: "white" }}>
+              <TableCell sx={{ borderColor: "lightgrey" }}>
+                <Typography sx={{ display: "flex", color: "black" }}>
                   {user.first_name}
                 </Typography>
               </TableCell>
-              <TableCell sx={{borderColor: "lightgrey"}}>
-                <Typography sx={{display: "flex", color: "black"}}>
+              <TableCell sx={{ borderColor: "lightgrey" }}>
+                <Typography sx={{ display: "flex", color: "black" }}>
                   {user.last_name}
                 </Typography>
               </TableCell>
-              <TableCell sx={{borderColor: "lightgrey"}}>
-                <Typography sx={{display: "flex", color: "black"}}>
+              <TableCell sx={{ borderColor: "lightgrey" }}>
+                <Typography sx={{ display: "flex", color: "black" }}>
                   {user.email}
                 </Typography>
               </TableCell>
-              <TableCell sx={{borderColor: "lightgrey"}}>
-                <Box sx={{justifyContent: "space-between", display: "flex", alignItems: "center"}}>
-                  <Typography sx={{display: "flex", color: "black"}}>
+              <TableCell sx={{ borderColor: "lightgrey" }}>
+                <Box
+                  sx={{
+                    justifyContent: "space-between",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography sx={{ display: "flex", color: "black" }}>
                     {user.phone_number}
                   </Typography>
                   {pathname === "/network" ? (
-                    <>
-                    </>
+                    <></>
+                  ) : (
                     // <IconButton
                     //   sx={{
                     //     "&:hover": {
@@ -155,7 +172,6 @@ const UserList: React.FC<UserListProps> = ({
                     // >
                     //   <ListIcon color="primary" />
                     // </IconButton>
-                  ) : (
                     <IconButton
                       onClick={() => sendInvitation(index)}
                       sx={{

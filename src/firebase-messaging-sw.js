@@ -23,7 +23,8 @@ const messaging = getMessaging(app);
 // Handle background messages
 onBackgroundMessage(messaging, (payload) => {
   console.log("Received background message:", payload);
-  const notificationTitle = payload.notification?.title || "Background Notification";
+  const notificationTitle =
+    payload.notification?.title || "Background Notification";
   const notificationOptions = {
     body: payload.notification?.body,
     icon: payload.notification?.icon,
@@ -46,12 +47,12 @@ precacheAndRoute([
 // Add custom caching logic
 registerRoute(
   ({ request }) => request.destination === "document",
-  new NetworkFirst()
+  new NetworkFirst(),
 );
 
 registerRoute(
   ({ request }) => request.destination === "image",
-  new NetworkFirst()
+  new NetworkFirst(),
 );
 
 // Set default handler to NetworkOnly

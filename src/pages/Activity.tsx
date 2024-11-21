@@ -563,7 +563,7 @@ export default function Activity() {
         display: "flex",
         flexDirection: "column",
         height: "calc(100vh - 100px)",
-        overflow: "auto"
+        overflow: "auto",
       }}
     >
       <div className="flex flex-wrap items-center gap-4">
@@ -600,7 +600,10 @@ export default function Activity() {
       </div>
       <div className="relative flex items-center justify-between">
         <div className="flex items-center ml-4 gap-2">
-          <IconButton ref={buttonRef} onClick={() => setIsGraphFilterOpen(!isGraphFilterOpen)}>
+          <IconButton
+            ref={buttonRef}
+            onClick={() => setIsGraphFilterOpen(!isGraphFilterOpen)}
+          >
             <FilterAlt />
           </IconButton>
           <DateRangePicker onChange={setDate} />

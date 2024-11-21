@@ -6,7 +6,7 @@ import {
   Typography,
   LinearProgress,
   Paper,
-  Grid
+  Grid,
 } from "@mui/material";
 
 function CircularProgressWithLabel(
@@ -105,15 +105,25 @@ export default function ProgressionWidget({
   }, [planData, stm32Data?.ExerciseIdx]);
 
   return (
-    <Grid sx={{flexDirection: "column", display: "flex", justifyContent: "center", alignContent: "center"}} container>
-      <Grid item xs={6}
+    <Grid
+      sx={{
+        flexDirection: "column",
+        display: "flex",
+        justifyContent: "center",
+        alignContent: "center",
+      }}
+      container
+    >
+      <Grid
+        item
+        xs={6}
         sx={{ display: "flex", justifyContent: "center", marginBottom: "10px" }}
       >
         <CircularProgressWithLabel
           value={(stretchProgress / totalStretch) * 100}
         />
       </Grid>
-      <Grid item sx={{alignContent: "center"}} xs={6}>
+      <Grid item sx={{ alignContent: "center" }} xs={6}>
         <Typography
           color="black"
           justifyContent="center"
@@ -124,7 +134,11 @@ export default function ProgressionWidget({
           {repetitionProgress + "/" + totalRepetition}
         </Typography>
         <Box
-          sx={{ display: "flex", justifyContent: "center", marginBottom: "4px" }}
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            marginBottom: "4px",
+          }}
         >
           <Box sx={{ width: "75%" }}>
             <LinearProgress

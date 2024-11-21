@@ -16,20 +16,20 @@ async function registerFCMToken() {
       if (process.env.NODE_ENV === "production") {
         // Register service worker for production
         registration = await navigator.serviceWorker.register(
-          "/firebase-messaging-sw.js"
+          "/firebase-messaging-sw.js",
           // { type: "module" } // Optional: Use 'classic' if your SW isn't a module
         );
       } else {
         // Register service worker for development
         registration = await navigator.serviceWorker.register(
           "/src/firebase-messaging-sw.js",
-          { type: "module" }
+          { type: "module" },
         );
       }
 
       console.log(
         "Service Worker registered successfully with scope:",
-        registration.scope
+        registration.scope,
       );
 
       // Retrieve the FCM token
@@ -43,7 +43,7 @@ async function registerFCMToken() {
         return fcmToken;
       } else {
         console.warn(
-          "No registration token available. Request permission to generate one."
+          "No registration token available. Request permission to generate one.",
         );
         return null;
       }
@@ -52,7 +52,10 @@ async function registerFCMToken() {
       return null;
     }
   } catch (error) {
-    console.error("Service worker registration or token retrieval failed:", error);
+    console.error(
+      "Service worker registration or token retrieval failed:",
+      error,
+    );
     return null;
   }
 }

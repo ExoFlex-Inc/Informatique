@@ -190,11 +190,11 @@ export const themeSettings = (mode: string) => {
       MuiDrawer: {
         styleOverrides: {
           root: {
-            '& .MuiDrawer-paper': {
-              backgroundColor: colors.primary[400] 
-            }
-          }
-        }
+            "& .MuiDrawer-paper": {
+              backgroundColor: colors.primary[400],
+            },
+          },
+        },
       },
       MuiCheckbox: {
         styleOverrides: {
@@ -218,12 +218,12 @@ export const themeSettings = (mode: string) => {
           "::-webkit-scrollbar-track": {
             backgroundColor: mode === "dark" ? "#2B5BB6" : "#7da9f7",
             borderRadius: "10px",
-            margin: "5px"
+            margin: "5px",
           },
           "::-webkit-scrollbar-thumb": {
             backgroundColor: mode === "dark" ? "#2BB673" : "#9bf7cb",
             borderRadius: "10px",
-            margin: "5px"
+            margin: "5px",
           },
           "::-webkit-scrollbar-thumb:hover": {
             backgroundColor: mode === "dark" ? "#37bf7d" : "#8df1c2",

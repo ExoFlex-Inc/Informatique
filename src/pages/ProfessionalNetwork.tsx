@@ -40,7 +40,7 @@ const ProfessionalNetwork = () => {
       });
     }
     setFilteredUsers(filteredAdmin);
-    setFilteredSearchBarUsers(filteredAdmin)
+    setFilteredSearchBarUsers(filteredAdmin);
   }, [admins, notifications, relations]);
 
   return (

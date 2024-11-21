@@ -1,50 +1,53 @@
-import docker from 'dockerode';
-import fetch from 'node-fetch';
-import type { Request, Response } from 'express';
+import docker from "dockerode";
+import fetch from "node-fetch";
+import type { Request, Response } from "express";
 
 const client = new docker();
 
-const imageName = 'bigjack325/exoflex';
-const tag = 'latest';
-const containerName = 'exoflex-app';
+const imageName = "bigjack325/exoflex";
+const tag = "latest";
+const containerName = "exoflex-app";
 
 // Helper function to follow progress during Docker operations
 const followProgress = (stream: any) =>
-    new Promise((resolve, reject) => {
-        client.modem.followProgress(stream, (err, output) => {
-            if (err) return reject(err);
-            resolve(output);
-        });
+  new Promise((resolve, reject) => {
+    client.modem.followProgress(stream, (err, output) => {
+      if (err) return reject(err);
+      resolve(output);
     });
+  });
 
 // Check for image updates
 export const checkImageUpdate = async (req: Request, res: Response) => {
-    try {
-        // Get local image digest
-        const localImage = client.getImage(`${imageName}:${tag}`);
-        const { RepoDigests } = await localImage.inspect();
-        const localDigest = RepoDigests?.[0]?.split('@')[1] || '';
+  try {
+    // Get local image digest
+    const localImage = client.getImage(`${imageName}:${tag}`);
+    const { RepoDigests } = await localImage.inspect();
+    const localDigest = RepoDigests?.[0]?.split("@")[1] || "";
 
-        // Fetch remote image digest from Docker Hub
-        const response = await fetch(`https://registry.hub.docker.com/v2/repositories/${imageName}/tags/${tag}`);
-        if (!response.ok) {
-            throw new Error(`Failed to fetch remote image info: ${response.statusText}`);
-        }
-        const remoteImageInfo = await response.json();
-        const remoteDigest = remoteImageInfo.digest || '';
-
-        const updateAvailable = localDigest !== remoteDigest;
-
-        res.json({
-            updateAvailable,
-            localDigest,
-            remoteDigest,
-        });
-    } catch (error) {
-        console.error('Error checking image updates:', error);
-        res.status(500).json({ error: 'Failed to check image updates' });
+    // Fetch remote image digest from Docker Hub
+    const response = await fetch(
+      `https://registry.hub.docker.com/v2/repositories/${imageName}/tags/${tag}`,
+    );
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch remote image info: ${response.statusText}`,
+      );
     }
+    const remoteImageInfo = await response.json();
+    const remoteDigest = remoteImageInfo.digest || "";
 
+    const updateAvailable = localDigest !== remoteDigest;
+
+    res.json({
+      updateAvailable,
+      localDigest,
+      remoteDigest,
+    });
+  } catch (error) {
+    console.error("Error checking image updates:", error);
+    res.status(500).json({ error: "Failed to check image updates" });
+  }
 };
 
 // Execute image update and redeployment
@@ -114,38 +117,46 @@ export const checkImageUpdate = async (req: Request, res: Response) => {
 // };
 
 export const executeImageUpdate = async (req: Request, res: Response) => {
-    console.log('Starting the image update process...');
+  console.log("Starting the image update process...");
+  try {
+    // Step 1: Pull the latest image
+    console.log(`Pulling the latest image: ${imageName}:${tag}...`);
     try {
-        // Step 1: Pull the latest image
-        console.log(`Pulling the latest image: ${imageName}:${tag}...`);
-        try {
-            const pullStream = await client.pull(`${imageName}:${tag}`);
-            console.log('Image pull started...');
-            await followProgress(pullStream);
-            console.log('Image pulled successfully.');
-        } catch (err) {
-            console.error(`Error pulling the latest image ${imageName}:${tag}:`, err.message);
-            throw err; // Re-throw to handle it in the catch block below
-        }
-
-        // Step 2: Restart the container
-        console.log(`Restarting container ${containerName} to use the updated image...`);
-        const container = client.getContainer(containerName);
-
-        try {
-            // Restart the container (Docker will use the updated image)
-            await container.restart();
-            console.log(`Container ${containerName} restarted successfully.`);
-        } catch (err) {
-            console.error(`Error restarting container ${containerName}:`, err.message);
-            throw err;
-        }
-
-        res.json({ message: 'Container updated and restarted successfully' });
-    } catch (error) {
-        console.error('Error during image update process:', error.message);
-        res.status(500).json({ error: 'Failed to update container' });
-    } finally {
-        console.log('Image update process finished (success or error).');
+      const pullStream = await client.pull(`${imageName}:${tag}`);
+      console.log("Image pull started...");
+      await followProgress(pullStream);
+      console.log("Image pulled successfully.");
+    } catch (err) {
+      console.error(
+        `Error pulling the latest image ${imageName}:${tag}:`,
+        err.message,
+      );
+      throw err; // Re-throw to handle it in the catch block below
     }
+
+    // Step 2: Restart the container
+    console.log(
+      `Restarting container ${containerName} to use the updated image...`,
+    );
+    const container = client.getContainer(containerName);
+
+    try {
+      // Restart the container (Docker will use the updated image)
+      await container.restart();
+      console.log(`Container ${containerName} restarted successfully.`);
+    } catch (err) {
+      console.error(
+        `Error restarting container ${containerName}:`,
+        err.message,
+      );
+      throw err;
+    }
+
+    res.json({ message: "Container updated and restarted successfully" });
+  } catch (error) {
+    console.error("Error during image update process:", error.message);
+    res.status(500).json({ error: "Failed to update container" });
+  } finally {
+    console.log("Image update process finished (success or error).");
+  }
 };

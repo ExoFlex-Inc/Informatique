@@ -124,15 +124,18 @@ function Profile() {
           <Paper sx={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
             {user &&
               Object.keys(shownInformation).map((key, index) => (
-                <Box sx={{flexGrow: 1,
+                <Box
+                  sx={{
+                    flexGrow: 1,
                     alignContent: "center",
-                    borderBottom: shownInformation[key] == "Phone Number" ? 0 : 1, 
-                    borderColor: "lightgray"
+                    borderBottom:
+                      shownInformation[key] == "Phone Number" ? 0 : 1,
+                    borderColor: "lightgray",
                   }}
                   key={index}
                 >
                   <ListItem>
-                    <Grid container  alignItems="center">
+                    <Grid container alignItems="center">
                       <Grid xs={4} item>
                         <ListItemText primary={`${shownInformation[key]}: `} />
                       </Grid>
