@@ -4,12 +4,13 @@ import { usePlan } from "../hooks/use-plan.ts";
 import useStm32 from "../hooks/use-stm32.ts";
 
 import {
-  useMediaQuery,
   useTheme,
   Box,
   Grid,
   Paper,
   IconButton,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import { useUser } from "../hooks/use-user.ts";
 import LineChart from "../components/LineChart.tsx";
@@ -570,9 +571,27 @@ export default function HMI() {
                   <RadioButtonCheckedIcon />
                 )}
               </IconButton>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={graphDataType === "position"}
+                    onChange={() => setGraphDataType("position")}
+                  />
+                }
+                label="Position"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={graphDataType === "torque"}
+                    onChange={() => setGraphDataType("torque")}
+                  />
+                }
+                label="Torque"
+              />
             </Box>
-            <Grid spacing={1} container sx={{display: "flex", paddingX: 4}}>
-              <Grid item xs={8} sx={{gridRow: 'span 2'}}>
+            <Grid container spacing={2} sx={{ display: "flex", justifyContent: "center", alignItems: "center", padding: 2 }}>
+              <Grid item xs={12} sm={10} md={8} sx={{ gridRow: 'span 2', height: "100%" }}>
                 <LineChart
                 chartData={getChartData()}
                 type="realtime"

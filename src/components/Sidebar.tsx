@@ -180,6 +180,10 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
     }),
   );
 
+  useEffect(() => {
+    setOpen(!isTablet);
+  }, [isTablet]);
+
   return (
     <Box sx={{ display: 'flex' }}>
       <Drawer variant="permanent" sx={{zIndex: 30}} open={open}>
@@ -196,9 +200,8 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
               <Avatar
                 src={user.avatar_url ? user.avatar_url : "/assets/user.png"}
                 sx={
-                  isTablet
-                    ? { width: 50, height: 50 }
-                    : { width: 100, height: 100 }
+                  {width: 100,
+                  height: 100}
                 }
               />
             </Box>
@@ -208,7 +211,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
                 className={
                   user?.first_name.length < 15 ? "text-4xl" : "text-xl"
                 }
-                variant={isTablet ? "h3" : "h2"}
+                variant="h2"
                 color={colors.grey[100]}
                 fontWeight="bold"
                 sx={{ m: "10px 0 0 0" }}
@@ -216,7 +219,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
                 {user?.first_name || "Client"}
               </Typography>
               <Typography
-                variant={isTablet ? "h6" : "h5"}
+                variant="h5"
                 color={colors.greenAccent[500]}
               >
                 {user?.speciality || "Speciality"}

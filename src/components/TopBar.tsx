@@ -127,8 +127,8 @@ export default function TopBar() {
             <Avatar
               ref={avatarRef}
               src={
-                user?.avatar_blob_url
-                  ? user.avatar_blob_url
+                user?.avatar_url
+                  ? user.avatar_url
                   : "/assets/user.png"
               }
             />
