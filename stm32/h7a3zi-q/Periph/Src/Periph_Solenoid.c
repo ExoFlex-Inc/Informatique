@@ -32,7 +32,7 @@
 #define LOCK_WAITING_DELAY 3000  // ms
 
 #define SOLENOID_PWM_VALUE 80  //%
-#define MOTOR_PWM_VALUE 50 //%
+#define MOTOR_PWM_VALUE 80 //%
 
 bool isEversionFree;
 bool isChangeSideFree;
