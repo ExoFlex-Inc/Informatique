@@ -231,38 +231,36 @@ const LineChart: React.FC<LineChartProps> = ({
   }, [title]);
 
   return (
-    <Box className="graph-container">
+    <Box>
       <Paper
-        className={`bg-white rounded-lg ${isFullScreen ? "h-screen w-screen top-0 left-0 fixed z-20" : ""}`}
+        sx={{ position: "relative" }}
+        className={`bg-white rounded-lg ${isFullScreen ? "h-screen w-screen top-0 left-0 fixed z-50" : ""}`}
       >
         <Box
           sx={{
             justifyContent: "right",
             display: "flex",
             paddingRight: 1,
-            paddingTop: 1,
           }}
         >
           {isFullScreen ? (
             <IconButton
+              size="small"
               sx={{
+                position: "absolute",
                 color: "gray",
-                "&:hover": {
-                  backgroundColor: "lightgray",
-                },
               }}
               onClick={() => setIsFullScreen(false)}
-              onTouchStart={() => setIsFullScreen(false)}
+              // onTouchStart={() => setIsFullScreen(false)}
             >
               <FullscreenExitIcon />
             </IconButton>
           ) : (
             <IconButton
+              size="small"
               sx={{
+                position: "absolute",
                 color: "gray",
-                "&:hover": {
-                  backgroundColor: "lightgray",
-                },
               }}
               onClick={() => setIsFullScreen(true)}
               onTouchStart={() => setIsFullScreen(true)}

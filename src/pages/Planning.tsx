@@ -13,7 +13,6 @@ import {
 import UserSearchBar from "../components/UserSearchBar.tsx";
 import ExercisesLimitsTable from "../components/ExercisesLimitsTable.tsx";
 import ExercisesPlanTable from "../components/ExercisesPlanTable.tsx";
-import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import { useRelations } from "../hooks/use-relations.ts";
 import { usePlan } from "../hooks/use-plan.ts";
 import Loading from "../components/Loading.tsx";
@@ -25,7 +24,7 @@ export default function Planning() {
   const [selectedUser, setSelectedUser] = useState<any[]>([]);
   const [isDisabled, setIsDisabled] = useState(true);
   const [addExerciseDisable, setAddExerciseDisable] = useState(true);
-  const [side, setSide] = useState<Side>(null);
+  const [side, setSide] = useState<Side>("Left");
   const [checked, setChecked] = useState(false);
   const checkboxRefs = useRef<(HTMLInputElement | null)[]>([]);
   const { relations, isLoading: isLoadingRelations } = useRelations();
@@ -134,7 +133,7 @@ export default function Planning() {
 
   const handleSnackbarClose = (
     event?: React.SyntheticEvent | Event,
-    reason?: string
+    reason?: string,
   ) => {
     if (reason === "clickaway") {
       return;
@@ -152,8 +151,8 @@ export default function Planning() {
           users={relations}
         />
       </div>
-      <CustomScrollbar>
-        <div className="m-6">
+      <div className="overflow-auto">
+        <div className=" m-6">
           <ExercisesLimitsTable
             limitsLeft={planData?.limits?.left}
             limitsRight={planData?.limits?.right}
@@ -220,8 +219,10 @@ export default function Planning() {
               Save Plan
             </button>
           </div>
-        ) : null}
-      </CustomScrollbar>
+        ) : (
+          true
+        )}
+      </div>
       {isLoading && <Loading />}
       <Snackbar
         open={snackbarOpen}

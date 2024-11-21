@@ -111,7 +111,7 @@ function Profile() {
           onChange={handleAvatarChange}
         />
       </IconButton>
-      <Box sx={{ display: "flex", margin: "16px" }}>
+      <Box sx={{ display: "flex", margin: "16px", flexGrow: 1 }}>
         <ThemeProvider
           theme={createTheme({
             palette: {
@@ -121,12 +121,21 @@ function Profile() {
             },
           })}
         >
-          <Paper sx={{ width: "40vw" }}>
+          <Paper sx={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
             {user &&
               Object.keys(shownInformation).map((key, index) => (
-                <div key={index}>
+                <Box
+                  sx={{
+                    flexGrow: 1,
+                    alignContent: "center",
+                    borderBottom:
+                      shownInformation[key] == "Phone Number" ? 0 : 1,
+                    borderColor: "lightgray",
+                  }}
+                  key={index}
+                >
                   <ListItem>
-                    <Grid container spacing={0.5} alignItems="center">
+                    <Grid container alignItems="center">
                       <Grid xs={4} item>
                         <ListItemText primary={`${shownInformation[key]}: `} />
                       </Grid>
@@ -187,8 +196,7 @@ function Profile() {
                       </Grid>
                     </Grid>
                   </ListItem>
-                  <Divider />
-                </div>
+                </Box>
               ))}
           </Paper>
         </ThemeProvider>

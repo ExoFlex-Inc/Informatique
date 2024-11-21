@@ -3,7 +3,18 @@ import SendIcon from "@mui/icons-material/Send";
 import UserMenuDropdown from "./UserMenuDropdown.tsx";
 import { useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import { Box, IconButton, Snackbar, Alert } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  Table,
+  TableContainer,
+  TableCell,
+  TableRow,
+  TableHead,
+  TableBody,
+  Typography,
+  Paper,
+} from "@mui/material";
 import { useUser } from "../hooks/use-user.ts";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -83,7 +94,7 @@ const UserList: React.FC<UserListProps> = ({
 
   const handleSnackbarClose = (
     event?: React.SyntheticEvent | Event,
-    reason?: string
+    reason?: string,
   ) => {
     if (reason === "clickaway") {
       return;
@@ -92,63 +103,75 @@ const UserList: React.FC<UserListProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-4 shadow-md shadow-gray-500 pt-2 bg-gray-300 rounded-2xl mx-4">
-      <label
-        className={
-          "font-bold border-gray-400 text-black pl-2 pb-2" +
-          (listOfUsers?.length > 0 ? " border-b-2" : "")
-        }
-      >
-        First Name
-      </label>
-      <label
-        className={
-          "font-bold border-gray-400 text-black pl-2 pb-2" +
-          (listOfUsers?.length ? " border-b-2" : "")
-        }
-      >
-        Last Name
-      </label>
-      <label
-        className={
-          "font-bold border-gray-400 text-black pl-2 pb-2" +
-          (listOfUsers?.length ? " border-b-2" : "")
-        }
-      >
-        Email
-      </label>
-      <label
-        className={
-          "font-bold border-gray-400 text-black pl-2 pb-2" +
-          (listOfUsers?.length ? " border-b-2" : "")
-        }
-      >
-        Phone Number
-      </label>
-
-      <ul className="divide-y rounded-b-2xl col-span-4 divide-gray-400 bg-white">
-        {listOfUsers?.slice(0, 10).map((user, index) => (
-          <div key={index} className="grid grid-cols-4 items-center">
-            <li className="text-black p-2">{user.first_name}</li>
-            <li className="text-black p-2">{user.last_name}</li>
-            <li className="text-black p-2">{user.email}</li>
-            <div className="relative">
-              <li className="text-black flex items-center justify-between p-2">
-                <span>{user.phone_number}</span>
-                <Box>
+    <TableContainer component={Paper} sx={{ borderRadius: "12px" }}>
+      <Table>
+        <TableHead className="bg-gray-100">
+          <TableRow>
+            <TableCell sx={{ borderColor: "lightgrey" }}>
+              <Typography sx={{ display: "flex", color: "gray" }}>
+                First Name
+              </Typography>
+            </TableCell>
+            <TableCell sx={{ borderColor: "lightgrey" }}>
+              <Typography sx={{ display: "flex", color: "gray" }}>
+                Last Name
+              </Typography>
+            </TableCell>
+            <TableCell sx={{ borderColor: "lightgrey" }}>
+              <Typography sx={{ display: "flex", color: "gray" }}>
+                Email
+              </Typography>
+            </TableCell>
+            <TableCell sx={{ borderColor: "lightgrey" }}>
+              <Typography sx={{ display: "flex", color: "gray" }}>
+                Phone Number
+              </Typography>
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {listOfUsers?.slice(0, 4).map((user, index) => (
+            <TableRow sx={{ backgroundColor: "white" }}>
+              <TableCell sx={{ borderColor: "lightgrey" }}>
+                <Typography sx={{ display: "flex", color: "black" }}>
+                  {user.first_name}
+                </Typography>
+              </TableCell>
+              <TableCell sx={{ borderColor: "lightgrey" }}>
+                <Typography sx={{ display: "flex", color: "black" }}>
+                  {user.last_name}
+                </Typography>
+              </TableCell>
+              <TableCell sx={{ borderColor: "lightgrey" }}>
+                <Typography sx={{ display: "flex", color: "black" }}>
+                  {user.email}
+                </Typography>
+              </TableCell>
+              <TableCell sx={{ borderColor: "lightgrey" }}>
+                <Box
+                  sx={{
+                    justifyContent: "space-between",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography sx={{ display: "flex", color: "black" }}>
+                    {user.phone_number}
+                  </Typography>
                   {pathname === "/network" ? (
-                    <IconButton
-                      sx={{
-                        "&:hover": {
-                          bgcolor: "#D1D5DB",
-                        },
-                      }}
-                      ref={(el) => addToButtonRefs(el, index)}
-                      onClick={() => toggleDropdown(index)}
-                    >
-                      <ListIcon color="primary" />
-                    </IconButton>
+                    <></>
                   ) : (
+                    // <IconButton
+                    //   sx={{
+                    //     "&:hover": {
+                    //       bgcolor: "#D1D5DB",
+                    //     },
+                    //   }}
+                    //   ref={(el) => addToButtonRefs(el, index)}
+                    //   onClick={() => toggleDropdown(index)}
+                    // >
+                    //   <ListIcon color="primary" />
+                    // </IconButton>
                     <IconButton
                       onClick={() => sendInvitation(index)}
                       sx={{
@@ -161,33 +184,12 @@ const UserList: React.FC<UserListProps> = ({
                     </IconButton>
                   )}
                 </Box>
-              </li>
-              {openMenuIndex === index && (
-                <UserMenuDropdown
-                  buttonRef={{ current: buttonRefs.current[index] ?? null }}
-                  clientId={user.user_id}
-                  setOpenMenuIndex={setOpenMenuIndex}
-                />
-              )}
-            </div>
-          </div>
-        ))}
-      </ul>
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
-          onClose={handleSnackbarClose}
-          severity={snackbarSeverity}
-          sx={{ width: "100%" }}
-        >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
-    </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 };
 

@@ -21,13 +21,13 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       VitePWA({
-        strategies: "injectManifest",
-        srcDir: "public",
+        strategies: "generateSW",
+        registerType: "autoUpdate",
+        srcDir: "src",
         filename: "firebase-messaging-sw.js",
         injectManifest: {
           rollupFormat: "iife",
         },
-        registerType: "autoUpdate",
         devOptions: {
           enabled: true,
           type: "classic",
@@ -54,7 +54,6 @@ export default defineConfig(({ mode }) => {
       host: true,
     },
     preview: {
-      // Add this section
       port: 1338,
       host: true,
     },

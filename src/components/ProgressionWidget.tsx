@@ -6,6 +6,7 @@ import {
   Typography,
   LinearProgress,
   Paper,
+  Grid,
 } from "@mui/material";
 
 function CircularProgressWithLabel(
@@ -14,7 +15,7 @@ function CircularProgressWithLabel(
   return (
     <Box sx={{ position: "relative", display: "inline-flex" }}>
       <CircularProgress
-        size="9.375rem"
+        size="8rem"
         variant="determinate"
         color="success"
         {...props}
@@ -104,42 +105,50 @@ export default function ProgressionWidget({
   }, [planData, stm32Data?.ExerciseIdx]);
 
   return (
-    <Box>
-      <Box
+    <Grid
+      sx={{
+        flexDirection: "column",
+        display: "flex",
+        justifyContent: "center",
+        alignContent: "center",
+      }}
+      container
+    >
+      <Grid
+        item
+        xs={6}
         sx={{ display: "flex", justifyContent: "center", marginBottom: "10px" }}
       >
         <CircularProgressWithLabel
           value={(stretchProgress / totalStretch) * 100}
         />
-      </Box>
-      <Typography
-        color="black"
-        justifyContent="center"
-        display="flex"
-        marginBottom="28px"
-      >
-        Session Progress
-      </Typography>
-      <Typography
-        color="black"
-        justifyContent="center"
-        display="flex"
-        marginBottom="4px"
-        fontSize="20px"
-      >
-        {repetitionProgress + "/" + totalRepetition}
-      </Typography>
-      <Box
-        sx={{ display: "flex", justifyContent: "center", marginBottom: "4px" }}
-      >
-        <Box sx={{ width: "75%" }}>
-          <LinearProgress
-            color="success"
-            variant="determinate"
-            value={(repetitionProgress / totalRepetition) * 100}
-          />
+      </Grid>
+      <Grid item sx={{ alignContent: "center" }} xs={6}>
+        <Typography
+          color="black"
+          justifyContent="center"
+          display="flex"
+          marginBottom="4px"
+          fontSize="20px"
+        >
+          {repetitionProgress + "/" + totalRepetition}
+        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            marginBottom: "4px",
+          }}
+        >
+          <Box sx={{ width: "75%" }}>
+            <LinearProgress
+              color="success"
+              variant="determinate"
+              value={(repetitionProgress / totalRepetition) * 100}
+            />
+          </Box>
         </Box>
-      </Box>
-    </Box>
+      </Grid>
+    </Grid>
   );
 }

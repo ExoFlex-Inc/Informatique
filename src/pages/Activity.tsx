@@ -1,5 +1,5 @@
 import UserSearchBar from "../components/UserSearchBar.tsx";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import LineChart from "../components/LineChart.tsx";
 import { FilterAlt } from "@mui/icons-material";
 import GraphFilters from "../components/GraphFilters.tsx";
@@ -18,7 +18,6 @@ import {
   MenuItem,
   IconButton,
 } from "@mui/material";
-import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import { useRelations } from "../hooks/use-relations.ts";
 import Loading from "../components/Loading.tsx";
 
@@ -118,7 +117,7 @@ function onGraphTypeChange(
 
 export default function Activity() {
   const [selectedUser, setSelectedUser] = useState<any[]>([]);
-  const [isGraphFilterOpen, setIsGraphFilterOpen] = useState(false);
+  const [isGraphFilterOpen, setIsGraphFilterOpen] = useState<boolean>(false);
   const [graphType, setGraphType] = useState("Amplitude");
   const [date, setDate] = useState<DateRange | null>();
   const [data, setData] = useState<dataStructure[]>([]);
@@ -133,6 +132,9 @@ export default function Activity() {
   const { relations, isLoading } = useRelations();
   const [availableSessions, setAvailableSessions] = useState<string[]>([]);
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -333,6 +335,24 @@ export default function Activity() {
       setAverageData(null);
     }
   }, [data, graphType]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        setIsGraphFilterOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownRef, buttonRef]);
 
   function getAverage(data: dataStructure[], graphType: string) {
     // Helper function to calculate the average
@@ -539,9 +559,11 @@ export default function Activity() {
         maxWidth: "80rem",
         marginLeft: "auto",
         marginRight: "auto",
+        paddingTop: "6px",
         display: "flex",
         flexDirection: "column",
         height: "calc(100vh - 100px)",
+        overflow: "auto",
       }}
     >
       <div className="flex flex-wrap items-center gap-4">
@@ -577,15 +599,19 @@ export default function Activity() {
           )}
       </div>
       <div className="relative flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <IconButton onClick={() => setIsGraphFilterOpen(!isGraphFilterOpen)}>
+        <div className="flex items-center ml-4 gap-2">
+          <IconButton
+            ref={buttonRef}
+            onClick={() => setIsGraphFilterOpen(!isGraphFilterOpen)}
+          >
             <FilterAlt />
           </IconButton>
           <DateRangePicker onChange={setDate} />
 
           {isGraphFilterOpen && (
-            <div className="absolute top-full mt-2 left-0 z-50">
+            <div className="absolute top-full ml-4 mt-2 left-0 z-50">
               <GraphFilters
+                dropdownRef={dropdownRef}
                 setGraphType={setGraphType}
                 setIsGraphFilterOpen={setIsGraphFilterOpen}
               />
@@ -602,34 +628,32 @@ export default function Activity() {
       >
         <Typography variant="h6">{graphType}</Typography>
       </Box>
-      <CustomScrollbar>
-        <Box paddingX={15} sx={{ flexBasis: "100%", marginBottom: 2 }}>
-          <LineChart type="activity" chartData={dataset1} title={title1} />
-        </Box>
-        <ThemeProvider theme={createTheme({ palette: { mode: "light" } })}>
-          <Box className="flex justify-center gap-4">
-            <Paper className="p-4 w-1/3">
-              <Typography variant="h6" className="mb-2 text-black">
-                Missing exercise days
-              </Typography>
-              <div className="flex flex-wrap gap-2">
-                {missingDates.map((date) => (
-                  <Typography key={date} variant="body2" className="text-black">
-                    {date}
-                  </Typography>
-                ))}
-              </div>
-            </Paper>
+      <Box paddingX={15} sx={{ marginBottom: 2 }}>
+        <LineChart type="activity" chartData={dataset1} title={title1} />
+      </Box>
+      <ThemeProvider theme={createTheme({ palette: { mode: "light" } })}>
+        <Box className="flex justify-center gap-4">
+          <Paper className="p-4 w-1/3">
+            <Typography variant="h6" className="mb-2 text-black">
+              Missing exercise days
+            </Typography>
+            <div className="flex flex-wrap gap-2">
+              {missingDates.map((date) => (
+                <Typography key={date} variant="body2" className="text-black">
+                  {date}
+                </Typography>
+              ))}
+            </div>
+          </Paper>
 
-            <Paper className="p-4 w-1/3">
-              <Typography variant="h6" className="mb-2 text-black">
-                {getAverageTitle(graphType)}
-              </Typography>
-              {renderAverageData(averageData, graphType)}
-            </Paper>
-          </Box>
-        </ThemeProvider>
-      </CustomScrollbar>
+          <Paper className="p-4 w-1/3">
+            <Typography variant="h6" className="mb-2 text-black">
+              {getAverageTitle(graphType)}
+            </Typography>
+            {renderAverageData(averageData, graphType)}
+          </Paper>
+        </Box>
+      </ThemeProvider>
       {isLoading && <Loading />}
     </Box>
   );

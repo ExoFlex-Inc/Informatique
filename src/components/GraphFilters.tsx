@@ -5,21 +5,24 @@ import {
   ListItemText,
   Box,
   Paper,
+  useTheme,
 } from "@mui/material";
 import React from "react";
-import useDropdown from "../hooks/use-dropdown.ts";
+import { tokens } from "../hooks/theme";
 
 interface GraphFiltersProps {
   setGraphType: React.Dispatch<React.SetStateAction<string>>;
   setIsGraphFilterOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  dropdownRef: React.RefObject<HTMLDivElement>;
 }
 
 const GraphFilters: React.FC<GraphFiltersProps> = ({
   setGraphType,
   setIsGraphFilterOpen,
+  dropdownRef,
 }) => {
-  const dropdownRef = useDropdown(setIsGraphFilterOpen);
-
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
   function changeGraphType(type: string) {
     setGraphType(type);
     setIsGraphFilterOpen(false);
@@ -35,7 +38,12 @@ const GraphFilters: React.FC<GraphFiltersProps> = ({
         position: "absolute",
       }}
     >
-      <Paper>
+      <Paper
+        sx={{
+          backgroundColor:
+            theme.palette.mode === "dark" ? colors.primary[400] : "",
+        }}
+      >
         <List className="rounded-md ml-4">
           <ListItem disablePadding>
             <ListItemButton onClick={() => changeGraphType("Amplitude")}>

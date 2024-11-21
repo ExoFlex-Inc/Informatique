@@ -4,19 +4,19 @@ import { usePlan } from "../hooks/use-plan.ts";
 import useStm32 from "../hooks/use-stm32.ts";
 
 import {
-  useMediaQuery,
   useTheme,
   Box,
   Grid,
   Paper,
   IconButton,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import { useUser } from "../hooks/use-user.ts";
 import LineChart from "../components/LineChart.tsx";
 import { tokens } from "../hooks/theme.ts";
 import ExerciseOverviewWidget from "../components/ExerciseOverviewWidget.tsx";
 import RatingPopUp from "../components/RatingPopUp.tsx";
-import CustomScrollbar from "../components/CustomScrollbars.tsx";
 import ManualControl from "../components/ManualControl.tsx";
 import Button from "../components/Button.tsx";
 import { Pause, PlayArrow, Refresh, Stop, Home } from "@mui/icons-material";
@@ -125,6 +125,12 @@ export default function HMI() {
       },
     ],
   });
+  const [latestMotorData, setLatestMotorData] = useState({
+    motor1: { x: 0, position: 0, torque: 0, current: 0 },
+    motor2: { x: 0, position: 0, torque: 0, current: 0 },
+    motor3: { x: 0, position: 0, torque: 0, current: 0 },
+  });
+  const [graphDataType, setGraphDataType] = useState("position");
 
   useEffect(() => {
     if (
@@ -329,6 +335,73 @@ export default function HMI() {
     }
   }, [painScale]);
 
+  useEffect(() => {
+    if (
+      stm32Data &&
+      stm32Data.Positions &&
+      stm32Data.Torques &&
+      stm32Data.Current
+    ) {
+      if (
+        stm32Data &&
+        stm32Data.Positions &&
+        stm32Data.Torques &&
+        stm32Data.Current
+      ) {
+        const currentTime = Date.now();
+        setLatestMotorData({
+          motor1: {
+            x: currentTime,
+            position: stm32Data.Positions[0] ?? 0,
+            torque: stm32Data.Torques[0] ?? 0,
+            current: stm32Data.Current[0] ?? 0,
+          },
+          motor2: {
+            x: currentTime,
+            position: stm32Data.Positions[1] ?? 0,
+            torque: stm32Data.Torques[1] ?? 0,
+            current: stm32Data.Current[1] ?? 0,
+          },
+          motor3: {
+            x: currentTime,
+            position: stm32Data.Positions[2] ?? 0,
+            torque: stm32Data.Torques[2] ?? 0,
+            current: stm32Data.Current[2] ?? 0,
+          },
+        });
+      }
+    }
+  }, [stm32Data]);
+
+  const getChartData = () => ({
+    datasets: [
+      {
+        data: [
+          {
+            x: latestMotorData.motor1.x,
+            y: latestMotorData.motor1[graphDataType],
+          },
+        ],
+      },
+      {
+        data: [
+          {
+            x: latestMotorData.motor2.x,
+            y: latestMotorData.motor2[graphDataType],
+          },
+        ],
+      },
+      {
+        data: [
+          {
+            x: latestMotorData.motor3.x,
+            y: latestMotorData.motor3[graphDataType],
+          },
+        ],
+      },
+    ],
+  });
+
   const exportCsv = async () => {
     try {
       if (!recordCsv) {
@@ -403,146 +476,186 @@ export default function HMI() {
   };
 
   return (
-    <div className="flex flex-col custom-height">
-      <CustomScrollbar>
-        <Box>
-          <Grid
-            paddingX={12}
-            container
-            spacing={2}
-            sx={{ justifyContent: "center", alignItems: "stretch" }}
-          >
-            <Grid item xs={12}>
-              <Box
-                gap={4}
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  mb: 2,
-                }}
-              >
-                {stm32Data?.AutoState == "WaitingForPlan" ||
-                stm32Data?.AutoState == "Ready" ? (
-                  <Button
-                    mainColor="#2fb73d"
-                    hoverColor="#33a63f"
-                    mode="Auto"
-                    action="Control"
-                    content="Start"
-                    icon={<PlayArrow />}
-                    socket={socket}
-                  />
-                ) : (
-                  <Button
-                    mainColor="#f5d50b"
-                    hoverColor="#dcc21d"
-                    mode="Auto"
-                    action="Control"
-                    content="Pause"
-                    icon={<Pause />}
-                    socket={socket}
-                  />
-                )}
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "calc(100vh - 100px)",
+      }}
+    >
+      <Box>
+        <Grid
+          container
+          spacing={2}
+          sx={{ justifyContent: "center", alignItems: "stretch" }}
+        >
+          <Grid item xs={12}>
+            <Box
+              gap={4}
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                mb: 1,
+              }}
+            >
+              {stm32Data?.AutoState == "WaitingForPlan" ||
+              stm32Data?.AutoState == "Ready" ? (
                 <Button
-                  icon={<Stop />}
+                  mainColor="#2fb73d"
+                  hoverColor="#33a63f"
                   mode="Auto"
                   action="Control"
-                  content="Stop"
-                  mainColor="#e41b1b"
-                  hoverColor="#cb2626"
-                  disabled={
-                    !stm32Data ||
-                    errorFromStm32 ||
-                    stm32Data?.AutoState === "Ready"
-                  }
+                  content="Start"
+                  icon={<PlayArrow />}
                   socket={socket}
                 />
+              ) : (
                 <Button
-                  mainColor="#1ec6e1"
-                  hoverColor="#2aa6ba"
-                  icon={<Home />}
-                  disabled={
-                    stm32Data?.AutoState !== "Ready" &&
-                    stm32Data?.AutoState !== "WaitingForPlan"
-                  }
-                  mode="Homing"
+                  mainColor="#f5d50b"
+                  hoverColor="#dcc21d"
+                  mode="Auto"
+                  action="Control"
+                  content="Pause"
+                  icon={<Pause />}
                   socket={socket}
                 />
-                <Button
-                  mainColor="#f1910f"
-                  hoverColor="#d08622"
-                  icon={<Refresh />}
-                  disabled={!stm32Data?.ErrorCode}
-                  mode="Reset"
-                  socket={socket}
-                />
-
-                <IconButton
-                  onClick={(e) => {
-                    exportCsv();
-                  }}
-                  onTouchStart={(e) => {
-                    exportCsv();
-                  }}
-                  size="large"
-                  sx={{
-                    backgroundColor: "blueAccent.main",
-                    "&:hover": {
-                      backgroundColor: "blueAccent.hover",
-                    },
-                  }}
-                  disabled={!stm32Data?.ErrorCode}
-                >
-                  {recordCsv ? (
-                    <RadioButtonUncheckedIcon />
-                  ) : (
-                    <RadioButtonCheckedIcon />
-                  )}
-                </IconButton>
-              </Box>
-              <LineChart
-                chartData={chartData}
-                type="line"
-                title="Exercise Progression"
+              )}
+              <Button
+                icon={<Stop />}
+                mode="Auto"
+                action="Control"
+                content="Stop"
+                mainColor="#e41b1b"
+                hoverColor="#cb2626"
+                disabled={
+                  !stm32Data ||
+                  errorFromStm32 ||
+                  stm32Data?.AutoState === "Ready"
+                }
+                socket={socket}
               />
-            </Grid>
-            <Grid item>
-              <Paper
-                sx={{
-                  padding: "10px",
-                  backgroundColor: "white",
-                  height: "100%",
+              <Button
+                mainColor="#1ec6e1"
+                hoverColor="#2aa6ba"
+                icon={<Home />}
+                disabled={
+                  stm32Data?.AutoState !== "Ready" &&
+                  stm32Data?.AutoState !== "WaitingForPlan"
+                }
+                mode="Homing"
+                socket={socket}
+              />
+              <Button
+                mainColor="#f1910f"
+                hoverColor="#d08622"
+                icon={<Refresh />}
+                disabled={!stm32Data?.ErrorCode}
+                mode="Reset"
+                socket={socket}
+              />
+
+              <IconButton
+                onClick={(e) => {
+                  exportCsv();
                 }}
+                onTouchStart={(e) => {
+                  exportCsv();
+                }}
+                size="large"
+                sx={{
+                  backgroundColor: "blueAccent.main",
+                  "&:hover": {
+                    backgroundColor: "blueAccent.hover",
+                  },
+                }}
+                disabled={!stm32Data?.ErrorCode}
               >
-                <ProgressionWidget
-                  setOpenDialogPainScale={setOpenDialogPainScale}
-                  stm32Data={stm32Data}
-                  planData={planData}
+                {recordCsv ? (
+                  <RadioButtonUncheckedIcon />
+                ) : (
+                  <RadioButtonCheckedIcon />
+                )}
+              </IconButton>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={graphDataType === "position"}
+                    onChange={() => setGraphDataType("position")}
+                  />
+                }
+                label="Position"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={graphDataType === "torque"}
+                    onChange={() => setGraphDataType("torque")}
+                  />
+                }
+                label="Torque"
+              />
+            </Box>
+            <Grid
+              container
+              spacing={2}
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                padding: 2,
+              }}
+            >
+              <Grid
+                item
+                xs={12}
+                sm={10}
+                md={8}
+                sx={{ gridRow: "span 2", height: "100%" }}
+              >
+                <LineChart
+                  chartData={getChartData()}
+                  type="realtime"
+                  title="Motor Data"
                 />
-              </Paper>
-            </Grid>
-            <Grid item>
-              <Paper sx={{ height: "100%", backgroundColor: "white" }}>
-                <ExerciseOverviewWidget
-                  stm32Data={stm32Data}
-                  planData={planData}
-                />
-              </Paper>
+              </Grid>
+              <Grid xs={4} item>
+                <Paper
+                  sx={{
+                    padding: "10px",
+                    backgroundColor: "white",
+                    marginBottom: 1,
+                  }}
+                >
+                  <ProgressionWidget
+                    setOpenDialogPainScale={setOpenDialogPainScale}
+                    stm32Data={stm32Data}
+                    planData={planData}
+                  />
+                </Paper>
+                <Paper sx={{ backgroundColor: "white" }}>
+                  <ExerciseOverviewWidget
+                    stm32Data={stm32Data}
+                    planData={planData}
+                  />
+                </Paper>
+              </Grid>
             </Grid>
           </Grid>
-        </Box>
-      </CustomScrollbar>
+        </Grid>
+      </Box>
       <RatingPopUp
         setOpenDialogPainScale={setOpenDialogPainScale}
         setPainScale={setPainScale}
         openDialogPainScale={openDialogPainScale}
       />
-      <ManualControl
-        errorFromStm32={errorFromStm32}
-        stm32Data={stm32Data ?? null}
-        socket={socket}
-      />
-    </div>
+      <Box sx={{ height: "100%", alignContent: "end" }}>
+        <ManualControl
+          errorFromStm32={errorFromStm32}
+          stm32Data={stm32Data ?? null}
+          socket={socket}
+        />
+      </Box>
+    </Box>
   );
 }

@@ -187,6 +187,15 @@ export const themeSettings = (mode: string) => {
           }),
     },
     components: {
+      MuiDrawer: {
+        styleOverrides: {
+          root: {
+            "& .MuiDrawer-paper": {
+              backgroundColor: colors.primary[400],
+            },
+          },
+        },
+      },
       MuiCheckbox: {
         styleOverrides: {
           root: {
@@ -197,6 +206,27 @@ export const themeSettings = (mode: string) => {
             "& .MuiSvgIcon-root": {
               fontSize: 28,
             },
+          },
+        },
+      },
+      MuiCssBaseline: {
+        styleOverrides: {
+          "::-webkit-scrollbar": {
+            width: "10px",
+            height: "10px",
+          },
+          "::-webkit-scrollbar-track": {
+            backgroundColor: mode === "dark" ? "#2B5BB6" : "#7da9f7",
+            borderRadius: "10px",
+            margin: "5px",
+          },
+          "::-webkit-scrollbar-thumb": {
+            backgroundColor: mode === "dark" ? "#2BB673" : "#9bf7cb",
+            borderRadius: "10px",
+            margin: "5px",
+          },
+          "::-webkit-scrollbar-thumb:hover": {
+            backgroundColor: mode === "dark" ? "#37bf7d" : "#8df1c2",
           },
         },
       },

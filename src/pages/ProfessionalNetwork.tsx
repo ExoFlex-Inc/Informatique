@@ -9,7 +9,6 @@ import Loading from "../components/Loading.tsx";
 import { useRelations } from "../hooks/use-relations.ts";
 import { useFetchPendingRelations } from "../hooks/use-relations.ts";
 import { useUser } from "../hooks/use-user.ts";
-import CustomScrollbar from "../components/CustomScrollbars.tsx";
 
 const ProfessionalNetwork = () => {
   const navigate = useNavigate();
@@ -21,6 +20,7 @@ const ProfessionalNetwork = () => {
 
   const isLoading = adminLoading || relationsLoading || notificationsLoading;
   const [filteredUsers, setFilteredUsers] = useState(admins);
+  const [filteredSearchBarUsers, setFilteredSearchBarUsers] = useState(admins);
 
   useEffect(() => {
     let filteredAdmin = admins;
@@ -40,15 +40,16 @@ const ProfessionalNetwork = () => {
       });
     }
     setFilteredUsers(filteredAdmin);
+    setFilteredSearchBarUsers(filteredAdmin);
   }, [admins, notifications, relations]);
 
   return (
-    <div className="custom-height relative flex flex-col">
+    <div className="custom-height relative flex flex-col m-6">
       <div className="flex items-center gap-4 relative">
         <UserSearchBar
           sx={{ width: 500 }}
           setSearchQuery={setFilteredUsers}
-          users={admins}
+          users={filteredSearchBarUsers}
         />
 
         {user?.permissions == "dev" || user?.permissions == "client" ? (
@@ -67,12 +68,10 @@ const ProfessionalNetwork = () => {
           true
         )}
       </div>
-      <CustomScrollbar>
-        <UserList
-          listOfUsers={filteredUsers}
-          setFilteredUsers={setFilteredUsers}
-        />
-      </CustomScrollbar>
+      <UserList
+        listOfUsers={filteredUsers}
+        setFilteredUsers={setFilteredUsers}
+      />
       {isLoading && <Loading />}
     </div>
   );

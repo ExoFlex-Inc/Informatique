@@ -5,7 +5,6 @@ import { useStats } from "../hooks/use-stats";
 import Loading from "../components/Loading";
 import Leaderboard from "../components/Leaderboard";
 import { useUser } from "../hooks/use-user";
-import CustomScrollbar from "../components/CustomScrollbars";
 
 export default function Dashboard() {
   const { user } = useUser();
@@ -58,26 +57,25 @@ export default function Dashboard() {
         height: "calc(100vh - 100px)",
         display: "flex",
         flexDirection: "column",
+        overflowY: "auto",
       }}
     >
-      <CustomScrollbar>
-        {hasPermissions && (
-          <Container maxWidth="lg" sx={{ mt: 2, mb: 2 }}>
-            <Grid container spacing={3}>
-              {stats && (
-                <StretchStreak
-                  currentStreak={stats.current_streak}
-                  longestStreak={stats.longest_streak}
-                />
-              )}
-              <Leaderboard
-                users={users}
-                currentUser={users?.find((u) => u.user_id === user.user_id)}
+      {hasPermissions && (
+        <Container maxWidth="lg">
+          <Grid container spacing={3}>
+            {stats && (
+              <StretchStreak
+                currentStreak={stats.current_streak}
+                longestStreak={stats.longest_streak}
               />
-            </Grid>
-          </Container>
-        )}
-      </CustomScrollbar>
+            )}
+            <Leaderboard
+              users={users}
+              currentUser={users?.find((u) => u.user_id === user.user_id)}
+            />
+          </Grid>
+        </Container>
+      )}
     </Box>
   );
 }
