@@ -48,9 +48,8 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Create a user and add to the dialout group for serial port access
-RUN useradd -m serialuser \
-    && usermod -aG dialout serialuser \
-    && chown -R serialuser:serialuser /app
+RUN usermod -aG dialout serialuser \
+    && chmod 666 /dev/ttyACM0
 
 # Switch to the created user
 USER serialuser
