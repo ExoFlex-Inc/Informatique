@@ -18,11 +18,14 @@
 #define MMOT_MOT3_MIN_POS -10
 #define MMOT_MOT3_MAX_POS 10
 
+#define MMOT_MAX_TEMP 60
+
 // Error Codes
 #define ERROR_SET_ORIGINES_MOTORS   -1
 #define ERROR_CAN_CONNECTION_MOTORS -2
 #define ERROR_CAN_MAX_MSG_DELAY     -3
 #define ERROR_MOTOR_MINMAX          -4
+#define ERROR_MOTOR_TEMP            -5
 
 #define MMOT_DT_MS 10
 #define MMOT_DT_S  MMOT_DT_MS / 1000
@@ -127,6 +130,8 @@ void ManagerMotor_DisableMotorsMovement();
 void ManagerMotor_VerifyMotorsConnection();
 void ManagerMotor_VerifyMotorsState();
 bool ManagerMotor_VerifyMotorState(uint8_t id);
+void ManagerMotor_VerifyMotorsTemp();
+bool ManagerMotor_VerifyMotorTemp(uint8_t id);
 
 void   ManagerMotor_ApplyOriginShift(uint8_t id);
 int8_t ManagerMotor_GetMotorDirection(uint8_t id);
@@ -251,6 +256,8 @@ void ManagerMotor_Task()
             ManagerMotor_DisableMotorsMovement();
             break;
         }
+
+        ManagerMotor_VerifyMotorsTemp();
         timerMs = HAL_GetTick();
     }
 }
@@ -881,6 +888,43 @@ bool ManagerMotor_VerifyMotorState(uint8_t id)
     }
 
     return verif;
+}
+
+void ManagerMotor_VerifyMotorsTemp()
+{
+	bool verifM1 = true;
+	bool verifM2 = true;
+	bool verifM3 = true;
+
+	#ifndef MMOT_DEV_MOTOR_1_DISABLE
+		verifM1 = ManagerMotor_VerifyMotorTemp(MMOT_MOTOR_1);
+	#endif
+
+	#ifndef MMOT_DEV_MOTOR_2_DISABLE
+		verifM2 = ManagerMotor_VerifyMotorTemp(MMOT_MOTOR_2);
+	#endif
+
+	#ifndef MMOT_DEV_MOTOR_3_DISABLE
+		verifM3 = ManagerMotor_VerifyMotorTemp(MMOT_MOTOR_3);
+	#endif
+
+	if (!verifM1 || !verifM2 || !verifM3)
+	{
+		managerMotor.state     = MMOT_STATE_ERROR;
+		managerMotor.errorCode = ERROR_MOTOR_TEMP;
+	}
+}
+
+bool ManagerMotor_VerifyMotorTemp(uint8_t id)
+{
+	bool verif = true;
+	if (motors[id].motor.temp >= MMOT_MAX_TEMP)
+	{
+		ManagerError_SetError(ERROR_13_MAX_TEMP);
+        ManagerMotor_SetMotorError(id);
+        verif = false;
+	}
+	return verif;
 }
 
 void ManagerMotor_SecurityPassed()
