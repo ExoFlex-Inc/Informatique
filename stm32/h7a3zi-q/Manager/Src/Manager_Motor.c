@@ -736,7 +736,7 @@ void ManagerMotor_MovePosSpeed(uint8_t id, float pos, float speed)
     motors[id].goalSpeed    = fabsf(speed);
     motors[id].goalTorque   = 0;
     motors[id].cmdPosition  = motors[id].motor.position;
-    motors[id].cmdSpeed     = motors[id].motor.velocity;
+    motors[id].cmdSpeed     = 0;
     motors[id].cmdTorque    = 0;
     motors[id].goalReady    = true;
 }
