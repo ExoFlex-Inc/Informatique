@@ -51,7 +51,9 @@
 #define MMOT_CONTROL_POS_SPEED        2
 #define MMOT_CONTROL_POS_SPEED_TORQUE 3
 
-#define MMOT_ACC 0.5f //rad/s2 -> 0 à 0.2 rad/s en 100ms
+#define MMOT_MOTOR1_ACC 1.0f
+#define MMOT_MOTOR2_ACC 1.0f
+#define MMOT_MOTOR3_ACC 0.1f
 
 #define MMOT_MIN_SPEED_CMD  0.05
 #define MMOT_MAX_SPEED_CMD  2
@@ -93,6 +95,7 @@ typedef struct
     bool    reset;
     bool    securityPass;
     bool    setupFirstPass;
+    float   acc[MMOT_MOTOR_NBR];
 
 } managerMotor_t;
 
@@ -223,6 +226,12 @@ void ManagerMotor_Reset()
     managerMotor.securityPass   = false;
     managerMotor.setupFirstPass = true;
     managerMotor.state          = MMOT_STATE_WAITING_SECURITY;
+
+
+    managerMotor.acc[MMOT_MOTOR_1] = MMOT_MOTOR1_ACC;
+    managerMotor.acc[MMOT_MOTOR_2] = MMOT_MOTOR2_ACC;
+    managerMotor.acc[MMOT_MOTOR_3] = MMOT_MOTOR3_ACC;
+
 
     torqueMaxKp = 10.0;
     torqueMinKp = 3.0;
@@ -499,7 +508,7 @@ void ManagerMotor_NextCmdPosSpeed(uint8_t id)
     {
         int8_t dir = ManagerMotor_GetMotorDirection(id);
 
-        float add = dir * MMOT_ACC * MMOT_DT_S;
+        float add = dir * managerMotor.acc[id] * MMOT_DT_S;
 
         motors[id].cmdSpeed = motors[id].cmdSpeed + add;
 
@@ -711,7 +720,7 @@ void ManagerMotor_MoveSpeed(uint8_t id, float speed)
     motors[id].goalSpeed    = speed;
     motors[id].goalTorque   = 0;
     motors[id].cmdPosition  = motors[id].motor.position;
-    motors[id].cmdSpeed     = motors[id].motor.velocity;
+    motors[id].cmdSpeed     = 0;
     motors[id].cmdTorque    = 0;
 }
 
