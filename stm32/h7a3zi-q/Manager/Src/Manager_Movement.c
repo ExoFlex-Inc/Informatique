@@ -663,7 +663,14 @@ void ManagerMovement_SetFirstPos(uint8_t mvtNbr)
         }
         else if (movements[i + movementIdx] == MMOV_EVERSION)
         {
-            firstPos[i] = motorsData[MMOT_MOTOR_2]->position;
+        	if(managerMovement.currentLegSide == MMOV_LEG_IS_LEFT)
+        	{
+        		firstPos[i] = -motorsData[MMOT_MOTOR_2]->position;
+        	}
+        	else if (managerMovement.currentLegSide == MMOV_LEG_IS_RIGHT)
+        	{
+        		firstPos[i] = motorsData[MMOT_MOTOR_2]->position;
+        	}
         }
         else if (movements[i + movementIdx] == MMOV_EXTENSION)
         {
