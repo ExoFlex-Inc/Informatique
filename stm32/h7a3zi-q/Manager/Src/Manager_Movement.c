@@ -272,10 +272,7 @@ void ManagerMovement_Manual()
 {
     if (PeriphUartRingBuf_GetRxTimerDelay() > MANUAL_MAX_TRANSMIT_TIME)
     {
-        ManagerMotor_StopManualMovement(MMOT_MOTOR_1);
-        ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
-        ManagerMotor_StopManualMovement(MMOT_MOTOR_3);
-
+    	ManagerMovement_StopMotorsCmd();
         PeriphSolenoid_StopPWMs();
     }
 }
