@@ -27,8 +27,8 @@
 #define ERROR_MOTOR_MINMAX          -4
 #define ERROR_MOTOR_TEMP            -5
 
-#define MMOT_DT_MS 10
-#define MMOT_DT_S  MMOT_DT_MS / 1000
+#define MMOT_DT_MS 10.0f
+#define MMOT_DT_S  MMOT_DT_MS / 1000.0f
 #define MAX_TRY    50  // 500 ms before flagging an error
 
 #define MOTOR_STEP   0.005
@@ -50,6 +50,10 @@
 #define MMOT_CONTROL_SPEED            1
 #define MMOT_CONTROL_POS_SPEED        2
 #define MMOT_CONTROL_POS_SPEED_TORQUE 3
+
+#define MMOT_MOTOR1_ACC 1.0f
+#define MMOT_MOTOR2_ACC 1.0f
+#define MMOT_MOTOR3_ACC 0.1f
 
 #define MMOT_MIN_SPEED_CMD  0.05
 #define MMOT_MAX_SPEED_CMD  2
@@ -91,6 +95,7 @@ typedef struct
     bool    reset;
     bool    securityPass;
     bool    setupFirstPass;
+    float   acc[MMOT_MOTOR_NBR];
 
 } managerMotor_t;
 
@@ -221,6 +226,12 @@ void ManagerMotor_Reset()
     managerMotor.securityPass   = false;
     managerMotor.setupFirstPass = true;
     managerMotor.state          = MMOT_STATE_WAITING_SECURITY;
+
+
+    managerMotor.acc[MMOT_MOTOR_1] = MMOT_MOTOR1_ACC;
+    managerMotor.acc[MMOT_MOTOR_2] = MMOT_MOTOR2_ACC;
+    managerMotor.acc[MMOT_MOTOR_3] = MMOT_MOTOR3_ACC;
+
 
     torqueMaxKp = 10.0;
     torqueMinKp = 3.0;
@@ -495,10 +506,22 @@ void ManagerMotor_NextCmdPosSpeed(uint8_t id)
     // Motor is not at goal
     if (posLeft > GOAL_POS_TOL && motors[id].goalReady)
     {
-        int8_t dir          = ManagerMotor_GetMotorDirection(id);
-        motors[id].cmdSpeed = dir * motors[id].goalSpeed;
-        motors[id].cmdPosition =
-            motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
+        int8_t dir = ManagerMotor_GetMotorDirection(id);
+
+        float add = dir * managerMotor.acc[id] * MMOT_DT_S;
+
+        motors[id].cmdSpeed = motors[id].cmdSpeed + add;
+
+        if (dir == 1 && motors[id].cmdSpeed > dir * motors[id].goalSpeed)
+        {
+        	motors[id].cmdSpeed = dir * motors[id].goalSpeed;
+        }
+        if (dir == -1 && motors[id].cmdSpeed < dir * motors[id].goalSpeed)
+        {
+        	motors[id].cmdSpeed = dir * motors[id].goalSpeed;
+        }
+
+        motors[id].cmdPosition = motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
 
         // Gravity compensation
         if (id == MMOT_MOTOR_3)
@@ -697,7 +720,7 @@ void ManagerMotor_MoveSpeed(uint8_t id, float speed)
     motors[id].goalSpeed    = speed;
     motors[id].goalTorque   = 0;
     motors[id].cmdPosition  = motors[id].motor.position;
-    motors[id].cmdSpeed     = motors[id].motor.velocity;
+    motors[id].cmdSpeed     = 0;
     motors[id].cmdTorque    = 0;
 }
 
@@ -713,7 +736,7 @@ void ManagerMotor_MovePosSpeed(uint8_t id, float pos, float speed)
     motors[id].goalSpeed    = fabsf(speed);
     motors[id].goalTorque   = 0;
     motors[id].cmdPosition  = motors[id].motor.position;
-    motors[id].cmdSpeed     = motors[id].motor.velocity;
+    motors[id].cmdSpeed     = 0;
     motors[id].cmdTorque    = 0;
     motors[id].goalReady    = true;
 }
