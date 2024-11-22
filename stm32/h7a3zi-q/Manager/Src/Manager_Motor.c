@@ -55,6 +55,8 @@
 #define MMOT_MOTOR2_ACC 1.0f
 #define MMOT_MOTOR3_ACC 0.1f
 
+#define MMOT_MAX_POS_OFFSET 0.01
+
 #define MMOT_MIN_SPEED_CMD  0.05
 #define MMOT_MAX_SPEED_CMD  2
 #define MMOT_MAX_TORQUE_CMD 20
@@ -127,6 +129,7 @@ void  ManagerMotor_NextCmdPosSpeedTorque(uint8_t id);
 float ManagerMotor_CalcSpeedFromTorque(float torque, float torqueGoal,
                                        float wMin, float wMax);
 float ManagerMotor_CalcGravityCompensation();
+bool ManagerMotor_CanAddPos(uint8_t id);
 
 void ManagerMotor_SendToMotors();
 void ManagerMotor_DisableMotors();
@@ -521,7 +524,10 @@ void ManagerMotor_NextCmdPosSpeed(uint8_t id)
         	motors[id].cmdSpeed = dir * motors[id].goalSpeed;
         }
 
-        motors[id].cmdPosition = motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
+        if (ManagerMotor_CanAddPos(id))
+        {
+        	 motors[id].cmdPosition = motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
+        }
 
         // Gravity compensation
         if (id == MMOT_MOTOR_3)
@@ -536,6 +542,8 @@ void ManagerMotor_NextCmdPosSpeed(uint8_t id)
         motors[id].goalReady = false;
     }
 }
+
+
 
 void ManagerMotor_NextCmdPosSpeedTorque(uint8_t id)
 {
@@ -563,8 +571,12 @@ void ManagerMotor_NextCmdPosSpeedTorque(uint8_t id)
 
         motors[id].cmdSpeed =
             motors[id].cmdSpeed * alpha + speedFromTorque * dir * (1 - alpha);
-        motors[id].cmdPosition =
-            motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
+
+        if (ManagerMotor_CanAddPos(id))
+        {
+        	motors[id].cmdPosition =
+        	            motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
+        }
 
         // Gravity compensation
         if (id == MMOT_MOTOR_3)
@@ -648,6 +660,29 @@ float ManagerMotor_CalcGravityCompensation()
     }
 
     return MMOT_GR_L * MMOT_GR_M * MMOT_GR_G * tetha;
+}
+
+bool ManagerMotor_CanAddPos(uint8_t id)
+{
+	bool ret = false;
+
+	int8_t dir = ManagerMotor_GetMotorDirection(id);
+
+	if (dir == 1)
+	{
+		if (motors[id].cmdPosition < motors[id].motor.position + MMOT_MAX_POS_OFFSET)
+		{
+			ret = true;
+		}
+	}
+	if (dir == -1)
+	{
+		if (motors[id].cmdPosition > motors[id].motor.position - 0.01)
+		{
+			ret = true;
+		}
+	}
+	return ret;
 }
 
 void ManagerMotor_SendToMotors()
