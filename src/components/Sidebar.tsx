@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-// import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
 import {
   Box,
   IconButton,
@@ -130,12 +129,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
   const colors = tokens(theme.palette.mode);
   const { user } = useUser();
   const isTablet = useMediaQuery("(max-width: 1024px)");
-  const location = useLocation();
-  const page = location.pathname.split("/").pop() || "";
-
   const [open, setOpen] = useState(true);
-  const allAccessPages: string[] = ["/dashboard", "/network", "/hmi"];
-  const adminAndDevPages: string[] = ["/planning", "/activity", "/manual"];
   const drawerWidth = 240;
   const menuItems = [
     {
