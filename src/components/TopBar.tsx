@@ -40,7 +40,7 @@ export default function TopBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error" | "info">(
     "success",
   );
 
@@ -66,7 +66,7 @@ export default function TopBar() {
     event.preventDefault();
 
     setSnackbarMessage("Logging out...");
-    setSnackbarSeverity("success");
+    setSnackbarSeverity("info");
     setSnackbarOpen(true);
 
     try {

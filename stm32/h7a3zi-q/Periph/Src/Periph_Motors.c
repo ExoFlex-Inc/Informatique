@@ -43,6 +43,7 @@ bool PeriphMotors_InitMotor(Motor* pMotor, uint8_t id, uint8_t model,
     }
 
     pMotor->parameters.ratio = ratio;
+    pMotor->temp             = 0;
 
     pMotor->noiseSmallIndex = 0;
     for (uint8_t i = 0; i < NOISE_SMALL_BUF_SIZE; i++)
@@ -201,6 +202,8 @@ void PeriphMotors_ParseMotorState(Motor* pMotor, uint8_t* canData)
         current *= -1;
     }
     pMotor->current = current;
+
+    pMotor->temp = canData[6] - 40;
 }
 
 float PeriphMotors_SumBuf(float* buf, uint8_t size)

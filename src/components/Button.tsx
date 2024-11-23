@@ -151,7 +151,7 @@ const Button: React.FC<ButtonProps> = ({
       | React.TouchEvent<HTMLButtonElement>,
   ) => {
     e.preventDefault(); // Prevent any unintended default behaviors
-    if (action === "Increment") {
+    if (action === "Increment" || action === "Tightening") {
       intervalRef.current = setInterval(
         () => sendingRequests(mode, action, content),
         20,

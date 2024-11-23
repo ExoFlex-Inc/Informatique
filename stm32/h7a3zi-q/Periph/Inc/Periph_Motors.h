@@ -48,6 +48,7 @@ typedef struct
     float   velocity;
     float   torque;
     float   current;
+    float   temp;
 
     float   posBuf[NOISE_SMALL_BUF_SIZE];
     float   velBuf[NOISE_BIG_BUF_SIZE];

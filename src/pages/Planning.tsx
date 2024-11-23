@@ -19,9 +19,11 @@ import Loading from "../components/Loading.tsx";
 import type { Side } from "../components/ToggleSide.tsx";
 import ToggleSide from "../components/ToggleSide.tsx";
 import { useQueryClient } from "@tanstack/react-query";
+import { useUser } from "../hooks/use-user.ts";
 
 export default function Planning() {
   const [selectedUser, setSelectedUser] = useState<any[]>([]);
+  const { user } = useUser();
   const [isDisabled, setIsDisabled] = useState(true);
   const [addExerciseDisable, setAddExerciseDisable] = useState(true);
   const [side, setSide] = useState<Side>("Left");
@@ -113,6 +115,7 @@ export default function Planning() {
       });
 
       if (response.ok) {
+        await sendInvitation();
         console.log("Plan pushed to Supabase");
         setSnackbarMessage("Plan and limits saved successfully.");
         setSnackbarSeverity("success");
@@ -128,6 +131,35 @@ export default function Planning() {
       setSnackbarMessage("Error saving plan to Supabase.");
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
+    }
+  };
+
+
+  const sendInvitation = async () => {
+    try {
+
+      const response = await fetch("http://localhost:3001/notification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          sender_id: user?.user_id,
+          receiver_id: selectedUser[0].user_id,
+          user_name: `${user?.first_name} ${user?.last_name}`,
+          image_url: user?.avatar_url,
+          type: "plan",
+          message: "modified your stretch plan",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to send invitation: ${response.statusText}`);
+      }
+
+    } catch (error) {
+      console.error("Error sending invitation:", error);
     }
   };
 
