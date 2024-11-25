@@ -34,7 +34,7 @@ import Login from "./pages/Login.tsx";
 import Loading from "./components/Loading.tsx";
 import ErrorBoundary from "./components/ErrorBoundary.tsx";
 import { useUser } from "./hooks/use-user.ts";
-import { useEffect, useState } from "react";
+import { useEffect,useRef, useState } from "react";
 import UpdateWidget from "./components/UpdateWidget";
 
 // Create a query client with default options
@@ -65,6 +65,97 @@ const localStoragePersister = createSyncStoragePersister({
 //     throw new Error("Update failed");
 //   }
 // };
+
+import { createContext, useContext } from 'react';
+
+const WebSocketContext = createContext<{
+  isReconnecting: boolean;
+  lastReconnectAttempt: number;
+}>({
+  isReconnecting: false,
+  lastReconnectAttempt: 0,
+});
+
+function WebSocketProvider({ children }: { children: React.ReactNode }) {
+  const [isReconnecting, setIsReconnecting] = useState(false);
+  const [lastReconnectAttempt, setLastReconnectAttempt] = useState(0);
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectAttemptRef = useRef(0);
+  const maxReconnectAttempts = 50;
+
+  useEffect(() => {
+    const connectWebSocket = () => {
+      if (reconnectAttemptRef.current >= maxReconnectAttempts) {
+        console.error('Failed to connect to server after maximum attempts');
+        return;
+      }
+
+      setIsReconnecting(true);
+      const ws = new WebSocket('ws://localhost:8080');
+      wsRef.current = ws;
+
+      ws.onopen = () => {
+        console.log('WebSocket connected');
+        setIsReconnecting(false);
+        reconnectAttemptRef.current = 0;
+        setLastReconnectAttempt(0);
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'SERVER_STATUS' && data.status === 'READY') {
+            console.log('Refresh page to load new version');
+            // Clear react-query cache before reload to ensure fresh data
+            queryClient.clear();
+            // Add a small delay to ensure cache is cleared
+            setTimeout(() => {
+              window.location.href=window.location.href;
+            }, 3000);
+          }
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error);
+        }
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket disconnected');
+        setIsReconnecting(true);
+        reconnectAttemptRef.current++;
+        setLastReconnectAttempt(reconnectAttemptRef.current);
+        
+        const currentWs = wsRef.current;
+        if (currentWs) {
+          currentWs.close();
+          wsRef.current = null;
+        }
+        
+        setTimeout(connectWebSocket, 2000);
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        setIsReconnecting(true);
+      };
+    };
+
+    connectWebSocket();
+
+    return () => {
+      const ws = wsRef.current;
+      if (ws) {
+        ws.close();
+        wsRef.current = null;
+      }
+    };
+  }, []);
+
+  return (
+    <WebSocketContext.Provider value={{ isReconnecting, lastReconnectAttempt }}>
+      {children}
+    </WebSocketContext.Provider>
+  );
+}
 
 // Create the router for your app
 const router = createBrowserRouter(
@@ -158,34 +249,6 @@ function AppLayout() {
 
 function App() {
   const [theme, colorMode] = useMode();
-  useEffect(() => {
-    const ws = new WebSocket('ws://localhost:8080');
-
-    ws.onopen = () => {
-        console.log('WebSocket connected');
-    };
-
-    let reloadTimeout;
-    ws.onclose = () => {
-        console.log('WebSocket disconnected');
-        if (!reloadTimeout) {
-            reloadTimeout = setTimeout(() => {
-                console.log('Refreshing page...');
-                window.location.reload();
-            }, 3000);
-        }
-    };
-
-    ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-    };
-
-    return () => {
-        clearTimeout(reloadTimeout);
-        ws.close();
-    };
-}, []);
-
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
@@ -194,12 +257,14 @@ function App() {
           client={queryClient}
           persistOptions={{ persister: localStoragePersister }}
         >
-          <ErrorBoundary>
-            <div className="app">
-              <RouterProvider router={router} />
-            </div>
-          </ErrorBoundary>
-          <ReactQueryDevtools initialIsOpen={false} />
+          <WebSocketProvider>
+            <ErrorBoundary>
+              <div className="app">
+                <RouterProvider router={router} />
+              </div>
+            </ErrorBoundary>
+            <ReactQueryDevtools initialIsOpen={false} />
+          </WebSocketProvider>
         </PersistQueryClientProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>
