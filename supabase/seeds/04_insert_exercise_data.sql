@@ -6,13 +6,18 @@ DECLARE
     exercise_data JSONB;
     rated_pain INTEGER;
     repetitions_done INTEGER;
+    dev_user_id UUID := '5e7f65da-6877-4bec-87b8-8abe8e90587c';
 BEGIN
-    FOR user_record IN SELECT id FROM auth.users WHERE role = 'authenticated' LOOP
+    -- Loop through users excluding the dev user
+    FOR user_record IN SELECT id 
+                       FROM auth.users 
+                       WHERE role = 'authenticated' 
+                         AND id != dev_user_id LOOP
         FOR j IN 1..50 LOOP
             repetitions_done := round(random() * 10);
 
             exercise_data := jsonb_build_object(
-                'recorded_date', to_char(base_date + (j * INTERVAL '1 day'), 'YYYY-MM-DD, HH24:MI:SS TZ'),
+                'recorded_date', to_char((base_date + (j * INTERVAL '1 day')) AT TIME ZONE 'EST', 'YYYY-MM-DD, HH24:MI:SS "EST"'), -- TODO: Make it work for any timezone
                 'angles', jsonb_build_object(
                     'dorsiflexion', ARRAY[
                         round((random() * 90 - 45)::numeric, 2), 

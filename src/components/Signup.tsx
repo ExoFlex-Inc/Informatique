@@ -6,6 +6,7 @@ import {
   Box,
   IconButton,
   InputAdornment,
+  Typography,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
@@ -22,6 +23,8 @@ export default function Signup({ onClose }: SignupProps) {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordsMatch, setPasswordsMatch] = useState(true);
+  const [passwordValid, setPasswordValid] = useState(true);
 
   const handleClickShowPassword = () => {
     setShowPassword((show) => !show);
@@ -31,12 +34,26 @@ export default function Signup({ onClose }: SignupProps) {
     setShowConfirmPassword((show) => !show);
   };
 
+  const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+  const handlePasswordChange = (value: string) => {
+    setPassword(value);
+    setPasswordsMatch(value === confirmPassword);
+    setPasswordValid(passwordRegex.test(value));
+  };
+
+  const handleConfirmPasswordChange = (value: string) => {
+    setConfirmPassword(value);
+    setPasswordsMatch(password === value);
+  };
+
   async function handleSignUp(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (password !== confirmPassword) {
-      alert("Passwords do not match");
+
+    if (!passwordsMatch || !passwordValid) {
       return;
     }
+
     const response = await fetch("http://localhost:3001/auth/signup", {
       method: "POST",
       headers: {
@@ -56,7 +73,7 @@ export default function Signup({ onClose }: SignupProps) {
     const data = await response.json();
     if (response.ok) {
       alert(
-        "Sign-up successful! Please check your email to verify your account.",
+        "Sign-up successful! Please check your email to verify your account."
       );
       if (onClose) onClose();
     } else {
@@ -148,7 +165,7 @@ export default function Signup({ onClose }: SignupProps) {
             id="password"
             autoComplete="new-password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => handlePasswordChange(e.target.value)}
             sx={textFieldSx}
             InputProps={{
               endAdornment: (
@@ -164,6 +181,17 @@ export default function Signup({ onClose }: SignupProps) {
               ),
             }}
           />
+          {!passwordValid && (
+            <Typography
+              variant="body2"
+              color="error"
+              sx={{ mt: 1, textAlign: "center" }}
+            >
+              Password must be at least 8 characters long, include one uppercase
+              letter, one lowercase letter, one number, and one special
+              character.
+            </Typography>
+          )}
           <TextField
             margin="normal"
             required
@@ -174,7 +202,7 @@ export default function Signup({ onClose }: SignupProps) {
             id="confirmPassword"
             autoComplete="new-password"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            onChange={(e) => handleConfirmPasswordChange(e.target.value)}
             sx={textFieldSx}
             InputProps={{
               endAdornment: (
@@ -190,6 +218,15 @@ export default function Signup({ onClose }: SignupProps) {
               ),
             }}
           />
+          {!passwordsMatch && (
+            <Typography
+              variant="body2"
+              color="error"
+              sx={{ mt: 1, textAlign: "center" }}
+            >
+              Passwords do not match
+            </Typography>
+          )}
           <Button
             type="submit"
             fullWidth
@@ -204,6 +241,7 @@ export default function Signup({ onClose }: SignupProps) {
                 backgroundColor: "#1e3a8a",
               },
             }}
+            disabled={!passwordValid || !passwordsMatch || password === ""}
           >
             SIGN UP
           </Button>
