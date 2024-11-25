@@ -7,7 +7,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import { ColorModeContext, useMode } from "./hooks/theme.ts";
-import { CssBaseline, ThemeProvider } from "@mui/material";
+import { Button, CssBaseline, Snackbar, ThemeProvider } from "@mui/material";
 import "./App.css";
 
 import Dashboard from "./pages/Dashboard.tsx";
@@ -36,6 +36,7 @@ import ErrorBoundary from "./components/ErrorBoundary.tsx";
 import { useUser } from "./hooks/use-user.ts";
 import { useEffect,useRef, useState } from "react";
 import UpdateWidget from "./components/UpdateWidget";
+import { createContext, useContext } from 'react';
 
 // Create a query client with default options
 const queryClient = new QueryClient({
@@ -51,23 +52,6 @@ const localStoragePersister = createSyncStoragePersister({
   storage: window.localStorage,
 });
 
-// const checkForUpdates = async () => {
-//   // Mock API call for checking updates
-//   const response = await fetch("http://localhost:3001/docker/check-updates");
-//   const data = await response.json();
-//   return data.updateAvailable;
-// };
-
-// const performUpdate = async () => {
-//   // Mock API call to perform update
-//   const response = await fetch("http://localhost:3001/docker/update", { method: "POST" });
-//   if (!response.ok) {
-//     throw new Error("Update failed");
-//   }
-// };
-
-import { createContext, useContext } from 'react';
-
 const WebSocketContext = createContext<{
   isReconnecting: boolean;
   lastReconnectAttempt: number;
@@ -79,6 +63,8 @@ const WebSocketContext = createContext<{
 function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const [isReconnecting, setIsReconnecting] = useState(false);
   const [lastReconnectAttempt, setLastReconnectAttempt] = useState(0);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectAttemptRef = useRef(0);
   const maxReconnectAttempts = 50;
@@ -86,16 +72,16 @@ function WebSocketProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const connectWebSocket = () => {
       if (reconnectAttemptRef.current >= maxReconnectAttempts) {
-        console.error('Failed to connect to server after maximum attempts');
+        console.error("Failed to connect to server after maximum attempts");
         return;
       }
 
       setIsReconnecting(true);
-      const ws = new WebSocket('ws://localhost:8080');
+      const ws = new WebSocket("ws://localhost:8080");
       wsRef.current = ws;
 
       ws.onopen = () => {
-        console.log('WebSocket connected');
+        console.log("WebSocket connected");
         setIsReconnecting(false);
         reconnectAttemptRef.current = 0;
         setLastReconnectAttempt(0);
@@ -104,37 +90,33 @@ function WebSocketProvider({ children }: { children: React.ReactNode }) {
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          if (data.type === 'SERVER_STATUS' && data.status === 'READY') {
-            console.log('Refresh page to load new version');
-            // Clear react-query cache before reload to ensure fresh data
-            queryClient.clear();
-            // Add a small delay to ensure cache is cleared
-            setTimeout(function(){
-              window.location.reload(true);
-            },100); 
+          if (data.type === "SERVER_STATUS" && data.status === "READY") {
+            console.log("New update detected");
+            setUpdateAvailable(true);
+            setSnackbarOpen(true); // Open the snackbar
           }
         } catch (error) {
-          console.error('Error parsing WebSocket message:', error);
+          console.error("Error parsing WebSocket message:", error);
         }
       };
 
       ws.onclose = () => {
-        console.log('WebSocket disconnected');
+        console.log("WebSocket disconnected");
         setIsReconnecting(true);
         reconnectAttemptRef.current++;
         setLastReconnectAttempt(reconnectAttemptRef.current);
-        
+
         const currentWs = wsRef.current;
         if (currentWs) {
           currentWs.close();
           wsRef.current = null;
         }
-        
+
         setTimeout(connectWebSocket, 2000);
       };
 
       ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
+        console.error("WebSocket error:", error);
         setIsReconnecting(true);
       };
     };
@@ -150,9 +132,30 @@ function WebSocketProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  const handleReload = () => {
+    setSnackbarOpen(false);
+    queryClient.clear(); // Clear react-query cache
+    setTimeout(() => {
+      window.location.reload(true); // Reload the page
+    }, 100);
+  };
+
   return (
     <WebSocketContext.Provider value={{ isReconnecting, lastReconnectAttempt }}>
       {children}
+      {updateAvailable && (
+        <Snackbar
+          open={snackbarOpen}
+          message="A new update is available!"
+          onClose={() => setSnackbarOpen(false)}
+          action={
+            <Button color="secondary" size="small" onClick={handleReload}>
+              Reload
+            </Button>
+          }
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        />
+      )}
     </WebSocketContext.Provider>
   );
 }
