@@ -23,6 +23,7 @@ import rateLimit from "express-rate-limit";
 import { exec } from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
+import WebSocket from 'ws';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -160,6 +161,16 @@ if (process.env.NODE_ENV === "production") {
     res.sendFile(path.join(__dirname, "../dist/index.html"));
   });
 }
+const wss = new WebSocket.Server({ port: 8080 });
+
+wss.on('connection', (ws) => {
+  console.log('Client connected');
+  ws.send(JSON.stringify({ message: 'Connected to server' }));
+
+  ws.on('close', () => {
+      console.log('Client disconnected');
+  });
+});
 
 process.on("SIGINT", () => {
   console.log("\n Server is shutting down...");

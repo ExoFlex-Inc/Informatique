@@ -158,6 +158,33 @@ function AppLayout() {
 
 function App() {
   const [theme, colorMode] = useMode();
+  useEffect(() => {
+    const ws = new WebSocket('ws://localhost:8080');
+
+    ws.onopen = () => {
+        console.log('WebSocket connected');
+    };
+
+    let reloadTimeout;
+    ws.onclose = () => {
+        console.log('WebSocket disconnected');
+        if (!reloadTimeout) {
+            reloadTimeout = setTimeout(() => {
+                console.log('Refreshing page...');
+                window.location.reload();
+            }, 3000);
+        }
+    };
+
+    ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+    };
+
+    return () => {
+        clearTimeout(reloadTimeout);
+        ws.close();
+    };
+}, []);
 
   return (
     <ColorModeContext.Provider value={colorMode}>

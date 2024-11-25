@@ -269,7 +269,7 @@ const ExercisesPlanTable: React.FC<ExercisesPlanTableProps> = ({
                   }}
                 >
                   <Typography align="center" sx={{ color: "gray" }}>
-                    Time (Sec)
+                    Stretch Time (Sec)
                   </Typography>
                 </TableCell>
                 <TableCell
