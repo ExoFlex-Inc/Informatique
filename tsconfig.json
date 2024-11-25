@@ -1,6 +1,8 @@
 {
   "extends": "@sindresorhus/tsconfig",
   "compilerOptions": {
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "lib": ["ESNext", "DOM", "webworker"],
     "target": "ESNext",
     "module": "ESNext",

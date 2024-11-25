@@ -77,7 +77,6 @@ const ManualControl = ({
             <KeyboardArrowUpIcon />
           </IconButton>
         </Box>
-        <Typography>Manual Control</Typography>
       </Box>
       <Drawer
         anchor="bottom"

@@ -4,8 +4,15 @@ import {
   Checkbox,
   FormControlLabel,
   Grid,
-  TextField,
   IconButton,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  TableContainer,
+  Typography,
+  Paper
 } from "@mui/material";
 import { Refresh, PlayArrow, Pause, Home } from "@mui/icons-material";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
@@ -14,6 +21,12 @@ import LineChart from "../components/LineChart";
 import useStm32 from "../hooks/use-stm32.ts";
 import Button from "../components/Button.tsx";
 import ManualControl from "../components/ManualControl.tsx";
+import stm32errors from "../assets/stm32errors.json";
+
+type errorInfo = {
+  errorNames: string;
+  errorDescription: string;
+}
 
 const errorMap = {
   0: "ERROR_0_MSEC",
@@ -44,7 +57,7 @@ const errorMap = {
   25: "ERROR_25",
 };
 export default function Manual() {
-  const [errorDescription, setErrorDescription] = useState("");
+  const [errorInformation, setErrorInformation] = useState<errorInfo[]>([]);
   const [graphDataType, setGraphDataType] = useState("position");
   const [graphPause, setGraphPause] = useState(false);
   const { stm32Data, socket, errorFromStm32 } = useStm32();
@@ -108,7 +121,12 @@ export default function Manual() {
     }
     if (stm32Data?.ErrorCode !== undefined) {
       const errorNames = decodeErrorCode(stm32Data.ErrorCode);
-      setErrorDescription(errorNames.join("\n") || "");
+      const errorInformation = errorNames.map((el: string, index) => {
+        return (
+          {errorNames: errorNames[index], errorDescription: stm32errors[el as keyof typeof stm32errors]}
+        )
+      })
+      setErrorInformation(errorInformation);
     }
   }, [stm32Data, graphPause]);
 
@@ -233,7 +251,7 @@ export default function Manual() {
               }}
             >
               <Box sx={{ width: 50 }} />
-              <Box gap={4} sx={{ display: "flex" }}>
+              <Box gap={4} sx={{ display: "flex", paddingRight: 4 }}>
                 <IconButton
                   onClick={() => setGraphPause(false)}
                   disabled={!graphPause}
@@ -331,7 +349,7 @@ export default function Manual() {
               graphPause={graphPause}
             />
           </Grid>
-          <Grid item xs={12} md={3}>
+          <Grid item xs={12}>
             <Box
               sx={{
                 display: "flex",
@@ -340,26 +358,50 @@ export default function Manual() {
                 height: "100%",
               }}
             >
-              <TextField
-                value={errorDescription}
-                multiline
-                fullWidth
-                rows={10}
-                variant="outlined"
-                InputProps={{
-                  readOnly: true,
-                }}
-                inputProps={{
-                  sx: {
-                    whiteSpace: "pre",
-                  },
-                }}
-              />
+              <TableContainer
+                component={Paper}
+                sx={{ borderRadius: "12px", bgcolor: "white", overflow: "hidden" }}
+              >
+                <Table>
+                  <TableHead className="bg-gray-100">
+                    <TableRow>
+                      <TableCell>
+                        <Typography align="center" sx={{ color: "gray" }}>
+                          Error code
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography align="center" sx={{ color: "gray" }}>
+                          Description
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {errorInformation.map((el, index) => {
+                      return(
+                        <TableRow>
+                          <TableCell>
+                            <Typography align="center" sx={{ color: "gray" }}>
+                              {errorInformation?.[index]?.errorNames}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography align="center" sx={{ color: "gray" }}>
+                              {errorInformation?.[index]?.errorDescription}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </Box>
           </Grid>
         </Grid>
       </Box>
-      <Box sx={{position: "sticky", bottom: 0, zIndex: 50}}>
+      <Box sx={{position: "sticky", bottom: 0, zIndex: 50, height: "100%", alignContent: "end"}}>
         <ManualControl
           stm32Data={stm32Data}
           socket={socket}

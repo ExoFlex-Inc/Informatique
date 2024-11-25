@@ -43,9 +43,14 @@ export default function Dashboard() {
 
   if (statsLoading || usersLoading) {
     return (
-      <div className="loading-container">
+      <Box
+        sx={{
+          position: "relative",
+          height: "calc(100vh - 100px)",
+        }}
+      >
         <Loading />
-      </div>
+      </Box>
     );
   }
 

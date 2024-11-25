@@ -60,17 +60,17 @@ const LineChart: React.FC<LineChartProps> = ({
           (number | ScatterDataPoint | null)[]
         >[] = [
           {
-            label: "Motor Dorsiflexion",
+            label: "Dorsiflexion",
             borderColor: "rgb(255, 99, 132)",
             data: [],
           },
           {
-            label: "Motor Eversion",
+            label: "Eversion",
             borderColor: "rgb(99, 255, 132)",
             data: [],
           },
           {
-            label: "Motor Extension",
+            label: "Extension",
             borderColor: "rgb(99, 132, 255)",
             data: [],
           },
