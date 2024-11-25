@@ -109,9 +109,9 @@ function WebSocketProvider({ children }: { children: React.ReactNode }) {
             // Clear react-query cache before reload to ensure fresh data
             queryClient.clear();
             // Add a small delay to ensure cache is cleared
-            setTimeout(() => {
-              window.location.href=window.location.href;
-            }, 3000);
+            setTimeout(function(){
+              window.location.reload(true);
+            },100); 
           }
         } catch (error) {
           console.error('Error parsing WebSocket message:', error);
