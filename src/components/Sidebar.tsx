@@ -244,7 +244,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
             <Box display="flex" justifyContent="center" alignItems="center">
               <Avatar
                 src={user.avatar_url ? user.avatar_url : "/assets/user.png"}
-                sx={{ height: "34%", width: "34%", position: "flex" }}
+                sx={{ height: "83px", width: "83px", position: "flex" }}
               />
             </Box>
 
