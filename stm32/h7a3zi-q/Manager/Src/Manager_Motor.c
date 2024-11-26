@@ -85,15 +85,14 @@ typedef struct
     bool    securityPass;
     bool    setupFirstPass;
     float   acc[MMOT_MOTOR_NBR];
-    float MinPos[MMOT_MOTOR_NBR];
-    float MaxPos[MMOT_MOTOR_NBR];
-    float MaxTorqueIdle[MMOT_MOTOR_NBR];
-    float MaxTorqueMoving[MMOT_MOTOR_NBR];
-    float MaxSpeedIdle[MMOT_MOTOR_NBR];
-    float MaxSpeedMoving[MMOT_MOTOR_NBR];
-
-
 } managerMotor_t;
+
+float minPos[MMOT_MOTOR_NBR];
+float maxPos[MMOT_MOTOR_NBR];
+float maxTorqueIdle[MMOT_MOTOR_NBR];
+float maxTorqueMoving[MMOT_MOTOR_NBR];
+float maxSpeedIdle[MMOT_MOTOR_NBR];
+float maxSpeedMoving[MMOT_MOTOR_NBR];
 
 static uint32_t timerMs = 0;
 
@@ -211,21 +210,21 @@ void ManagerMotor_Reset()
     minPos[MMOT_MOTOR_3] = -10;
     maxPos[MMOT_MOTOR_3] = 10;
 
-    maxTorqueIdle[MMOT_MOTOR_1] = 0.5;
-    maxTorqueIdle[MMOT_MOTOR_2] = 0.5;
-    maxTorqueIdle[MMOT_MOTOR_3] = 2;
+    maxTorqueIdle[MMOT_MOTOR_1] = 1;
+    maxTorqueIdle[MMOT_MOTOR_2] = 1;
+    maxTorqueIdle[MMOT_MOTOR_3] = 4;
 
-	maxTorqueMoving[MMOT_MOTOR_1] = 12;
-	maxTorqueMoving[MMOT_MOTOR_2] = 12;
-	maxTorqueMoving[MMOT_MOTOR_3] = 30;
+	maxTorqueMoving[MMOT_MOTOR_1] = 15;
+	maxTorqueMoving[MMOT_MOTOR_2] = 15;
+	maxTorqueMoving[MMOT_MOTOR_3] = 60;
 
     maxSpeedIdle[MMOT_MOTOR_1] = 0.1;
     maxSpeedIdle[MMOT_MOTOR_2] = 0.1;
     maxSpeedIdle[MMOT_MOTOR_3] = 0.1;
 
-    maxSpeedMoving[MMOT_MOTOR_1] = 0.7;
-    maxSpeedMoving[MMOT_MOTOR_2] = 0.7;
-    maxSpeedMoving[MMOT_MOTOR_3] = 0.35;
+    maxSpeedMoving[MMOT_MOTOR_1] = 1.0;
+    maxSpeedMoving[MMOT_MOTOR_2] = 1.0;
+    maxSpeedMoving[MMOT_MOTOR_3] = 0.5;
 
 
     // Init Data for canBus messages
@@ -879,16 +878,16 @@ bool ManagerMotor_VerifyMotorState(uint8_t id)
 
     if (managerMotor.state == MMOT_STATE_READY2MOVE)
     {
-        if (motors[id].motor.velocity > maxSpeedIdle[id] ||
-            motors[id].motor.velocity < -maxSpeedIdle[id])
+        if (motors[id].motor.velocity > maxSpeedMoving[id] ||
+            motors[id].motor.velocity < -maxSpeedMoving[id])
         {
             ManagerError_SetError(ERROR_22_MMOT_MINMAX_SPEED);
             ManagerMotor_SetMotorError(id);
             verif = false;
         }
 
-        if (motors[id].motor.torque > maxTorqueIdle ||
-            motors[id].motor.torque < -maxTorqueIdle)
+        if (motors[id].motor.torque > maxTorqueMoving[id] ||
+            motors[id].motor.torque < -maxTorqueMoving[id])
         {
             ManagerError_SetError(ERROR_21_MMOT_MINMAX_TORQUE);
             ManagerMotor_SetMotorError(id);
@@ -906,16 +905,16 @@ bool ManagerMotor_VerifyMotorState(uint8_t id)
 
     else
     {
-        if (motors[id].motor.velocity > maxSpeedMoving ||
-            motors[id].motor.velocity < -maxSpeedMoving)
+        if (motors[id].motor.velocity > maxSpeedIdle[id] ||
+            motors[id].motor.velocity < -maxSpeedIdle[id])
         {
             ManagerError_SetError(ERROR_22_MMOT_MINMAX_SPEED);
             ManagerMotor_SetMotorError(id);
             verif = false;
         }
 
-        if (motors[id].motor.torque > maxTorqueMoving ||
-            motors[id].motor.torque < -maxTorqueMoving)
+        if (motors[id].motor.torque > maxTorqueIdle[id] ||
+            motors[id].motor.torque < -maxTorqueIdle[id])
         {
             ManagerError_SetError(ERROR_21_MMOT_MINMAX_TORQUE);
             ManagerMotor_SetMotorError(id);
