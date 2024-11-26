@@ -14,6 +14,7 @@ import LineChart from "../components/LineChart";
 import useStm32 from "../hooks/use-stm32.ts";
 import Button from "../components/Button.tsx";
 import ManualControl from "../components/ManualControl.tsx";
+import HmiButtonClick from "../components/HmiButtonClick.tsx";
 
 const errorMap = {
   0: "ERROR_0_MSEC",
@@ -256,7 +257,7 @@ export default function Manual() {
                 >
                   <Pause />
                 </IconButton>
-                <Button
+                <HmiButtonClick
                   icon={<Home />}
                   mode="Homing"
                   mainColor="blueAccent.main"
@@ -264,7 +265,7 @@ export default function Manual() {
                   socket={socket}
                 />
 
-                <Button
+                <HmiButtonClick
                   icon={<Refresh />}
                   disabled={!stm32Data?.ErrorCode}
                   mode="Reset"
@@ -274,9 +275,6 @@ export default function Manual() {
                 />
                 <IconButton
                   onClick={(e) => {
-                    exportCsv();
-                  }}
-                  onTouchStart={(e) => {
                     exportCsv();
                   }}
                   size="large"

@@ -26,6 +26,8 @@ import Button from "./Button.tsx";
 import type { stm32DataType } from "../hooks/use-stm32.ts";
 import { useEffect } from "react";
 import { tokens } from "../hooks/theme";
+import HmiButtonMovement from "./HmiButtonMovement.tsx";
+import HmiButtonClick from "./HmiButtonClick.tsx";
 
 interface ManualControlProps {
   errorFromStm32: boolean;
@@ -155,7 +157,7 @@ const ManualControl = ({
                             gap: "40px",
                           }}
                         >
-                          <Button
+                          <HmiButtonMovement
                             mode="Manual"
                             action="Increment"
                             content={
@@ -171,7 +173,7 @@ const ManualControl = ({
                             socket={socket}
                           />
 
-                          <Button
+                          <HmiButtonMovement
                             mode="Manual"
                             action="Increment"
                             content={
@@ -206,7 +208,7 @@ const ManualControl = ({
                             gap: "40px",
                           }}
                         >
-                          <Button
+                          <HmiButtonMovement
                             mode="Manual"
                             action="Increment"
                             content="DorsiflexionU"
@@ -217,7 +219,7 @@ const ManualControl = ({
                             icon={<ArrowUpward />}
                             socket={socket}
                           />
-                          <Button
+                          <HmiButtonMovement
                             mode="Manual"
                             action="Increment"
                             content="DorsiflexionD"
@@ -248,7 +250,7 @@ const ManualControl = ({
                             gap: "40px",
                           }}
                         >
-                          <Button
+                          <HmiButtonMovement
                             mode="Manual"
                             action="Increment"
                             content="ExtensionU"
@@ -259,7 +261,7 @@ const ManualControl = ({
                             icon={<ArrowUpward />}
                             socket={socket}
                           />
-                          <Button
+                          <HmiButtonMovement
                             mode="Manual"
                             action="Increment"
                             content="ExtensionD"
@@ -307,7 +309,7 @@ const ManualControl = ({
                         gap: "40px",
                       }}
                     >
-                      <Button
+                      <HmiButtonMovement
                         mode="Manual"
                         action="Tightening"
                         content="Forward"
@@ -318,7 +320,7 @@ const ManualControl = ({
                         icon={<Compress />}
                         socket={socket}
                       />
-                      <Button
+                      <HmiButtonMovement
                         mode="Manual"
                         action="Tightening"
                         content="Backward"
@@ -365,7 +367,7 @@ const ManualControl = ({
                           gap: "40px",
                         }}
                       >
-                        <Button
+                        <HmiButtonClick
                           mode="ChangeSide"
                           mainColor={
                             stm32Data?.CurrentLegSide == "LegIsRight"
@@ -386,7 +388,7 @@ const ManualControl = ({
                           icon={<ArrowBack />}
                           socket={socket}
                         />
-                        <Button
+                        <HmiButtonClick
                           mode="ChangeSide"
                           mainColor={
                             stm32Data?.CurrentLegSide == "LegIsLeft"

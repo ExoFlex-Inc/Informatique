@@ -24,6 +24,8 @@ import { useStats } from "../hooks/use-stats.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import HmiButtonClick from "../components/HmiButtonClick.tsx";
+
 interface ChartData {
   datasets: {
     label: string;
@@ -110,7 +112,6 @@ export default function HMI() {
     useState<boolean>(false);
   const [painScale, setPainScale] = useState<number>(0);
 
-  const hasExecute = useRef(false);
   const [chartData, setChartData] = useState<ChartData>({
     datasets: [
       {
@@ -131,47 +132,166 @@ export default function HMI() {
     motor3: { x: 0, position: 0, torque: 0, current: 0 },
   });
   const [graphDataType, setGraphDataType] = useState("position");
+  const resetPlanInterval = useRef<number | null>(null);
+  const planInterval = useRef<number | null>(null);
+  const planTimeoutRef = useRef<number | null>(null);
+  const effectRan = useRef(false);
 
   useEffect(() => {
-    if (
-      socket &&
-      stm32Data &&
-      stm32Data.AutoState === "Ready" &&
-      !hasExecute.current
-    ) {
-      const message = "{Auto;Resetplan;}";
-      socket.emit("sendDataToStm32", message);
-      hasExecute.current = true;
-      console.log("Reset", message);
+    if (effectRan.current) {
+      return;
     }
-  }, [stm32Data]);
 
-  useEffect(() => {
-    if (
-      stm32Data &&
-      stm32Data.AutoState === "WaitingForPlan" &&
-      planData &&
-      socket
-    ) {
-      let message = `{Auto;Plan;${planData.limits.left.angles.dorsiflexion};${planData.limits.left.torque.dorsiflexion};${planData.limits.left.angles.eversion};${planData.limits.left.torque.eversion};${planData.limits.left.angles.extension};${planData.limits.left.torque.extension};${planData.limits.right.angles.dorsiflexion};${planData.limits.right.torque.dorsiflexion};${planData.limits.right.angles.eversion};${planData.limits.right.torque.eversion};${planData.limits.right.angles.extension};${planData.limits.right.torque.extension}`;
+    // Check if necessary variables are available
+    if (stm32Data && stm32Data.AutoState === "Ready" && planData) {
+      effectRan.current = true; // Set the flag to prevent future runs
 
-      planData.plan.forEach((set) => {
-        message += `;${set.movement.length}`;
-        for (let i = 0; i < 3; i++) {
-          if (i <= set.movement.length - 1) {
-            const movement = set.movement[i];
-            message += `;${movement?.exercise ?? 0};${movement?.target_angle ?? 0};${movement?.target_torque ?? 0}`;
-          } else {
-            message += `;${0};${0};${0}`;
-          }
+      console.log("Ready state detected, sending reset message...");
+
+      const resetMessage = "{Auto;Resetplan;}";
+      console.log("Reset plan message:", resetMessage);
+      socket.emit("sendDataToStm32", resetMessage);
+
+      // Set a timeout to send the plan after 100ms
+      planTimeoutRef.current = window.setTimeout(() => {
+        try {
+          let planMessage = `{Auto;Plan;${planData.limits.left.angles.dorsiflexion};${planData.limits.left.torque.dorsiflexion};${planData.limits.left.angles.eversion};${planData.limits.left.torque.eversion};${planData.limits.left.angles.extension};${planData.limits.left.torque.extension};${planData.limits.right.angles.dorsiflexion};${planData.limits.right.torque.dorsiflexion};${planData.limits.right.angles.eversion};${planData.limits.right.torque.eversion};${planData.limits.right.angles.extension};${planData.limits.right.torque.extension}`;
+
+          planData.plan.forEach((set) => {
+            planMessage += `;${set.movement.length}`;
+            for (let i = 0; i < 3; i++) {
+              if (i < set.movement.length) {
+                const movement = set.movement[i];
+                planMessage += `;${movement?.exercise ?? 0};${movement?.target_angle ?? 0};${movement?.target_torque ?? 0}`;
+              } else {
+                planMessage += `;0;0;0`;
+              }
+            }
+            planMessage += `;${set.repetitions};${set.rest};${set.time};${set.speed}`;
+          });
+          planMessage += "}";
+
+          console.log("Plan message:", planMessage);
+          socket.emit("sendDataToStm32", planMessage);
+        } catch (error) {
+          console.log("Conditions not met:", { stm32Data, planData, socket });
         }
-        message += `;${set.repetitions};${set.rest};${set.time};${set.speed}`;
-      });
-      message += "}";
-      console.log("plan", message);
-      socket.emit("sendDataToStm32", message);
+      }, 100); // 100ms delay
     }
-  }, [stm32Data, planData]);
+
+  }, [stm32Data, planData]); 
+
+  useEffect(() => {
+    // Cleanup any existing intervals before setting new ones
+    if (resetPlanInterval.current !== null) {
+      window.clearInterval(resetPlanInterval.current);
+      resetPlanInterval.current = null;
+    }
+    if (planInterval.current !== null) {
+      window.clearInterval(planInterval.current);
+      planInterval.current = null;
+    }
+
+    if (stm32Data && stm32Data.AutoState === "WaitingForPlan" && planData) {
+      console.log("WaitingForPlan detected, starting intervals...");
+
+      // Use window.setInterval and assign to number
+      resetPlanInterval.current = window.setInterval(() => {
+        const resetMessage = "{Auto;Resetplan;}";
+        console.log("Reset plan message:", resetMessage);
+        socket.emit("sendDataToStm32", resetMessage);
+      }, 1000);
+
+      planInterval.current = window.setInterval(() => {
+        let planMessage = `{Auto;Plan;${planData.limits.left.angles.dorsiflexion};${planData.limits.left.torque.dorsiflexion};${planData.limits.left.angles.eversion};${planData.limits.left.torque.eversion};${planData.limits.left.angles.extension};${planData.limits.left.torque.extension};${planData.limits.right.angles.dorsiflexion};${planData.limits.right.torque.dorsiflexion};${planData.limits.right.angles.eversion};${planData.limits.right.torque.eversion};${planData.limits.right.angles.extension};${planData.limits.right.torque.extension}`;
+
+        planData.plan.forEach((set) => {
+          planMessage += `;${set.movement.length}`;
+          for (let i = 0; i < 3; i++) {
+            if (i < set.movement.length) {
+              const movement = set.movement[i];
+              planMessage += `;${movement?.exercise ?? 0};${movement?.target_angle ?? 0};${movement?.target_torque ?? 0}`;
+            } else {
+              planMessage += `;0;0;0`;
+            }
+          }
+          planMessage += `;${set.repetitions};${set.rest};${set.time};${set.speed}`;
+        });
+        planMessage += "}";
+
+        console.log("Plan message:", planMessage);
+        socket.emit("sendDataToStm32", planMessage);
+      }, 1100);
+    }
+
+    // Cleanup function
+    return () => {
+      if (resetPlanInterval.current !== null) {
+        window.clearInterval(resetPlanInterval.current);
+        resetPlanInterval.current = null;
+      }
+      if (planInterval.current !== null) {
+        window.clearInterval(planInterval.current);
+        planInterval.current = null;
+      }
+    };
+  }, [stm32Data?.AutoState, planData]);
+
+  useEffect(() => {
+    // Cleanup any existing intervals before setting new ones
+    if (resetPlanInterval.current !== null) {
+      window.clearInterval(resetPlanInterval.current);
+      resetPlanInterval.current = null;
+    }
+    if (planInterval.current !== null) {
+      window.clearInterval(planInterval.current);
+      planInterval.current = null;
+    }
+
+    if (stm32Data && stm32Data.AutoState === "WaitingForPlan" && planData) {
+      console.log("WaitingForPlan detected, starting intervals...");
+
+      // Use window.setInterval and assign to number
+      resetPlanInterval.current = window.setInterval(() => {
+        const resetMessage = "{Auto;Resetplan;}";
+        console.log("Reset plan message:", resetMessage);
+        socket.emit("sendDataToStm32", resetMessage);
+      }, 1000);
+
+      planInterval.current = window.setInterval(() => {
+        let planMessage = `{Auto;Plan;${planData.limits.left.angles.dorsiflexion};${planData.limits.left.torque.dorsiflexion};${planData.limits.left.angles.eversion};${planData.limits.left.torque.eversion};${planData.limits.left.angles.extension};${planData.limits.left.torque.extension};${planData.limits.right.angles.dorsiflexion};${planData.limits.right.torque.dorsiflexion};${planData.limits.right.angles.eversion};${planData.limits.right.torque.eversion};${planData.limits.right.angles.extension};${planData.limits.right.torque.extension}`;
+
+        planData.plan.forEach((set) => {
+          planMessage += `;${set.movement.length}`;
+          for (let i = 0; i < 3; i++) {
+            if (i < set.movement.length) {
+              const movement = set.movement[i];
+              planMessage += `;${movement?.exercise ?? 0};${movement?.target_angle ?? 0};${movement?.target_torque ?? 0}`;
+            } else {
+              planMessage += `;0;0;0`;
+            }
+          }
+          planMessage += `;${set.repetitions};${set.rest};${set.time};${set.speed}`;
+        });
+        planMessage += "}";
+
+        console.log("Plan message:", planMessage);
+        socket.emit("sendDataToStm32", planMessage);
+      }, 1100);
+    }
+
+    // Cleanup function
+    return () => {
+      if (resetPlanInterval.current !== null) {
+        window.clearInterval(resetPlanInterval.current);
+        resetPlanInterval.current = null;
+      }
+      if (planInterval.current !== null) {
+        window.clearInterval(planInterval.current);
+        planInterval.current = null;
+      }
+    };
+  }, [stm32Data?.AutoState, planData]);
 
   useEffect(() => {
     const stopRecording = async () => {
@@ -499,29 +619,36 @@ export default function HMI() {
                 mb: 1,
               }}
             >
-              {stm32Data?.AutoState == "WaitingForPlan" ||
-              stm32Data?.AutoState == "Ready" ? (
-                <Button
+              {stm32Data?.AutoState == "Ready" ? (
+                <HmiButtonClick
                   mainColor="#2fb73d"
                   hoverColor="#33a63f"
                   mode="Auto"
                   action="Control"
                   content="Start"
+                  disabled={
+                    !stm32Data ||
+                    stm32Data?.AutoState !== "Ready"
+                  }
                   icon={<PlayArrow />}
                   socket={socket}
                 />
               ) : (
-                <Button
+                <HmiButtonClick
                   mainColor="#f5d50b"
                   hoverColor="#dcc21d"
                   mode="Auto"
                   action="Control"
                   content="Pause"
+                  disabled={
+                    !stm32Data ||
+                    stm32Data?.AutoState === "WaitingForPlan"
+                  }
                   icon={<Pause />}
                   socket={socket}
                 />
               )}
-              <Button
+              <HmiButtonClick
                 icon={<Stop />}
                 mode="Auto"
                 action="Control"
@@ -530,27 +657,29 @@ export default function HMI() {
                 hoverColor="#cb2626"
                 disabled={
                   !stm32Data ||
-                  errorFromStm32 ||
-                  stm32Data?.AutoState === "Ready"
+                  // stm32Data?.ErrorCode ||
+                  stm32Data?.AutoState === "Ready" ||
+                  stm32Data?.AutoState === "WaitingForPlan"
                 }
                 socket={socket}
               />
-              <Button
+              <HmiButtonClick
                 mainColor="#1ec6e1"
                 hoverColor="#2aa6ba"
                 icon={<Home />}
                 disabled={
-                  stm32Data?.AutoState !== "Ready" &&
+                  !stm32Data ||
+                  // stm32Data?.ErrorCode ||
                   stm32Data?.AutoState !== "WaitingForPlan"
                 }
                 mode="Homing"
                 socket={socket}
               />
-              <Button
+              <HmiButtonClick
                 mainColor="#f1910f"
                 hoverColor="#d08622"
                 icon={<Refresh />}
-                disabled={!stm32Data?.ErrorCode}
+                disabled={!stm32Data}
                 mode="Reset"
                 socket={socket}
               />
@@ -569,7 +698,7 @@ export default function HMI() {
                     backgroundColor: "blueAccent.hover",
                   },
                 }}
-                disabled={!stm32Data?.ErrorCode}
+                disabled={!stm32Data || stm32Data?.AutoState == "WaitingForPlan"}
               >
                 {recordCsv ? (
                   <RadioButtonUncheckedIcon />

@@ -500,6 +500,7 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
 
         try {
           const parsedData = JSON.parse(jsonDataString);
+          // console.log("Parsed data:", parsedData);
           io.emit("stm32Data", parsedData);
           if (isRecording === true) {
             // Append new data to prevAngles and prevTorques

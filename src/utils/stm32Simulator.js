@@ -48,7 +48,7 @@ function createJsonMessage() {
     HomingState: "",
     ExerciseIdx: 0,
     Repetitions: 1,
-    ErrorCode: 0b10101,
+    // ErrorCode: 0b10101,
     Positions: positions,
     Torques: torques,
     Current: currents,
@@ -58,7 +58,7 @@ function createJsonMessage() {
 }
 
 // Periodically send JSON data over the serial port
-const sendInterval = 2000;
+const sendInterval = 1000;
 const sendData = () => {
   const jsonMessage = createJsonMessage();
   port.write(jsonMessage + "\n", (err) => {
