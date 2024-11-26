@@ -1,6 +1,5 @@
 services:
   app:
-    container_name: exoflex-app
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -12,6 +11,7 @@ services:
     ports:
       - "1338:1338"
       - "3001:3001"
+      - "8080:8080"
     devices:
       - "/dev/ttyACM0:/dev/ttyACM0"
     privileged: true
@@ -25,7 +25,6 @@ services:
       - com.centurylinklabs.watchtower.enable=true
 
   watchtower:
-    container_name: watchtower
     image: containrrr/watchtower:latest
     env_file:
       - .env.production

@@ -32,6 +32,7 @@
 #define MMOV_CHANGESIDE_STATE_GETCMD      1
 #define MMOV_CHANGESIDE_STATE_MOVERIGHT   2
 #define MMOV_CHANGESIDE_STATE_MOVELEFT    3
+#define MMOV_CHANGESIDE_STATE_RESTPOS     4
 
 typedef struct
 {
@@ -93,6 +94,7 @@ bool eversionFree;
 // Left and right pos for homing
 float leftPos;
 float rightPos;
+float middlePos;
 
 uint8_t movements[MAX_EXERCISES];
 uint8_t repetitions[MAX_EXERCISES];
@@ -370,6 +372,10 @@ void ManagerMovement_ChangeSide()
         ManagerMovement_ChangeSideLeft();
 
         break;
+    case MMOV_CHANGESIDE_STATE_RESTPOS:
+    	ManagerMovement_RestPos();
+
+    	break;
     }
 }
 
@@ -1029,11 +1035,15 @@ void ManagerMovement_HomingEversion()
                 rightPos          = motorsData[MMOT_MOTOR_2]->position;
                 evOutsideLimitHit = true;
                 ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
+
+                middlePos = ManagerMovement_GetMiddlePos(leftPos, rightPos);
+                if(managerMovement.currentLegSide == MMOV_LEG_IS_LEFT)
+                {
+                	middlePos = -middlePos;
+                }
             }
 
-            if (ManagerMovement_GoToPos(
-                    MMOV_EVERSION,
-                    ManagerMovement_GetMiddlePos(leftPos, rightPos)))
+            if (ManagerMovement_GoToPos(MMOV_EVERSION, middlePos))
             {
                 ManagerMovement_SetOrigins(MMOT_MOTOR_2);
 
@@ -1044,8 +1054,7 @@ void ManagerMovement_HomingEversion()
                 {
                     PeriphSolenoid_ResetPWMState();
                     managerMovement.changeSideState =
-                        MMOV_CHANGESIDE_STATE_STARTINGPOS;
-                    managerMovement.state = MMOV_STATE_MANUAL;
+                    		MMOV_CHANGESIDE_STATE_RESTPOS;
                 }
                 else
                 {
@@ -1117,14 +1126,21 @@ void ManagerMovement_RestPos()
     if (ManagerMovement_GoToMultiplePos(MMOV_EVR_RESTPOS, MMOV_DOR_RESTPOS,
                                         MMOV_EXT_RESTPOS))
     {
-        managerMovement.homingState = MMOV_HOMING_EXTENSION;
+    	if (managerMovement.state == MMOV_STATE_CHANGESIDE)
+		{
+    		managerMovement.changeSideState = MMOV_CHANGESIDE_STATE_STARTINGPOS;
+		}
+    	else
+    	{
+    		managerMovement.homingState = MMOV_HOMING_EXTENSION;
+    	}
         managerMovement.state       = MMOV_STATE_MANUAL;
     }
 }
 
 float ManagerMovement_GetMiddlePos(float leftPos, float rightPos)
 {
-    float middlePos = (leftPos + rightPos) / 2.0;
+	float middlePos = (leftPos + rightPos) / 2.0;
 
     return middlePos;
 }

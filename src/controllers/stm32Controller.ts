@@ -42,6 +42,7 @@ let saveData = {
       minute: "2-digit",
       second: "2-digit",
       hour12: false,
+      timeZone: "America/New_York",
       timeZoneName: "short",
     })
     .replace(" 24:", " 00:"),
@@ -114,6 +115,7 @@ function resetSaveData() {
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
+        timeZone: "America/New_York", //todo: change to personal timezone
         hour12: false,
         timeZoneName: "short",
       })
