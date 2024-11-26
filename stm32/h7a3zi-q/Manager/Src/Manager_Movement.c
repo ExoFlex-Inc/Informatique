@@ -636,7 +636,10 @@ void ManagerMovement_ResetExercise()
         mvtNbr[i]        = 0.0f;
         targetTorques[i] = 0.0f;
     }
-    managerMovement.autoState = MMOV_AUTO_STATE_WAITING4PLAN;
+    if (managerMovement.autoState != MMOV_AUTO_STATE_READY)
+    {
+    	managerMovement.autoState = MMOV_AUTO_STATE_WAITING4PLAN;
+    }
 }
 
 void ManagerMovement_StartExercise()
@@ -695,8 +698,7 @@ void ManagerMovement_Waiting4Plan()
 
 void ManagerMovement_AutoReady()
 {
-    // Verify if the plan as good values
-    if (mvtNbr[exerciseIdx] == 0 || exerciseIdx == MAX_EXERCISES)
+    if (exerciseIdx == MAX_EXERCISES)
     {
         managerMovement.autoState = MMOV_AUTO_STATE_STOP;
     }
