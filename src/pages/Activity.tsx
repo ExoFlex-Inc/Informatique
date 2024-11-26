@@ -78,7 +78,7 @@ function onGraphTypeChange(
         pointHoverRadius: 7,
       };
 
-    const recordedDate = dates[index] ?? ""; // Use the date at the args index
+    const recordedDate = dates[0] ?? "";
 
     for (let i = 0; i < arg.length; i++) {
       const yValue = arg[i];
