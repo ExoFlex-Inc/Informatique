@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-// import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
 import {
   Box,
   IconButton,
@@ -130,13 +129,40 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
   const colors = tokens(theme.palette.mode);
   const { user } = useUser();
   const isTablet = useMediaQuery("(max-width: 1024px)");
-  const location = useLocation();
-  const page = location.pathname.split("/").pop() || "";
-
   const [open, setOpen] = useState(true);
-  const allAccessPages: string[] = ["/dashboard", "/network", "/hmi"];
-  const adminAndDevPages: string[] = ["/planning", "/activity", "/manual"];
   const drawerWidth = 240;
+  const menuItems = [
+    {
+      text: "Dashboard",
+      to: "/dashboard",
+      permissions: "all",
+    },
+    {
+      text: "Network",
+      to: "/network",
+      permissions: "all",
+    },
+    {
+      text: "Planning",
+      to: "/planning",
+      permissions: ["admin", "dev"],
+    },
+    {
+      text: "Activity",
+      to: "/activity",
+      permissions: ["admin", "dev"],
+    },
+    {
+      text: "HMI",
+      to: "/hmi",
+      permissions: "all",
+    },
+    {
+      text: "Manual",
+      to: "/manual",
+      permissions: ["admin", "dev"],
+    }
+  ];
 
   const openedMixin = (theme: Theme): CSSObject => ({
     width: drawerWidth,
@@ -241,18 +267,19 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
           </Box>
         )}
         <List sx={{ paddingY: "0px" }}>
-          {["Dashboard", "Network", "HMI"].map((text, index) => (
-            <Item
-              text={text}
-              to={allAccessPages[index] as string}
-              open={open}
-            />
-          ))}
-          {(permissions === "admin" || permissions === "dev") &&
-            ["Planning", "Activity", "Manual"].map((text, index) => (
+          {menuItems
+            .filter((item) => {
+              if (item.permissions === "all") return true;
+              if (Array.isArray(item.permissions)) {
+                return item.permissions.includes(permissions);
+              }
+              return item.permissions === permissions;
+            })
+            .map((item) => (
               <Item
-                text={text}
-                to={adminAndDevPages[index] as string}
+                key={item.text}
+                text={item.text}
+                to={item.to}
                 open={open}
               />
             ))}

@@ -23,6 +23,7 @@ import rateLimit from "express-rate-limit";
 import { exec } from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
+import WebSocket from 'ws';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -55,6 +56,31 @@ if (process.env["ROBOT"] === "false") {
 
 const app: Application = express();
 const httpServer = createServer(app);
+const wss = new WebSocket.Server({ port: 8080 });
+
+// Store server start time
+const SERVER_START_TIME = Date.now();
+
+// Track if server is fully initialized
+let serverReady = false;
+
+wss.on('connection', (ws) => {
+  console.log('Client connected');
+  
+  if (serverReady) {
+    console.log('Server is ready, sending status to client');
+    ws.send(JSON.stringify({ 
+      type: 'SERVER_STATUS',
+      status: 'READY',
+      startTime: SERVER_START_TIME 
+    }));
+    serverReady = false;
+  }
+
+  ws.on('close', () => {
+    console.log('Client disconnected');
+  });
+});
 
 // Configure Socket.IO with CORS
 const io = new SocketIOServer(httpServer, {
@@ -150,6 +176,20 @@ export { io };
 const PORT = process.env["PORT"] || 3001;
 httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  
+  // Set server as ready after everything is initialized
+  serverReady = true;
+  
+  // Notify all connected clients that server is ready
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify({
+        type: 'SERVER_STATUS',
+        status: 'READY',
+        startTime: SERVER_START_TIME
+      }));
+    }
+  });
 });
 
 if (process.env.NODE_ENV === "production") {
@@ -163,6 +203,19 @@ if (process.env.NODE_ENV === "production") {
 
 process.on("SIGINT", () => {
   console.log("\n Server is shutting down...");
+  serverReady = false; // Mark server as not ready during shutdown
+  
+  // Notify all clients that server is shutting down
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify({
+        type: 'SERVER_STATUS',
+        status: 'SHUTTING_DOWN',
+        startTime: SERVER_START_TIME
+      }));
+    }
+  });
+
   const serialPort = getSerialPort();
   if (serialPort && serialPort.isOpen) {
     serialPort.close((err: any) => {
@@ -173,8 +226,12 @@ process.on("SIGINT", () => {
       }
     });
   }
-  httpServer.close(() => {
-    console.log("\n Server closed.");
-    process.exit(0);
+  
+  wss.close(() => {
+    console.log("WebSocket server closed.");
+    httpServer.close(() => {
+      console.log("\n HTTP server closed.");
+      process.exit(0);
+    });
   });
 });

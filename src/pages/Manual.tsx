@@ -359,11 +359,13 @@ export default function Manual() {
           </Grid>
         </Grid>
       </Box>
-      <ManualControl
-        stm32Data={stm32Data}
-        socket={socket}
-        errorFromStm32={errorFromStm32}
-      />
+      <Box sx={{position: "sticky", bottom: 0, zIndex: 50}}>
+        <ManualControl
+          stm32Data={stm32Data}
+          socket={socket}
+          errorFromStm32={errorFromStm32}
+        />
+      </Box>
     </div>
   );
 }

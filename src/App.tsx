@@ -7,7 +7,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import { ColorModeContext, useMode } from "./hooks/theme.ts";
-import { CssBaseline, ThemeProvider } from "@mui/material";
+import { Button, CssBaseline, Snackbar, ThemeProvider } from "@mui/material";
 import "./App.css";
 
 import Dashboard from "./pages/Dashboard.tsx";
@@ -34,8 +34,9 @@ import Login from "./pages/Login.tsx";
 import Loading from "./components/Loading.tsx";
 import ErrorBoundary from "./components/ErrorBoundary.tsx";
 import { useUser } from "./hooks/use-user.ts";
-import { useEffect, useState } from "react";
+import { useEffect,useRef, useState } from "react";
 import UpdateWidget from "./components/UpdateWidget";
+import { createContext, useContext } from 'react';
 
 // Create a query client with default options
 const queryClient = new QueryClient({
@@ -51,20 +52,113 @@ const localStoragePersister = createSyncStoragePersister({
   storage: window.localStorage,
 });
 
-// const checkForUpdates = async () => {
-//   // Mock API call for checking updates
-//   const response = await fetch("http://localhost:3001/docker/check-updates");
-//   const data = await response.json();
-//   return data.updateAvailable;
-// };
+const WebSocketContext = createContext<{
+  isReconnecting: boolean;
+  lastReconnectAttempt: number;
+}>({
+  isReconnecting: false,
+  lastReconnectAttempt: 0,
+});
 
-// const performUpdate = async () => {
-//   // Mock API call to perform update
-//   const response = await fetch("http://localhost:3001/docker/update", { method: "POST" });
-//   if (!response.ok) {
-//     throw new Error("Update failed");
-//   }
-// };
+function WebSocketProvider({ children }: { children: React.ReactNode }) {
+  const [isReconnecting, setIsReconnecting] = useState(false);
+  const [lastReconnectAttempt, setLastReconnectAttempt] = useState(0);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectAttemptRef = useRef(0);
+  const maxReconnectAttempts = 50;
+
+  useEffect(() => {
+    const connectWebSocket = () => {
+      if (reconnectAttemptRef.current >= maxReconnectAttempts) {
+        console.error("Failed to connect to server after maximum attempts");
+        return;
+      }
+
+      setIsReconnecting(true);
+      const ws = new WebSocket("ws://localhost:8080");
+      wsRef.current = ws;
+
+      ws.onopen = () => {
+        console.log("WebSocket connected");
+        setIsReconnecting(false);
+        reconnectAttemptRef.current = 0;
+        setLastReconnectAttempt(0);
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === "SERVER_STATUS" && data.status === "READY") {
+            console.log("New update detected");
+            setUpdateAvailable(true);
+            setSnackbarOpen(true); // Open the snackbar
+          }
+        } catch (error) {
+          console.error("Error parsing WebSocket message:", error);
+        }
+      };
+
+      ws.onclose = () => {
+        console.log("WebSocket disconnected");
+        setIsReconnecting(true);
+        reconnectAttemptRef.current++;
+        setLastReconnectAttempt(reconnectAttemptRef.current);
+
+        const currentWs = wsRef.current;
+        if (currentWs) {
+          currentWs.close();
+          wsRef.current = null;
+        }
+
+        setTimeout(connectWebSocket, 2000);
+      };
+
+      ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+        setIsReconnecting(true);
+      };
+    };
+
+    connectWebSocket();
+
+    return () => {
+      const ws = wsRef.current;
+      if (ws) {
+        ws.close();
+        wsRef.current = null;
+      }
+    };
+  }, []);
+
+  const handleReload = () => {
+    setSnackbarOpen(false);
+    queryClient.clear(); // Clear react-query cache
+    setTimeout(() => {
+      window.location.reload(true); // Reload the page
+    }, 100);
+  };
+
+  return (
+    <WebSocketContext.Provider value={{ isReconnecting, lastReconnectAttempt }}>
+      {children}
+      {updateAvailable && (
+        <Snackbar
+          open={snackbarOpen}
+          message="A new update is available!"
+          onClose={() => setSnackbarOpen(false)}
+          action={
+            <Button color="secondary" size="small" onClick={handleReload}>
+              Reload
+            </Button>
+          }
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        />
+      )}
+    </WebSocketContext.Provider>
+  );
+}
 
 // Create the router for your app
 const router = createBrowserRouter(
@@ -158,7 +252,6 @@ function AppLayout() {
 
 function App() {
   const [theme, colorMode] = useMode();
-
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
@@ -167,12 +260,14 @@ function App() {
           client={queryClient}
           persistOptions={{ persister: localStoragePersister }}
         >
-          <ErrorBoundary>
-            <div className="app">
-              <RouterProvider router={router} />
-            </div>
-          </ErrorBoundary>
-          <ReactQueryDevtools initialIsOpen={false} />
+          <WebSocketProvider>
+            <ErrorBoundary>
+              <div className="app">
+                <RouterProvider router={router} />
+              </div>
+            </ErrorBoundary>
+            <ReactQueryDevtools initialIsOpen={false} />
+          </WebSocketProvider>
         </PersistQueryClientProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>

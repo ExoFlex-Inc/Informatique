@@ -46,7 +46,6 @@ export const signup = async (req: Request, res: Response) => {
             first_name: first_name,
             last_name: last_name,
             phone_number: phone_number,
-            permissions: permissions,
           },
         },
       });
@@ -78,6 +77,21 @@ export const signup = async (req: Request, res: Response) => {
 
     if (profileInsertError) {
       return res.status(400).json({ error: profileInsertError.message });
+    }
+
+    // Insert default stats for the new user
+    const { error: statsInsertError } = await supaClient
+      .from("stats")
+      .insert([
+        {
+          user_id: newUserUUID,
+          current_streak: 0,
+          longest_streak: 0
+        },
+      ]);
+
+    if (statsInsertError) {
+      return res.status(400).json({ error: statsInsertError.message });
     }
 
     // Set the access_token and refresh_token in cookies if session exists

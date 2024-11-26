@@ -32,12 +32,31 @@ export default defineConfig(({ mode }) => {
           enabled: true,
           type: "classic",
         },
+        workbox: {
+          skipWaiting: true,
+          clientsClaim: true,
+          cleanupOutdatedCaches: true,
+          runtimeCaching: [
+            {
+              urlPattern: ({ url }) => url.pathname.startsWith('/'),
+              handler: 'NetworkFirst', // Fetch from network first, then fallback to cache
+              options: {
+                cacheName: 'runtime-cache',
+                expiration: {
+                  maxEntries: 50,
+                  maxAgeSeconds: 7 * 24 * 60 * 60, // Cache for a week
+                },
+              },
+            },
+          ],
+        }
       }),
     ],
     build: {
       outDir: "dist",
       assetsDir: "assets", // Explicitly set assets directory
       emptyOutDir: true, // Clean the output directory before build
+      manifest: true, // Generate manifest.json
       sourcemap: mode === "development", // Enable sourcemaps in development
       rollupOptions: {
         output: {
