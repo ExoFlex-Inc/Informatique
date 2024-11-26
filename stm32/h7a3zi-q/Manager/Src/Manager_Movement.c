@@ -32,6 +32,7 @@
 #define MMOV_CHANGESIDE_STATE_GETCMD      1
 #define MMOV_CHANGESIDE_STATE_MOVERIGHT   2
 #define MMOV_CHANGESIDE_STATE_MOVELEFT    3
+#define MMOV_CHANGESIDE_STATE_RESTPOS     4
 
 typedef struct
 {
@@ -370,6 +371,10 @@ void ManagerMovement_ChangeSide()
         ManagerMovement_ChangeSideLeft();
 
         break;
+    case MMOV_CHANGESIDE_STATE_RESTPOS:
+    	ManagerMovement_RestPos();
+
+    	break;
     }
 }
 
@@ -1044,8 +1049,7 @@ void ManagerMovement_HomingEversion()
                 {
                     PeriphSolenoid_ResetPWMState();
                     managerMovement.changeSideState =
-                        MMOV_CHANGESIDE_STATE_STARTINGPOS;
-                    managerMovement.state = MMOV_STATE_MANUAL;
+                    		MMOV_CHANGESIDE_STATE_RESTPOS;
                 }
                 else
                 {
@@ -1117,14 +1121,26 @@ void ManagerMovement_RestPos()
     if (ManagerMovement_GoToMultiplePos(MMOV_EVR_RESTPOS, MMOV_DOR_RESTPOS,
                                         MMOV_EXT_RESTPOS))
     {
-        managerMovement.homingState = MMOV_HOMING_EXTENSION;
+    	if (managerMovement.state == MMOV_STATE_CHANGESIDE)
+		{
+    		managerMovement.changeSideState = MMOV_CHANGESIDE_STATE_STARTINGPOS;
+		}
+    	else
+    	{
+    		managerMovement.homingState = MMOV_HOMING_EXTENSION;
+    	}
         managerMovement.state       = MMOV_STATE_MANUAL;
     }
 }
 
 float ManagerMovement_GetMiddlePos(float leftPos, float rightPos)
 {
-    float middlePos = (leftPos + rightPos) / 2.0;
+	float middlePos = (leftPos + rightPos) / 2.0;
+
+	if (managerMovement.currentLegSide == MMOV_LEG_IS_LEFT)
+	{
+		middlePos = -middlePos;
+	}
 
     return middlePos;
 }
