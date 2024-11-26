@@ -94,6 +94,7 @@ bool eversionFree;
 // Left and right pos for homing
 float leftPos;
 float rightPos;
+float middlePos;
 
 uint8_t movements[MAX_EXERCISES];
 uint8_t repetitions[MAX_EXERCISES];
@@ -1034,11 +1035,15 @@ void ManagerMovement_HomingEversion()
                 rightPos          = motorsData[MMOT_MOTOR_2]->position;
                 evOutsideLimitHit = true;
                 ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
+
+                middlePos = ManagerMovement_GetMiddlePos(leftPos, rightPos);
+                if(managerMovement.currentLegSide == MMOV_LEG_IS_LEFT)
+                {
+                	middlePos = -middlePos;
+                }
             }
 
-            if (ManagerMovement_GoToPos(
-                    MMOV_EVERSION,
-                    ManagerMovement_GetMiddlePos(leftPos, rightPos)))
+            if (ManagerMovement_GoToPos(MMOV_EVERSION, middlePos))
             {
                 ManagerMovement_SetOrigins(MMOT_MOTOR_2);
 
@@ -1136,11 +1141,6 @@ void ManagerMovement_RestPos()
 float ManagerMovement_GetMiddlePos(float leftPos, float rightPos)
 {
 	float middlePos = (leftPos + rightPos) / 2.0;
-
-	if (managerMovement.currentLegSide == MMOV_LEG_IS_LEFT)
-	{
-		middlePos = -middlePos;
-	}
 
     return middlePos;
 }
