@@ -35,14 +35,14 @@ const LineChart: React.FC<LineChartProps> = ({
   const getYAxisLimits = (
     datasets: ChartDataset<"line", (number | ScatterDataPoint | null)[]>[],
   ) => {
-    let min = -30;
-    let max = 45;
+    let min = -90;
+    let max = 90;
 
     datasets.forEach((dataset) => {
       dataset.data.forEach((point) => {
         if (typeof point === "object" && point?.y !== undefined) {
-          min = Math.min(min, point.y) - 5;
-          max = Math.max(max, point.y) + 5;
+          min = Math.min(min, point.y);
+          max = Math.max(max, point.y);
         }
       });
     });

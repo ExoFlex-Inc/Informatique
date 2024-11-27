@@ -30,7 +30,7 @@ import HmiButtonMovement from "./HmiButtonMovement.tsx";
 import HmiButtonClick from "./HmiButtonClick.tsx";
 
 interface ManualControlProps {
-  errorFromStm32: boolean;
+  errorFromStm32: string | null;
   stm32Data: stm32DataType | null;
   socket: any;
 }
@@ -167,7 +167,7 @@ const ManualControl = ({
                             mainColor="blueAccent.main"
                             hoverColor="blueAccent.hover"
                             textColor="white"
-                            disabled={errorFromStm32 || changeSideDisabled}
+                            disabled={errorFromStm32 !== '0' || changeSideDisabled}
                             icon={<ArrowBack />}
                             socket={socket}
                           />
@@ -183,7 +183,7 @@ const ManualControl = ({
                             mainColor="blueAccent.main"
                             hoverColor="blueAccent.hover"
                             textColor="white"
-                            disabled={errorFromStm32 || changeSideDisabled}
+                            disabled={errorFromStm32 !== '0' || changeSideDisabled}
                             icon={<ArrowForward />}
                             socket={socket}
                           />
@@ -214,7 +214,7 @@ const ManualControl = ({
                             mainColor="blueAccent.main"
                             hoverColor="blueAccent.hover"
                             textColor="white"
-                            disabled={errorFromStm32 || changeSideDisabled}
+                            disabled={errorFromStm32 !== '0' || changeSideDisabled}
                             icon={<ArrowUpward />}
                             socket={socket}
                           />
@@ -225,7 +225,7 @@ const ManualControl = ({
                             mainColor="blueAccent.main"
                             hoverColor="blueAccent.hover"
                             textColor="white"
-                            disabled={errorFromStm32 || changeSideDisabled}
+                            disabled={errorFromStm32 !== '0' || changeSideDisabled}
                             icon={<ArrowDownward />}
                             socket={socket}
                           />
@@ -256,7 +256,7 @@ const ManualControl = ({
                             mainColor="blueAccent.main"
                             hoverColor="blueAccent.hover"
                             textColor="text-white"
-                            disabled={errorFromStm32 || changeSideDisabled}
+                            disabled={errorFromStm32 !== '0' || changeSideDisabled}
                             icon={<ArrowUpward />}
                             socket={socket}
                           />
@@ -267,7 +267,7 @@ const ManualControl = ({
                             mainColor="blueAccent.main"
                             hoverColor="blueAccent.hover"
                             textColor="text-white"
-                            disabled={errorFromStm32 || changeSideDisabled}
+                            disabled={errorFromStm32 !== '0' || changeSideDisabled}
                             icon={<ArrowDownward />}
                             socket={socket}
                           />
@@ -315,7 +315,7 @@ const ManualControl = ({
                         mainColor="blueAccent.main"
                         hoverColor="blueAccent.hover"
                         textColor="white"
-                        disabled={errorFromStm32 || changeSideDisabled}
+                        disabled={changeSideDisabled}
                         icon={<Compress />}
                         socket={socket}
                       />
@@ -326,7 +326,7 @@ const ManualControl = ({
                         mainColor="blueAccent.main"
                         hoverColor="blueAccent.hover"
                         textColor="white"
-                        disabled={errorFromStm32 || changeSideDisabled}
+                        disabled={changeSideDisabled}
                         icon={<Expand />}
                         socket={socket}
                       />
@@ -381,7 +381,7 @@ const ManualControl = ({
                           textColor="white"
                           disabled={
                             changeSideDisabled ||
-                            errorFromStm32 ||
+                            errorFromStm32 !== '0' ||
                             stm32Data?.CurrentLegSide == "LegIsLeft"
                           }
                           icon={<ArrowBack />}
@@ -402,7 +402,7 @@ const ManualControl = ({
                           textColor="white"
                           disabled={
                             changeSideDisabled ||
-                            errorFromStm32 ||
+                            errorFromStm32 !== '0' ||
                             stm32Data?.CurrentLegSide == "LegIsRight"
                           }
                           icon={<ArrowForward />}

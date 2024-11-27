@@ -41,7 +41,7 @@ interface Stm32Data {
   Speed: number[];
   Repetitions: number;
   ExerciseIdx: number;
-  ErrorCode: number;
+  ErrorCode: string;
   Mode: string;
   HomingState: string;
   CurrentLegSide: string;
@@ -94,17 +94,15 @@ interface Movement {
 
 export default function HMI() {
   const { user } = useUser();
-  const { stats } = useStats();
   const { planData } = usePlan(user?.user_id) as {
     planData: PlanData | undefined;
   };
   const [recordCsv, setRecordCsv] = useState(false);
   const queryClient = useQueryClient();
 
-  const { stm32Data, socket, errorFromStm32 } = useStm32() as {
-    stm32Data: Stm32Data | null | undefined;
+  const { stm32Data, socket } = useStm32() as {
+    stm32Data: Stm32Data | null;
     socket: any;
-    errorFromStm32: boolean;
   };
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -630,6 +628,7 @@ export default function HMI() {
                   disabled={
                     !stm32Data ||
                     stm32Data?.AutoState !== "Ready"
+                    || stm32Data?.ErrorCode !== '0'
                   }
                   icon={<PlayArrow />}
                   socket={socket}
@@ -644,6 +643,7 @@ export default function HMI() {
                   disabled={
                     !stm32Data ||
                     stm32Data?.AutoState === "WaitingForPlan"
+                    || stm32Data?.ErrorCode !== '0'
                   }
                   icon={<Pause />}
                   socket={socket}
@@ -658,9 +658,9 @@ export default function HMI() {
                 hoverColor="#cb2626"
                 disabled={
                   !stm32Data ||
-                  // stm32Data?.ErrorCode ||
                   stm32Data?.AutoState === "Ready" ||
                   stm32Data?.AutoState === "WaitingForPlan"
+                  || stm32Data?.ErrorCode !== '0'
                 }
                 socket={socket}
               />
@@ -670,8 +670,8 @@ export default function HMI() {
                 icon={<Home />}
                 disabled={
                   !stm32Data ||
-                  // stm32Data?.ErrorCode ||
                   stm32Data?.AutoState !== "WaitingForPlan"
+                  || stm32Data?.ErrorCode !== '0'
                 }
                 mode="Homing"
                 socket={socket}
@@ -680,7 +680,7 @@ export default function HMI() {
                 mainColor="#f1910f"
                 hoverColor="#d08622"
                 icon={<Refresh />}
-                disabled={!stm32Data}
+                disabled={!stm32Data || stm32Data?.ErrorCode === '0'}
                 mode="Reset"
                 socket={socket}
               />
@@ -699,7 +699,7 @@ export default function HMI() {
                     backgroundColor: "blueAccent.hover",
                   },
                 }}
-                disabled={!stm32Data || stm32Data?.AutoState == "WaitingForPlan"}
+                disabled={!stm32Data || stm32Data?.AutoState == "WaitingForPlan" || stm32Data?.ErrorCode !== '0'}
               >
                 {recordCsv ? (
                   <RadioButtonUncheckedIcon />
@@ -781,8 +781,8 @@ export default function HMI() {
       />
       <Box sx={{position: "sticky", bottom: 0, zIndex: 50, height: "100%", alignContent: "end"}}>
         <ManualControl
-          errorFromStm32={errorFromStm32}
-          stm32Data={stm32Data ?? null}
+          stm32Data={stm32Data}
+          errorFromStm32={stm32Data?.ErrorCode ?? null}
           socket={socket}
         />
       </Box>

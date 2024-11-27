@@ -61,7 +61,7 @@ export default function Manual() {
   const [errorInformation, setErrorInformation] = useState<errorInfo[]>([]);
   const [graphDataType, setGraphDataType] = useState("position");
   const [graphPause, setGraphPause] = useState(false);
-  const { stm32Data, socket, errorFromStm32 } = useStm32();
+  const { stm32Data, socket } = useStm32();
 
   const [latestMotorData, setLatestMotorData] = useState({
     motor1: { x: 0, position: 0, torque: 0, current: 0 },
@@ -403,7 +403,7 @@ export default function Manual() {
         <ManualControl
           stm32Data={stm32Data}
           socket={socket}
-          errorFromStm32={errorFromStm32}
+          errorFromStm32={stm32Data?.ErrorCode ?? null}
         />
       </Box>
     </div>

@@ -9,15 +9,16 @@ interface MyEvents {
 }
 
 export type stm32DataType = {
-  Mode: string;
   AutoState: string;
-  HomingState: string;
-  CurrentLegSide: string;
-  Repetitions: number;
-  ExerciseIdx: number;
-  ErrorCode: number;
   Positions: number[];
   Torques: number[];
+  Speed: number[];
+  Repetitions: number;
+  ExerciseIdx: number;
+  ErrorCode: string;
+  Mode: string;
+  HomingState: string;
+  CurrentLegSide: string;
   Current: number[];
 };
 
@@ -26,7 +27,6 @@ const ENDPOINT = "http://localhost:3001"; // Pointing to the server on port 3001
 const useStm32 = () => {
   const [stm32Data, setStm32Data] = useState<stm32DataType | null>(null);
   const [retrySerial, setRetrySerial] = useState<boolean>(true);
-  const [errorFromStm32, setErrorFromStm32] = useState<boolean>(false);
   const [socket, setSocket] = useState<Socket<MyEvents> | null>(null);
 
   const initializeSerialPort = async () => {
@@ -52,7 +52,6 @@ const useStm32 = () => {
         setRetrySerial(shouldRetry);
       } else {
         setRetrySerial(false);
-        setErrorFromStm32(false); // Reset error state after successful initialization
       }
     } catch (error) {
       console.error(
@@ -96,7 +95,6 @@ const useStm32 = () => {
       };
 
       const handleSerialPortClosed = () => {
-        setErrorFromStm32(true);
         setRetrySerial(true);
       };
 
@@ -110,7 +108,7 @@ const useStm32 = () => {
     }
   }, [socket]);
 
-  return { stm32Data, socket, errorFromStm32 };
+  return { stm32Data, socket };
 };
 
 export default useStm32;

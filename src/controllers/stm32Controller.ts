@@ -313,7 +313,16 @@ const recordingStm32Data = async (req: Request, res: Response) => {
       return res
         .status(200)
         .send({ exercise_id: exerciseId, message: "Recording stopped." });
+    } else if (state === "reset") {
+      // Reset recording
+      togglePushInterval("stop");
+      isRecording = true;
+      exerciseId = null;
+      return res
+        .status(200)
+        .send({ exercise_id: exerciseId, message: "Recording reseted." });
     }
+
   } catch (error) {
     // Handle unexpected errors
     console.error("Error in recordingStm32Data:", error);

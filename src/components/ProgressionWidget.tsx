@@ -70,10 +70,10 @@ export default function ProgressionWidget({
     if (stm32Data?.AutoState === "Resting") {
       setStretchProgress(stretchProgress + 1);
     }
-    if(stm32Data?.AutoState === "Stop" ){
+    if(stm32Data?.AutoState === "Stop" || stm32Data?.Mode === "Error" ){
       setStretchProgress(0);
     }
-  }, [stm32Data?.AutoState]);
+  }, [stm32Data?.AutoState, stm32Data?.Mode]);
 
   // Memoize totalStretch calculation
   const totalStretch = useMemo(() => {
