@@ -99,6 +99,8 @@ typedef struct
 
 } managerMotor_t;
 
+float cmdMaxTorque[MMOT_MOTOR_NBR];
+
 static uint32_t timerMs = 0;
 
 MotorControl motors[MMOT_MOTOR_NBR];
@@ -214,6 +216,10 @@ void ManagerMotor_Reset()
     motorsMaxPos[MMOT_MOTOR_2] = MMOT_MOT2_MAX_POS;
     motorsMinPos[MMOT_MOTOR_3] = MMOT_MOT3_MIN_POS;
     motorsMaxPos[MMOT_MOTOR_3] = MMOT_MOT3_MAX_POS;
+
+    cmdMaxTorque[MMOT_MOTOR_1] = 15;
+    cmdMaxTorque[MMOT_MOTOR_2] = 20;
+    cmdMaxTorque[MMOT_MOTOR_3] = 50;
 
     // Init Data for canBus messages
     for (uint8_t i = 0; i < 8; i++)
@@ -749,9 +755,9 @@ void ManagerMotor_MovePosSpeedTorque(uint8_t id, float pos, float minSpeed,
         maxSpeed = MMOT_MAX_SPEED_CMD;
     }
 
-    if (fabsf(torque) > MMOT_MAX_TORQUE_CMD)
+    if (fabsf(torque) > cmdMaxTorque[id])
     {
-        torque = MMOT_MAX_TORQUE_CMD;
+        torque = cmdMaxTorque[id];
     }
 
     motors[id].controlType  = MMOT_CONTROL_POS_SPEED_TORQUE;
