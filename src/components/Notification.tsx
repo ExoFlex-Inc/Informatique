@@ -192,7 +192,7 @@ const Notification = () => {
               },
             })}
           >
-            <Paper sx={{ width: "30vw", padding: 2 }}>
+            <Paper sx={{ width: "30vw", padding: 2, maxHeight: "280px", overflow: "auto" }}>
               <List>
                 {notifications && notifications.length > 0 ? (
                   notifications.map((notification: any, index: number) => (
