@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { messaging, onMessage } from "../utils/firebaseClient.ts";
+import { messaging, onForegroundMessage } from "../utils/firebaseClient.ts";
 import { useEffect } from "react";
 import { useUser } from "./use-user.ts";
 
@@ -33,11 +33,12 @@ export function useNotification() {
   // Listen for live FCM notifications and update cache directly
   useEffect(() => {
     if (!user?.user_id) return;
-
-    const unsubscribe = onMessage(messaging, (payload) => {
+  
+    const fetchMessage = async () => {
+      const payload = await onForegroundMessage();
       const { title, body, image } = payload.notification;
       const { id, type, sender_id, user_name } = payload.data;
-
+  
       const newNotification = {
         id,
         title,
@@ -48,17 +49,14 @@ export function useNotification() {
         sender_id,
         created_at: new Date(),
       };
-
-      // Update the cache directly
+  
       queryClient.setQueryData(["notification"], (old = []) => [
         newNotification,
         ...old,
       ]);
-    });
-
-    return () => {
-      unsubscribe();
     };
+  
+    fetchMessage();
   }, [queryClient, user?.user_id]);
 
   const deleteNotification = async (notificationId: string) => {

@@ -87,6 +87,7 @@ bool evOutsideLimitHit;
 bool exUpLimitHit;
 
 bool isAtFirstPos;
+bool resetCmdSent;
 
 bool changeSideFree;
 bool eversionFree;
@@ -207,6 +208,7 @@ void ManagerMovement_Reset()
 
     commandSent  = false;
     isAtFirstPos = false;
+    resetCmdSent = false;
 
     changeSideFree = false;
     eversionFree   = false;
@@ -776,7 +778,6 @@ void ManagerMovement_AutoStrectching()
     {
         managerMovement.autoState = MMOV_AUTO_STATE_STOP;
         ManagerMovement_StopMotorsCmd();
-        movementIdx = mvtNbr[exerciseIdx] - 1;
     }
     else
     {
@@ -866,7 +867,6 @@ void ManagerMovement_AutoStrectching()
             managerMovement.autoState = MMOV_AUTO_STATE_2FIRST_POS;
 
 #ifndef MMOV_DISABLE_TORQUE_STRETCHING
-            movementIdx--;
             cmd1Sent       = false;
             cmd2Sent       = false;
             cmd3Sent       = false;
@@ -883,6 +883,18 @@ void ManagerMovement_Auto2FirstPos()
      * is incremented to the last movement done, the flags are reset, and the
      * state is changed.
      */
+	if(!resetCmdSent)
+	{
+		movementIdx = mvtNbr[exerciseIdx] - 1;
+		if (exerciseIdx != 0)
+		{
+			for (uint8_t i = 0; i < exerciseIdx; i++)
+			{
+				movementIdx += mvtNbr[i];
+			}
+		}
+		resetCmdSent = true;
+	}
 
     if (!pos3Reached && mvtNbr[exerciseIdx] >= 3)
     {
@@ -915,6 +927,7 @@ void ManagerMovement_Auto2FirstPos()
         pos1Reached = false;
         pos2Reached = false;
         pos3Reached = false;
+        resetCmdSent = false;
 
         movementIdx++;
 

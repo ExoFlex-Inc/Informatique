@@ -1,69 +1,88 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
-import dotenv from "dotenv";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
 
-// Export Vite config
 export default defineConfig(({ mode }) => {
-  // Load environment variables based on `mode`
   const env = loadEnv(mode, process.cwd(), "");
-
-  // Manually set NODE_ENV if needed
-  process.env.NODE_ENV = mode === "production" ? "production" : "development";
+  const isProduction = mode === 'production';
 
   return {
     base: "/",
     define: {
       "process.env.SUPABASE_API_URL": JSON.stringify(env.SUPABASE_API_URL),
       "process.env.SUPABASE_ANON_KEY": JSON.stringify(env.SUPABASE_ANON_KEY),
+      "process.env.NODE_ENV": JSON.stringify(mode)
     },
     plugins: [
       react(),
       VitePWA({
-        strategies: "generateSW",
-        registerType: "autoUpdate",
-        srcDir: "src",
-        filename: "firebase-messaging-sw.js",
-        injectManifest: {
-          rollupFormat: "iife",
-        },
+        strategies: 'injectManifest',
+        injectRegister: null,
+        registerType: 'autoUpdate',
         devOptions: {
           enabled: true,
-          type: "classic",
+          type: 'module',
+          navigateFallback: 'index.html',
         },
         workbox: {
-          skipWaiting: true,
-          clientsClaim: true,
-          cleanupOutdatedCaches: true,
-          runtimeCaching: [
+          sourcemap: true,
+        //   // skipWaiting: true,
+        //   // clientsClaim: true,
+        //   // cleanupOutdatedCaches: true,
+        //   // globPatterns: ['**/*.{js,css,html,svg,png,ico,txt}'],
+        //   // runtimeCaching: [
+        //   //   {
+        //   //     urlPattern: /^https:\/\/supabase\.com\/api/,
+        //   //     handler: 'NetworkFirst',
+        //   //     options: {
+        //   //       cacheName: 'supabase-api-cache',
+        //   //       expiration: {
+        //   //         maxEntries: 20,
+        //   //         maxAgeSeconds: 24 * 60 * 60, // 1 day
+        //   //       },
+        //   //     },
+        //   //   },
+        //   //   {
+        //   //     urlPattern: ({ request }) => request.destination === 'image',
+        //   //     handler: 'CacheFirst',
+        //   //     options: {
+        //   //       cacheName: 'image-cache',
+        //   //       expiration: {
+        //   //         maxEntries: 60,
+        //   //         maxAgeSeconds: 7 * 24 * 60 * 60, // 1 week
+        //   //       },
+        //   //     },
+        //   //   },
+        //   // ],
+        },
+        manifest: {
+          name: 'ExoFlex',
+          short_name: 'ExoFlex',
+          description: 'ExoFlex HMI app',
+          theme_color: '#ffffff',
+          icons: [
             {
-              urlPattern: ({ url }) => url.pathname.startsWith('/'),
-              handler: 'NetworkFirst', // Fetch from network first, then fallback to cache
-              options: {
-                cacheName: 'runtime-cache',
-                expiration: {
-                  maxEntries: 50,
-                  maxAgeSeconds: 7 * 24 * 60 * 60, // Cache for a week
-                },
-              },
-            },
+              src: '/assets/logo_192x192.png',
+              sizes: '192x192',
+              type: 'image/png'
+            }
           ],
-        }
+        },
       }),
     ],
     build: {
       outDir: "dist",
-      assetsDir: "assets", // Explicitly set assets directory
-      emptyOutDir: true, // Clean the output directory before build
-      manifest: true, // Generate manifest.json
-      sourcemap: mode === "development", // Enable sourcemaps in development
+      assetsDir: "assets",
+      emptyOutDir: true,
+      manifest: true,
+      sourcemap: !isProduction,
       rollupOptions: {
         output: {
           manualChunks: {
-            // Split vendor code into separate chunks
             "react-vendor": ["react", "react-dom"],
             "mui-vendor": ["@mui/material", "@mui/icons-material"],
+            "supabase-vendor": ["@supabase/supabase-js"],
           },
         },
       },
@@ -71,17 +90,24 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 1338,
       host: true,
+      strictPort: true,
+      open: true,
     },
     preview: {
       port: 1338,
       host: true,
+      strictPort: true,
     },
     resolve: {
       alias: {
-        // Add path aliases for easier imports
         "@": path.resolve(__dirname, "./src"),
         "@assets": path.resolve(__dirname, "./public/assets"),
+        "@components": path.resolve(__dirname, "./src/components"),
+        "@utils": path.resolve(__dirname, "./src/utils"),
       },
+    },
+    optimizeDeps: {
+      include: ['react', 'react-dom', '@supabase/supabase-js'],
     },
     publicDir: "public",
   };
