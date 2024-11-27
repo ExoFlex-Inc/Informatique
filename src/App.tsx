@@ -143,7 +143,7 @@ function WebSocketProvider({ children }: { children: React.ReactNode }) {
   return (
     <WebSocketContext.Provider value={{ isReconnecting, lastReconnectAttempt }}>
       {children}
-      {updateAvailable && (
+      {/* {updateAvailable && (
         <Snackbar
           open={snackbarOpen}
           message="A new update is available!"
@@ -155,7 +155,7 @@ function WebSocketProvider({ children }: { children: React.ReactNode }) {
           }
           anchorOrigin={{ vertical: "top", horizontal: "center" }}
         />
-      )}
+      )} */}
     </WebSocketContext.Provider>
   );
 }

@@ -1,5 +1,7 @@
+// firebaseClient.ts
+
 import { initializeApp } from "firebase/app";
-import { getMessaging, onMessage } from "firebase/messaging";
+import { getMessaging, getToken, onMessage, type Messaging } from "firebase/messaging";
 
 // Firebase configuration object
 const firebaseConfig = {
@@ -12,10 +14,93 @@ const firebaseConfig = {
   measurementId: "G-R0PPB7W550",
 };
 
-// Initialize Firebase app client
+// Initialize Firebase app
 const app = initializeApp(firebaseConfig);
 
 // Initialize Firebase Messaging
-const messaging = getMessaging(app);
+const messaging: Messaging = getMessaging(app);
 
-export { messaging, onMessage };
+/**
+ * Function to register a service worker.
+ * @returns Promise<ServiceWorkerRegistration>
+ */
+export const getOrRegisterServiceWorker = (): Promise<ServiceWorkerRegistration> => {
+  if ("serviceWorker" in navigator) {
+    // Determine the service worker file based on the environment
+    const swPath =
+      import.meta.env.MODE === "production" ? "/sw.js" : "/dev-sw.js?dev-sw";
+    
+    // Determine the service worker type based on the environment
+    const swType =
+      import.meta.env.MODE === "production" ? "classic" : "module";
+
+    return navigator.serviceWorker
+      .register(swPath, { type: swType })
+      .then((registration) => {
+        console.log("Service Worker registered with scope:", registration.scope);
+        return registration;
+      })
+      .catch((error) => {
+        console.error("Service Worker registration failed:", error);
+        throw error; // Propagate the error to be handled by the caller
+      });
+  } else {
+    return Promise.reject(
+      new Error("Service workers are not supported in this browser.")
+    );
+  }
+};
+
+/**
+ * Function to get Firebase token for push notifications.
+ * @param vapidKey - Your VAPID key for FCM.
+ * @param registration - The ServiceWorkerRegistration object.
+ * @returns Promise<void>
+ */
+export const getFirebaseToken = (
+  vapidKey: string,
+  registration: ServiceWorkerRegistration
+): Promise<void> => {
+  return Notification.requestPermission()
+    .then((permission) => {
+      if (permission === "granted") {
+        console.log("Notification permission granted.");
+
+        // Get the registration token
+        return getToken(messaging, {
+          vapidKey: vapidKey, // Replace with your VAPID key
+          serviceWorkerRegistration: registration,
+        });
+      } else {
+        console.log("Unable to get permission to notify.");
+        return null;
+      }
+    })
+    .then((currentToken) => {
+      if (currentToken) {
+        console.log("FCM Token:", currentToken);
+        // TODO: Send the token to your server and update the UI if necessary
+      } else {
+        console.log(
+          "No registration token available. Request permission to generate one."
+        );
+      }
+    })
+    .catch((err) => {
+      console.error("Error occurred while requesting permission or retrieving token.", err);
+    });
+};
+
+/**
+ * Function to handle foreground messages.
+ * @returns Promise<any> - Resolves with the message payload.
+ */
+export const onForegroundMessage = (): Promise<any> =>
+  new Promise((resolve) => {
+    onMessage(messaging, (payload) => {
+      resolve(payload);
+    });
+  });
+
+// Export messaging and Firebase configuration for other uses
+export { messaging, app };
