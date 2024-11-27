@@ -1,64 +1,13 @@
 import { useState } from "react";
 import { getToken } from "firebase/messaging";
-import { messaging } from "../utils/firebaseClient.ts";
+import { getOrRegisterServiceWorker, messaging } from "../utils/firebaseClient.ts";
 import { useNavigate } from "react-router-dom";
 import Dialog from "../components/Dialog.tsx";
 import SignUp from "../components/Signup.tsx";
 import { TextField, IconButton, InputAdornment, Button } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useUser } from "../hooks/use-user.ts";
-
-async function registerFCMToken() {
-  try {
-    if ("serviceWorker" in navigator) {
-      let registration;
-
-      if (process.env.NODE_ENV === "production") {
-        // Register service worker for production
-        registration = await navigator.serviceWorker.register(
-          "/firebase-messaging-sw.js",
-          // { type: "module" } // Optional: Use 'classic' if your SW isn't a module
-        );
-      } else {
-        // Register service worker for development
-        registration = await navigator.serviceWorker.register(
-          "/src/firebase-messaging-sw.js",
-          { type: "module" },
-        );
-      }
-
-      console.log(
-        "Service Worker registered successfully with scope:",
-        registration.scope,
-      );
-
-      // Retrieve the FCM token
-      const fcmToken = await getToken(messaging, {
-        serviceWorkerRegistration: registration,
-        vapidKey: import.meta.env["VITE_FIREBASE_VAPID_KEY"],
-      });
-
-      if (fcmToken) {
-        console.log("FCM Token retrieved:", fcmToken);
-        return fcmToken;
-      } else {
-        console.warn(
-          "No registration token available. Request permission to generate one.",
-        );
-        return null;
-      }
-    } else {
-      console.error("Service Workers are not supported in this browser.");
-      return null;
-    }
-  } catch (error) {
-    console.error(
-      "Service worker registration or token retrieval failed:",
-      error,
-    );
-    return null;
-  }
-}
+import { getFirebaseToken } from "../utils/firebaseClient.ts";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -85,7 +34,16 @@ export default function Login() {
         throw new Error(data.error || "Login failed");
       }
 
-      const fcmToken = await registerFCMToken();
+      // Register the service worker
+      const registration = await getOrRegisterServiceWorker();
+
+      // Get the FCM token using the registered service worker
+      const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
+      if (!vapidKey) {
+        throw new Error("VAPID key is not defined in environment variables.");
+      }
+
+      const fcmToken = await getFirebaseToken(vapidKey, registration);
 
       // Update the profile with the FCM token and user metadata
       await updateProfile({
