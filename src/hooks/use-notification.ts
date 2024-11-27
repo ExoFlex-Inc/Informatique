@@ -61,5 +61,23 @@ export function useNotification() {
     };
   }, [queryClient, user?.user_id]);
 
-  return { notifications, isLoading, error };
+  const deleteNotification = async (notificationId: string) => {
+    try {
+      await fetch(`http://localhost:3001/notification/${notificationId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      queryClient.setQueryData(["notification"], (old = []) =>
+        old.filter((notif) => notif.id !== notificationId)
+      );
+    } catch (error) {
+      console.error("Failed to delete notification:", error);
+    }
+  };
+
+  return { notifications, isLoading, error, deleteNotification };
 }
