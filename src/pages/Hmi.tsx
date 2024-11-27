@@ -481,6 +481,7 @@ export default function HMI() {
         display: "flex",
         flexDirection: "column",
         height: "calc(100vh - 100px)",
+        overflow: "auto"
       }}
     >
       <Box>
