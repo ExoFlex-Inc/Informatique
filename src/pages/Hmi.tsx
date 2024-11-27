@@ -601,6 +601,7 @@ export default function HMI() {
         display: "flex",
         flexDirection: "column",
         height: "calc(100vh - 100px)",
+        overflow: "auto"
       }}
     >
       <Box>
@@ -778,7 +779,7 @@ export default function HMI() {
         setPainScale={setPainScale}
         openDialogPainScale={openDialogPainScale}
       />
-      <Box sx={{ height: "100%", alignContent: "end" }}>
+      <Box sx={{position: "sticky", bottom: 0, zIndex: 50, height: "100%", alignContent: "end"}}>
         <ManualControl
           errorFromStm32={errorFromStm32}
           stm32Data={stm32Data ?? null}

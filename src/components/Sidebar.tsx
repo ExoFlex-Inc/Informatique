@@ -240,11 +240,11 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
           </Box>
         </DrawerHeader>
         {open && (
-          <Box mb="25px">
+          <Box mb="5px">
             <Box display="flex" justifyContent="center" alignItems="center">
               <Avatar
                 src={user.avatar_url ? user.avatar_url : "/assets/user.png"}
-                sx={{ width: 100, height: 100 }}
+                sx={{ height: "83px", width: "83px", position: "flex" }}
               />
             </Box>
 
@@ -289,7 +289,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
           justifyContent="center"
           alignItems="end"
           height="100%"
-          paddingBottom="10px"
+          paddingBottom="5px"
         >
           <img
             alt="logo"
