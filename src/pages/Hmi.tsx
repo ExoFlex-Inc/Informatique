@@ -179,7 +179,7 @@ export default function HMI() {
       }, 100); // 100ms delay
     }
 
-  }, [stm32Data, planData]); 
+  }, [stm32Data?.AutoState, planData]); 
 
   useEffect(() => {
     // Cleanup any existing intervals before setting new ones

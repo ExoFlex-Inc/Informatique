@@ -310,6 +310,7 @@ const recordingStm32Data = async (req: Request, res: Response) => {
       // Stop recording
       togglePushInterval("stop");
       isRecording = false;
+      exerciseId = null;
       return res
         .status(200)
         .send({ exercise_id: exerciseId, message: "Recording stopped." });
