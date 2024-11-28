@@ -27,19 +27,25 @@ const Notification = () => {
   const [responseMessage, setResponseMessage] = useState<{
     [key: string]: string;
   }>({});
+  const [lastSeenNotifications, setLastSeenNotifications] = useState<string[]>(
+    [],
+  );
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const queryClient = useQueryClient();
-
   const { notifications, deleteNotification } = useNotification();
   const { user } = useUser();
 
   useEffect(() => {
-    if (notifications && notifications.length > 0) {
+    if (
+      notifications &&
+      notifications.length > 0 &&
+      !notifications.every((n) => lastSeenNotifications.includes(n.id))
+    ) {
       setIsNotifications(true);
     }
-  }, [notifications]);
+  }, [notifications, lastSeenNotifications]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -58,6 +64,14 @@ const Notification = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [dropdownRef, buttonRef]);
+
+  const handleNotificationClick = () => {
+    setIsOpen(!isOpen);
+    if (isNotifications) {
+      setIsNotifications(false);
+      setLastSeenNotifications(notifications.map((n: any) => n.id));
+    }
+  };
 
   // Handle Accept action
   const handleAccept = async (notification: any) => {
@@ -88,9 +102,7 @@ const Notification = () => {
         throw new Error("Error accepting relation request");
       }
 
-      //Invalidate relation query to refetch the updated data
       queryClient.invalidateQueries({ queryKey: ["relations"] });
-
       deleteNotification(notification.id);
 
       setResponseMessage((prev) => ({
@@ -113,7 +125,6 @@ const Notification = () => {
     }));
 
     try {
-      
       deleteNotification(notification.id);
 
       setResponseMessage((prev) => ({
@@ -131,13 +142,7 @@ const Notification = () => {
 
   return (
     <div>
-      <IconButton
-        ref={buttonRef}
-        onClick={() => {
-          setIsOpen(!isOpen);
-          if (isNotifications) setIsNotifications(false);
-        }}
-      >
+      <IconButton ref={buttonRef} onClick={handleNotificationClick}>
         {isNotifications ? (
           <Badge color="error" variant="dot">
             <NotificationsOutlinedIcon />
@@ -168,7 +173,14 @@ const Notification = () => {
               },
             })}
           >
-            <Paper sx={{ width: "30vw", padding: 2, maxHeight: "280px", overflow: "auto" }}>
+            <Paper
+              sx={{
+                width: "30vw",
+                padding: 2,
+                maxHeight: "280px",
+                overflow: "auto",
+              }}
+            >
               <List>
                 {notifications && notifications.length > 0 ? (
                   notifications.map((notification: any, index: number) => (
@@ -181,85 +193,87 @@ const Notification = () => {
                       </ListItemAvatar>
                       <Grid container>
                         <Grid item xs={12}>
-                        <Box sx={{display: "flex"}}>
-                          <ListItemText
-                            primary={
-                              <Typography variant="body1" component="span">
-                                {notification.user_name}
-                              </Typography>
-                            }
-                            secondary={
-                              <Box>
-                                {notification.body && (
-                                  <Typography
-                                    variant="body2"
-                                    component="span"
-                                    className="text-black"
-                                    display="block"
-                                  >
-                                    {notification.body}
-                                  </Typography>
-                                )}
-                                <Typography
-                                  variant="caption"
-                                  component="span"
-                                  display="block"
-                                  color="textSecondary"
-                                >
-                                  {new Date(
-                                    notification.created_at,
-                                  ).toLocaleString()}
+                          <Box sx={{ display: "flex" }}>
+                            <ListItemText
+                              primary={
+                                <Typography variant="body1" component="span">
+                                  {notification.user_name}
                                 </Typography>
-                              </Box>
-                            }
-                          />
-                          {notification.type === "plan" && 
-                            <Box sx={{alignContent: "center"}}>
-                              <IconButton onClick={() => handleReject(notification)}>
-                                <CloseIcon />
-                              </IconButton>
-                            </Box>
-                          }
-                        </Box>
-                        {notification.type === "relation" && (
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "flex-end",
-                              marginTop: 1,
-                            }}
-                          >
-                            {responseMessage[notification.id] ? (
-                              <Typography
-                                variant="body2"
-                                color="textSecondary"
-                              >
-                                {responseMessage[notification.id]}
-                              </Typography>
-                            ) : (
-                              <>
-                                <Button
-                                  variant="contained"
-                                  color="primary"
-                                  size="small"
-                                  sx={{ marginRight: 1 }}
-                                  onClick={() => handleAccept(notification)}
-                                >
-                                  Accept
-                                </Button>
-                                <Button
-                                  variant="outlined"
-                                  color="error"
-                                  size="small"
+                              }
+                              secondary={
+                                <Box>
+                                  {notification.body && (
+                                    <Typography
+                                      variant="body2"
+                                      component="span"
+                                      className="text-black"
+                                      display="block"
+                                    >
+                                      {notification.body}
+                                    </Typography>
+                                  )}
+                                  <Typography
+                                    variant="caption"
+                                    component="span"
+                                    display="block"
+                                    color="textSecondary"
+                                  >
+                                    {new Date(
+                                      notification.created_at
+                                    ).toLocaleString()}
+                                  </Typography>
+                                </Box>
+                              }
+                            />
+                            {notification.type !== "relation" && (
+                              <Box sx={{ alignContent: "center" }}>
+                                <IconButton
                                   onClick={() => handleReject(notification)}
                                 >
-                                  Reject
-                                </Button>
-                              </>
+                                  <CloseIcon />
+                                </IconButton>
+                              </Box>
                             )}
                           </Box>
-                        )}
-                      </Grid>
+                          {notification.type === "relation" && (
+                            <Box
+                              sx={{
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                marginTop: 1,
+                              }}
+                            >
+                              {responseMessage[notification.id] ? (
+                                <Typography
+                                  variant="body2"
+                                  color="textSecondary"
+                                >
+                                  {responseMessage[notification.id]}
+                                </Typography>
+                              ) : (
+                                <>
+                                  <Button
+                                    variant="contained"
+                                    color="primary"
+                                    size="small"
+                                    sx={{ marginRight: 1 }}
+                                    onClick={() => handleAccept(notification)}
+                                  >
+                                    Accept
+                                  </Button>
+                                  <Button
+                                    variant="outlined"
+                                    color="error"
+                                    size="small"
+                                    onClick={() => handleReject(notification)}
+                                  >
+                                    Reject
+                                  </Button>
+                                </>
+                              )}
+                            </Box>
+                          )}
+                        </Grid>
                       </Grid>
                     </ListItem>
                   ))
