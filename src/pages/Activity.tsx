@@ -585,10 +585,17 @@ export default function Activity() {
               <InputLabel id="session-select-label">Select Session</InputLabel>
               <Select
                 labelId="session-select-label"
-                id="session-select"
                 value={selectedSession}
                 label="Select Session"
-                onChange={handleSessionChange}
+                onChange={(e) => setSelectedSession(e.target.value)}
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 30 * 3.5 + 8, // Max height for 3 items
+                      width: 250,
+                    },
+                  },
+                }}
               >
                 {availableSessions.map((session) => (
                   <MenuItem key={session} value={session}>
