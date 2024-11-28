@@ -5,6 +5,7 @@ import {
   getSavedData,
   clearData,
   addRatedPainExerciseData,
+  deleteExerciseData
 } from "../controllers/stm32Controller.ts";
 
 const router = express.Router();
@@ -14,5 +15,6 @@ router.post("/record", recordingStm32Data);
 router.get("/saved-data", getSavedData);
 router.post("/clear-data", clearData);
 router.post("/rated_pain", addRatedPainExerciseData);
+router.delete("/exercise_data", deleteExerciseData);
 
 export default router;

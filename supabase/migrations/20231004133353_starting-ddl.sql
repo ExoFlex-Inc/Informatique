@@ -233,6 +233,12 @@ AS PERMISSIVE FOR DELETE
 TO public
 USING (user_id = auth.uid());
 
+CREATE POLICY "users can delete exercise data" 
+ON "public"."exercise_data"
+AS PERMISSIVE FOR DELETE
+TO public
+USING (user_id = auth.uid());
+
 CREATE POLICY "admins_and_managers_can_assign_admin" ON public.user_profiles
 AS PERMISSIVE FOR UPDATE
 TO public

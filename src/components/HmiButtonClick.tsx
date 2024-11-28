@@ -41,6 +41,21 @@ const HmiButtonClick: React.FC<ClickButtonProps> = ({
             ["Dashboard", "Network", "Planning", "Activity", "Manual"].forEach(enableItem);
           }
 
+          if (content === "Stop") {
+            const response = await fetch("http://localhost:3001/stm32/exercise_data", {
+              method: "DELETE",
+              headers: {
+              "Content-Type": "application/json",
+              },
+              credentials: "include",
+          });
+            if (response.ok) {
+              console.log(`Deleted exercice_data`);
+            } else {
+                console.error(`Failed to delete exercise_data.`);
+            }
+          }
+
           let state;
 
           if (content) {

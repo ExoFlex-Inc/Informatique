@@ -598,6 +598,34 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
   }
 });
 
+export const deleteExerciseData = async (req: Request, res: Response) => {
+
+  if (!exerciseId) {
+    return res
+      .status(400)
+      .json({ message: "Missing required parameter: exerciseId" });
+  }
+
+  try {
+    const { data, error } = await supaClient
+      .from("exercise_data")
+      .delete()
+      .eq("id", exerciseId)
+
+    if (error) {
+      return res.status(500).json({ message: error.message });
+    }
+
+    exerciseId= null;
+
+    return res
+      .status(200)
+      .json({ message: "Exercise data successfully deleted", data });
+  } catch (error) {
+    return res.status(500).json({ message: (error as any).message });
+  }
+};
+
 export {
   initializeSerialPort,
   recordingStm32Data,
