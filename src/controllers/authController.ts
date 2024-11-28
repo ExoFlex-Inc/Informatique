@@ -96,9 +96,14 @@ export const signup = async (req: Request, res: Response) => {
 
     // Set the access_token and refresh_token in cookies if session exists
     if (newUserProfile.session) {
-      res.cookie("access_token", newUserProfile.session.access_token, {
+      // res.cookie("access_token", newUserProfile.session.access_token, {
+      //   ...cookieOptions,
+      //   maxAge: 1000 * 60 * 60, // 1 hour
+      // });
+
+      res.cookie("access_token", newUserProfile.session.refresh_token, {
         ...cookieOptions,
-        maxAge: 1000 * 60 * 60, // 1 hour
+        maxAge: 1000 * 60 * 60 * 12, // 12 hours
       });
 
       res.cookie("refresh_token", newUserProfile.session.refresh_token, {
@@ -139,9 +144,14 @@ export const login = async (req: Request, res: Response) => {
     }
 
     // Set the access_token and refresh_token in cookies
+    // res.cookie("access_token", supabaseUser.session.access_token, {
+    //   ...cookieOptions,
+    //   maxAge: 1000 * 60 * 60, // 1 hour
+    // });
+
     res.cookie("access_token", supabaseUser.session.access_token, {
       ...cookieOptions,
-      maxAge: 1000 * 60 * 60, // 1 hour
+      maxAge: 1000 * 60 * 60 * 12, // 12 hours
     });
 
     res.cookie("refresh_token", supabaseUser.session.refresh_token, {
@@ -229,9 +239,13 @@ export const setSession = async (req: Request, res: Response) => {
 
     if (tokenData.access_token) {
       // Set the new tokens in cookies
+      // res.cookie("access_token", tokenData.access_token, {
+      //   ...cookieOptions,
+      //   maxAge: 1000 * 60 * 60, // 1 hour
+      // });
       res.cookie("access_token", tokenData.access_token, {
         ...cookieOptions,
-        maxAge: 1000 * 60 * 60, // 1 hour
+        maxAge: 1000 * 60 * 60 * 12, // 12 hours
       });
 
       res.cookie("refresh_token", tokenData.refresh_token, {
