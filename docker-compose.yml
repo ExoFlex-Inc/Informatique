@@ -12,6 +12,7 @@ services:
       - "1338:1338"
       - "3001:3001"
       - "8080:8080"
+      - "443:443"
     devices:
       - "/dev/ttyACM0:/dev/ttyACM0"
     privileged: true
