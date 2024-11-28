@@ -27,6 +27,7 @@ import { messaging } from "../utils/firebaseClient.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUser } from "../hooks/use-user.ts";
 import { ColorModeContext } from "../hooks/theme.ts";
+import { DisablePagesContext } from "../context/DisablePagesContext.tsx";
 
 export default function TopBar() {
   const { user } = useUser();
@@ -43,6 +44,7 @@ export default function TopBar() {
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error" | "info">(
     "success",
   );
+  const { disabledItems, disableItem, enableItem } = useContext(DisablePagesContext);
 
   useEffect(() => {
     const handleClickOutside = (event: any) => {
@@ -112,6 +114,7 @@ export default function TopBar() {
   };
 
   return (
+  <DisablePagesContext.Provider value={{ disabledItems, disableItem, enableItem }}>
     <Box className="nav-bar relative justify-end">
       <Box className="flex items-center">
         {user && (
@@ -125,7 +128,8 @@ export default function TopBar() {
         )}
         {user && <Notification />}
         {user && (
-          <IconButton className="h-14" onClick={onProfileClick}>
+          <IconButton className="h-14" 
+          onClick={disabledItems.length === 0 ? onProfileClick : undefined}>
             <Avatar
               ref={avatarRef}
               src={user?.avatar_url ? user.avatar_url : "/assets/user.png"}
@@ -195,5 +199,7 @@ export default function TopBar() {
         </Alert>
       </Snackbar>
     </Box>
+
+  </DisablePagesContext.Provider>
   );
 }

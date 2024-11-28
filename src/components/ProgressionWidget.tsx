@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useContext, useEffect, useMemo } from "react";
 import {
   Box,
   CircularProgress,
   type CircularProgressProps,
   Typography,
   LinearProgress,
-  Paper,
   Grid,
 } from "@mui/material";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { DisablePagesContext } from "../context/DisablePagesContext";
 
 function CircularProgressWithLabel(
   props: CircularProgressProps & { value: number },
@@ -54,28 +55,46 @@ export default function ProgressionWidget({
   planData,
   setOpenDialogPainScale,
 }: Props) {
-  const [stretchProgress, setStretchProgress] = useState(0);
-  const [repetitionProgress, setRepetitionProgress] = useState(0);
-  const [totalRepetition, setTotalRepetition] = useState(-1);
+  const queryClient = useQueryClient();
+  const { enableItem } = useContext(DisablePagesContext);
 
-  useEffect(() => {
-    let stretchDone = 0;
-    for (let i = stm32Data?.ExerciseIdx - 1; i > -1; i--) {
-      stretchDone = stretchDone + planData.plan[i].repetitions;
-    }
-    setStretchProgress(stretchDone);
-  }, [stm32Data?.ExerciseIdx]);
+  // **Define Query Keys**
+  const STRETCH_PROGRESS_KEY = ['stretchProgress'];
+  const TOTAL_REPETITION_KEY = ['totalRepetition'];
 
-  useEffect(() => {
-    if (stm32Data?.AutoState === "Resting") {
-      setStretchProgress(stretchProgress + 1);
-    }
-    if(stm32Data?.AutoState === "Stop" || stm32Data?.Mode === "Error" ){
-      setStretchProgress(0);
-    }
-  }, [stm32Data?.AutoState, stm32Data?.Mode]);
+  // **React Query: Fetching stretchProgress**
+  let { data: cachedProgress = 0 } = useQuery({
+    queryKey: STRETCH_PROGRESS_KEY,
+    queryFn: () => 0,
+    staleTime: Infinity,
+    initialData: 0,
+  });
 
-  // Memoize totalStretch calculation
+  // **React Query: Mutation to Update stretchProgress**
+  const updateProgress = useMutation({
+    mutationFn: (newProgress: number) => Promise.resolve(newProgress),
+    onSuccess: (newProgress) => {
+      queryClient.setQueryData(STRETCH_PROGRESS_KEY, newProgress);
+    },
+  });
+
+  // **React Query: Fetching totalRepetition**
+  const { data: totalRepetition = 0 } = useQuery({
+    queryKey: TOTAL_REPETITION_KEY,
+    queryFn: () => 0,
+    staleTime: Infinity,
+    initialData: 0,
+  });
+
+  // **React Query: Mutation to Update totalRepetition**
+  const updateTotalRepetition = useMutation({
+    mutationFn: (newTotal: number) => Promise.resolve(newTotal),
+    onSuccess: (newTotal) => {
+      queryClient.setQueryData(TOTAL_REPETITION_KEY, newTotal);
+    },
+  });
+
+  // **Calculate Total Stretch**
   const totalStretch = useMemo(() => {
     console.log(planData);
     if (!planData?.plan) return 1;
@@ -84,26 +103,35 @@ export default function ProgressionWidget({
     }, 0);
   }, [planData]);
 
+  // **Effect: Update stretchProgress based on AutoState and Mode**
+  useEffect(() => {
+    if (stm32Data?.AutoState === "Resting") {
+      updateProgress.mutate(cachedProgress + 1);
+    }
+    if (stm32Data?.AutoState === "Stop" || stm32Data?.Mode === "Error") {
+      updateProgress.mutate(0);
+    }
+  }, [stm32Data?.AutoState, stm32Data?.Mode]);
+
+  // **Effect: Update repetitionProgress and handle Pain Scale Dialog**
   useEffect(() => {
     if (stm32Data?.Repetitions !== undefined) {
-      setRepetitionProgress(stm32Data.Repetitions);
 
       // Open pain scale dialog if repetitions are complete
-      if (stretchProgress === totalStretch) {
+      if (cachedProgress >= totalStretch) {
         setOpenDialogPainScale(true);
-        setStretchProgress(0);
+        updateProgress.mutate(0); // Reset progress after completion
+        ["Dashboard", "Network", "Planning", "Activity", "Manual"].forEach(enableItem);
       }
     }
-  }, [stm32Data?.Repetitions, totalRepetition, setOpenDialogPainScale]);
+  }, [stm32Data?.Repetitions]);
 
+  // **Effect: Set Total Repetitions for Current Exercise**
   useEffect(() => {
     if (planData && stm32Data?.ExerciseIdx !== undefined) {
-      if (planData.plan[stm32Data.ExerciseIdx]?.repetitions) {
-        const repetitions = planData.plan[stm32Data.ExerciseIdx]?.repetitions;
-        setTotalRepetition(repetitions);
-      } else {
-        setTotalRepetition(0);
-      }
+      const currentExercise = planData.plan[stm32Data.ExerciseIdx];
+      const repetitions = currentExercise?.repetitions || 0;
+      updateTotalRepetition.mutate(repetitions);
     }
   }, [planData, stm32Data?.ExerciseIdx]);
 
@@ -123,7 +151,7 @@ export default function ProgressionWidget({
         sx={{ display: "flex", justifyContent: "center", marginBottom: "10px" }}
       >
         <CircularProgressWithLabel
-          value={(stretchProgress / totalStretch) * 100}
+          value={totalStretch > 0 ? (cachedProgress / totalStretch) * 100 : 0}
         />
       </Grid>
       <Grid item sx={{ alignContent: "center" }} xs={6}>
@@ -134,7 +162,7 @@ export default function ProgressionWidget({
           marginBottom="4px"
           fontSize="20px"
         >
-          {repetitionProgress + "/" + totalRepetition}
+          {stm32Data?.Repetitions + "/" + totalRepetition}
         </Typography>
         <Box
           sx={{
@@ -147,7 +175,7 @@ export default function ProgressionWidget({
             <LinearProgress
               color="success"
               variant="determinate"
-              value={(repetitionProgress / totalRepetition) * 100}
+              value={totalRepetition > 0 ? (stm32Data?.Repetitions / totalRepetition) * 100 : 0}
             />
           </Box>
         </Box>

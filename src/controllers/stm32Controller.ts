@@ -10,7 +10,8 @@ import {
 import { io } from "../server.ts";
 import supaClient from "../utils/supabaseClient.ts";
 
-const PUSH_INTERVAL_MS = 5000; // Push data every 5 seconds
+const PUSH_INTERVAL_SUPABASE_MS = 5000; // Push data every 5 seconds
+const PUSH_INTERVAL_MS = 1000; // Update saveData every second
 let pushInterval: NodeJS.Timeout | null = null;
 let isRecording = false;
 
@@ -258,7 +259,7 @@ const togglePushInterval = (state: string) => {
 
     pushInterval = setInterval(() => {
       updateDataToSupabase();
-    }, PUSH_INTERVAL_MS);
+    }, PUSH_INTERVAL_SUPABASE_MS);
     console.log("Push interval started");
   } else if (state === "stop" && pushInterval) {
     clearInterval(pushInterval);
@@ -310,13 +311,15 @@ const recordingStm32Data = async (req: Request, res: Response) => {
       // Stop recording
       togglePushInterval("stop");
       isRecording = false;
+      stopUpdateInterval();
       return res
         .status(200)
         .send({ exercise_id: exerciseId, message: "Recording stopped." });
     } else if (state === "reset") {
       // Reset recording
       togglePushInterval("stop");
-      isRecording = true;
+      isRecording = false;
+      stopUpdateInterval();
       exerciseId = null;
       return res
         .status(200)
@@ -438,6 +441,18 @@ const addRatedPainExerciseData = async (req: Request, res: Response) => {
   });
 };
 
+// Interval for periodic saveData updates
+let updateInterval: NodeJS.Timeout | null = null;
+
+// Stop the update interval when recording stops
+const stopUpdateInterval = () => {
+  if (updateInterval) {
+    clearInterval(updateInterval);
+    updateInterval = null;
+    console.log("Update interval cleared.");
+  }
+};
+
 // Function to initialize serial port
 const initializeSerialPort = asyncHandler(async (_, res: Response) => {
   const serialPort = getSerialPort();
@@ -499,7 +514,7 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
     newSerialPort.on("data", (data) => {
       receivedDataBuffer += data.toString();
       setReceivedDataBuffer(receivedDataBuffer);
-    
+
       while (
         receivedDataBuffer.includes("{") &&
         receivedDataBuffer.includes("}")
@@ -509,11 +524,13 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
         const jsonDataString = receivedDataBuffer.substring(startIdx, endIdx);
 
         try {
-          if (jsonDataString.trim().startsWith("{") && jsonDataString.trim().endsWith("}")) {
-            
+          if (
+            jsonDataString.trim().startsWith("{") &&
+            jsonDataString.trim().endsWith("}")
+          ) {
             const parsedData = JSON.parse(jsonDataString);
-            // console.log("Parsed data:", parsedData);
             io.emit("stm32Data", parsedData);
+
             if (isRecording === true) {
               // Append new data to prevAngles and prevTorques
               prevAngles.dorsiflexion.push(parsedData.Positions[0]);
@@ -527,41 +544,46 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
               prevSpeeds.dorsiflexion.push(parsedData.Speed[0]);
               prevSpeeds.eversion.push(parsedData.Speed[1]);
               prevSpeeds.extension.push(parsedData.Speed[2]);
-
-              // Update saveData with new values
-              saveData = {
-                ...saveData,
-                angles: {
-                  dorsiflexion: [...prevAngles.dorsiflexion],
-                  eversion: [...prevAngles.eversion],
-                  extension: [...prevAngles.extension],
-                },
-                angle_max: {
-                  dorsiflexion: Math.max(...prevAngles.dorsiflexion),
-                  eversion: Math.max(...prevAngles.eversion),
-                  extension: Math.max(...prevAngles.extension),
-                },
-                torques: {
-                  dorsiflexion: [...prevTorques.dorsiflexion],
-                  eversion: [...prevTorques.eversion],
-                  extension: [...prevTorques.extension],
-                },
-                torque_max: {
-                  dorsiflexion: Math.max(...prevTorques.dorsiflexion),
-                  eversion: Math.max(...prevTorques.eversion),
-                  extension: Math.max(...prevTorques.extension),
-                },
-                speeds: {
-                  dorsiflexion: [...prevSpeeds.dorsiflexion],
-                  eversion: [...prevSpeeds.eversion],
-                  extension: [...prevSpeeds.extension],
-                },
-                repetitions_done: parsedData.Repetitions,
-              };
             }
           }
+
+          // Start periodic updates
+          if (isRecording === true && !updateInterval) {
+            updateInterval = setInterval(() => {
+              if (isRecording === true) {
+                saveData = {
+                  ...saveData,
+                  angles: {
+                    dorsiflexion: [...prevAngles.dorsiflexion],
+                    eversion: [...prevAngles.eversion],
+                    extension: [...prevAngles.extension],
+                  },
+                  angle_max: {
+                    dorsiflexion: Math.max(...prevAngles.dorsiflexion, 0),
+                    eversion: Math.max(...prevAngles.eversion, 0),
+                    extension: Math.max(...prevAngles.extension, 0),
+                  },
+                  torques: {
+                    dorsiflexion: [...prevTorques.dorsiflexion],
+                    eversion: [...prevTorques.eversion],
+                    extension: [...prevTorques.extension],
+                  },
+                  torque_max: {
+                    dorsiflexion: Math.max(...prevTorques.dorsiflexion, 0),
+                    eversion: Math.max(...prevTorques.eversion, 0),
+                    extension: Math.max(...prevTorques.extension, 0),
+                  },
+                  speeds: {
+                    dorsiflexion: [...prevSpeeds.dorsiflexion],
+                    eversion: [...prevSpeeds.eversion],
+                    extension: [...prevSpeeds.extension],
+                  },
+                };
+              }
+            }, PUSH_INTERVAL_MS);
+          }
         } catch (err) {
-          // console.error("Error parsing JSON:", err);
+          console.error("Error parsing JSON:", err);
         }
 
         // Remove the processed data from the buffer
@@ -569,7 +591,6 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
         setReceivedDataBuffer(receivedDataBuffer);
       }
     });
-    
   } else {
     setSerialPort(null);
     console.error("No scanner port found.");

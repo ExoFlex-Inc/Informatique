@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useContext } from "react";
 import { IconButton, Button as MuiButton, Typography } from "@mui/material";
+import { DisablePagesContext } from "../context/DisablePagesContext";
 
 interface ClickButtonProps {
   label?: string;
@@ -26,9 +27,19 @@ const HmiButtonClick: React.FC<ClickButtonProps> = ({
   disabled,
   icon,
 }) => {
+  const { disableItem, enableItem } = useContext(DisablePagesContext);
+
   const handleClick = async () => {
+
     if( content === "Start" || content === "Stop" || content === "Pause" || mode === "Reset" ){
         try {
+          if (content === "Start") {
+            console.log("Disabling pages...");
+            ["Dashboard", "Network", "Planning", "Activity", "Manual"].forEach(disableItem);
+          } else {
+            console.log("Enabling pages...");
+            ["Dashboard", "Network", "Planning", "Activity", "Manual"].forEach(enableItem);
+          }
 
           let state;
 
