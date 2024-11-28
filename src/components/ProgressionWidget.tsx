@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useContext, useEffect, useMemo } from "react";
 import {
   Box,
   CircularProgress,
@@ -8,6 +8,7 @@ import {
   Grid,
 } from "@mui/material";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { DisablePagesContext } from "../context/DisablePagesContext";
 
 function CircularProgressWithLabel(
   props: CircularProgressProps & { value: number },
@@ -55,6 +56,7 @@ export default function ProgressionWidget({
   setOpenDialogPainScale,
 }: Props) {
   const queryClient = useQueryClient();
+  const { enableItem } = useContext(DisablePagesContext);
 
   // **Define Query Keys**
   const STRETCH_PROGRESS_KEY = ['stretchProgress'];
@@ -119,6 +121,7 @@ export default function ProgressionWidget({
       if (cachedProgress >= totalStretch) {
         setOpenDialogPainScale(true);
         updateProgress.mutate(0); // Reset progress after completion
+        ["Dashboard", "Network", "Planning", "Activity", "Manual"].forEach(enableItem);
       }
     }
   }, [stm32Data?.Repetitions]);
