@@ -37,6 +37,8 @@ import { useUser } from "./hooks/use-user.ts";
 import { useEffect,useRef, useState } from "react";
 import UpdateWidget from "./components/UpdateWidget";
 import { createContext, useContext } from 'react';
+import { DisablePagesContext } from "./context/DisablePagesContext.tsx";
+import { DisablePagesProvider } from "./provider/DisablePagesProvider.tsx";
 
 // Create a query client with default options
 const queryClient = new QueryClient({
@@ -230,15 +232,13 @@ function AppLayout() {
   if (user) {
     return (
       <>
-        {/* <UpdateWidget
-            onCheckUpdates={checkForUpdates}
-            onUpdate={performUpdate}
-        /> */}
+      <DisablePagesProvider>
         <ProSideBar permissions={user.permissions} />
         <main className="content overflow-hidden">
           <TopBar />
           <Outlet />
         </main>
+      </DisablePagesProvider>
       </>
     );
   }
@@ -266,7 +266,7 @@ function App() {
                 <RouterProvider router={router} />
               </div>
             </ErrorBoundary>
-            <ReactQueryDevtools initialIsOpen={false} />
+            <ReactQueryDevtools/>
           </WebSocketProvider>
         </PersistQueryClientProvider>
       </ThemeProvider>

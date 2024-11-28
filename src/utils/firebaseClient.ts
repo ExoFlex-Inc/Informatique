@@ -38,7 +38,12 @@ export const getOrRegisterServiceWorker = (): Promise<ServiceWorkerRegistration>
       .register(swPath, { type: swType })
       .then((registration) => {
         console.log("Service Worker registered with scope:", registration.scope);
-        return registration;
+
+        // Wait until the service worker is ready
+        return navigator.serviceWorker.ready.then(() => {
+          console.log("Service Worker is ready.");
+          return registration; // Return the registration once it's ready
+        });
       })
       .catch((error) => {
         console.error("Service Worker registration failed:", error);

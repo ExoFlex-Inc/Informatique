@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Box,
   IconButton,
@@ -31,6 +31,7 @@ import {
   VideogameAsset,
 } from "@mui/icons-material";
 import { useUser } from "../hooks/use-user";
+import { DisablePagesContext } from "../context/DisablePagesContext";
 
 interface ProSidebarProps {
   permissions: string;
@@ -40,16 +41,17 @@ interface ItemProps {
   text: string;
   to: string;
   open: boolean;
+  disabled?: boolean;
 }
 
-const Item: React.FC<ItemProps> = ({ text, to, open }) => {
+const Item: React.FC<ItemProps> = ({ text, to, open, disabled }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
   const backgroundColor = theme.palette.mode === "dark" ? "#2B5BB6" : "#7da9f7";
 
   const handleClick = () => {
-    navigate(to);
+    if (!disabled) navigate(to);
   };
 
   return (
@@ -131,6 +133,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
   const isTablet = useMediaQuery("(max-width: 1024px)");
   const [open, setOpen] = useState(true);
   const drawerWidth = 240;
+  const { disabledItems, disableItem, enableItem } = useContext(DisablePagesContext);
   const menuItems = [
     {
       text: "Dashboard",
@@ -224,85 +227,88 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
   }, [isTablet]);
 
   return (
-    <Box sx={{ display: "flex" }}>
-      <Drawer variant="permanent" sx={{ zIndex: 30 }} open={open}>
-        <DrawerHeader>
-          <Box
-            sx={{
-              width: "100%",
-              display: "flex",
-              justifyContent: open ? "end" : "center",
-            }}
-          >
-            <IconButton onClick={() => setOpen(!open)}>
-              {open ? <ChevronLeft /> : <Menu />}
-            </IconButton>
-          </Box>
-        </DrawerHeader>
-        {open && (
-          <Box mb="5px">
-            <Box display="flex" justifyContent="center" alignItems="center">
-              <Avatar
-                src={user.avatar_url ? user.avatar_url : "/assets/user.png"}
-                sx={{ height: "83px", width: "83px", position: "flex" }}
-              />
+    <DisablePagesContext.Provider value={{ disabledItems, disableItem, enableItem }}>
+      <Box sx={{ display: "flex" }}>
+        <Drawer variant="permanent" sx={{ zIndex: 30 }} open={open}>
+          <DrawerHeader>
+            <Box
+              sx={{
+                width: "100%",
+                display: "flex",
+                justifyContent: open ? "end" : "center",
+              }}
+            >
+              <IconButton onClick={() => setOpen(!open)}>
+                {open ? <ChevronLeft /> : <Menu />}
+              </IconButton>
             </Box>
+          </DrawerHeader>
+          {open && (
+            <Box mb="5px">
+              <Box display="flex" justifyContent="center" alignItems="center">
+                <Avatar
+                  src={user.avatar_url ? user.avatar_url : "/assets/user.png"}
+                  sx={{ height: "83px", width: "83px", position: "flex" }}
+                />
+              </Box>
 
-            <Box textAlign="center">
-              <Typography
-                className={
-                  user?.first_name.length < 15 ? "text-4xl" : "text-xl"
-                }
-                variant="h2"
-                color={colors.grey[100]}
-                fontWeight="bold"
-                sx={{ m: "10px 0 0 0" }}
-              >
-                {user?.first_name || "Client"}
-              </Typography>
-              <Typography variant="h5" color={colors.greenAccent[500]}>
-                {user?.speciality || "Speciality"}
-              </Typography>
+              <Box textAlign="center">
+                <Typography
+                  className={
+                    user?.first_name.length < 15 ? "text-4xl" : "text-xl"
+                  }
+                  variant="h2"
+                  color={colors.grey[100]}
+                  fontWeight="bold"
+                  sx={{ m: "10px 0 0 0" }}
+                >
+                  {user?.first_name || "Client"}
+                </Typography>
+                <Typography variant="h5" color={colors.greenAccent[500]}>
+                  {user?.speciality || "Speciality"}
+                </Typography>
+              </Box>
             </Box>
+          )}
+          <List sx={{ paddingY: "0px" }}>
+            {menuItems
+              .filter((item) => {
+                if (item.permissions === "all") return true;
+                if (Array.isArray(item.permissions)) {
+                  return item.permissions.includes(permissions);
+                }
+                return item.permissions === permissions;
+              })
+              .map((item) => (
+                <Item
+                  key={item.text}
+                  text={item.text}
+                  to={item.to}
+                  open={open}
+                  disabled={disabledItems.includes(item.text)}
+                />
+              ))}
+          </List>
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="end"
+            height="100%"
+            paddingBottom="5px"
+          >
+            <img
+              alt="logo"
+              src="/assets/logo.png"
+              style={{
+                paddingTop: "10px",
+                height: "auto",
+                maxWidth: open ? "45%" : "80%",
+              }}
+            />
           </Box>
-        )}
-        <List sx={{ paddingY: "0px" }}>
-          {menuItems
-            .filter((item) => {
-              if (item.permissions === "all") return true;
-              if (Array.isArray(item.permissions)) {
-                return item.permissions.includes(permissions);
-              }
-              return item.permissions === permissions;
-            })
-            .map((item) => (
-              <Item
-                key={item.text}
-                text={item.text}
-                to={item.to}
-                open={open}
-              />
-            ))}
-        </List>
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="end"
-          height="100%"
-          paddingBottom="5px"
-        >
-          <img
-            alt="logo"
-            src="/assets/logo.png"
-            style={{
-              paddingTop: "10px",
-              height: "auto",
-              maxWidth: open ? "45%" : "80%",
-            }}
-          />
-        </Box>
-      </Drawer>
-    </Box>
+        </Drawer>
+      </Box>
+    </DisablePagesContext.Provider>
   );
 };
 
