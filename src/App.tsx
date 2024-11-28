@@ -252,6 +252,22 @@ function AppLayout() {
 
 function App() {
   const [theme, colorMode] = useMode();
+
+  useEffect(() => {
+    const handleContextMenu = (event: MouseEvent) => {
+      if (event.ctrlKey || event.shiftKey) {
+        return;
+      }
+      event.preventDefault();
+    };
+
+    document.addEventListener("contextmenu", handleContextMenu);
+
+    return () => {
+      document.removeEventListener("contextmenu", handleContextMenu);
+    };
+  }, []);
+
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
