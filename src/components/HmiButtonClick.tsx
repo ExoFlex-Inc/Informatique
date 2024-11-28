@@ -36,7 +36,7 @@ const HmiButtonClick: React.FC<ClickButtonProps> = ({
           if (content === "Start") {
             console.log("Disabling pages...");
             ["Dashboard", "Network", "Planning", "Activity", "Manual"].forEach(disableItem);
-          } else if (content === "Stop") {
+          } else {
             console.log("Enabling pages...");
             ["Dashboard", "Network", "Planning", "Activity", "Manual"].forEach(enableItem);
           }
