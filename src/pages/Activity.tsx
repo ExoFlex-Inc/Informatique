@@ -141,8 +141,8 @@ export default function Activity() {
       if (!selectedUser || selectedUser.length === 0 || !date) return;
 
       const userId = selectedUser[0].user_id;
-      const startDate = date[0].toISOString();
-      const endDate = date[1].toISOString();
+      const startDate = new Date(date[0]).toISOString(); // Already in UTC
+      const endDate = new Date(date[1]).toISOString(); // Already in UTC
 
       const url = `http://localhost:3001/exercise-data/dates/${userId}?start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`;
 

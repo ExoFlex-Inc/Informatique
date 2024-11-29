@@ -10,12 +10,16 @@ export const getExerciseData = async (req: Request, res: Response) => {
   }
 
   try {
+    // Extend end_date to include the entire day
+    const adjustedEndDate = new Date(end_date as string);
+    adjustedEndDate.setUTCHours(23, 59, 59, 999); // Set to 23:59:59.999 UTC
+
     const { data, error } = await supaClient
       .from("exercise_data")
       .select("*")
       .eq("user_id", userId)
       .gte("created_at", start_date)
-      .lte("created_at", end_date)
+      .lte("created_at", adjustedEndDate.toISOString())
       .order("created_at", { ascending: true });
 
     if (error) {
