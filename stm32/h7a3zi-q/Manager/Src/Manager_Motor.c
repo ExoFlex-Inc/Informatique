@@ -233,11 +233,9 @@ void ManagerMotor_Reset()
     managerMotor.setupFirstPass = true;
     managerMotor.state          = MMOT_STATE_WAITING_SECURITY;
 
-
     managerMotor.acc[MMOT_MOTOR_1] = MMOT_MOTOR1_ACC;
     managerMotor.acc[MMOT_MOTOR_2] = MMOT_MOTOR2_ACC;
     managerMotor.acc[MMOT_MOTOR_3] = MMOT_MOTOR3_ACC;
-
 
     torqueMaxKp = 10.0;
     torqueMinKp = 3.0;
@@ -520,14 +518,15 @@ void ManagerMotor_NextCmdPosSpeed(uint8_t id)
 
         if (dir == 1 && motors[id].cmdSpeed > dir * motors[id].goalSpeed)
         {
-        	motors[id].cmdSpeed = dir * motors[id].goalSpeed;
+            motors[id].cmdSpeed = dir * motors[id].goalSpeed;
         }
         if (dir == -1 && motors[id].cmdSpeed < dir * motors[id].goalSpeed)
         {
-        	motors[id].cmdSpeed = dir * motors[id].goalSpeed;
+            motors[id].cmdSpeed = dir * motors[id].goalSpeed;
         }
 
-        motors[id].cmdPosition = motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
+        motors[id].cmdPosition =
+            motors[id].cmdPosition + motors[id].cmdSpeed * MMOT_DT_S;
 
         // Gravity compensation
         if (id == MMOT_MOTOR_3)

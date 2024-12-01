@@ -59,8 +59,8 @@ export default function ProgressionWidget({
   const { enableItem } = useContext(DisablePagesContext);
 
   // **Define Query Keys**
-  const STRETCH_PROGRESS_KEY = ['stretchProgress'];
-  const TOTAL_REPETITION_KEY = ['totalRepetition'];
+  const STRETCH_PROGRESS_KEY = ["stretchProgress"];
+  const TOTAL_REPETITION_KEY = ["totalRepetition"];
 
   // **React Query: Fetching stretchProgress**
   let { data: cachedProgress = 0 } = useQuery({
@@ -116,12 +116,13 @@ export default function ProgressionWidget({
   // **Effect: Update repetitionProgress and handle Pain Scale Dialog**
   useEffect(() => {
     if (stm32Data?.Repetitions !== undefined) {
-
       // Open pain scale dialog if repetitions are complete
       if (cachedProgress >= totalStretch) {
         setOpenDialogPainScale(true);
         updateProgress.mutate(0); // Reset progress after completion
-        ["Dashboard", "Network", "Planning", "Activity", "Manual"].forEach(enableItem);
+        ["Dashboard", "Network", "Planning", "Activity", "Manual"].forEach(
+          enableItem,
+        );
       }
     }
   }, [stm32Data?.Repetitions]);
@@ -175,7 +176,11 @@ export default function ProgressionWidget({
             <LinearProgress
               color="success"
               variant="determinate"
-              value={totalRepetition > 0 ? (stm32Data?.Repetitions / totalRepetition) * 100 : 0}
+              value={
+                totalRepetition > 0
+                  ? (stm32Data?.Repetitions / totalRepetition) * 100
+                  : 0
+              }
             />
           </Box>
         </Box>
