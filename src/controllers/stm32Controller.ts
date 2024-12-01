@@ -325,7 +325,6 @@ const recordingStm32Data = async (req: Request, res: Response) => {
         .status(200)
         .send({ exercise_id: exerciseId, message: "Recording reseted." });
     }
-
   } catch (error) {
     // Handle unexpected errors
     console.error("Error in recordingStm32Data:", error);
@@ -599,7 +598,6 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
 });
 
 export const deleteExerciseData = async (req: Request, res: Response) => {
-
   if (!exerciseId) {
     return res
       .status(400)
@@ -610,13 +608,13 @@ export const deleteExerciseData = async (req: Request, res: Response) => {
     const { data, error } = await supaClient
       .from("exercise_data")
       .delete()
-      .eq("id", exerciseId)
+      .eq("id", exerciseId);
 
     if (error) {
       return res.status(500).json({ message: error.message });
     }
 
-    exerciseId= null;
+    exerciseId = null;
 
     return res
       .status(200)
