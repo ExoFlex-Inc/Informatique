@@ -1,6 +1,9 @@
-
-import { cleanupOutdatedCaches, createHandlerBoundToURL, precacheAndRoute } from 'workbox-precaching';
-import { NavigationRoute, registerRoute } from 'workbox-routing';
+import {
+  cleanupOutdatedCaches,
+  createHandlerBoundToURL,
+  precacheAndRoute,
+} from "workbox-precaching";
+import { NavigationRoute, registerRoute } from "workbox-routing";
 
 import { initializeApp } from "firebase/app";
 import { getMessaging, onBackgroundMessage } from "firebase/messaging/sw";
@@ -18,10 +21,9 @@ if (import.meta.env.DEV) {
 }
 
 // Register Navigation Route to serve index.html for navigation requests
-registerRoute(new NavigationRoute(
-  createHandlerBoundToURL('index.html'),
-  { allowList },
-));
+registerRoute(
+  new NavigationRoute(createHandlerBoundToURL("index.html"), { allowList }),
+);
 
 // Initialize Firebase
 const firebaseApp = initializeApp({
@@ -39,39 +41,39 @@ const messaging = getMessaging(firebaseApp);
 
 // Handle background messages via Firebase
 onBackgroundMessage(messaging, (payload) => {
-  const notificationTitle = payload.notification.title || 'Notification';
+  const notificationTitle = payload.notification.title || "Notification";
   const notificationOptions = {
-    body: payload.notification.body || 'New message',
-    icon: payload.notification.icon || 'assets/logo_192x192.png',
+    body: payload.notification.body || "New message",
+    icon: payload.notification.icon || "assets/logo_192x192.png",
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
 // Handle notification click events
-self.addEventListener('notificationclick', (event) => {
+self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
   event.waitUntil(
-    self.clients.matchAll({ type: 'window' }).then((clientList) => {
+    self.clients.matchAll({ type: "window" }).then((clientList) => {
       for (const client of clientList) {
-        if (client.url === '/' && 'focus' in client) {
+        if (client.url === "/" && "focus" in client) {
           return client.focus();
         }
       }
       if (self.clients.openWindow) {
-        return self.clients.openWindow('/');
+        return self.clients.openWindow("/");
       }
-    })
+    }),
   );
 });
 
 // Install event: Skip waiting to activate the new service worker immediately
-self.addEventListener('install', (event) => {
+self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
 
 // Activate event: Claim clients to control pages immediately
-self.addEventListener('activate', (event) => {
+self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
 });

@@ -16,7 +16,7 @@ import {
   ListItemAvatar,
   createTheme,
 } from "@mui/material";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
 import { useNotification } from "../hooks/use-notification.ts";
 import { useUser } from "../hooks/use-user.ts";
 import { useQueryClient } from "@tanstack/react-query";
@@ -219,7 +219,7 @@ const Notification = () => {
                                     color="textSecondary"
                                   >
                                     {new Date(
-                                      notification.created_at
+                                      notification.created_at,
                                     ).toLocaleString()}
                                   </Typography>
                                 </Box>
