@@ -33,12 +33,12 @@ export function useNotification() {
   // Listen for live FCM notifications and update cache directly
   useEffect(() => {
     if (!user?.user_id) return;
-  
+
     const fetchMessage = async () => {
       const payload = await onForegroundMessage();
       const { title, body, image } = payload.notification;
       const { id, type, sender_id, user_name } = payload.data;
-  
+
       const newNotification = {
         id,
         title,
@@ -49,13 +49,13 @@ export function useNotification() {
         sender_id,
         created_at: new Date(),
       };
-  
+
       queryClient.setQueryData(["notification"], (old = []) => [
         newNotification,
         ...old,
       ]);
     };
-  
+
     fetchMessage();
   }, [queryClient, user?.user_id]);
 
@@ -70,7 +70,7 @@ export function useNotification() {
       });
 
       queryClient.setQueryData(["notification"], (old = []) =>
-        old.filter((notif) => notif.id !== notificationId)
+        old.filter((notif) => notif.id !== notificationId),
       );
     } catch (error) {
       console.error("Failed to delete notification:", error);

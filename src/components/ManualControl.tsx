@@ -167,7 +167,9 @@ const ManualControl = ({
                             mainColor="blueAccent.main"
                             hoverColor="blueAccent.hover"
                             textColor="white"
-                            disabled={errorFromStm32 !== '0' || changeSideDisabled}
+                            disabled={
+                              errorFromStm32 !== "0" || changeSideDisabled
+                            }
                             icon={<ArrowBack />}
                             socket={socket}
                           />
@@ -183,7 +185,9 @@ const ManualControl = ({
                             mainColor="blueAccent.main"
                             hoverColor="blueAccent.hover"
                             textColor="white"
-                            disabled={errorFromStm32 !== '0' || changeSideDisabled}
+                            disabled={
+                              errorFromStm32 !== "0" || changeSideDisabled
+                            }
                             icon={<ArrowForward />}
                             socket={socket}
                           />
@@ -214,7 +218,9 @@ const ManualControl = ({
                             mainColor="blueAccent.main"
                             hoverColor="blueAccent.hover"
                             textColor="white"
-                            disabled={errorFromStm32 !== '0' || changeSideDisabled}
+                            disabled={
+                              errorFromStm32 !== "0" || changeSideDisabled
+                            }
                             icon={<ArrowUpward />}
                             socket={socket}
                           />
@@ -225,7 +231,9 @@ const ManualControl = ({
                             mainColor="blueAccent.main"
                             hoverColor="blueAccent.hover"
                             textColor="white"
-                            disabled={errorFromStm32 !== '0' || changeSideDisabled}
+                            disabled={
+                              errorFromStm32 !== "0" || changeSideDisabled
+                            }
                             icon={<ArrowDownward />}
                             socket={socket}
                           />
@@ -256,7 +264,9 @@ const ManualControl = ({
                             mainColor="blueAccent.main"
                             hoverColor="blueAccent.hover"
                             textColor="text-white"
-                            disabled={errorFromStm32 !== '0' || changeSideDisabled}
+                            disabled={
+                              errorFromStm32 !== "0" || changeSideDisabled
+                            }
                             icon={<ArrowUpward />}
                             socket={socket}
                           />
@@ -267,7 +277,9 @@ const ManualControl = ({
                             mainColor="blueAccent.main"
                             hoverColor="blueAccent.hover"
                             textColor="text-white"
-                            disabled={errorFromStm32 !== '0' || changeSideDisabled}
+                            disabled={
+                              errorFromStm32 !== "0" || changeSideDisabled
+                            }
                             icon={<ArrowDownward />}
                             socket={socket}
                           />
@@ -381,7 +393,7 @@ const ManualControl = ({
                           textColor="white"
                           disabled={
                             changeSideDisabled ||
-                            errorFromStm32 !== '0' ||
+                            errorFromStm32 !== "0" ||
                             stm32Data?.CurrentLegSide == "LegIsLeft"
                           }
                           icon={<ArrowBack />}
@@ -402,7 +414,7 @@ const ManualControl = ({
                           textColor="white"
                           disabled={
                             changeSideDisabled ||
-                            errorFromStm32 !== '0' ||
+                            errorFromStm32 !== "0" ||
                             stm32Data?.CurrentLegSide == "LegIsRight"
                           }
                           icon={<ArrowForward />}
