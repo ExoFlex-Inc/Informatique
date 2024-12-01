@@ -7,5 +7,5 @@ export const DisablePagesContext = createContext<{
 }>({
   disabledItems: [], // Add this property to the default value
   disableItem: () => {},
-  enableItem: () => {}
+  enableItem: () => {},
 });

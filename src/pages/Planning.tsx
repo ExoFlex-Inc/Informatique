@@ -134,10 +134,8 @@ export default function Planning() {
     }
   };
 
-
   const sendInvitation = async () => {
     try {
-
       const response = await fetch("http://localhost:3001/notification", {
         method: "POST",
         headers: {
@@ -157,7 +155,6 @@ export default function Planning() {
       if (!response.ok) {
         throw new Error(`Failed to send invitation: ${response.statusText}`);
       }
-
     } catch (error) {
       console.error("Error sending invitation:", error);
     }

@@ -564,7 +564,7 @@ export default function Activity() {
         flexDirection: "column",
         height: "calc(100vh - 100px)",
         overflow: "auto",
-        position: "relative"
+        position: "relative",
       }}
     >
       <div className="flex flex-wrap items-center gap-4">

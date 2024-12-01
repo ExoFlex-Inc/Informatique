@@ -5,7 +5,7 @@ import {
   getSavedData,
   clearData,
   addRatedPainExerciseData,
-  deleteExerciseData
+  deleteExerciseData,
 } from "../controllers/stm32Controller.ts";
 
 const router = express.Router();
