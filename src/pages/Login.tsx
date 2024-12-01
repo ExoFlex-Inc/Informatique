@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { getToken } from "firebase/messaging";
-import { getOrRegisterServiceWorker, messaging } from "../utils/firebaseClient.ts";
+import {
+  getOrRegisterServiceWorker,
+  messaging,
+} from "../utils/firebaseClient.ts";
 import { useNavigate } from "react-router-dom";
 import Dialog from "../components/Dialog.tsx";
 import SignUp from "../components/Signup.tsx";

@@ -34,7 +34,8 @@ export default function Signup({ onClose }: SignupProps) {
     setShowConfirmPassword((show) => !show);
   };
 
-  const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  const passwordRegex =
+    /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
   const handlePasswordChange = (value: string) => {
     setPassword(value);
@@ -73,7 +74,7 @@ export default function Signup({ onClose }: SignupProps) {
     const data = await response.json();
     if (response.ok) {
       alert(
-        "Sign-up successful! Please check your email to verify your account."
+        "Sign-up successful! Please check your email to verify your account.",
       );
       if (onClose) onClose();
     } else {
