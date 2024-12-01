@@ -375,9 +375,9 @@ void ManagerMovement_ChangeSide()
 
         break;
     case MMOV_CHANGESIDE_STATE_RESTPOS:
-    	ManagerMovement_RestPos();
+        ManagerMovement_RestPos();
 
-    	break;
+        break;
     }
 }
 
@@ -640,7 +640,7 @@ void ManagerMovement_ResetExercise()
     }
     if (managerMovement.autoState != MMOV_AUTO_STATE_READY)
     {
-    	managerMovement.autoState = MMOV_AUTO_STATE_WAITING4PLAN;
+        managerMovement.autoState = MMOV_AUTO_STATE_WAITING4PLAN;
     }
 }
 
@@ -883,18 +883,18 @@ void ManagerMovement_Auto2FirstPos()
      * is incremented to the last movement done, the flags are reset, and the
      * state is changed.
      */
-	if(!resetCmdSent)
-	{
-		movementIdx = mvtNbr[exerciseIdx] - 1;
-		if (exerciseIdx != 0)
-		{
-			for (uint8_t i = 0; i < exerciseIdx; i++)
-			{
-				movementIdx += mvtNbr[i];
-			}
-		}
-		resetCmdSent = true;
-	}
+    if (!resetCmdSent)
+    {
+        movementIdx = mvtNbr[exerciseIdx] - 1;
+        if (exerciseIdx != 0)
+        {
+            for (uint8_t i = 0; i < exerciseIdx; i++)
+            {
+                movementIdx += mvtNbr[i];
+            }
+        }
+        resetCmdSent = true;
+    }
 
     if (!pos3Reached && mvtNbr[exerciseIdx] >= 3)
     {
@@ -924,9 +924,9 @@ void ManagerMovement_Auto2FirstPos()
     {
         isAtFirstPos = true;
 
-        pos1Reached = false;
-        pos2Reached = false;
-        pos3Reached = false;
+        pos1Reached  = false;
+        pos2Reached  = false;
+        pos3Reached  = false;
         resetCmdSent = false;
 
         movementIdx++;
@@ -1052,9 +1052,9 @@ void ManagerMovement_HomingEversion()
                 ManagerMotor_StopManualMovement(MMOT_MOTOR_2);
 
                 middlePos = ManagerMovement_GetMiddlePos(leftPos, rightPos);
-                if(managerMovement.currentLegSide == MMOV_LEG_IS_LEFT)
+                if (managerMovement.currentLegSide == MMOV_LEG_IS_LEFT)
                 {
-                	middlePos = -middlePos;
+                    middlePos = -middlePos;
                 }
             }
 
@@ -1069,7 +1069,7 @@ void ManagerMovement_HomingEversion()
                 {
                     PeriphSolenoid_ResetPWMState();
                     managerMovement.changeSideState =
-                    		MMOV_CHANGESIDE_STATE_RESTPOS;
+                        MMOV_CHANGESIDE_STATE_RESTPOS;
                 }
                 else
                 {
@@ -1141,21 +1141,21 @@ void ManagerMovement_RestPos()
     if (ManagerMovement_GoToMultiplePos(MMOV_EVR_RESTPOS, MMOV_DOR_RESTPOS,
                                         MMOV_EXT_RESTPOS))
     {
-    	if (managerMovement.state == MMOV_STATE_CHANGESIDE)
-		{
-    		managerMovement.changeSideState = MMOV_CHANGESIDE_STATE_STARTINGPOS;
-		}
-    	else
-    	{
-    		managerMovement.homingState = MMOV_HOMING_EXTENSION;
-    	}
-        managerMovement.state       = MMOV_STATE_MANUAL;
+        if (managerMovement.state == MMOV_STATE_CHANGESIDE)
+        {
+            managerMovement.changeSideState = MMOV_CHANGESIDE_STATE_STARTINGPOS;
+        }
+        else
+        {
+            managerMovement.homingState = MMOV_HOMING_EXTENSION;
+        }
+        managerMovement.state = MMOV_STATE_MANUAL;
     }
 }
 
 float ManagerMovement_GetMiddlePos(float leftPos, float rightPos)
 {
-	float middlePos = (leftPos + rightPos) / 2.0;
+    float middlePos = (leftPos + rightPos) / 2.0;
 
     return middlePos;
 }

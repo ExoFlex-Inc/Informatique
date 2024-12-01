@@ -14,7 +14,6 @@ interface LongPressButtonProps {
   socket?: any;
 }
 
-
 const HmiButtonMovement: React.FC<LongPressButtonProps> = ({
   label,
   mode,
@@ -61,12 +60,12 @@ const HmiButtonMovement: React.FC<LongPressButtonProps> = ({
     pressStartTimeRef.current = Date.now();
 
     if (action === "Increment" || action === "Tightening") {
-    intervalRef.current = setInterval(
+      intervalRef.current = setInterval(
         () => sendingRequests(mode, action, content),
         50,
-    );
+      );
     } else {
-    sendingRequests(mode, action, content);
+      sendingRequests(mode, action, content);
     }
 
     window.addEventListener("mouseup", handleEnd);
@@ -74,7 +73,6 @@ const HmiButtonMovement: React.FC<LongPressButtonProps> = ({
   };
 
   const handleEnd = () => {
-
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;

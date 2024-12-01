@@ -34,9 +34,9 @@ import Login from "./pages/Login.tsx";
 import Loading from "./components/Loading.tsx";
 import ErrorBoundary from "./components/ErrorBoundary.tsx";
 import { useUser } from "./hooks/use-user.ts";
-import { useEffect,useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import UpdateWidget from "./components/UpdateWidget";
-import { createContext, useContext } from 'react';
+import { createContext, useContext } from "react";
 import { DisablePagesContext } from "./context/DisablePagesContext.tsx";
 import { DisablePagesProvider } from "./provider/DisablePagesProvider.tsx";
 
@@ -232,13 +232,13 @@ function AppLayout() {
   if (user) {
     return (
       <>
-      <DisablePagesProvider>
-        <ProSideBar permissions={user.permissions} />
-        <main className="content overflow-hidden">
-          <TopBar />
-          <Outlet />
-        </main>
-      </DisablePagesProvider>
+        <DisablePagesProvider>
+          <ProSideBar permissions={user.permissions} />
+          <main className="content overflow-hidden">
+            <TopBar />
+            <Outlet />
+          </main>
+        </DisablePagesProvider>
       </>
     );
   }
@@ -282,7 +282,7 @@ function App() {
                 <RouterProvider router={router} />
               </div>
             </ErrorBoundary>
-            <ReactQueryDevtools/>
+            <ReactQueryDevtools />
           </WebSocketProvider>
         </PersistQueryClientProvider>
       </ThemeProvider>
