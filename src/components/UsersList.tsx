@@ -1,8 +1,3 @@
-import ListIcon from "@mui/icons-material/List";
-import SendIcon from "@mui/icons-material/Send";
-import UserMenuDropdown from "./UserMenuDropdown.tsx";
-import { useState, useRef } from "react";
-import { useLocation } from "react-router-dom";
 import {
   Box,
   IconButton,
@@ -14,20 +9,14 @@ import {
   TableBody,
   Typography,
   Paper,
+  Snackbar,
+  Alert,
 } from "@mui/material";
-import { useUser } from "../hooks/use-user.ts";
+import { useState, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-
-interface UserListProps {
-  listOfUsers: Array<{
-    user_id: string;
-    first_name: string;
-    last_name: string;
-    phone_number: string;
-    email: string;
-  }>;
-  setFilteredUsers: React.Dispatch<any>;
-}
+import { useUser } from "../hooks/use-user";
+import { Send as SendIcon } from "@mui/icons-material";
 
 const UserList: React.FC<UserListProps> = ({
   listOfUsers,
@@ -103,93 +92,99 @@ const UserList: React.FC<UserListProps> = ({
   };
 
   return (
-    <TableContainer component={Paper} sx={{ borderRadius: "12px" }}>
-      <Table>
-        <TableHead className="bg-gray-100">
-          <TableRow>
-            <TableCell sx={{ borderColor: "lightgrey" }}>
-              <Typography sx={{ display: "flex", color: "gray" }}>
-                First Name
-              </Typography>
-            </TableCell>
-            <TableCell sx={{ borderColor: "lightgrey" }}>
-              <Typography sx={{ display: "flex", color: "gray" }}>
-                Last Name
-              </Typography>
-            </TableCell>
-            <TableCell sx={{ borderColor: "lightgrey" }}>
-              <Typography sx={{ display: "flex", color: "gray" }}>
-                Email
-              </Typography>
-            </TableCell>
-            <TableCell sx={{ borderColor: "lightgrey" }}>
-              <Typography sx={{ display: "flex", color: "gray" }}>
-                Phone Number
-              </Typography>
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {listOfUsers?.slice(0, 4).map((user, index) => (
-            <TableRow sx={{ backgroundColor: "white" }}>
+    <>
+      <TableContainer component={Paper} sx={{ borderRadius: "12px" }}>
+        <Table>
+          <TableHead className="bg-gray-100">
+            <TableRow>
               <TableCell sx={{ borderColor: "lightgrey" }}>
-                <Typography sx={{ display: "flex", color: "black" }}>
-                  {user.first_name}
+                <Typography sx={{ display: "flex", color: "gray" }}>
+                  First Name
                 </Typography>
               </TableCell>
               <TableCell sx={{ borderColor: "lightgrey" }}>
-                <Typography sx={{ display: "flex", color: "black" }}>
-                  {user.last_name}
+                <Typography sx={{ display: "flex", color: "gray" }}>
+                  Last Name
                 </Typography>
               </TableCell>
               <TableCell sx={{ borderColor: "lightgrey" }}>
-                <Typography sx={{ display: "flex", color: "black" }}>
-                  {user.email}
+                <Typography sx={{ display: "flex", color: "gray" }}>
+                  Email
                 </Typography>
               </TableCell>
               <TableCell sx={{ borderColor: "lightgrey" }}>
-                <Box
-                  sx={{
-                    justifyContent: "space-between",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography sx={{ display: "flex", color: "black" }}>
-                    {user.phone_number}
-                  </Typography>
-                  {pathname === "/network" ? (
-                    <></>
-                  ) : (
-                    // <IconButton
-                    //   sx={{
-                    //     "&:hover": {
-                    //       bgcolor: "#D1D5DB",
-                    //     },
-                    //   }}
-                    //   ref={(el) => addToButtonRefs(el, index)}
-                    //   onClick={() => toggleDropdown(index)}
-                    // >
-                    //   <ListIcon color="primary" />
-                    // </IconButton>
-                    <IconButton
-                      onClick={() => sendInvitation(index)}
-                      sx={{
-                        "&:hover": {
-                          bgcolor: "#D1D5DB",
-                        },
-                      }}
-                    >
-                      <SendIcon color="success" />
-                    </IconButton>
-                  )}
-                </Box>
+                <Typography sx={{ display: "flex", color: "gray" }}>
+                  Phone Number
+                </Typography>
               </TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHead>
+          <TableBody>
+            {listOfUsers?.slice(0, 4).map((user, index) => (
+              <TableRow sx={{ backgroundColor: "white" }} key={user.user_id}>
+                <TableCell sx={{ borderColor: "lightgrey" }}>
+                  <Typography sx={{ display: "flex", color: "black" }}>
+                    {user.first_name}
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ borderColor: "lightgrey" }}>
+                  <Typography sx={{ display: "flex", color: "black" }}>
+                    {user.last_name}
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ borderColor: "lightgrey" }}>
+                  <Typography sx={{ display: "flex", color: "black" }}>
+                    {user.email}
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ borderColor: "lightgrey" }}>
+                  <Box
+                    sx={{
+                      justifyContent: "space-between",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography sx={{ display: "flex", color: "black" }}>
+                      {user.phone_number}
+                    </Typography>
+                    {pathname === "/network" ? (
+                      <></>
+                    ) : (
+                      <IconButton
+                        onClick={() => sendInvitation(index)}
+                        sx={{
+                          "&:hover": {
+                            bgcolor: "#D1D5DB",
+                          },
+                        }}
+                      >
+                        <SendIcon color="success" />
+                      </IconButton>
+                    )}
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={5000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+    </>
   );
 };
 

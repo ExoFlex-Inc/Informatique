@@ -105,26 +105,61 @@ export default function Planning() {
         plan: plan,
         user_id: selectedUser[0].user_id,
       };
-
-      const response = await fetch("http://localhost:3001/plan", {
-        method: "POST",
+  
+      // Check if the plan already exists
+      const response1 = await fetch(`http://localhost:3001/plan/${selectedUser[0].user_id}`, {
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(requestBody),
       });
-
-      if (response.ok) {
-        await sendInvitation();
-        console.log("Plan pushed to Supabase");
-        setSnackbarMessage("Plan and limits saved successfully.");
-        setSnackbarSeverity("success");
-        setSnackbarOpen(true);
+  
+      if (response1.ok) {
+        console.log("Existing plan fetched from Supabase");
+  
+        // Update the existing plan
+        const updateResponse = await fetch("http://localhost:3001/plan", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        });
+  
+        if (updateResponse.ok) {
+          await sendInvitation();
+          console.log("Plan updated in Supabase");
+          setSnackbarMessage("Plan updated successfully.");
+          setSnackbarSeverity("success");
+          setSnackbarOpen(true);
+        } else {
+          console.error("Failed to update plan in Supabase");
+          setSnackbarMessage("Failed to update plan in Supabase.");
+          setSnackbarSeverity("error");
+          setSnackbarOpen(true);
+        }
       } else {
-        console.error("Failed to send plan to Supabase");
-        setSnackbarMessage("Failed to send plan to Supabase.");
-        setSnackbarSeverity("error");
-        setSnackbarOpen(true);
+        // No existing plan, create a new one
+        const response = await fetch("http://localhost:3001/plan", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        });
+  
+        if (response.ok) {
+          await sendInvitation();
+          console.log("Plan pushed to Supabase");
+          setSnackbarMessage("Plan and limits saved successfully.");
+          setSnackbarSeverity("success");
+          setSnackbarOpen(true);
+        } else {
+          console.error("Failed to send plan to Supabase");
+          setSnackbarMessage("Failed to send plan to Supabase.");
+          setSnackbarSeverity("error");
+          setSnackbarOpen(true);
+        }
       }
     } catch (error) {
       console.error("Error saving plan to Supabase:", error);
@@ -133,7 +168,6 @@ export default function Planning() {
       setSnackbarOpen(true);
     }
   };
-
 
   const sendInvitation = async () => {
     try {

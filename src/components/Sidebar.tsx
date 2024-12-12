@@ -273,6 +273,9 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
           <List sx={{ paddingY: "0px" }}>
             {menuItems
               .filter((item) => {
+                if (permissions === "admin" && (item.text === "Dashboard" || item.text === "HMI")) {
+                  return false;
+                }
                 if (item.permissions === "all") return true;
                 if (Array.isArray(item.permissions)) {
                   return item.permissions.includes(permissions);

@@ -227,6 +227,11 @@ AS PERMISSIVE FOR INSERT
 TO public
 WITH CHECK (true);
 
+
+CREATE POLICY "users_can_update_all_plan" ON plans
+FOR UPDATE
+USING (true);
+
 CREATE POLICY "users can delete own plans" 
 ON "public"."plans"
 AS PERMISSIVE FOR DELETE

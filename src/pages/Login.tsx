@@ -54,8 +54,12 @@ export default function Login() {
         permissions: data.user.user_metadata.permissions,
         fcm_token: fcmToken,
       });
-
-      navigate("/dashboard", { replace: true });
+      
+      if( data.user.user_metadata.permissions === "admin" ) {
+        navigate("/network", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
     } catch (error) {
       console.error("Login error:", error.message);
       alert(`Login failed: ${error.message}`);

@@ -104,3 +104,61 @@ export const getPlan = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Unexpected error occurred." });
   }
 };
+
+export const updatePlan = async (req: Request, res: Response) => {
+  const { plan, user_id } = req.body;
+
+  // Validate the input
+  if (!plan || !user_id) {
+    return res.status(400).json({ message: "Plan and user_id are required." });
+  }
+
+  try {
+    // Check if the plan exists for the given user_id
+    const { data: existingPlan, error: fetchError } = await supaClient
+      .from("plans")
+      .select("*")
+      .eq("user_id", user_id)
+      .single();
+
+    if (fetchError) {
+      // Handle "not found" case gracefully
+      if (fetchError.code === "PGRST116") {
+        console.warn(`No plan found for user_id: ${user_id}`);
+        return res
+          .status(404)
+          .json({ message: "No existing plan found to update." });
+      }
+
+      console.error("Error fetching existing plan:", fetchError);
+      return res.status(500).json({
+        message: "Error fetching existing plan",
+        error: fetchError.message,
+      });
+    }
+
+    // Update the existing plan
+    const { data, error } = await supaClient
+      .from("plans")
+      .update({
+        plan
+      })
+      .eq("user_id", user_id)
+      .select("*");
+
+    if (error) {
+      console.error("Error updating plan:", error);
+      return res
+        .status(500)
+        .json({ message: "Error updating plan", error: error.message });
+    }
+
+    console.log(`Plan updated successfully for user_id: ${user_id}`);
+    return res
+      .status(200)
+      .json({ message: "Plan updated successfully.", data });
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    return res.status(500).json({ message: "Unexpected error occurred." });
+  }
+};
