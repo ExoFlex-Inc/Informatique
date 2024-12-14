@@ -41,10 +41,11 @@ export default function TopBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error" | "info">(
-    "success",
-  );
-  const { disabledItems, disableItem, enableItem } = useContext(DisablePagesContext);
+  const [snackbarSeverity, setSnackbarSeverity] = useState<
+    "success" | "error" | "info"
+  >("success");
+  const { disabledItems, disableItem, enableItem } =
+    useContext(DisablePagesContext);
 
   useEffect(() => {
     const handleClickOutside = (event: any) => {
@@ -114,92 +115,95 @@ export default function TopBar() {
   };
 
   return (
-  <DisablePagesContext.Provider value={{ disabledItems, disableItem, enableItem }}>
-    <Box className="nav-bar relative justify-end">
-      <Box className="flex items-center">
-        {user && (
-          <IconButton onClick={colorMode.toggleColorMode}>
-            {theme.palette.mode === "dark" ? (
-              <DarkModeOutlinedIcon />
-            ) : (
-              <LightModeOutlinedIcon />
-            )}
-          </IconButton>
-        )}
-        {user && <Notification />}
-        {user && (
-          <IconButton className="h-14" 
-          onClick={disabledItems.length === 0 ? onProfileClick : undefined}>
-            <Avatar
-              ref={avatarRef}
-              src={user?.avatar_url ? user.avatar_url : "/assets/user.png"}
-            />
-          </IconButton>
-        )}
-      </Box>
-
-      {user ? (
-        isMenuOpen && (
-          <Box
-            ref={menuRef}
-            sx={{
-              display: "flex",
-              position: "absolute",
-              zIndex: 20,
-              top: "5rem",
-            }}
-          >
-            <ThemeProvider
-              theme={createTheme({
-                palette: {
-                  mode: "light",
-                  primary: { main: "rgb(102, 157, 246)" },
-                  background: { paper: "rgb(235, 235, 235)" },
-                },
-              })}
+    <DisablePagesContext.Provider
+      value={{ disabledItems, disableItem, enableItem }}
+    >
+      <Box className="nav-bar relative justify-end">
+        <Box className="flex items-center">
+          {user && (
+            <IconButton onClick={colorMode.toggleColorMode}>
+              {theme.palette.mode === "dark" ? (
+                <DarkModeOutlinedIcon />
+              ) : (
+                <LightModeOutlinedIcon />
+              )}
+            </IconButton>
+          )}
+          {user && <Notification />}
+          {user && (
+            <IconButton
+              className="h-14"
+              onClick={disabledItems.length === 0 ? onProfileClick : undefined}
             >
-              <Paper>
-                <ListItem>
-                  <ListItemButton onClick={() => navigate("/profile")}>
-                    <ListItemIcon>
-                      <PersonIcon />
-                    </ListItemIcon>
-                    <ListItemText primary="See Profile" />
-                  </ListItemButton>
-                </ListItem>
-                <Divider />
-                <ListItem>
-                  <ListItemButton onClick={handleLogout}>
-                    <ListItemIcon>
-                      <LogoutIcon />
-                    </ListItemIcon>
-                    <ListItemText primary="Logout" />
-                  </ListItemButton>
-                </ListItem>
-              </Paper>
-            </ThemeProvider>
-          </Box>
-        )
-      ) : (
-        <Login />
-      )}
+              <Avatar
+                ref={avatarRef}
+                src={user?.avatar_url ? user.avatar_url : "/assets/user.png"}
+              />
+            </IconButton>
+          )}
+        </Box>
 
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={5000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
+        {user ? (
+          isMenuOpen && (
+            <Box
+              ref={menuRef}
+              sx={{
+                display: "flex",
+                position: "absolute",
+                zIndex: 20,
+                top: "5rem",
+              }}
+            >
+              <ThemeProvider
+                theme={createTheme({
+                  palette: {
+                    mode: "light",
+                    primary: { main: "rgb(102, 157, 246)" },
+                    background: { paper: "rgb(235, 235, 235)" },
+                  },
+                })}
+              >
+                <Paper>
+                  <ListItem>
+                    <ListItemButton onClick={() => navigate("/profile")}>
+                      <ListItemIcon>
+                        <PersonIcon />
+                      </ListItemIcon>
+                      <ListItemText primary="See Profile" />
+                    </ListItemButton>
+                  </ListItem>
+                  <Divider />
+                  <ListItem>
+                    <ListItemButton onClick={handleLogout}>
+                      <ListItemIcon>
+                        <LogoutIcon />
+                      </ListItemIcon>
+                      <ListItemText primary="Logout" />
+                    </ListItemButton>
+                  </ListItem>
+                </Paper>
+              </ThemeProvider>
+            </Box>
+          )
+        ) : (
+          <Login />
+        )}
+
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={5000}
           onClose={handleSnackbarClose}
-          severity={snackbarSeverity}
-          sx={{ width: "100%" }}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
         >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
-    </Box>
-
-  </DisablePagesContext.Provider>
+          <Alert
+            onClose={handleSnackbarClose}
+            severity={snackbarSeverity}
+            sx={{ width: "100%" }}
+          >
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
+      </Box>
+    </DisablePagesContext.Provider>
   );
 }

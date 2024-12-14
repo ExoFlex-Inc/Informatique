@@ -12,7 +12,7 @@ import {
   TableBody,
   TableContainer,
   Typography,
-  Paper
+  Paper,
 } from "@mui/material";
 import { Refresh, PlayArrow, Pause, Home } from "@mui/icons-material";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
@@ -27,7 +27,7 @@ import stm32errors from "../assets/stm32errors.json";
 type errorInfo = {
   errorNames: string;
   errorDescription: string;
-}
+};
 
 const errorMap = {
   0: "ERROR_0_MSEC",
@@ -123,10 +123,11 @@ export default function Manual() {
     if (stm32Data?.ErrorCode !== undefined) {
       const errorNames = decodeErrorCode(stm32Data.ErrorCode);
       const errorInformation = errorNames.map((el: string, index) => {
-        return (
-          {errorNames: errorNames[index], errorDescription: stm32errors[el as keyof typeof stm32errors]}
-        )
-      })
+        return {
+          errorNames: errorNames[index],
+          errorDescription: stm32errors[el as keyof typeof stm32errors],
+        };
+      });
       setErrorInformation(errorInformation);
     }
   }, [stm32Data, graphPause]);
@@ -358,7 +359,11 @@ export default function Manual() {
             >
               <TableContainer
                 component={Paper}
-                sx={{ borderRadius: "12px", bgcolor: "white", overflow: "hidden" }}
+                sx={{
+                  borderRadius: "12px",
+                  bgcolor: "white",
+                  overflow: "hidden",
+                }}
               >
                 <Table>
                   <TableHead className="bg-gray-100">
@@ -377,7 +382,7 @@ export default function Manual() {
                   </TableHead>
                   <TableBody>
                     {errorInformation.map((el, index) => {
-                      return(
+                      return (
                         <TableRow>
                           <TableCell>
                             <Typography align="center" sx={{ color: "gray" }}>
@@ -390,7 +395,7 @@ export default function Manual() {
                             </Typography>
                           </TableCell>
                         </TableRow>
-                      )
+                      );
                     })}
                   </TableBody>
                 </Table>
@@ -399,7 +404,15 @@ export default function Manual() {
           </Grid>
         </Grid>
       </Box>
-      <Box sx={{position: "sticky", bottom: 0, zIndex: 50, height: "100%", alignContent: "end"}}>
+      <Box
+        sx={{
+          position: "sticky",
+          bottom: 0,
+          zIndex: 50,
+          height: "100%",
+          alignContent: "end",
+        }}
+      >
         <ManualControl
           stm32Data={stm32Data}
           socket={socket}

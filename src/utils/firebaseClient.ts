@@ -1,7 +1,12 @@
 // firebaseClient.ts
 
 import { initializeApp } from "firebase/app";
-import { getMessaging, getToken, onMessage, type Messaging } from "firebase/messaging";
+import {
+  getMessaging,
+  getToken,
+  onMessage,
+  type Messaging,
+} from "firebase/messaging";
 
 // Firebase configuration object
 const firebaseConfig = {
@@ -24,37 +29,41 @@ const messaging: Messaging = getMessaging(app);
  * Function to register a service worker.
  * @returns Promise<ServiceWorkerRegistration>
  */
-export const getOrRegisterServiceWorker = (): Promise<ServiceWorkerRegistration> => {
-  if ("serviceWorker" in navigator) {
-    // Determine the service worker file based on the environment
-    const swPath =
-      import.meta.env.MODE === "production" ? "/sw.js" : "/dev-sw.js?dev-sw";
-    
-    // Determine the service worker type based on the environment
-    const swType =
-      import.meta.env.MODE === "production" ? "classic" : "module";
+export const getOrRegisterServiceWorker =
+  (): Promise<ServiceWorkerRegistration> => {
+    if ("serviceWorker" in navigator) {
+      // Determine the service worker file based on the environment
+      const swPath =
+        import.meta.env.MODE === "production" ? "/sw.js" : "/dev-sw.js?dev-sw";
 
-    return navigator.serviceWorker
-      .register(swPath, { type: swType })
-      .then((registration) => {
-        console.log("Service Worker registered with scope:", registration.scope);
+      // Determine the service worker type based on the environment
+      const swType =
+        import.meta.env.MODE === "production" ? "classic" : "module";
 
-        // Wait until the service worker is ready
-        return navigator.serviceWorker.ready.then(() => {
-          console.log("Service Worker is ready.");
-          return registration; // Return the registration once it's ready
+      return navigator.serviceWorker
+        .register(swPath, { type: swType })
+        .then((registration) => {
+          console.log(
+            "Service Worker registered with scope:",
+            registration.scope,
+          );
+
+          // Wait until the service worker is ready
+          return navigator.serviceWorker.ready.then(() => {
+            console.log("Service Worker is ready.");
+            return registration; // Return the registration once it's ready
+          });
+        })
+        .catch((error) => {
+          console.error("Service Worker registration failed:", error);
+          throw error; // Propagate the error to be handled by the caller
         });
-      })
-      .catch((error) => {
-        console.error("Service Worker registration failed:", error);
-        throw error; // Propagate the error to be handled by the caller
-      });
-  } else {
-    return Promise.reject(
-      new Error("Service workers are not supported in this browser.")
-    );
-  }
-};
+    } else {
+      return Promise.reject(
+        new Error("Service workers are not supported in this browser."),
+      );
+    }
+  };
 
 /**
  * Function to get Firebase token for push notifications.
@@ -64,7 +73,7 @@ export const getOrRegisterServiceWorker = (): Promise<ServiceWorkerRegistration>
  */
 export const getFirebaseToken = (
   vapidKey: string,
-  registration: ServiceWorkerRegistration
+  registration: ServiceWorkerRegistration,
 ): Promise<void> => {
   return Notification.requestPermission()
     .then((permission) => {
@@ -87,12 +96,15 @@ export const getFirebaseToken = (
         // TODO: Send the token to your server and update the UI if necessary
       } else {
         console.log(
-          "No registration token available. Request permission to generate one."
+          "No registration token available. Request permission to generate one.",
         );
       }
     })
     .catch((err) => {
-      console.error("Error occurred while requesting permission or retrieving token.", err);
+      console.error(
+        "Error occurred while requesting permission or retrieving token.",
+        err,
+      );
     });
 };
 

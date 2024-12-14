@@ -80,15 +80,13 @@ export const signup = async (req: Request, res: Response) => {
     }
 
     // Insert default stats for the new user
-    const { error: statsInsertError } = await supaClient
-      .from("stats")
-      .insert([
-        {
-          user_id: newUserUUID,
-          current_streak: 0,
-          longest_streak: 0
-        },
-      ]);
+    const { error: statsInsertError } = await supaClient.from("stats").insert([
+      {
+        user_id: newUserUUID,
+        current_streak: 0,
+        longest_streak: 0,
+      },
+    ]);
 
     if (statsInsertError) {
       return res.status(400).json({ error: statsInsertError.message });

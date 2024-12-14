@@ -133,7 +133,8 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
   const isTablet = useMediaQuery("(max-width: 1024px)");
   const [open, setOpen] = useState(true);
   const drawerWidth = 240;
-  const { disabledItems, disableItem, enableItem } = useContext(DisablePagesContext);
+  const { disabledItems, disableItem, enableItem } =
+    useContext(DisablePagesContext);
   const menuItems = [
     {
       text: "Dashboard",
@@ -164,7 +165,7 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
       text: "Manual",
       to: "/manual",
       permissions: ["admin", "dev"],
-    }
+    },
   ];
 
   const openedMixin = (theme: Theme): CSSObject => ({
@@ -227,7 +228,9 @@ const ProSidebar: React.FC<ProSidebarProps> = ({ permissions }) => {
   }, [isTablet]);
 
   return (
-    <DisablePagesContext.Provider value={{ disabledItems, disableItem, enableItem }}>
+    <DisablePagesContext.Provider
+      value={{ disabledItems, disableItem, enableItem }}
+    >
       <Box sx={{ display: "flex" }}>
         <Drawer variant="permanent" sx={{ zIndex: 30 }} open={open}>
           <DrawerHeader>

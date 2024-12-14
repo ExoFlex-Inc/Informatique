@@ -322,7 +322,6 @@ const recordingStm32Data = async (req: Request, res: Response) => {
         .status(200)
         .send({ exercise_id: exerciseId, message: "Recording reseted." });
     }
-
   } catch (error) {
     // Handle unexpected errors
     console.error("Error in recordingStm32Data:", error);
@@ -499,7 +498,7 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
     newSerialPort.on("data", (data) => {
       receivedDataBuffer += data.toString();
       setReceivedDataBuffer(receivedDataBuffer);
-    
+
       while (
         receivedDataBuffer.includes("{") &&
         receivedDataBuffer.includes("}")
@@ -509,8 +508,10 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
         const jsonDataString = receivedDataBuffer.substring(startIdx, endIdx);
 
         try {
-          if (jsonDataString.trim().startsWith("{") && jsonDataString.trim().endsWith("}")) {
-            
+          if (
+            jsonDataString.trim().startsWith("{") &&
+            jsonDataString.trim().endsWith("}")
+          ) {
             const parsedData = JSON.parse(jsonDataString);
             // console.log("Parsed data:", parsedData);
             io.emit("stm32Data", parsedData);
@@ -569,7 +570,6 @@ const initializeSerialPort = asyncHandler(async (_, res: Response) => {
         setReceivedDataBuffer(receivedDataBuffer);
       }
     });
-    
   } else {
     setSerialPort(null);
     console.error("No scanner port found.");

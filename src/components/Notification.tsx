@@ -16,7 +16,7 @@ import {
   ListItemAvatar,
   createTheme,
 } from "@mui/material";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
 import { useNotification } from "../hooks/use-notification.ts";
 import { useUser } from "../hooks/use-user.ts";
 import { useQueryClient } from "@tanstack/react-query";
@@ -113,7 +113,6 @@ const Notification = () => {
     }));
 
     try {
-      
       deleteNotification(notification.id);
 
       setResponseMessage((prev) => ({
@@ -168,7 +167,14 @@ const Notification = () => {
               },
             })}
           >
-            <Paper sx={{ width: "30vw", padding: 2, maxHeight: "280px", overflow: "auto" }}>
+            <Paper
+              sx={{
+                width: "30vw",
+                padding: 2,
+                maxHeight: "280px",
+                overflow: "auto",
+              }}
+            >
               <List>
                 {notifications && notifications.length > 0 ? (
                   notifications.map((notification: any, index: number) => (
@@ -181,85 +187,87 @@ const Notification = () => {
                       </ListItemAvatar>
                       <Grid container>
                         <Grid item xs={12}>
-                        <Box sx={{display: "flex"}}>
-                          <ListItemText
-                            primary={
-                              <Typography variant="body1" component="span">
-                                {notification.user_name}
-                              </Typography>
-                            }
-                            secondary={
-                              <Box>
-                                {notification.body && (
-                                  <Typography
-                                    variant="body2"
-                                    component="span"
-                                    className="text-black"
-                                    display="block"
-                                  >
-                                    {notification.body}
-                                  </Typography>
-                                )}
-                                <Typography
-                                  variant="caption"
-                                  component="span"
-                                  display="block"
-                                  color="textSecondary"
-                                >
-                                  {new Date(
-                                    notification.created_at,
-                                  ).toLocaleString()}
+                          <Box sx={{ display: "flex" }}>
+                            <ListItemText
+                              primary={
+                                <Typography variant="body1" component="span">
+                                  {notification.user_name}
                                 </Typography>
-                              </Box>
-                            }
-                          />
-                          {notification.type === "plan" && 
-                            <Box sx={{alignContent: "center"}}>
-                              <IconButton onClick={() => handleReject(notification)}>
-                                <CloseIcon />
-                              </IconButton>
-                            </Box>
-                          }
-                        </Box>
-                        {notification.type === "relation" && (
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "flex-end",
-                              marginTop: 1,
-                            }}
-                          >
-                            {responseMessage[notification.id] ? (
-                              <Typography
-                                variant="body2"
-                                color="textSecondary"
-                              >
-                                {responseMessage[notification.id]}
-                              </Typography>
-                            ) : (
-                              <>
-                                <Button
-                                  variant="contained"
-                                  color="primary"
-                                  size="small"
-                                  sx={{ marginRight: 1 }}
-                                  onClick={() => handleAccept(notification)}
-                                >
-                                  Accept
-                                </Button>
-                                <Button
-                                  variant="outlined"
-                                  color="error"
-                                  size="small"
+                              }
+                              secondary={
+                                <Box>
+                                  {notification.body && (
+                                    <Typography
+                                      variant="body2"
+                                      component="span"
+                                      className="text-black"
+                                      display="block"
+                                    >
+                                      {notification.body}
+                                    </Typography>
+                                  )}
+                                  <Typography
+                                    variant="caption"
+                                    component="span"
+                                    display="block"
+                                    color="textSecondary"
+                                  >
+                                    {new Date(
+                                      notification.created_at,
+                                    ).toLocaleString()}
+                                  </Typography>
+                                </Box>
+                              }
+                            />
+                            {notification.type === "plan" && (
+                              <Box sx={{ alignContent: "center" }}>
+                                <IconButton
                                   onClick={() => handleReject(notification)}
                                 >
-                                  Reject
-                                </Button>
-                              </>
+                                  <CloseIcon />
+                                </IconButton>
+                              </Box>
                             )}
                           </Box>
-                        )}
-                      </Grid>
+                          {notification.type === "relation" && (
+                            <Box
+                              sx={{
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                marginTop: 1,
+                              }}
+                            >
+                              {responseMessage[notification.id] ? (
+                                <Typography
+                                  variant="body2"
+                                  color="textSecondary"
+                                >
+                                  {responseMessage[notification.id]}
+                                </Typography>
+                              ) : (
+                                <>
+                                  <Button
+                                    variant="contained"
+                                    color="primary"
+                                    size="small"
+                                    sx={{ marginRight: 1 }}
+                                    onClick={() => handleAccept(notification)}
+                                  >
+                                    Accept
+                                  </Button>
+                                  <Button
+                                    variant="outlined"
+                                    color="error"
+                                    size="small"
+                                    onClick={() => handleReject(notification)}
+                                  >
+                                    Reject
+                                  </Button>
+                                </>
+                              )}
+                            </Box>
+                          )}
+                        </Grid>
                       </Grid>
                     </ListItem>
                   ))
